@@ -1,5 +1,5 @@
 ---
-name: a11y-design-guide
+name: guide
 description: >-
   Proactive accessible design guidance and pattern library. Use BEFORE writing UI code —
   when the user is designing a page layout, choosing a component, picking colors, planning

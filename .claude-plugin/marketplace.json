@@ -1,13 +1,13 @@
 {
-  "name": "a11y-web-inspect",
+  "name": "beacon",
   "owner": {
     "name": "chiehweihuang"
   },
   "plugins": [
     {
-      "name": "a11y-web-inspect",
+      "name": "beacon",
       "source": "./",
-      "description": "Accessibility skills for Claude Code — inspect, advisory, and design guide for building inclusive web applications"
+      "description": "Accessibility + AEO inspection for Claude Code. Lighthouse-style scoring, interactive reports, legal risk assessment, and auto-advisory hook."
     }
   ]
 }

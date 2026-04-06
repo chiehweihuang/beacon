@@ -1,5 +1,5 @@
 ---
-name: a11y-advisor
+name: advisor
 description: Accessibility guidance for UI code. This skill is auto-loaded by the a11y-advisor PostToolUse hook when HTML/CSS/JSX/TSX/Vue/Svelte files are edited. You can also invoke it manually for deeper guidance on accessible design patterns, disability categories, legal context, or WCAG criteria. Use when you need the full reference material beyond what the hook provides.
 ---
 

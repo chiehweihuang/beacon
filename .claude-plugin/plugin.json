@@ -1,21 +1,23 @@
 {
-  "name": "a11y-web-inspect",
-  "version": "1.0.0",
-  "description": "Accessibility skills for Claude Code — audit, advisory, and design guide for building inclusive web applications",
+  "name": "beacon",
+  "version": "2.0.0",
+  "description": "Accessibility + AEO inspection for Claude Code. Lighthouse-style 0-100 scoring across 10 categories, interactive HTML reports, legal risk assessment for 6 jurisdictions, framework-specific fixes, and a PostToolUse hook that auto-checks a11y when you edit UI files.",
   "author": {
     "name": "chiehweihuang",
     "url": "https://github.com/chiehweihuang"
   },
-  "homepage": "https://github.com/chiehweihuang/a11y-web-audit",
-  "repository": "https://github.com/chiehweihuang/a11y-web-audit",
+  "homepage": "https://github.com/chiehweihuang/beacon",
+  "repository": "https://github.com/chiehweihuang/beacon",
   "license": "MIT",
   "keywords": [
     "claude-code",
     "accessibility",
     "a11y",
+    "aeo",
     "wcag",
-    "audit",
+    "inspection",
     "inclusive-design"
   ],
-  "skills": ["./skills/"]
+  "skills": ["./skills/"],
+  "hooks": "./hooks/hooks.json"
 }

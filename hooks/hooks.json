@@ -1,0 +1,10 @@
+{
+  "hooks": [
+    {
+      "type": "PostToolUse",
+      "matcher": "Write|Edit",
+      "description": "Auto-triggers a11y advisor when UI files (HTML/CSS/JSX/TSX/Vue/Svelte) are edited",
+      "command": "node ./scripts/a11y-advisor-hook.mjs"
+    }
+  ]
+}
