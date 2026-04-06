@@ -1,0 +1,21 @@
+{
+  "name": "a11y-web-audit",
+  "version": "1.0.0",
+  "description": "Accessibility skills for Claude Code — audit, advisory, and design guide for building inclusive web applications",
+  "author": {
+    "name": "chiehweihuang",
+    "url": "https://github.com/chiehweihuang"
+  },
+  "homepage": "https://github.com/chiehweihuang/a11y-web-audit",
+  "repository": "https://github.com/chiehweihuang/a11y-web-audit",
+  "license": "MIT",
+  "keywords": [
+    "claude-code",
+    "accessibility",
+    "a11y",
+    "wcag",
+    "audit",
+    "inclusive-design"
+  ],
+  "skills": ["./skills/"]
+}
