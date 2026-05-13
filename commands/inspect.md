@@ -365,6 +365,38 @@ Severity classification rules:
 
 `prefers-reduced-motion` absence: classify as **warning** (not critical) unless content actively flashes > 3 times/second (that is LIFE-SAFETY critical).
 
+**SEVERITY MATRIX — overrides the general rules above for these specific criteria. When a finding maps to a row in this table, use the assigned severity EXACTLY. Do not upgrade or downgrade based on your own confidence assessment.**
+
+| WCAG | Criterion | Mandated Severity | Reason |
+|------|-----------|-------------------|--------|
+| 1.1.1 | Text Alternatives (missing alt) | **critical** | Level A; presence of `alt` attribute is static-detectable |
+| 1.2.2 | Captions (Prerecorded) | **critical** | Level A; `<video>` without `<track kind="captions">` is static-detectable |
+| 1.3.1 | Info and Relationships | **critical** | Level A; structural markup failures (unlabeled inputs, missing `<th>`, etc.) are static-detectable |
+| 1.3.6 | Identify Purpose | **tip** | Level AAA; never critical or warning |
+| 1.4.1 | Use of Color | **critical** | Level A; color-only state indicators detectable from static HTML |
+| 1.4.2 | Audio Control | **critical** | Level A; `<audio autoplay>` without controls is static-detectable |
+| 1.4.3 | Contrast (Minimum) | **warning** | Level AA; never critical, even when ratio is confirmed |
+| 1.4.4 | Resize Text | **warning** | Level AA |
+| 1.4.10 | Reflow | **warning** | Level AA |
+| 1.4.11 | Non-text Contrast | **warning** | Level AA |
+| 1.4.12 | Text Spacing | **warning** | Level AA |
+| 2.1.1 | Keyboard (no-keyboard div/span onclick) | **critical** | Level A; div/span with onclick but no keyboard handler is static-detectable |
+| 2.2.2 | Pause, Stop, Hide (autoplay) | **critical** | Level A; `autoplay` attribute on media elements is static-detectable |
+| 2.3.1 | Three Flashes or Below Threshold | **critical** | Level A; LIFE-SAFETY — always critical regardless of confidence |
+| 2.4.1 | Bypass Blocks (skip links) | **warning** | Level A but absence of skip links requires runtime verification to confirm complete absence |
+| 2.4.2 | Page Titled | **critical** | Level A; empty or missing `<title>` is static-detectable |
+| 2.4.7 | Focus Visible | **warning** | Level AA |
+| 2.4.11 | Focus Not Obscured (Minimum) | **warning** | Level AA |
+| 3.1.1 | Language of Page | **critical** | Level A; missing `lang` on `<html>` is static-detectable |
+| 3.3.2 | Labels or Instructions | **critical** | Level A; visible label absence is static-detectable |
+| 4.1.2 | Name, Role, Value (missing labels/names) | **critical** | Level A; unlabeled interactive elements detectable from static HTML |
+
+**Common misclassification traps to avoid:**
+- 1.4.3 contrast violations are **always warning**, never critical — even when the exact ratio is confirmed and very low
+- 2.4.1 (skip links) should be **warning**, not critical — its presence may depend on JS or other pages
+- 1.4.1 (use of color) is **critical** (Level A), not warning — even if subtle
+- 2.4.7 focus visibility is **warning** (Level AA), not critical — even when `outline: none` is confirmed
+
 Overall score is a weighted average:
 | Category | Weight |
 |----------|--------|
