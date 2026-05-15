@@ -1,6 +1,6 @@
 {
   "name": "beacon",
-  "version": "2.0.0",
+  "version": "2.0.2",
   "description": "Accessibility + AEO inspection for Claude Code. Lighthouse-style 0-100 scoring across 10 categories, interactive HTML reports, legal risk assessment for 6 jurisdictions, framework-specific fixes, and a PostToolUse hook that auto-checks a11y when you edit UI files.",
   "author": {
     "name": "chiehweihuang",
@@ -18,5 +18,7 @@
     "inspection",
     "inclusive-design"
   ],
-  "skills": ["./commands/"]
+  "skills": [
+    "./commands/"
+  ]
 }

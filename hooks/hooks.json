@@ -1,6 +1,27 @@
 {
-  "description": "Auto-triggers a11y advisor when UI files are edited",
+  "description": "Beacon proactive triggering — SessionStart injects governance, UserPromptSubmit flags UI prompts, PostToolUse runs the a11y advisor.",
   "hooks": {
+    "SessionStart": [
+      {
+        "matcher": "startup|clear|compact",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node ${CLAUDE_PLUGIN_ROOT}/scripts/beacon-session-start.mjs"
+          }
+        ]
+      }
+    ],
+    "UserPromptSubmit": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node ${CLAUDE_PLUGIN_ROOT}/scripts/beacon-prompt-gate.mjs"
+          }
+        ]
+      }
+    ],
     "PostToolUse": [
       {
         "matcher": "Write|Edit",
