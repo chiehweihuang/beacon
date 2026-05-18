@@ -84,18 +84,18 @@ const I18N = {
     tab_legal: '法律風險',
     tab_methodology: '方法論與限制',
     tab_remediation: '修復計畫',
-    // Section headings
+    // Section headings (suggestion-toned)
     h2_category_summary: '分類摘要',
-    h2_critical: '關鍵問題',
-    h2_warnings: '警告',
-    h2_tips: '提示與最佳實踐',
+    h2_critical: '建議優先處理',
+    h2_warnings: '建議留意項目',
+    h2_tips: '參考建議與最佳實踐',
     h2_remediation_priority: '修復優先序',
     h2_testing_recommendations: '測試建議',
     h2_legal_risk: '法律風險評估',
     // Table headers
     th_category: '分類',
     th_pass: '通過',
-    th_fail: '失敗',
+    th_fail: '待修',
     th_review: '待審',
     th_coverage: '覆蓋率',
     // Meta line
@@ -103,14 +103,14 @@ const I18N = {
     meta_scope: '範圍',
     meta_standard: '標準',
     meta_auditor: '審查者',
-    // Verdict
-    verdict_pass: '通過',
-    verdict_needs_work: '需改進',
-    verdict_fail: '不及格',
-    verdict_issues_found: '個問題',
-    verdict_critical: '關鍵',
-    verdict_warnings: '警告',
-    verdict_tips: '提示',
+    // Verdict (suggestion-toned, not judgmental)
+    verdict_pass: '達到基準',
+    verdict_needs_work: '建議考慮改進',
+    verdict_fail: '建議優先檢視',
+    verdict_issues_found: '個發現項目',
+    verdict_critical: '影響較大',
+    verdict_warnings: '建議留意',
+    verdict_tips: '參考建議',
     // Score ring
     ring_overall: '總分',
     ring_was: '上次',
@@ -120,23 +120,23 @@ const I18N = {
     cmp_delta: '差距',
     cmp_issues: '問題數（目前 / 上次）',
     // Findings labels
-    finding_affected: '受影響使用者',
+    finding_affected: '可能受影響的使用者',
     finding_location: '位置',
-    finding_fix: '修補',
-    finding_legal: '法律',
-    finding_before_after: '修補前 / 修補後',
-    finding_before: '修補前',
-    finding_after: '修補後',
-    finding_empty: '此分類無 finding。',
+    finding_fix: '建議調整',
+    finding_legal: '法律參考',
+    finding_before_after: '調整前 / 調整後',
+    finding_before: '調整前',
+    finding_after: '調整後',
+    finding_empty: '此分類目前無發現項目。',
     // Legal risk
     legal_deadline: '截止日',
     legal_score: '暴露分數',
     legal_overall: '整體風險',
-    // Remediation
-    rem_p0: 'P0 — 必修（Level A）',
-    rem_p1: 'P1 — 應修（Level AA）',
-    rem_p2: 'P2 — 可修（最佳實踐）',
-    rem_empty: '無測試建議。',
+    // Remediation (suggestion-toned)
+    rem_p0: 'P0 — 建議優先處理（Level A）',
+    rem_p1: 'P1 — 建議在合理時程內處理（Level AA）',
+    rem_p2: 'P2 — 可考慮處理（最佳實踐）',
+    rem_empty: '目前無測試建議。',
     // Score table
     score_was_prefix: '上次',
     // Category names (matched by cat.id)
@@ -158,49 +158,49 @@ const I18N = {
     tab_methodology: 'Methodology & Limits',
     tab_remediation: 'Remediation',
     h2_category_summary: 'Category Summary',
-    h2_critical: 'Critical Findings',
-    h2_warnings: 'Warnings',
-    h2_tips: 'Tips & Best Practices',
+    h2_critical: 'Priority Items',
+    h2_warnings: 'Items to Note',
+    h2_tips: 'Suggestions & Best Practices',
     h2_remediation_priority: 'Remediation Priority',
     h2_testing_recommendations: 'Testing Recommendations',
     h2_legal_risk: 'Legal Risk Assessment',
     th_category: 'Category',
     th_pass: 'Pass',
-    th_fail: 'Fail',
+    th_fail: 'Adjust',
     th_review: 'Review',
     th_coverage: 'Coverage',
     meta_date: 'Date',
     meta_scope: 'Scope',
     meta_standard: 'Standard',
     meta_auditor: 'Auditor',
-    verdict_pass: 'PASS',
-    verdict_needs_work: 'NEEDS WORK',
-    verdict_fail: 'FAIL',
-    verdict_issues_found: 'issues found',
-    verdict_critical: 'critical',
-    verdict_warnings: 'warnings',
-    verdict_tips: 'tips',
+    verdict_pass: 'Meets baseline',
+    verdict_needs_work: 'Consider improving',
+    verdict_fail: 'Priority review recommended',
+    verdict_issues_found: 'observations',
+    verdict_critical: 'higher priority',
+    verdict_warnings: 'to note',
+    verdict_tips: 'suggestions',
     ring_overall: 'Overall',
     ring_was: 'was',
     cmp_current: 'Current Score',
     cmp_previous: 'Previous Score',
     cmp_delta: 'Delta',
     cmp_issues: 'Issues (now / was)',
-    finding_affected: 'Affected users',
+    finding_affected: 'Users potentially affected',
     finding_location: 'Location',
-    finding_fix: 'Fix',
-    finding_legal: 'Legal',
+    finding_fix: 'Suggested adjustment',
+    finding_legal: 'Legal note',
     finding_before_after: 'Before / After',
     finding_before: 'Before',
     finding_after: 'After',
-    finding_empty: 'No findings in this category.',
+    finding_empty: 'No observations in this category at the moment.',
     legal_deadline: 'Deadline',
     legal_score: 'Exposure Score',
     legal_overall: 'Overall Risk',
-    rem_p0: 'P0 — Must Fix (Level A)',
-    rem_p1: 'P1 — Should Fix (Level AA)',
-    rem_p2: 'P2 — Nice to Fix (Best Practices)',
-    rem_empty: 'No testing recommendations.',
+    rem_p0: 'P0 — Recommended priority (Level A)',
+    rem_p1: 'P1 — Recommended in due course (Level AA)',
+    rem_p2: 'P2 — Optional enhancement (Best Practices)',
+    rem_empty: 'No testing recommendations at the moment.',
     score_was_prefix: 'was',
     cat_contrast: 'Color & Contrast',
     cat_keyboard: 'Keyboard Navigation',
@@ -340,31 +340,32 @@ function buildContextBanner() {
   return `
     <div class="audit-context-banner" role="note" aria-label="Audit limitations notice">
       <div class="lang-zh" lang="zh-Hant">
-        <div class="banner-title">&#9888; 在信任分數之前請先閱讀</div>
+        <div class="banner-title">&#9888; 閱讀分數前的脈絡說明</div>
         <p>
-          這是<strong>自動化基線審查</strong>。業界共識（包括 axe-core 團隊本身）認為自動化工具僅能偵測約
-          <strong>30&ndash;40% 的真實 WCAG 問題</strong>。剩下 60&ndash;70%&mdash;認知負荷、真實螢幕閱讀器任務達成率、
-          動態互動品質、瀏覽器深色模式覆寫下的效能痛點、以及標籤文字是否<em>真的易懂</em>&mdash;需要
-          <strong>找障礙使用者實測</strong>才能驗證。
+          這是一份<strong>自動化基線審查</strong>。依目前的業界資料（包含 axe-core 團隊自己的說明），自動化工具大約能涵蓋
+          <strong>30&ndash;40% 的 WCAG 項目</strong>。其餘 60&ndash;70%&mdash;例如認知負荷、真實螢幕閱讀器任務達成率、
+          動態互動品質、瀏覽器深色模式覆寫下的效能體驗、以及標籤文字是否<em>真的易懂</em>&mdash;
+          較適合透過<strong>與障礙使用者一同測試</strong>來確認。
         </p>
         <p class="banner-cta">
-          高分<em>不等於</em>網站可達。請參閱 <strong>Methodology &amp; Limits</strong> 分頁，
-          了解本審查能與不能告訴你的事、以及推薦的工作流程。
+          較高的分數，本身還不足以充分代表網站完全可達。可一併參閱 <strong>Methodology &amp; Limits</strong> 分頁，
+          了解本審查擅長與不擅長的範疇、以及建議的工作流程。
         </p>
       </div>
       <div class="lang-en" lang="en">
-        <div class="banner-title">&#9888; Read Before Trusting the Score</div>
+        <div class="banner-title">&#9888; Context Before Reading the Score</div>
         <p>
-          This is an <strong>automated baseline audit</strong>. Industry consensus (including the axe-core team)
-          holds that automated tools detect roughly <strong>30&ndash;40% of real WCAG issues</strong>.
-          The remaining 60&ndash;70% &mdash; cognitive load, real screen-reader task completion,
-          dynamic interaction quality, performance pain under user-agent dark-mode overrides,
-          whether labels are actually <em>understandable</em> &mdash; require <strong>testing with disabled users</strong>.
+          This is an <strong>automated baseline audit</strong>. Based on current industry data
+          (including statements from the axe-core team itself), automated tools cover roughly
+          <strong>30&ndash;40% of WCAG criteria</strong>. The remaining 60&ndash;70% &mdash; cognitive load,
+          real screen-reader task completion, dynamic interaction quality, performance experience
+          under user-agent dark-mode overrides, whether labels are actually <em>understandable</em>
+          &mdash; are better confirmed through <strong>testing alongside disabled users</strong>.
         </p>
         <p class="banner-cta">
-          A high score does <em>not</em> mean your site is accessible. See the
-          <strong>Methodology &amp; Limits</strong> tab for what this audit can and cannot tell you,
-          and the recommended workflow.
+          A high score, on its own, does not yet fully demonstrate accessibility. You can pair this
+          report with the <strong>Methodology &amp; Limits</strong> tab to see what this audit
+          is well-suited and less-suited for, plus the recommended workflow.
         </p>
       </div>
     </div>`;
@@ -398,7 +399,7 @@ function buildLimitationsHTML(audit) {
       ${methodsHTML}
 
       <div class="lang-zh" lang="zh-Hant">
-        <h3>本審查能偵測的事</h3>
+        <h3>本審查擅長偵測的範疇</h3>
         <p class="section-intro">機器可判定、有靜態或執行時可識別特徵的項目：</p>
         <ul class="capability-list">
           <li>圖片缺 alt 文字、表單欄位未配對 label、按鈕無可讀名稱</li>
@@ -412,8 +413,8 @@ function buildLimitationsHTML(audit) {
           <li>可由靜態 HTML 判定的 WCAG 2.2 A &amp; AA 條款</li>
         </ul>
 
-        <h3>本審查無法偵測的事</h3>
-        <p class="section-intro">需要人類判斷、真實使用者、或執行時任務觀察的項目：</p>
+        <h3>本審查涵蓋之外的範疇</h3>
+        <p class="section-intro">較適合透過人類判斷、真實使用者測試、或執行時任務觀察來確認的項目：</p>
         <ul class="limitation-list">
           <li><strong>認知負荷</strong>&mdash;單頁選項過多、文案抽象、版面密集</li>
           <li><strong>alt 文字或 label 是否真的有用</strong>&mdash;存在不等於清楚。<code>alt="image"</code> 通過 axe，但對螢幕閱讀器使用者毫無幫助</li>
@@ -435,14 +436,14 @@ function buildLimitationsHTML(audit) {
           <li><strong>團隊裡僱用障礙者。</strong>預防勝於補救。設計階段內建的可達性，比事後審查補上的更便宜也更好。</li>
           <li><strong>開發者自己做鍵盤-only 完整流程測試。</strong>5 分鐘，高產出。拔掉滑鼠，用 Tab / Shift+Tab / Enter / Space / 方向鍵走完主要使用者旅程。</li>
           <li><strong>用螢幕閱讀器跑核心流程。</strong>NVDA（Windows，免費）、VoiceOver（macOS / iOS，內建）、TalkBack（Android）。只用聽的走完主流程。</li>
-          <li><strong>自動化基線審查（本份報告）。</strong>抓出機器可偵測的子集。當作 CI 的回歸防線，不要當作完工證書。</li>
+          <li><strong>自動化基線審查（本份報告）。</strong>抓出機器可偵測的子集。較適合作為 CI 的回歸防線；建議避免單獨作為完工證書。</li>
           <li><strong>公開可達性聲明。</strong>EU EAA 強制，其他司法管轄推薦。聲明標準、已知限制、回饋管道。</li>
         </ol>
 
-        <h3>常見的誤解陷阱</h3>
+        <h3>容易被忽略的脈絡</h3>
         <table class="traps-table">
           <thead>
-            <tr><th>你以為&hellip;</th><th>實情&hellip;</th></tr>
+            <tr><th>常見的想法&hellip;</th><th>值得補充的觀察&hellip;</th></tr>
           </thead>
           <tbody>
             <tr>
@@ -455,7 +456,7 @@ function buildLimitationsHTML(audit) {
             </tr>
             <tr>
               <td>「表單有 <code>&lt;label&gt;</code>，可以用了。」</td>
-              <td>標籤文字本身也必須清楚不歧義。<code>&lt;label&gt;欄位&lt;/label&gt;</code> 通過 3.3.2 但對誰都沒用。</td>
+              <td>標籤文字本身也建議保持清楚不歧義。<code>&lt;label&gt;欄位&lt;/label&gt;</code> 雖通過 3.3.2，但實際上對使用者幫助有限。</td>
             </tr>
             <tr>
               <td>「axe 沒抓到任何違規，就完工了。」</td>
@@ -472,18 +473,18 @@ function buildLimitationsHTML(audit) {
           </tbody>
         </table>
 
-        <h3>如何使用本份報告</h3>
+        <h3>建議的使用方式</h3>
         <ul class="usage-list">
-          <li><strong>作為 CI 回歸防線：</strong>把 <code>axe-core</code> 或本審查接進 CI。阻擋引入新的 critical 違規的 PR。</li>
+          <li><strong>作為 CI 回歸防線：</strong>把 <code>axe-core</code> 或本審查接進 CI；對引入新的高影響項目的 PR 建議先複核再合併。</li>
           <li><strong>作為教育工具：</strong>帶新成員走過 findings 建立 a11y 直覺。before/after 程式碼區塊就是為此設計。</li>
-          <li><strong>作為時序追蹤指標：</strong>用 <code>--previous</code> 旗標比對審查。變化方向比絕對分數重要。</li>
-          <li><strong>不要當作完工證書：</strong>「Beacon 95 分」不等於「這個產品可達」。在任何公開可達性聲明中，應說明方法論與其限制。</li>
-          <li><strong>不要替代「僱用或付費請障礙者測試」：</strong>真實 a11y 工作中最昂貴也最被低估的環節。本報告無法取代這項工作。</li>
+          <li><strong>作為時序追蹤指標：</strong>用 <code>--previous</code> 旗標比對審查。變化方向比絕對分數更具參考價值。</li>
+          <li><strong>建議避免：當作完工證書</strong>&mdash;「Beacon 95 分」不直接等同於「這個產品完全可達」。公開可達性聲明中建議一併說明方法論與其涵蓋範圍。</li>
+          <li><strong>建議搭配：與障礙使用者一同測試</strong>&mdash;真實 a11y 工作中最昂貴也最容易被低估的環節。本報告作為基線，這項工作補上其他面向。</li>
         </ul>
       </div>
 
       <div class="lang-en" lang="en">
-        <h3>What This Audit CAN Detect</h3>
+        <h3>What This Audit Is Well-Suited For</h3>
         <p class="section-intro">Machine-decidable items with static or runtime signatures:</p>
         <ul class="capability-list">
           <li>Missing alt text on images, unlabeled form inputs, missing button names</li>
@@ -497,8 +498,8 @@ function buildLimitationsHTML(audit) {
           <li>Static-detectable WCAG 2.2 A &amp; AA criteria</li>
         </ul>
 
-        <h3>What This Audit CANNOT Detect</h3>
-        <p class="section-intro">Items that require human judgement, real users, or runtime task observation:</p>
+        <h3>Areas Beyond This Audit's Scope</h3>
+        <p class="section-intro">Items better confirmed through human judgement, real users, or runtime task observation:</p>
         <ul class="limitation-list">
           <li><strong>Cognitive load</strong> &mdash; too many choices on one screen, abstract copy, dense layouts</li>
           <li><strong>Whether alt text or labels are actually useful</strong> &mdash; presence &ne; clarity. <code>alt="image"</code> passes axe but tells a screen-reader user nothing.</li>
@@ -520,14 +521,14 @@ function buildLimitationsHTML(audit) {
           <li><strong>Hire disabled people on your team.</strong> Preventive, not reactive. Designed-in accessibility is cheaper and better than audited-in.</li>
           <li><strong>Self keyboard-only walkthrough of core flows.</strong> 5 minutes, very high yield. Unplug the mouse and complete your primary user journey using only Tab / Shift+Tab / Enter / Space / Arrow keys.</li>
           <li><strong>Screen-reader walkthrough of core flows.</strong> NVDA (Windows, free), VoiceOver (macOS / iOS, built-in), TalkBack (Android). Run through your primary user journey listening only.</li>
-          <li><strong>Automated baseline audit (this report).</strong> Catches the obvious, machine-detectable subset. Use as regression-prevention in CI, not as a completion certificate.</li>
+          <li><strong>Automated baseline audit (this report).</strong> Catches the obvious, machine-detectable subset. Well-suited as CI regression-prevention; best not relied on as a standalone completion certificate.</li>
           <li><strong>Public accessibility statement.</strong> Required in EU under EAA, recommended elsewhere. States your standard, known limitations, and feedback contact.</li>
         </ol>
 
-        <h3>Common Misinterpretation Traps</h3>
+        <h3>Context That's Easy to Overlook</h3>
         <table class="traps-table">
           <thead>
-            <tr><th>If you think&hellip;</th><th>The reality is&hellip;</th></tr>
+            <tr><th>Common assumption&hellip;</th><th>Worth keeping in mind&hellip;</th></tr>
           </thead>
           <tbody>
             <tr>
@@ -548,7 +549,7 @@ function buildLimitationsHTML(audit) {
             </tr>
             <tr>
               <td>"Skip link added, keyboard accessibility complete."</td>
-              <td>Skip link is one criterion. Focus management in modals, SPA route changes, and dynamic content updates is often broken separately and is invisible to static audits.</td>
+              <td>Skip link is one criterion. Focus management in modals, SPA route changes, and dynamic content updates is often a separate concern, and may go unnoticed by static audits.</td>
             </tr>
             <tr>
               <td>"Half-implemented dark mode is harmless."</td>
@@ -557,13 +558,13 @@ function buildLimitationsHTML(audit) {
           </tbody>
         </table>
 
-        <h3>How To Use This Report</h3>
+        <h3>Suggested Uses</h3>
         <ul class="usage-list">
-          <li><strong>As baseline regression-prevention:</strong> wire <code>axe-core</code> or this audit into CI. Block PRs that introduce new critical-level violations.</li>
+          <li><strong>As baseline regression-prevention:</strong> wire <code>axe-core</code> or this audit into CI. PRs introducing new higher-priority items can be flagged for closer review before merge.</li>
           <li><strong>As an education tool:</strong> walk new team members through findings to build a11y intuition. The before/after code blocks are designed for this.</li>
           <li><strong>As a tracking metric over time:</strong> use the <code>--previous</code> flag to compare audits. Direction-of-change matters more than absolute score.</li>
-          <li><strong>NOT as a completion certificate:</strong> "Beacon score 95" is not "this product is accessible". State the methodology and its limits in any public accessibility statement.</li>
-          <li><strong>NOT as a substitute for hiring or paying disabled users to test:</strong> the most expensive line item in real a11y work, and the most under-invested. This report cannot replace that work.</li>
+          <li><strong>Best avoided as a completion certificate:</strong> "Beacon score 95" does not directly equate to "this product is fully accessible". Public accessibility statements work better when they also describe the methodology and its scope.</li>
+          <li><strong>Best paired with testing alongside disabled users:</strong> the most expensive line item in real a11y work, and the most under-invested. This report serves as a baseline; that work covers the rest.</li>
         </ul>
       </div>
     </div>`;
