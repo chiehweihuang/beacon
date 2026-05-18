@@ -70,6 +70,169 @@ if (!outputPath) {
   outputPath = resolve(dirname(auditPath), `${parts.join('-')}.html`);
 }
 
+/**
+ * I18N: centralized translation table.
+ * Both languages render inline in the HTML; CSS hides the inactive one
+ * via body[data-active-lang]. Category names are matched by cat.id
+ * (falls back to cat.name when ID is unknown).
+ */
+const I18N = {
+  zh: {
+    // Tabs
+    tab_overview: '總覽',
+    tab_findings: '發現項',
+    tab_legal: '法律風險',
+    tab_methodology: '方法論與限制',
+    tab_remediation: '修復計畫',
+    // Section headings
+    h2_category_summary: '分類摘要',
+    h2_critical: '關鍵問題',
+    h2_warnings: '警告',
+    h2_tips: '提示與最佳實踐',
+    h2_remediation_priority: '修復優先序',
+    h2_testing_recommendations: '測試建議',
+    h2_legal_risk: '法律風險評估',
+    // Table headers
+    th_category: '分類',
+    th_pass: '通過',
+    th_fail: '失敗',
+    th_review: '待審',
+    th_coverage: '覆蓋率',
+    // Meta line
+    meta_date: '日期',
+    meta_scope: '範圍',
+    meta_standard: '標準',
+    meta_auditor: '審查者',
+    // Verdict
+    verdict_pass: '通過',
+    verdict_needs_work: '需改進',
+    verdict_fail: '不及格',
+    verdict_issues_found: '個問題',
+    verdict_critical: '關鍵',
+    verdict_warnings: '警告',
+    verdict_tips: '提示',
+    // Score ring
+    ring_overall: '總分',
+    ring_was: '上次',
+    // Comparison banner
+    cmp_current: '目前分數',
+    cmp_previous: '上次分數',
+    cmp_delta: '差距',
+    cmp_issues: '問題數（目前 / 上次）',
+    // Findings labels
+    finding_affected: '受影響使用者',
+    finding_location: '位置',
+    finding_fix: '修補',
+    finding_legal: '法律',
+    finding_before_after: '修補前 / 修補後',
+    finding_before: '修補前',
+    finding_after: '修補後',
+    finding_empty: '此分類無 finding。',
+    // Legal risk
+    legal_deadline: '截止日',
+    legal_score: '暴露分數',
+    legal_overall: '整體風險',
+    // Remediation
+    rem_p0: 'P0 — 必修（Level A）',
+    rem_p1: 'P1 — 應修（Level AA）',
+    rem_p2: 'P2 — 可修（最佳實踐）',
+    rem_empty: '無測試建議。',
+    // Score table
+    score_was_prefix: '上次',
+    // Category names (matched by cat.id)
+    cat_contrast: '色彩與對比',
+    cat_keyboard: '鍵盤導覽',
+    cat_screenreader: '螢幕閱讀器',
+    cat_forms: '表單',
+    cat_responsive: '響應式與回流',
+    cat_touch: '觸控與目標尺寸',
+    cat_cognitive: '認知',
+    cat_motion: '動態與動畫',
+    cat_media: '媒體',
+    cat_agent: '代理可操作性與 AEO',
+  },
+  en: {
+    tab_overview: 'Overview',
+    tab_findings: 'Findings',
+    tab_legal: 'Legal Risk',
+    tab_methodology: 'Methodology & Limits',
+    tab_remediation: 'Remediation',
+    h2_category_summary: 'Category Summary',
+    h2_critical: 'Critical Findings',
+    h2_warnings: 'Warnings',
+    h2_tips: 'Tips & Best Practices',
+    h2_remediation_priority: 'Remediation Priority',
+    h2_testing_recommendations: 'Testing Recommendations',
+    h2_legal_risk: 'Legal Risk Assessment',
+    th_category: 'Category',
+    th_pass: 'Pass',
+    th_fail: 'Fail',
+    th_review: 'Review',
+    th_coverage: 'Coverage',
+    meta_date: 'Date',
+    meta_scope: 'Scope',
+    meta_standard: 'Standard',
+    meta_auditor: 'Auditor',
+    verdict_pass: 'PASS',
+    verdict_needs_work: 'NEEDS WORK',
+    verdict_fail: 'FAIL',
+    verdict_issues_found: 'issues found',
+    verdict_critical: 'critical',
+    verdict_warnings: 'warnings',
+    verdict_tips: 'tips',
+    ring_overall: 'Overall',
+    ring_was: 'was',
+    cmp_current: 'Current Score',
+    cmp_previous: 'Previous Score',
+    cmp_delta: 'Delta',
+    cmp_issues: 'Issues (now / was)',
+    finding_affected: 'Affected users',
+    finding_location: 'Location',
+    finding_fix: 'Fix',
+    finding_legal: 'Legal',
+    finding_before_after: 'Before / After',
+    finding_before: 'Before',
+    finding_after: 'After',
+    finding_empty: 'No findings in this category.',
+    legal_deadline: 'Deadline',
+    legal_score: 'Exposure Score',
+    legal_overall: 'Overall Risk',
+    rem_p0: 'P0 — Must Fix (Level A)',
+    rem_p1: 'P1 — Should Fix (Level AA)',
+    rem_p2: 'P2 — Nice to Fix (Best Practices)',
+    rem_empty: 'No testing recommendations.',
+    score_was_prefix: 'was',
+    cat_contrast: 'Color & Contrast',
+    cat_keyboard: 'Keyboard Navigation',
+    cat_screenreader: 'Screen Reader',
+    cat_forms: 'Forms',
+    cat_responsive: 'Responsive & Reflow',
+    cat_touch: 'Touch & Targets',
+    cat_cognitive: 'Cognitive',
+    cat_motion: 'Motion & Animation',
+    cat_media: 'Media',
+    cat_agent: 'Agent Operability & AEO',
+  },
+};
+
+/** Wrap two strings in bilingual spans; CSS hides the inactive language. */
+function bi(zh, en) {
+  return `<span class="lang-zh" lang="zh-Hant">${zh}</span><span class="lang-en" lang="en">${en}</span>`;
+}
+
+/** Look up an I18N key in both languages and return as bilingual spans. */
+function t(key) {
+  return bi(I18N.zh[key] || key, I18N.en[key] || key);
+}
+
+/** Render a category's name bilingually: I18N table by id, fall back to cat.name. */
+function catName(cat) {
+  const id = cat?.id || '';
+  const zh = I18N.zh[`cat_${id}`] || cat?.name || id;
+  const en = I18N.en[`cat_${id}`] || cat?.name || id;
+  return bi(zh, en);
+}
+
 function scoreColor(score) {
   if (score >= 90) return '#0cce6b';
   if (score >= 50) return '#ffa400';
@@ -77,9 +240,10 @@ function scoreColor(score) {
 }
 
 function scoreLabel(score) {
-  if (score >= 90) return 'PASS';
-  if (score >= 50) return 'NEEDS WORK';
-  return 'FAIL';
+  // Returns a bilingual span; choose key based on score band
+  if (score >= 90) return t('verdict_pass');
+  if (score >= 50) return t('verdict_needs_work');
+  return t('verdict_fail');
 }
 
 function riskColor(level) {
@@ -103,7 +267,7 @@ function buildCategoryRows(categories, prevCategories) {
     const prevScore = prev ? prev.score : null;
     return `
       <tr class="category-row" data-category="${cat.id}">
-        <td class="cat-name">${cat.name}</td>
+        <td class="cat-name">${catName(cat)}</td>
         <td class="num pass">${cat.pass} ${deltaArrow(cat.pass, prevPass)}</td>
         <td class="num fail">${cat.fail} ${deltaArrow(cat.fail, prevFail)}</td>
         <td class="num review">${cat.review || 0}</td>
@@ -112,14 +276,14 @@ function buildCategoryRows(categories, prevCategories) {
             <div class="score-fill" style="width:${cat.score}%;background:${scoreColor(cat.score)}"></div>
             <span class="score-text">${cat.score}%</span>
           </div>
-          ${prevScore !== null ? `<div class="prev-score">was ${prevScore}%</div>` : ''}
+          ${prevScore !== null ? `<div class="prev-score">${t('score_was_prefix')} ${prevScore}%</div>` : ''}
         </td>
       </tr>`;
   }).join('');
 }
 
 function buildFindingsHTML(findings) {
-  if (!findings || findings.length === 0) return '<p class="empty">No findings in this category.</p>';
+  if (!findings || findings.length === 0) return `<p class="empty">${t('finding_empty')}</p>`;
   return findings.map(f => {
     const severityClass = f.severity === 'critical' ? 'critical' : f.severity === 'warning' ? 'warning' : 'tip';
     const icon = f.severity === 'critical' ? '&#x1F534;' : f.severity === 'warning' ? '&#9888;' : '&#x1F4A1;';
@@ -132,12 +296,12 @@ function buildFindingsHTML(findings) {
           <span class="level-tag">${escapeHtml(f.level || '')}</span>
         </div>
         <div class="finding-body">
-          <p><strong>Affected users:</strong> ${escapeHtml(f.affected_users || 'N/A')}</p>
-          <p><strong>Location:</strong> <code>${escapeHtml(f.location || 'N/A')}</code></p>
+          <p><strong>${t('finding_affected')}:</strong> ${escapeHtml(f.affected_users || 'N/A')}</p>
+          <p><strong>${t('finding_location')}:</strong> <code>${escapeHtml(f.location || 'N/A')}</code></p>
           <p>${escapeHtml(f.description || '')}</p>
-          ${f.fix ? `<div class="fix"><strong>Fix:</strong> ${escapeHtml(f.fix)}</div>` : ''}
-          ${f.legal_exposure ? `<div class="legal"><strong>Legal:</strong> ${escapeHtml(f.legal_exposure)}</div>` : ''}
-          ${f.code_before ? `<details><summary>Before / After</summary><div class="code-compare"><div class="code-before"><div class="code-label">Before</div><pre><code>${escapeHtml(f.code_before)}</code></pre></div><div class="code-after"><div class="code-label">After</div><pre><code>${escapeHtml(f.code_after || '')}</code></pre></div></div></details>` : ''}
+          ${f.fix ? `<div class="fix"><strong>${t('finding_fix')}:</strong> ${escapeHtml(f.fix)}</div>` : ''}
+          ${f.legal_exposure ? `<div class="legal"><strong>${t('finding_legal')}:</strong> ${escapeHtml(f.legal_exposure)}</div>` : ''}
+          ${f.code_before ? `<details><summary>${t('finding_before_after')}</summary><div class="code-compare"><div class="code-before"><div class="code-label">${t('finding_before')}</div><pre><code>${escapeHtml(f.code_before)}</code></pre></div><div class="code-after"><div class="code-label">${t('finding_after')}</div><pre><code>${escapeHtml(f.code_after || '')}</code></pre></div></div></details>` : ''}
         </div>
       </div>`;
   }).join('');
@@ -151,7 +315,7 @@ function buildLegalRiskHTML(legal) {
   if (!legal) return '';
   return `
     <div class="legal-risk-panel">
-      <h3>Legal Risk Assessment</h3>
+      <h3>${t('h2_legal_risk')}</h3>
       <div class="risk-grid">
         ${legal.jurisdictions.map(j => `
           <div class="risk-card" style="border-left:4px solid ${riskColor(j.risk_level)}">
@@ -160,13 +324,13 @@ function buildLegalRiskHTML(legal) {
               <span class="risk-badge" style="background:${riskColor(j.risk_level)}">${escapeHtml((j.risk_level || '').toUpperCase())}</span>
             </div>
             <p>${escapeHtml(j.law || '')} &mdash; ${escapeHtml(j.detail || '')}</p>
-            ${j.deadline ? `<p class="deadline">Deadline: ${escapeHtml(j.deadline)}</p>` : ''}
-            <p class="risk-score">Exposure Score: <strong>${j.score}/10</strong></p>
+            ${j.deadline ? `<p class="deadline">${t('legal_deadline')}: ${escapeHtml(j.deadline)}</p>` : ''}
+            <p class="risk-score">${t('legal_score')}: <strong>${j.score}/10</strong></p>
           </div>`).join('')}
       </div>
       <div class="risk-summary">
         <div class="overall-risk" style="background:${riskColor(legal.overall_level)}">
-          Overall Risk: ${legal.overall_level.toUpperCase()} (${legal.overall_score}/10)
+          ${t('legal_overall')}: ${legal.overall_level.toUpperCase()} (${legal.overall_score}/10)
         </div>
       </div>
     </div>`;
@@ -425,6 +589,8 @@ const html = `<!DOCTYPE html>
     --warn: #b45309;
     --fail: #b91c1c;
     --tip: #0369a1;
+    --gold: #c8901c;
+    --gold-glow: rgba(200, 144, 28, 0.18);
     --shadow: 0 1px 3px rgba(15,23,42,0.08), 0 1px 2px rgba(15,23,42,0.04);
     color-scheme: light;
   }
@@ -443,6 +609,8 @@ const html = `<!DOCTYPE html>
       --warn: #ffa400;
       --fail: #ff4e42;
       --tip: #4fc3f7;
+      --gold: #e6b800;
+      --gold-glow: rgba(230, 184, 0, 0.22);
       --shadow: 0 1px 3px rgba(0,0,0,0.4), 0 1px 2px rgba(0,0,0,0.3);
       color-scheme: dark;
     }
@@ -461,6 +629,8 @@ const html = `<!DOCTYPE html>
     --warn: #b45309;
     --fail: #b91c1c;
     --tip: #0369a1;
+    --gold: #c8901c;
+    --gold-glow: rgba(200, 144, 28, 0.18);
     --shadow: 0 1px 3px rgba(15,23,42,0.08), 0 1px 2px rgba(15,23,42,0.04);
     color-scheme: light;
   }
@@ -476,6 +646,8 @@ const html = `<!DOCTYPE html>
     --warn: #ffa400;
     --fail: #ff4e42;
     --tip: #4fc3f7;
+    --gold: #e6b800;
+    --gold-glow: rgba(230, 184, 0, 0.22);
     --shadow: 0 1px 3px rgba(0,0,0,0.4), 0 1px 2px rgba(0,0,0,0.3);
     color-scheme: dark;
   }
@@ -660,7 +832,9 @@ const html = `<!DOCTYPE html>
     color: var(--text);
     background-color: var(--surface-2);
     transform: translateY(-1px);
-    box-shadow: 0 -2px 0 var(--text-muted) inset;
+    box-shadow:
+      inset 0 0 0 1.5px var(--gold),
+      0 2px 12px var(--gold-glow);
   }
   .tab:hover::after {
     left: 12%;
@@ -859,41 +1033,41 @@ const html = `<!DOCTYPE html>
 
 <h1>Accessibility Audit Report</h1>
 <div class="meta">
-  <span>Date: ${audit.metadata?.date || 'N/A'}</span>
-  <span>Scope: ${audit.metadata?.scope || 'N/A'}</span>
-  <span>Standard: ${audit.metadata?.standard || 'WCAG 2.2 AA'}</span>
-  <span>Auditor: Claude Code (a11y-audit)</span>
+  <span>${t('meta_date')}: ${audit.metadata?.date || 'N/A'}</span>
+  <span>${t('meta_scope')}: ${escapeHtml(audit.metadata?.scope || 'N/A')}</span>
+  <span>${t('meta_standard')}: ${escapeHtml(audit.metadata?.standard || 'WCAG 2.2 AA')}</span>
+  <span>${t('meta_auditor')}: Claude Code (a11y-audit)</span>
 </div>
 
 ${previous ? `
 <div class="comparison-banner">
   <div class="comparison-stat">
     <div class="value" style="color:${scoreColor(audit.summary.overall_score)}">${audit.summary.overall_score}</div>
-    <div class="label">Current Score</div>
+    <div class="label">${t('cmp_current')}</div>
   </div>
   <div class="comparison-stat">
     <div class="value" style="color:${scoreColor(previous.summary.overall_score)}">${previous.summary.overall_score}</div>
-    <div class="label">Previous Score</div>
+    <div class="label">${t('cmp_previous')}</div>
   </div>
   <div class="comparison-stat">
     <div class="value" style="color:${audit.summary.overall_score > previous.summary.overall_score ? 'var(--pass)' : 'var(--fail)'}">
       ${audit.summary.overall_score > previous.summary.overall_score ? '+' : ''}${audit.summary.overall_score - previous.summary.overall_score}
     </div>
-    <div class="label">Delta</div>
+    <div class="label">${t('cmp_delta')}</div>
   </div>
   <div class="comparison-stat">
     <div class="value">${audit.summary.total_findings} / ${previous.summary.total_findings}</div>
-    <div class="label">Issues (now / was)</div>
+    <div class="label">${t('cmp_issues')}</div>
   </div>
 </div>
 ` : ''}
 
 <!-- Score Rings -->
 <div class="score-ring-container">
-  ${buildScoreRing('Overall', audit.summary.overall_score, previous?.summary?.overall_score)}
+  ${buildScoreRing(t('ring_overall'), audit.summary.overall_score, previous?.summary?.overall_score)}
   ${audit.summary.categories.map(cat => {
     const prev = previous?.summary?.categories?.find(p => p.id === cat.id);
-    return buildScoreRing(cat.name, cat.score, prev?.score);
+    return buildScoreRing(catName(cat), cat.score, prev?.score);
   }).join('')}
 </div>
 
@@ -903,8 +1077,8 @@ ${previous ? `
     ${scoreLabel(audit.summary.overall_score)}
   </span>
   <span style="color:var(--text-muted);margin-left:0.5rem">
-    ${audit.summary.total_findings} issues found
-    (${audit.summary.critical} critical, ${audit.summary.warnings} warnings, ${audit.summary.tips} tips)
+    ${audit.summary.total_findings} ${t('verdict_issues_found')}
+    (${audit.summary.critical} ${t('verdict_critical')}, ${audit.summary.warnings} ${t('verdict_warnings')}, ${audit.summary.tips} ${t('verdict_tips')})
   </span>
 </div>
 
@@ -913,24 +1087,24 @@ ${buildContextBanner()}
 
 <!-- Tabs -->
 <div class="tabs">
-  <div class="tab active" onclick="switchTab('overview')">Overview</div>
-  <div class="tab" onclick="switchTab('findings')">Findings</div>
-  <div class="tab" onclick="switchTab('legal')">Legal Risk</div>
-  <div class="tab" onclick="switchTab('methodology')">Methodology &amp; Limits</div>
-  <div class="tab" onclick="switchTab('remediation')">Remediation</div>
+  <div class="tab active" onclick="switchTab('overview')">${t('tab_overview')}</div>
+  <div class="tab" onclick="switchTab('findings')">${t('tab_findings')}</div>
+  <div class="tab" onclick="switchTab('legal')">${t('tab_legal')}</div>
+  <div class="tab" onclick="switchTab('methodology')">${t('tab_methodology')}</div>
+  <div class="tab" onclick="switchTab('remediation')">${t('tab_remediation')}</div>
 </div>
 
 <!-- Overview Tab -->
 <div id="tab-overview" class="tab-content active">
-  <h2>Category Summary</h2>
+  <h2>${t('h2_category_summary')}</h2>
   <table class="summary-table">
     <thead>
       <tr>
-        <th>Category</th>
-        <th class="num">Pass</th>
-        <th class="num">Fail</th>
-        <th class="num">Review</th>
-        <th>Coverage</th>
+        <th>${t('th_category')}</th>
+        <th class="num">${t('th_pass')}</th>
+        <th class="num">${t('th_fail')}</th>
+        <th class="num">${t('th_review')}</th>
+        <th>${t('th_coverage')}</th>
       </tr>
     </thead>
     <tbody>
@@ -940,7 +1114,7 @@ ${buildContextBanner()}
 
   ${audit.summary.categories.map(cat => `
     <div class="category-detail" id="detail-${cat.id}">
-      <h3>${cat.name}</h3>
+      <h3>${catName(cat)}</h3>
       ${buildFindingsHTML(audit.findings?.filter(f => f.category === cat.id))}
     </div>
   `).join('')}
@@ -948,13 +1122,13 @@ ${buildContextBanner()}
 
 <!-- Findings Tab -->
 <div id="tab-findings" class="tab-content">
-  <h2>Critical Findings</h2>
+  <h2>${t('h2_critical')}</h2>
   ${buildFindingsHTML(audit.findings?.filter(f => f.severity === 'critical'))}
 
-  <h2>Warnings</h2>
+  <h2>${t('h2_warnings')}</h2>
   ${buildFindingsHTML(audit.findings?.filter(f => f.severity === 'warning'))}
 
-  <h2>Tips &amp; Best Practices</h2>
+  <h2>${t('h2_tips')}</h2>
   ${buildFindingsHTML(audit.findings?.filter(f => f.severity === 'tip'))}
 </div>
 
@@ -970,14 +1144,14 @@ ${buildContextBanner()}
 
 <!-- Remediation Tab -->
 <div id="tab-remediation" class="tab-content">
-  <h2>Remediation Priority</h2>
+  <h2>${t('h2_remediation_priority')}</h2>
   ${['p0', 'p1', 'p2'].map(priority => {
     const items = audit.remediation?.filter(r => r.priority === priority) || [];
     if (items.length === 0) return '';
-    const labels = { p0: 'P0 -- Must Fix (Level A)', p1: 'P1 -- Should Fix (Level AA)', p2: 'P2 -- Nice to Fix (Best Practices)' };
+    const labelKey = priority === 'p0' ? 'rem_p0' : priority === 'p1' ? 'rem_p1' : 'rem_p2';
     return `
       <div class="priority-section">
-        <h3><span class="priority-tag ${priority}">${priority.toUpperCase()}</span> ${labels[priority]}</h3>
+        <h3><span class="priority-tag ${priority}">${priority.toUpperCase()}</span> ${t(labelKey)}</h3>
         ${items.map(r => `
           <div class="remediation-item">
             <span>&#8226; ${escapeHtml(r.title || '')} &mdash; ${escapeHtml(r.wcag || '')}</span>
@@ -987,8 +1161,8 @@ ${buildContextBanner()}
       </div>`;
   }).join('')}
 
-  <h2>Testing Recommendations</h2>
-  ${audit.testing_recommendations ? `<ul>${audit.testing_recommendations.map(t => `<li>${escapeHtml(t)}</li>`).join('')}</ul>` : '<p class="empty">No testing recommendations.</p>'}
+  <h2>${t('h2_testing_recommendations')}</h2>
+  ${audit.testing_recommendations ? `<ul>${audit.testing_recommendations.map(rec => `<li>${escapeHtml(rec)}</li>`).join('')}</ul>` : `<p class="empty">${t('rem_empty')}</p>`}
 </div>
 
 <script>
@@ -1070,7 +1244,7 @@ function buildScoreRing(label, score, prevScore) {
   const offset = circumference * (1 - score / 100);
   const color = scoreColor(score);
   const prevText = prevScore !== null && prevScore !== undefined
-    ? `<div class="ring-prev">was ${prevScore}</div>`
+    ? `<div class="ring-prev">${t('ring_was')} ${prevScore}</div>`
     : '';
   return `
     <div class="score-ring">
