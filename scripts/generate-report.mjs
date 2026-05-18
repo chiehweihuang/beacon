@@ -30,8 +30,44 @@ for (let i = 1; i < args.length; i++) {
 const audit = JSON.parse(readFileSync(auditPath, 'utf8'));
 const previous = previousPath ? JSON.parse(readFileSync(previousPath, 'utf8')) : null;
 
+/**
+ * Build a filesystem-safe slug from audit.metadata.url, falling back to scope.
+ * Examples:
+ *   "https://tokyotaiwanradar.com/zh"   -> "tokyotaiwanradar.com-zh"
+ *   "https://www.example.com/blog/post" -> "example.com-blog"
+ *   undefined + scope "Homepage zh"     -> "homepage-zh"
+ */
+function buildSlug(audit) {
+  const url = audit?.metadata?.url;
+  if (url) {
+    try {
+      const u = new URL(url);
+      const host = u.hostname.replace(/^www\./, '');
+      const firstSeg = (u.pathname.replace(/^\/+|\/+$/g, '').split('/')[0] || '').trim();
+      const raw = firstSeg ? `${host}-${firstSeg}` : host;
+      // Filesystem-safe: keep letters/digits/dot/hyphen; collapse others to hyphen
+      return raw
+        .replace(/[^A-Za-z0-9.-]+/g, '-')
+        .replace(/^-+|-+$/g, '')
+        .slice(0, 60) || null;
+    } catch (e) {
+      // Not a valid URL — fall through to scope-based slug
+    }
+  }
+  const scope = audit?.metadata?.scope || '';
+  const fromScope = scope
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, '-')
+    .replace(/^-+|-+$/g, '')
+    .slice(0, 60);
+  return fromScope || null;
+}
+
 if (!outputPath) {
-  outputPath = resolve(dirname(auditPath), `a11y-report-${audit.metadata?.date || 'latest'}.html`);
+  const slug = buildSlug(audit);
+  const date = audit.metadata?.date || 'latest';
+  const parts = ['a11y-report', slug, date].filter(Boolean);
+  outputPath = resolve(dirname(auditPath), `${parts.join('-')}.html`);
 }
 
 function scoreColor(score) {
@@ -584,11 +620,75 @@ const html = `<!DOCTYPE html>
   .risk-summary { margin-top: 1rem; }
 
   /* Tabs */
-  .tabs { display: flex; gap: 0; border-bottom: 2px solid var(--border); margin: 2rem 0 1rem; }
-  .tab { padding: 0.6rem 1.2rem; cursor: pointer; color: var(--text-muted);
-    border-bottom: 2px solid transparent; margin-bottom: -2px; transition: all 0.2s; }
-  .tab:hover { color: var(--text); }
-  .tab.active { color: var(--accent); border-bottom-color: var(--accent); }
+  .tabs {
+    display: flex;
+    gap: 0;
+    border-bottom: 2px solid var(--border);
+    margin: 2rem 0 1rem;
+    flex-wrap: wrap;
+  }
+  .tab {
+    padding: 0.65rem 1.2rem;
+    cursor: pointer;
+    color: var(--text-muted);
+    border-bottom: 2px solid transparent;
+    margin-bottom: -2px;
+    border-radius: 6px 6px 0 0;
+    position: relative;
+    user-select: none;
+    transition:
+      color 0.18s ease,
+      background-color 0.18s ease,
+      transform 0.18s ease,
+      box-shadow 0.18s ease;
+  }
+  /* Animated underline that grows from center on hover */
+  .tab::after {
+    content: '';
+    position: absolute;
+    left: 50%;
+    right: 50%;
+    bottom: -2px;
+    height: 2px;
+    background: var(--accent);
+    opacity: 0;
+    transition: left 0.22s ease, right 0.22s ease, opacity 0.18s ease;
+    pointer-events: none;
+    border-radius: 2px;
+  }
+  .tab:hover {
+    color: var(--text);
+    background-color: var(--surface-2);
+    transform: translateY(-1px);
+    box-shadow: 0 -2px 0 var(--text-muted) inset;
+  }
+  .tab:hover::after {
+    left: 12%;
+    right: 12%;
+    opacity: 0.55;
+  }
+  .tab:focus-visible {
+    outline: 2px solid var(--accent);
+    outline-offset: -2px;
+  }
+  .tab.active {
+    color: var(--accent);
+    border-bottom-color: var(--accent);
+    background-color: transparent;
+    transform: none;
+    box-shadow: none;
+    font-weight: 600;
+  }
+  .tab.active::after {
+    left: 0;
+    right: 0;
+    opacity: 1;
+  }
+  /* Respect users with motion sensitivity (our own report's a11y dog-food) */
+  @media (prefers-reduced-motion: reduce) {
+    .tab, .tab::after { transition: color 0.01s; }
+    .tab:hover { transform: none; }
+  }
   .tab-content { display: none; }
   .tab-content.active { display: block; }
 
