@@ -91,16 +91,16 @@ function buildFindingsHTML(findings) {
       <div class="finding ${severityClass}">
         <div class="finding-header">
           <span class="severity-icon">${icon}</span>
-          <strong>${f.title}</strong>
-          <span class="wcag-tag">${f.wcag || ''}</span>
-          <span class="level-tag">${f.level || ''}</span>
+          <strong>${escapeHtml(f.title || '')}</strong>
+          <span class="wcag-tag">${escapeHtml(f.wcag || '')}</span>
+          <span class="level-tag">${escapeHtml(f.level || '')}</span>
         </div>
         <div class="finding-body">
-          <p><strong>Affected users:</strong> ${f.affected_users || 'N/A'}</p>
-          <p><strong>Location:</strong> <code>${f.location || 'N/A'}</code></p>
-          <p>${f.description || ''}</p>
-          ${f.fix ? `<div class="fix"><strong>Fix:</strong> ${f.fix}</div>` : ''}
-          ${f.legal_exposure ? `<div class="legal"><strong>Legal:</strong> ${f.legal_exposure}</div>` : ''}
+          <p><strong>Affected users:</strong> ${escapeHtml(f.affected_users || 'N/A')}</p>
+          <p><strong>Location:</strong> <code>${escapeHtml(f.location || 'N/A')}</code></p>
+          <p>${escapeHtml(f.description || '')}</p>
+          ${f.fix ? `<div class="fix"><strong>Fix:</strong> ${escapeHtml(f.fix)}</div>` : ''}
+          ${f.legal_exposure ? `<div class="legal"><strong>Legal:</strong> ${escapeHtml(f.legal_exposure)}</div>` : ''}
           ${f.code_before ? `<details><summary>Before / After</summary><div class="code-compare"><div class="code-before"><div class="code-label">Before</div><pre><code>${escapeHtml(f.code_before)}</code></pre></div><div class="code-after"><div class="code-label">After</div><pre><code>${escapeHtml(f.code_after || '')}</code></pre></div></div></details>` : ''}
         </div>
       </div>`;
@@ -120,11 +120,11 @@ function buildLegalRiskHTML(legal) {
         ${legal.jurisdictions.map(j => `
           <div class="risk-card" style="border-left:4px solid ${riskColor(j.risk_level)}">
             <div class="risk-header">
-              <strong>${j.name}</strong>
-              <span class="risk-badge" style="background:${riskColor(j.risk_level)}">${j.risk_level.toUpperCase()}</span>
+              <strong>${escapeHtml(j.name || '')}</strong>
+              <span class="risk-badge" style="background:${riskColor(j.risk_level)}">${escapeHtml((j.risk_level || '').toUpperCase())}</span>
             </div>
-            <p>${j.law} &mdash; ${j.detail || ''}</p>
-            ${j.deadline ? `<p class="deadline">Deadline: ${j.deadline}</p>` : ''}
+            <p>${escapeHtml(j.law || '')} &mdash; ${escapeHtml(j.detail || '')}</p>
+            ${j.deadline ? `<p class="deadline">Deadline: ${escapeHtml(j.deadline)}</p>` : ''}
             <p class="risk-score">Exposure Score: <strong>${j.score}/10</strong></p>
           </div>`).join('')}
       </div>
@@ -411,15 +411,15 @@ ${previous ? `
         <h3><span class="priority-tag ${priority}">${priority.toUpperCase()}</span> ${labels[priority]}</h3>
         ${items.map(r => `
           <div class="remediation-item">
-            <span>&#8226; ${r.title} &mdash; ${r.wcag || ''}</span>
-            <span class="effort-tag">${r.effort || ''}</span>
+            <span>&#8226; ${escapeHtml(r.title || '')} &mdash; ${escapeHtml(r.wcag || '')}</span>
+            <span class="effort-tag">${escapeHtml(r.effort || '')}</span>
           </div>
         `).join('')}
       </div>`;
   }).join('')}
 
   <h2>Testing Recommendations</h2>
-  ${audit.testing_recommendations ? `<ul>${audit.testing_recommendations.map(t => `<li>${t}</li>`).join('')}</ul>` : '<p class="empty">No testing recommendations.</p>'}
+  ${audit.testing_recommendations ? `<ul>${audit.testing_recommendations.map(t => `<li>${escapeHtml(t)}</li>`).join('')}</ul>` : '<p class="empty">No testing recommendations.</p>'}
 </div>
 
 <script>
