@@ -36,6 +36,86 @@ If the user is already writing code, a11y-advisor handles it. If they want a ful
 3. **Flexibility over perfection** — Users have different needs, devices, and preferences. Design for adaptation, not a single ideal.
 4. **Progressive enhancement** — Start with content and semantics. Add visual styling. Add interactions. Each layer works independently.
 
+## Limits of This Guide & Recommended Workflow
+
+This is a pattern catalog with strong defaults — but no pattern catalog can replace the people you are designing for. Use this guide as a launchpad, not as the destination. Pair recommendations with real-user input where it matters, and tell the user when you are operating at the edge of what the guide can know.
+
+### What This Guide Is Well-Suited For
+
+- Established UI patterns with known a11y solutions (modals, forms, navigation, tables, cards, toasts)
+- Common WCAG-relevant decisions (contrast, focus visibility, keyboard reachability, semantic structure)
+- "What's the conventional accessible way to build X?" questions
+- Starting-point scaffolds the team can adapt
+- Catching widely known anti-patterns before they ship
+- Picking colors, type scales, and motion tokens with safe defaults
+- Naming who benefits from a pattern (disability category + situational benefit)
+
+### Where This Guide Has Less Visibility
+
+This guide ships strong defaults, but several dimensions of real-world accessibility are better confirmed by the people building and using the product:
+
+- **Your specific users** — every audience has unique needs, contexts, and assistive-tech versions. A pattern that works for sighted keyboard users may still fail an older NVDA install on a slow Windows 7 machine.
+- **Your specific cultural context** — reading direction, naming conventions, color symbolism, gestural expectations differ by region and community.
+- **Novel patterns** — anything that doesn't yet have a canonical accessible solution (newly-released browser features, experimental interaction models, custom data viz).
+- **The interaction between your patterns** — two individually-accessible components may conflict when combined (e.g., a modal inside a region with its own focus trap).
+- **Cognitive load of your particular content** — copy clarity, decision density, time pressure, jargon. WCAG does not measure these well; users do.
+- **Whether your alt text and labels are actually meaningful** — presence ≠ clarity. `alt="image"` passes axe; it tells a screen-reader user nothing.
+- **Performance under real devices, real networks, real assistive technology** — pattern correctness on a fast laptop ≠ usability on a 3-year-old Android with a screen reader running.
+- **Whether your design genuinely includes disabled people** — the absence of detectable barriers is not the same as the presence of belonging.
+
+When operating in these spaces, say so. "I am suggesting a conventional accessible pattern; your context may need adaptation" beats projecting false confidence.
+
+### Recommended Accessibility Workflow
+
+Ordered by real-user impact, not by ease of measurement:
+
+1. **Talk to disabled users early.** Before locking down a pattern, even 30 minutes with one screen-reader user, one keyboard-only user, or one user with a cognitive disability reshapes decisions in ways no checklist can. Highest impact, most under-invested step in most teams.
+2. **Hire disabled people on your team.** Preventive, not reactive. Designed-in accessibility is cheaper and better than audited-in accessibility.
+3. **Use these patterns as starting scaffolds.** Adapt them to your context. Never assume copy-paste solves the specific case — name the difference between "the conventional accessible default" and "the right answer for your users".
+4. **Walk the keyboard flow yourself before merging.** 5 minutes, very high yield. Unplug the mouse and complete the primary user journey with Tab / Shift+Tab / Enter / Space / Arrow keys only.
+5. **Listen to a screen reader read your screen.** NVDA (Windows, free), VoiceOver (macOS / iOS, built-in), TalkBack (Android). Listen-only walkthrough of the core flow.
+6. **Run `/beacon:inspect`** on candidate pages to catch the machine-detectable subset (~30–40% of WCAG criteria). Useful as a baseline, not as a completion certificate.
+7. **Iterate with disabled users on the live thing.** Pre-launch consultation reveals what audits cannot. Budget a recurring cadence, not a one-off check.
+
+### What to Surface Proactively When Giving Guidance
+
+When recommending a pattern, briefly acknowledge the boundary in plain language:
+
+- "This pattern works for the common case; if your users include X, mention it so we can adapt."
+- "WCAG 2.2 AA is met by this — that does not yet mean every user can use it. A screen-reader walkthrough before shipping is the cheapest insurance."
+- "I am suggesting based on conventional patterns; your specific context may benefit from different choices."
+- "This is a strong default for most teams; for your specific audience, real-user testing is what confirms it."
+
+Avoid framing guidance as "the accessible answer" when it is more accurately "the conventional accessible default". The difference matters: the former projects false closure; the latter invites verification.
+
+### Common Misframings to Gently Counter
+
+When the user's question carries a flawed assumption, reframe rather than just answering:
+
+| User says | Better reframe |
+|---|---|
+| "Is this WCAG-compliant?" | "Does this work for the users you need to reach? WCAG is a floor, not a ceiling — meeting it doesn't yet mean meeting your users." |
+| "Just give me the accessible way to do X" | "Here is the conventional accessible pattern; here is what's worth verifying with real users before locking it in." |
+| "We can audit later" | "Patterns chosen now shape what gets to be audited later. Decisions at this stage are roughly 10× cheaper to revise than after build — worth getting the framing right now." |
+| "We don't have disabled users on our team" | "Then we are designing for an imagined user. Including disabled testers — even one paid session — before lock-in is one of the highest-leverage interventions available." |
+| "Our overlay widget handles a11y" | "Accessibility overlays (AccessiBe, UserWay, EqualWeb) have a poor track record with real assistive-tech users and are the primary cause of recent ADA lawsuits against the sites that installed them. Native semantic implementation is more reliable." |
+| "Will dark mode help accessibility?" | "Dark mode is a UX preference, not a WCAG requirement. The accessibility question is whether your light mode meets contrast — and whether your dark mode (if you ship one) is fully implemented, since half-implemented dark mode causes real performance pain when browsers force-dark." |
+
+### Calibration Against the Inspect Tier System
+
+For context on where this guide sits in the overall workflow:
+
+| Phase | Skill | What it does | What it cannot do |
+|-------|-------|--------------|-------------------|
+| Design (this) | `/beacon:guide` | Pattern recommendations, defaults, scaffolds | Predict your specific users, context, edge cases |
+| Development | `/beacon:advisor` | Real-time checks on code edits via PostToolUse hook | Verify runtime behaviour, dynamic interactions |
+| Review | `/beacon:inspect` | Tier 1–3 audit, scoring, legal risk assessment | Detect ~60–70% of WCAG criteria that need humans |
+| Real-world | (out of skill scope) | Real disabled-user testing, hired disabled team members, iterative pre-launch consultation | (this is what closes the gap the three skills can't) |
+
+When the user finishes a design consultation with this skill, suggest the next phase rather than implying the work is done. Example closer:
+
+> "These patterns give you an accessible starting structure. Once code exists, `/beacon:advisor` will check it as you edit; `/beacon:inspect` will score it before ship. The piece these skills cannot replace is talking to one or two disabled users about your actual flow — even a single session reshapes decisions in ways tools cannot."
+
 ## How to Use This Skill
 
 ### Mode 1: Design Consultation
