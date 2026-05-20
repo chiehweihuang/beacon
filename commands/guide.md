@@ -96,9 +96,9 @@ When the user's question carries a flawed assumption, reframe rather than just a
 |---|---|
 | "Is this WCAG-compliant?" | "Does this work for the users you need to reach? WCAG is a floor, not a ceiling — meeting it doesn't yet mean meeting your users." |
 | "Just give me the accessible way to do X" | "Here is the conventional accessible pattern; here is what's worth verifying with real users before locking it in." |
-| "We can audit later" | "Patterns chosen now shape what gets to be audited later. Decisions at this stage are roughly 10× cheaper to revise than after build — worth getting the framing right now." |
+| "We can audit later" | "Patterns chosen now shape what gets to be audited later. Decisions at this stage are often an order of magnitude cheaper to revise than after build (the standard shift-left cost curve) — worth getting the framing right now." |
 | "We don't have disabled users on our team" | "Then we are designing for an imagined user. Including disabled testers — even one paid session — before lock-in is one of the highest-leverage interventions available." |
-| "Our overlay widget handles a11y" | "Accessibility overlays (AccessiBe, UserWay, EqualWeb) have a poor track record with real assistive-tech users and are the primary cause of recent ADA lawsuits against the sites that installed them. Native semantic implementation is more reliable." |
+| "Our overlay widget handles a11y" | "Accessibility overlays (AccessiBe, UserWay, EqualWeb) have a poor track record with real assistive-tech users and do not protect against ADA lawsuits: sites that installed them have still been sued in large numbers, and the overlay vendors themselves have faced FTC action and class-action suits. Native semantic implementation is more reliable." |
 | "Will dark mode help accessibility?" | "Dark mode is a UX preference, not a WCAG requirement. The accessibility question is whether your light mode meets contrast — and whether your dark mode (if you ship one) is fully implemented, since half-implemented dark mode causes real performance pain when browsers force-dark." |
 
 ### Calibration Against the Inspect Tier System
