@@ -342,8 +342,8 @@ function buildContextBanner() {
       <div class="lang-zh" lang="zh-Hant">
         <div class="banner-title">&#9888; 閱讀分數前的脈絡說明</div>
         <p>
-          這是一份<strong>自動化基線審查</strong>。依目前的業界資料（包含 axe-core 團隊自己的說明），自動化工具大約能涵蓋
-          <strong>30&ndash;40% 的 WCAG 項目</strong>。其餘 60&ndash;70%&mdash;例如認知負荷、真實螢幕閱讀器任務達成率、
+          這是一份<strong>自動化基線審查</strong>。依英國政府數位服務署（GDS，Government Digital Service）對自動化工具的審計，自動化工具大約能完整涵蓋
+          <strong>30&ndash;40% 的 WCAG 成功項目</strong>（若以問題數量計，單一工具可達約 57%，差距在於項目廣度而非偵測率）。其餘 60&ndash;70%&mdash;例如認知負荷、真實螢幕閱讀器任務達成率、
           動態互動品質、瀏覽器深色模式覆寫下的效能體驗、以及標籤文字是否<em>真的易懂</em>&mdash;
           較適合透過<strong>與障礙使用者一同測試</strong>來確認。
         </p>
@@ -355,9 +355,10 @@ function buildContextBanner() {
       <div class="lang-en" lang="en">
         <div class="banner-title">&#9888; Context Before Reading the Score</div>
         <p>
-          This is an <strong>automated baseline audit</strong>. Based on current industry data
-          (including statements from the axe-core team itself), automated tools cover roughly
-          <strong>30&ndash;40% of WCAG criteria</strong>. The remaining 60&ndash;70% &mdash; cognitive load,
+          This is an <strong>automated baseline audit</strong>. Per a UK Government Digital
+          Service audit of automated tools, automated testing fully covers roughly
+          <strong>30&ndash;40% of WCAG success criteria</strong> (by raw issue volume a single tool
+          can reach ~57%; the gap is in criteria breadth, not catch rate). The remaining 60&ndash;70% &mdash; cognitive load,
           real screen-reader task completion, dynamic interaction quality, performance experience
           under user-agent dark-mode overrides, whether labels are actually <em>understandable</em>
           &mdash; are better confirmed through <strong>testing alongside disabled users</strong>.
