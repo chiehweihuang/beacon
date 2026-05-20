@@ -1,0 +1,184 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://chiehweihuang.github.io/beacon/schema/v1/audit-results.schema.json",
+  "title": "Beacon audit-results.json",
+  "description": "DRAFT skeleton produced by ROADMAP Open Question 10 research. NOT a published contract. Blockers B1-B8 in research/q10-json-schema-stability.md must be resolved before this becomes a third-party contract. This file does not change generate-report.mjs or commands/inspect.md.",
+  "type": "object",
+  "required": ["schema_version", "metadata", "summary"],
+  "properties": {
+    "schema_version": {
+      "type": "string",
+      "description": "B1: data-schema version, independent of plugin.json version. Suggested initial value '1.0'.",
+      "pattern": "^[0-9]+\\.[0-9]+$",
+      "examples": ["1.0"]
+    },
+    "metadata": {
+      "type": "object",
+      "required": ["scope"],
+      "properties": {
+        "date": { "type": "string", "pattern": "^[0-9]{4}-[0-9]{2}-[0-9]{2}$" },
+        "url": { "type": "string", "format": "uri" },
+        "scope": { "type": "string" },
+        "standard": { "type": "string", "examples": ["WCAG 2.2 AA"] },
+        "jurisdictions": { "type": "array", "items": { "type": "string" } },
+        "platform": { "type": "string", "enum": ["Web", "iOS", "Android", "Desktop"] },
+        "tool_version": { "type": "string" },
+        "confidence_level": {
+          "type": "string",
+          "enum": ["high", "medium", "low"],
+          "description": "Closed enum. Caps overall score at 60 when 'low' (commands/inspect.md:201)."
+        },
+        "requires_live_audit": { "type": "boolean" },
+        "audit_tier": {
+          "type": "string",
+          "description": "B6: free-text today (generate-report.mjs:413). Recommend a closed enum before v1.0 freeze."
+        },
+        "audit_methods": { "type": "array", "items": { "type": "string" } },
+        "bot_protected": { "type": "boolean" },
+        "unable_to_fetch": { "type": "boolean" }
+      },
+      "additionalProperties": true
+    },
+    "summary": {
+      "type": "object",
+      "description": "B4: the fields below are accessed unguarded by generate-report.mjs and are therefore required.",
+      "required": ["overall_score", "total_findings", "critical", "warnings", "tips", "categories"],
+      "properties": {
+        "overall_score": { "type": "number", "minimum": 0, "maximum": 100 },
+        "total_findings": { "type": "integer", "minimum": 0 },
+        "critical": { "type": "integer", "minimum": 0, "description": "Note: singular key, while 'warnings'/'tips' are plural (B8)." },
+        "warnings": { "type": "integer", "minimum": 0 },
+        "tips": { "type": "integer", "minimum": 0 },
+        "unverifiable": { "type": "integer", "minimum": 0 },
+        "pedagogical_excluded": { "type": "integer", "minimum": 0 },
+        "categories": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": ["id", "score", "pass", "fail"],
+            "properties": {
+              "id": { "type": "string", "description": "Join key + I18N lookup (cat_<id>)." },
+              "name": { "type": "string", "description": "Fallback display name when id is not in the I18N table." },
+              "score": { "type": "number", "minimum": 0, "maximum": 100 },
+              "pass": { "type": "integer", "minimum": 0 },
+              "fail": { "type": "integer", "minimum": 0 },
+              "review": {
+                "type": "integer",
+                "minimum": 0,
+                "description": "B3 UNRESOLVED: generate-report.mjs:273 reads 'review'; commands/inspect.md:460 emits 'unverifiable'. One must be chosen before v1.0."
+              },
+              "unverifiable": { "type": "integer", "minimum": 0 },
+              "weight": { "type": "number" },
+              "note": { "type": "string" }
+            },
+            "additionalProperties": false
+          }
+        }
+      },
+      "additionalProperties": true
+    },
+    "findings": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["category", "severity"],
+        "properties": {
+          "id": { "type": "string" },
+          "category": { "type": "string", "description": "Joins summary.categories[].id." },
+          "severity": {
+            "type": "string",
+            "enum": ["critical", "warning", "tip"],
+            "description": "Closed enum. Singular 'warning' here vs plural 'warnings' in summary (B8)."
+          },
+          "title": { "type": "string" },
+          "wcag": { "type": "string", "examples": ["1.4.3"] },
+          "level": { "type": "string", "enum": ["A", "AA", "AAA", "best-practice", "code-health"] },
+          "affected_users": { "type": "string" },
+          "location": { "type": "string" },
+          "description": { "type": "string" },
+          "fix": { "type": "string" },
+          "legal_exposure": { "type": "string" },
+          "code_before": { "type": "string" },
+          "code_after": { "type": "string" },
+          "axe_node_count": { "type": ["number", "string"] }
+        },
+        "additionalProperties": false
+      }
+    },
+    "legal_risk": {
+      "type": "object",
+      "required": ["overall_level", "overall_score", "jurisdictions"],
+      "properties": {
+        "overall_level": { "type": "string", "enum": ["critical", "high", "medium", "low"] },
+        "overall_score": { "type": "number", "minimum": 1, "maximum": 10 },
+        "narrative": { "type": "string" },
+        "jurisdictions": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": ["score"],
+            "properties": {
+              "name": { "type": "string" },
+              "law": { "type": "string" },
+              "risk_level": { "type": "string", "enum": ["critical", "high", "medium", "low"] },
+              "score": { "type": "number", "minimum": 1, "maximum": 10 },
+              "detail": { "type": "string" },
+              "deadline": { "type": ["string", "null"] }
+            },
+            "additionalProperties": false
+          }
+        }
+      },
+      "additionalProperties": false
+    },
+    "remediation": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["priority", "title"],
+        "properties": {
+          "priority": {
+            "type": "string",
+            "enum": ["p0", "p1", "p2", "p3"],
+            "description": "B7 UNRESOLVED: generate-report.mjs:1216 only renders p0/p1/p2; p3 is silently dropped."
+          },
+          "title": { "type": "string" },
+          "wcag": { "type": "string" },
+          "effort": { "type": "string" },
+          "impact": { "type": "string" }
+        },
+        "additionalProperties": false
+      }
+    },
+    "testing_recommendations": {
+      "type": "array",
+      "items": { "type": "string" }
+    },
+    "screenshots": {
+      "type": "array",
+      "description": "B6: declared in ARCHITECTURE.md but not produced or consumed. Extension point pending specification.",
+      "items": {
+        "type": "object",
+        "properties": {
+          "label": { "type": "string" },
+          "path": { "type": "string" }
+        }
+      }
+    },
+    "site_signals": {
+      "type": "object",
+      "description": "B6: free-form in ARCHITECTURE.md; explicit extension point pending specification.",
+      "additionalProperties": true
+    },
+    "aeo_signals": {
+      "description": "B5: deliberately UNSPECIFIED. ROADMAP:106 plans to restructure the AEO sub-score in v2.1/v2.2. Excluded from v1.0 of the contract. Do not rely on this field.",
+      "additionalProperties": true
+    },
+    "dark_mode_analysis": {
+      "type": "object",
+      "description": "B6: free-form in ARCHITECTURE.md; explicit extension point pending specification.",
+      "additionalProperties": true
+    }
+  },
+  "additionalProperties": true
+}
