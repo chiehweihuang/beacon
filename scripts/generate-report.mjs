@@ -371,6 +371,44 @@ function buildContextBanner() {
     </div>`;
 }
 
+// AEO sub-score honesty note. Echoes buildContextBanner()'s epistemic stance but
+// scoped to the Agent/AEO category detail — it appears exactly where the reader
+// sees the AEO sub-score, not at report top. AEO measures structural hygiene
+// (an eligibility proxy), never actual citation outcomes.
+function buildAeoDisclaimer() {
+  return `
+    <div class="aeo-disclaimer" role="note" aria-label="AEO sub-score interpretation note">
+      <div class="lang-zh" lang="zh-Hant">
+        <div class="aeo-disclaimer-title">&#9888; 關於 AEO 子分數的解讀</div>
+        <p>
+          AEO 子分數衡量的是<strong>被認為有助於 AI 引用的結構衛生</strong>（JSON-LD、meta tags、
+          canonical、Open Graph 等），<strong>不是實際引用結果</strong>。結構齊全只代表「具備被引用的
+          條件」，不代表 AI 引擎真的引用了你的內容。
+        </p>
+        <p class="aeo-disclaimer-cta">
+          要確認 AI 是否真的引用你的內容，需檢視三項實證訊號：<strong>server log 的 AI 爬蟲記錄</strong>、
+          <strong>手動在 answer engine 查詢</strong>、以及 <strong>analytics 的 referral 來源</strong>。
+          這三項若皆為零，則不論 AEO 子分數幾分，引用效果尚未發生。
+        </p>
+      </div>
+      <div class="lang-en" lang="en">
+        <div class="aeo-disclaimer-title">&#9888; Reading the AEO Sub-score</div>
+        <p>
+          The AEO sub-score measures <strong>structural hygiene believed to help AI citation</strong>
+          (JSON-LD, meta tags, canonical, Open Graph, etc.) &mdash; <strong>not actual citation
+          outcomes</strong>. Complete structure means "eligible to be cited", not that any AI engine
+          has cited your content.
+        </p>
+        <p class="aeo-disclaimer-cta">
+          To confirm whether AI actually cites your content, check three empirical signals:
+          <strong>AI-crawler hits in server logs</strong>, <strong>manual queries on answer
+          engines</strong>, and <strong>referral sources in analytics</strong>. If all three are
+          zero, then whatever the AEO sub-score, citation impact has not happened yet.
+        </p>
+      </div>
+    </div>`;
+}
+
 function buildLimitationsHTML(audit) {
   const tier = audit.metadata?.audit_tier || 'Tier 1 (static HTML only)';
   const confidence = audit.metadata?.confidence_level || 'medium';
@@ -936,6 +974,34 @@ const html = `<!DOCTYPE html>
   .audit-context-banner strong { color: var(--text); }
   .audit-context-banner em { font-style: italic; color: var(--warn); }
 
+  /* AEO sub-score disclaimer — scoped to the Agent/AEO category detail */
+  .aeo-disclaimer {
+    background: linear-gradient(135deg, rgba(79,195,247,0.10), rgba(255,164,0,0.06));
+    border: 1px solid var(--accent);
+    border-left: 6px solid var(--accent);
+    border-radius: 8px;
+    padding: 0.9rem 1.1rem;
+    margin: 0 0 1rem;
+    font-size: 0.88rem;
+    line-height: 1.65;
+  }
+  .aeo-disclaimer-title {
+    font-size: 0.98rem;
+    font-weight: 700;
+    color: var(--accent);
+    margin-bottom: 0.4rem;
+  }
+  .aeo-disclaimer p { margin-bottom: 0.45rem; }
+  .aeo-disclaimer p:last-child { margin-bottom: 0; }
+  .aeo-disclaimer-cta {
+    color: var(--text-muted);
+    font-size: 0.84rem;
+    border-top: 1px dashed rgba(79,195,247,0.3);
+    padding-top: 0.45rem;
+    margin-top: 0.45rem;
+  }
+  .aeo-disclaimer strong { color: var(--text); }
+
   /* Methodology & Limits tab */
   .methodology-panel { font-size: 0.92rem; line-height: 1.7; }
   .methodology-panel h2 { margin-top: 0; }
@@ -1116,6 +1182,7 @@ ${buildContextBanner()}
   ${audit.summary.categories.map(cat => `
     <div class="category-detail" id="detail-${cat.id}">
       <h3>${catName(cat)}</h3>
+      ${cat.id === 'agent' ? buildAeoDisclaimer() : ''}
       ${buildFindingsHTML(audit.findings?.filter(f => f.category === cat.id))}
     </div>
   `).join('')}
