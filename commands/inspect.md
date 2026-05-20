@@ -16,7 +16,7 @@ description: >-
 
 # Accessibility Audit v2.1
 
-Conduct a structured accessibility audit that produces **quantitative scores** and an **interactive HTML report** — not just a checklist. Think Lighthouse for accessibility, but with legal risk assessment and human-centered explanations.
+Conduct a structured accessibility audit that produces **quantitative scores** and an **interactive HTML report**. The score is a machine-detectable baseline — a useful starting point, not a completion certificate. Pairs Lighthouse-style scoring with legal-risk context and human-centered explanations.
 
 ## What This Version Adds
 
@@ -67,7 +67,7 @@ npx lighthouse <url> --only-categories=accessibility --output=json
 npx eslint --rule 'jsx-a11y/*' src/
 ```
 
-Automated tools catch ~30-40% of issues. The remaining 60-70% requires manual review.
+Automated tools cover roughly 30-40% of WCAG success criteria, per a UK Government Digital Service audit of automated tools. The remaining 60-70% (cognitive load, real screen-reader task completion, dynamic interaction quality, whether labels are genuinely understandable) is better confirmed through testing alongside disabled users than through any scan. Treat the automated pass as a baseline, not a verdict.
 
 ### Step 2a: Three-Tier Audit Architecture
 
@@ -198,7 +198,7 @@ Before manual review, assess how much of the page content is available in the st
 |-------|---------|--------|
 | **HIGH** | >= 80% of content visible in static HTML | Normal scoring |
 | **MEDIUM** | 40-80% visible; some JS-rendered components | Score normally but flag unverifiable items |
-| **LOW** | < 40% visible; CSR shell | Score static HTML only. Append disclaimer: "This score reflects static HTML analysis only. A live browser audit is required for a meaningful assessment." Lower the overall score ceiling to 60 and mark the audit as `requires_live_audit: true` |
+| **LOW** | < 40% visible; CSR shell | Score static HTML only. Append disclaimer: "This score reflects static HTML analysis only. A live browser audit (Tier 2) would give a fuller picture; until then, treat this as a partial baseline." Lower the overall score ceiling to 60 and mark the audit as `requires_live_audit: true` |
 
 Include `confidence_level` in the JSON output metadata.
 
@@ -528,7 +528,7 @@ Open the report in the browser for the user to review.
 
 ### Step 8: Generate Accessibility Statement
 
-Offer to generate an accessibility statement (the international standard replacement for static badges).
+Offer to generate an accessibility statement (required in the EU under the EAA, recommended elsewhere, and a more honest signal than a static compliance badge).
 
 Reference: W3C WAI — Developing an Accessibility Statement
 
@@ -629,9 +629,9 @@ npx eslint --rule 'jsx-a11y/*' --max-warnings 0 src/
 
 Include the appropriate config in the audit report when CI/CD integration is requested.
 
-## Common Pitfalls
+## Common Misframings
 
-| Pitfall | Correct Approach |
+| Common approach | More reliable approach |
 |---------|------------------|
 | `role="button"` on a `<div>` | Use native `<button>` -- includes keyboard handling for free |
 | `tabindex="0"` on everything | Only interactive elements need focus; use native elements |
@@ -647,12 +647,12 @@ Include the appropriate config in the audit report when CI/CD integration is req
 
 ## Scoring Interpretation
 
-| Score | Meaning |
+| Score | Reading |
 |-------|---------|
-| 90-100 | Excellent — minor improvements only |
-| 70-89 | Good — some issues need attention |
-| 50-69 | Needs work — significant barriers exist |
-| 0-49 | Poor — critical barriers blocking users |
+| 90-100 | Meets baseline comfortably — refinements only |
+| 70-89 | Meets baseline — some items worth attention |
+| 50-69 | Below baseline — notable barriers worth prioritising |
+| 0-49 | Well below baseline — priority barriers likely blocking users |
 
 ## References
 

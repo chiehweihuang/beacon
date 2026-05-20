@@ -227,7 +227,7 @@ The first focusable element. Invisible until focused. Lets keyboard users bypass
 
 **Selection (Use Radio Group, Not `<select>`)**
 
-`<select>` is hostile to elderly users, low-vision users, and motor-impaired users. For < 7 options, always use radio buttons or a segmented control.
+`<select>` is difficult for many elderly, low-vision, and motor-impaired users. For < 7 options, always use radio buttons or a segmented control.
 
 ```html
 <fieldset>
