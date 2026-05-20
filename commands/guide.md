@@ -11,6 +11,11 @@ description: >-
   Also use when the user asks for accessible color palettes, typography systems, or layout
   patterns. This is the "before you code" skill; a11y-advisor is the "while you code" skill;
   a11y-audit is the "after you code" skill.
+  Also use when the user asks a definitional or conceptual accessibility question
+  with no build or audit in progress — "what is WCAG 1.4.3", "what does contrast
+  minimum mean", "explain focus visible", "who does this criterion help", "why does
+  this rule exist". Give the explanation directly; do not start a design
+  consultation or an audit unless the user then asks to build or assess something.
 ---
 
 # Accessible Design Guide
@@ -169,6 +174,37 @@ When the user is setting up a design system or starting a new project, offer to 
 4. **Focus style** system
 5. **Motion tokens** with `prefers-reduced-motion` built in
 6. **Dark mode** strategy with proper CSS variable architecture
+
+### Mode 4: Concept Explanation
+
+When the user asks what a WCAG criterion, an accessibility concept, or a disability
+category *means* — with no build or audit in flight — answer the question directly.
+Do not route into Mode 1 (design consultation) or suggest /beacon:inspect unless the
+user then signals they want to build or assess something.
+
+Answer shape (keep it tight — explanation, not a lecture):
+
+1. **Plain-language definition** — one or two sentences. What the criterion/concept
+   requires, in human terms. Pull the rule from `references/wcag-quick.md`.
+2. **Who it is for** — name the disability categories affected and one situational
+   benefit. Pull from `references/disabilities.md`. This is Beacon's signature framing:
+   a criterion is never just a rule, it is a group of people.
+3. **What meeting it looks like** — one concrete pass example. One concrete fail
+   example. Code only if it clarifies; this is not a fix request.
+4. **The number behind it** — level (A/AA/AAA), and the threshold if it has one
+   (e.g. 1.4.3 -> 4.5:1 body / 3:1 large text).
+5. **Honest boundary** — where the criterion's machine-checkable part ends and human
+   judgement begins (e.g. "alt text *presence* is checkable; whether it is
+   *meaningful* is not"). This keeps Mode 4 consistent with Beacon's
+   epistemic-honesty stance.
+6. **One-line bridge to action, only if relevant** — "If you are about to build
+   something that touches this, say so and I will switch to design guidance; if you
+   want to check an existing page against it, /beacon:inspect scores it." Offer the
+   bridge; do not force the user down it.
+
+Do NOT, in Mode 4: produce a scaffold, start the Scope/Target-level interview, emit a
+0-100 score, or generate `audit-results.json`. Those belong to Modes 1-3 and to
+/beacon:inspect. Mode 4's deliverable is understanding.
 
 ## Pattern Catalog
 
