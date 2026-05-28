@@ -52,22 +52,27 @@ Ask the user (if not already specified):
 5. **Previous audit**: Is there a previous `audit-results.json` to compare against?
 6. **Feedback opt-in**: Would you like to contribute anonymized aggregate data to improve this skill?
 
-### Step 2: Automated Scan (if applicable)
+### Step 2: Automated Scan (default-on)
 
-If automated tools are available, run them first:
+Run automated tools first. Treat this as the baseline tier — if any of the tools below is unavailable, log the gap and continue, but do not skip the entire step on the assumption that "manual will catch it".
+
+**Why default-on:** Beacon's Tier 1 static analysis cannot detect computed-style issues (color contrast in particular). The improve pipeline confirmed this empirically — a single real-world site survey (tokyotaiwanradar.com, 2026-05-26) surfaced a `color-contrast` violation axe-core caught and Tier 1 missed. Running axe-core in-process closes that detection gap without re-implementing contrast math.
 
 ```bash
-# axe-core via Playwright (best automated coverage)
+# axe-core via Playwright — REQUIRED baseline if Playwright MCP is available
+# (covers color-contrast, computed-style rules, ARIA conformance)
 npx playwright test --grep accessibility
 
-# Lighthouse CLI
+# Lighthouse CLI — recommended for additional category scoring
 npx lighthouse <url> --only-categories=accessibility --output=json
 
-# eslint a11y plugin (React/JSX)
+# eslint a11y plugin (React/JSX) — recommended for source-tree audits
 npx eslint --rule 'jsx-a11y/*' src/
 ```
 
-Automated tools catch ~30-40% of issues. The remaining 60-70% requires manual review.
+**Fallback chain:** if Playwright MCP is unavailable, fall back to Tier 1 static analysis only AND record `"requires_live_audit": true` in `audit-results.json` metadata so the maintainer knows the contrast/computed-style class of findings was not exercised.
+
+Automated tools catch ~30-40% of WCAG criteria. The remaining 60-70% (cognitive load, screen-reader task completion, dynamic interaction quality) requires manual review — but for the 30-40% that *is* automatable, skipping the run produces silent false negatives.
 
 ### Step 2a: Three-Tier Audit Architecture
 
