@@ -68,9 +68,17 @@ npx lighthouse <url> --only-categories=accessibility --output=json
 
 # eslint a11y plugin (React/JSX) — recommended for source-tree audits
 npx eslint --rule 'jsx-a11y/*' src/
+
+# Beacon-native deterministic Tier 1 baseline — zero external deps, no browser.
+# Produces audit-results.json directly compatible with generate-report.mjs.
+# Run this even when the external tools above are unavailable: it is the
+# reproducible starting point you then enrich with judgment.
+node scripts/static-audit.mjs --scope "<scope>" --output audit-results.json <file-or-dir>...
 ```
 
-**Fallback chain:** if Playwright MCP is unavailable, fall back to Tier 1 static analysis only AND record `"requires_live_audit": true` in `audit-results.json` metadata so the maintainer knows the contrast/computed-style class of findings was not exercised.
+`scripts/static-audit.mjs` is Beacon's own scanner: it walks the given files, applies pattern checks for the same 10 categories the report scores, and writes the `audit-results.json` source-of-truth. The external tools (axe/Lighthouse/eslint) cross-check it; axe in particular covers the computed-style class (contrast) the static scanner structurally cannot. Use both when available.
+
+**Fallback chain:** if Playwright MCP is unavailable, fall back to the Beacon-native static scanner + Tier 1 manual analysis AND record `"requires_live_audit": true` in `audit-results.json` metadata so the maintainer knows the contrast/computed-style class of findings was not exercised.
 
 Automated tools catch ~30-40% of WCAG criteria. The remaining 60-70% (cognitive load, screen-reader task completion, dynamic interaction quality) requires manual review — but for the 30-40% that *is* automatable, skipping the run produces silent false negatives.
 
@@ -80,7 +88,7 @@ This skill supports three audit tiers. Use the highest tier available:
 
 ```
 Tier 1: Static HTML Analysis (always available)
-  Tools: Read, Grep, Glob
+  Tools: scripts/static-audit.mjs (deterministic baseline) + Read, Grep, Glob (judgment enrichment)
   Coverage: ~50% of WCAG criteria
   Confidence: MEDIUM (HIGH for server-rendered sites)
 
