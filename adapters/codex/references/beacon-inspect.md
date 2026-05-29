@@ -52,22 +52,33 @@ Ask the user (if not already specified):
 5. **Previous audit**: Is there a previous `audit-results.json` to compare against?
 6. **Feedback opt-in**: Would you like to contribute anonymized aggregate data to improve this skill?
 
-### Step 2: Automated Scan (if applicable)
+### Step 2: Automated Scan (default-on)
 
-If automated tools are available, run them first:
+Run automated tools first. Treat this as the baseline tier — if any tool is unavailable, log the gap and continue, but do not skip the entire step on the assumption that "manual will catch it".
+
+**Why default-on:** Beacon's Tier 1 static analysis cannot detect computed-style issues (color contrast in particular). A real-world site survey (tokyotaiwanradar.com, 2026-05-26) confirmed axe-core catches a `color-contrast` violation the static scanner misses. Running axe-core closes that gap without re-implementing contrast math.
 
 ```bash
-# axe-core via Playwright (best automated coverage)
+# Beacon-native deterministic Tier 1 baseline — zero external deps, no browser.
+# Produces audit-results.json compatible with generate-report.mjs. Run this
+# even when the tools below are unavailable: it is the reproducible starting
+# point you then enrich with judgment.
+node scripts/static-audit.mjs --scope "<scope>" --output audit-results.json <file-or-dir>...
+
+# axe-core via Playwright — REQUIRED baseline if a browser is available
+# (covers color-contrast, computed-style rules, ARIA conformance)
 npx playwright test --grep accessibility
 
-# Lighthouse CLI
+# Lighthouse CLI — recommended for additional category scoring
 npx lighthouse <url> --only-categories=accessibility --output=json
 
-# eslint a11y plugin (React/JSX)
+# eslint a11y plugin (React/JSX) — recommended for source-tree audits
 npx eslint --rule 'jsx-a11y/*' src/
 ```
 
-Automated tools catch ~30-40% of issues. The remaining 60-70% requires manual review.
+`scripts/static-audit.mjs` is Beacon's own scanner: walks the given files, applies pattern checks for the same 10 categories the report scores, and writes the `audit-results.json` source-of-truth. The external tools cross-check it; axe in particular covers the computed-style class (contrast) the static scanner structurally cannot.
+
+Automated tools catch ~30-40% of WCAG criteria. The remaining 60-70% (cognitive load, screen-reader task completion, dynamic interaction quality) requires manual review — but for the 30-40% that *is* automatable, skipping the run produces silent false negatives. If no browser is available, run the static scanner + manual analysis AND record `"requires_live_audit": true` in metadata.
 
 ### Step 2a: Three-Tier Audit Architecture
 
@@ -75,7 +86,7 @@ This skill supports three audit tiers. Use the highest tier available:
 
 ```
 Tier 1: Static HTML Analysis (always available)
-  Tools: Read, Grep, Glob
+  Tools: scripts/static-audit.mjs (deterministic baseline) + Read, Grep, rg (judgment enrichment)
   Coverage: ~50% of WCAG criteria
   Confidence: MEDIUM (HIGH for server-rendered sites)
 
