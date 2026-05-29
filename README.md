@@ -54,6 +54,15 @@ Requires `beacon` in your `extraKnownMarketplaces`:
 }
 ```
 
+### Codex
+
+Beacon also runs in Codex as a skill. The source lives in `adapters/codex/`;
+deploy it to `~/.codex/skills/beacon/`. It carries the same accessibility + AEO
+knowledge without the Claude Code hook layer (Codex invokes Beacon by goal /
+skill, not by PostToolUse hook). See [ADAPTERS.md](./ADAPTERS.md) for how the
+Claude Code and Codex surfaces relate, what is shared, and what is deliberately
+runtime-specific.
+
 ## License
 
 MIT
