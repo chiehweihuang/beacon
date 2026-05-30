@@ -71,31 +71,34 @@ Decisions about content that drifted and was pulled back across surfaces.
 - **Not yet wired:** `scripts/static-audit.mjs` is present but not yet referenced from `commands/inspect.md`'s flow. Wiring it into Step 2 / Step 2a is a deliberate follow-up, sequenced AFTER PR #6 (`feat/inspect-step2-default-on`) merges, to avoid a conflicting edit to the same Step 2 region. Until wired, it is invocable manually: `node scripts/static-audit.mjs --scope "..." --output audit-results.json <paths>`.
 - **Calibration note (non-blocking):** the deterministic script and agent-judgment Tier 1 can disagree on the same fixture (script found 19 findings / score 36 vs an agent's hand-audit of 13 findings / score 18 on bad-ecommerce). This agent-vs-script divergence is itself useful signal and is exactly what the `a11y-skill-workspace` pipeline is built to surface. Not reconciled here.
 
-## Phase A — planned (not yet done)
+## Phase A — designed (structure A2)
 
-Target structure once the shared content above is extracted:
+> Full design: `docs/superpowers/specs/2026-05-30-phase-a-core-extraction-design.md`
+> (spike-validated 14/0). An earlier sketch here proposed an A3-style layout with
+> CC moved under `adapters/claude-code/`. That was **rejected** in the design
+> because changing `marketplace.json source` from `./` would move the install path
+> and risk breaking the live v2.0.9 plugin. The chosen structure is **A2**: CC
+> build outputs stay at the repo root, every load path unchanged.
+
+Target structure (A2):
 
 ```
 beacon/
   core/
+    content/      guide.md, inspect.md, advisor.md (neutral prose, @cc/@codex markers)
     references/   wcag-quick, patterns, legal-brief, disabilities, cases, documents
-    content/      guide, advisor, inspect process prose (runtime-neutral)
     scripts/      static-audit.mjs, generate-report.mjs
-  adapters/
-    claude-code/  plugin.json + commands/ (thin, import core/content) + hooks/ + hook scripts
-    codex/        SKILL.md (imports core/content + core/references) + goal-workflows + repeat-testing + advisor.mjs (CLI)
-    copilot/      (future)
-  build.mjs       assembles each adapter from core/ + adapter-specific layer; validates parity
+  build.mjs       core -> every adapter, via an explicit GENERATED manifest
+  extract.mjs     one-time bootstrap: committed variants -> marked core (LCS)
+
+  commands/ references/ scripts/   BUILD OUTPUT at repo root (load paths UNCHANGED)
+  scripts/{hook scripts} hooks/ .claude-plugin/   CC-only, hand-kept, build never touches
+  adapters/codex/   beacon-*.md + shared refs/scripts BUILT; SKILL.md + goal-workflows
+                    + repeat-testing + advisor.mjs hand-kept
 ```
 
-`build.mjs` responsibilities:
-1. Copy `core/` content into each adapter's deployable form (resolving the
-   `static-audit.mjs` duplication noted above).
-2. Wrap shared process prose in each runtime's mechanic (CC command frontmatter
-   vs Codex SKILL.md sections).
-3. Fail if an adapter references core content that doesn't exist (parity gate).
-
-Phase A is a dedicated refactor that touches the production CC layout. It should
-run only after both adapters are committed (this branch) and after PR #6 merges,
-so the core-vs-adapter boundary is observable from real committed copies rather
-than guessed.
+`build.mjs` operates on an explicit `GENERATED` manifest (not whole directories)
+because the output dirs mix generated and hand-kept files; it validates parity
+with `--check` (build to temp, diff only the GENERATED set). See the design spec
+for the manifest and the migration-safety invariant (build reproduces committed
+outputs byte-identically; `git diff` empty after build).

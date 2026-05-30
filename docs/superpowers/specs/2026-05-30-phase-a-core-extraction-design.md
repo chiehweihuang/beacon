@@ -85,6 +85,18 @@ Append only to a local private stats file if the user explicitly opts in. No cod
 LCS-merges them into one marked core (common lines plain, CC-only runs wrapped
 in `@cc`, codex-only runs in `@codex`).
 
+**Non-swap deltas (reordering).** Not every delta is a clean 1:1 line swap — the
+`inspect` pair includes a *reordered* Step 2 tool block (the same lines in a
+different order across surfaces). LCS handles this correctly by representing the
+reorder as a CC-only run (the block in CC's order) plus a codex-only run (the
+block in codex's order); the spike confirmed `inspect` round-trips byte-identical
+(30 marker lines, 4 hunks). The consequence to know: reordered content appears
+*twice* in the marked core (once per `@cc`/`@codex` block), so a future edit to
+that shared-but-reordered content must be applied in both blocks. This is rare
+(one block today) and visible in the markers; if it becomes common, that section
+is a candidate to converge to a single order so it can drop back to plain shared
+text.
+
 ### Validation (spike, 2026-05-30)
 
 A non-destructive spike read the committed CC + codex variants, extracted a
@@ -112,6 +124,64 @@ Responsibilities:
 4. Never touch adapter-specific hand-kept files.
 5. `--check` mode: build into memory/temp and diff against committed outputs;
    exit non-zero if any differ. This is the parity gate.
+
+### Generated-file manifest (the crux — output dirs are mixed)
+
+`commands/`, `scripts/`, and `adapters/codex/references/` and
+`adapters/codex/scripts/` each contain BOTH build-generated files AND hand-kept
+adapter-specific files. `scripts/` holds 2 generated (`static-audit`,
+`generate-report`) next to 3 hand-kept CC hooks (`a11y-advisor-hook`,
+`beacon-prompt-gate`, `beacon-session-start`); `adapters/codex/references/` holds
+generated `beacon-*` + 6 shared next to hand-kept `goal-workflows`,
+`repeat-testing`. Therefore `build.mjs` MUST NOT operate on whole directories —
+it operates on an explicit manifest of exactly the files it owns. Whole-dir copy
+or whole-dir `--check` diff would either clobber hand-kept files or false-fail
+parity on them.
+
+`build.mjs` declares a single `GENERATED` table — the only files it writes and
+the only files `--check` compares:
+
+```
+GENERATED = [
+  // CC plugin (repo root)
+  { out: 'commands/guide.md',     src: 'core/content/guide.md',   kind: 'variant:cc' },
+  { out: 'commands/inspect.md',   src: 'core/content/inspect.md', kind: 'variant:cc' },
+  { out: 'commands/advisor.md',   src: 'core/content/advisor.md', kind: 'variant:cc' },
+  { out: 'references/<f>.md',      src: 'core/references/<f>.md',  kind: 'copy' },   // 6 files
+  { out: 'scripts/static-audit.mjs',    src: 'core/scripts/static-audit.mjs',    kind: 'copy' },
+  { out: 'scripts/generate-report.mjs', src: 'core/scripts/generate-report.mjs', kind: 'copy' },
+  // Codex adapter
+  { out: 'adapters/codex/references/beacon-guide.md',   src: 'core/content/guide.md',   kind: 'variant:codex' },
+  { out: 'adapters/codex/references/beacon-inspect.md', src: 'core/content/inspect.md', kind: 'variant:codex' },
+  { out: 'adapters/codex/references/beacon-advisor.md', src: 'core/content/advisor.md', kind: 'variant:codex' },
+  { out: 'adapters/codex/references/<f>.md',  src: 'core/references/<f>.md', kind: 'copy' },  // 6 files
+  { out: 'adapters/codex/scripts/static-audit.mjs',    src: 'core/scripts/static-audit.mjs',    kind: 'copy' },
+  { out: 'adapters/codex/scripts/generate-report.mjs', src: 'core/scripts/generate-report.mjs', kind: 'copy' },
+]
+```
+
+Everything NOT in this table is HAND-KEPT and build never reads, writes, or
+checks it: `scripts/{a11y-advisor-hook,beacon-prompt-gate,beacon-session-start}.mjs`,
+`hooks/`, `.claude-plugin/`, `adapters/codex/SKILL.md`,
+`adapters/codex/references/{goal-workflows,repeat-testing}.md`,
+`adapters/codex/scripts/advisor.mjs`.
+
+**Orphan detection:** build also flags (does NOT auto-delete) any file whose name
+matches a GENERATED-output pattern but whose `core/` source no longer exists
+(e.g. a content file removed from core but its built output left behind). The
+maintainer resolves orphans by hand — auto-deletion near hand-kept files is too
+risky.
+
+**No GENERATED header in outputs.** An earlier idea injected a
+`<!-- GENERATED — edit core -->` banner into each built file. Dropped, for two
+reasons: (1) CC command files begin with `---` YAML frontmatter, and a leading
+HTML comment would push `---` off line 1 and break the skill loader's frontmatter
+detection; (2) any injected banner breaks the byte-identity invariant the spike
+proved against the current committed files. Marker-rot (someone editing a built
+output instead of `core/`) is instead caught by the `--check` parity gate (run
+before commit / in CI), backed by the workflow documentation and this manifest.
+The byte-identity baseline stays "current committed files, modulo the one-time
+CRLF→LF normalization commit" — no header caveat.
 
 ### Line-ending policy
 
@@ -175,6 +245,12 @@ structurally (no load-path change) and the rollout enforces it procedurally:
 - **CRLF normalization churn.** The one-time LF commit touches many files; it is
   isolated to its own commit so it doesn't obscure logic changes.
 - **Marker rot.** If someone edits a built output (`commands/inspect.md`) directly
-  instead of `core/`, the next build silently overwrites it. Mitigation: a
-  header comment in each built file ("GENERATED from core/ — edit core, run
-  build") + the `--check` parity gate catching stale state.
+  instead of `core/`, the next build silently overwrites it. Mitigation: the
+  `--check` parity gate (run before commit / in CI) fails when a built output
+  diverges from what `core/` would regenerate, catching the stale hand-edit. (A
+  GENERATED banner in each output was considered and rejected — it would break CC
+  frontmatter detection and the byte-identity invariant; see build.mjs.)
+- **Mixed output directories.** `commands/`, `scripts/`, and the codex
+  `references/`/`scripts/` dirs each hold both generated and hand-kept files.
+  `build.mjs` must drive off the explicit GENERATED manifest, never whole-dir
+  operations, or it will clobber hand-kept files or false-fail parity on them.
