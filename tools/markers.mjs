@@ -2,6 +2,10 @@
 // Tokens are matched as EXACT trimmed lines, interpreted EVERYWHERE in the file
 // (including inside fenced code blocks — verified: 10 of inspect's 30 markers land
 // inside its ```bash block, so fence-aware pass-through would break byte-identity).
+// CAUTION: a BALANCED real <!--@cc-->...<!--/@cc--> pair in genuine content would
+// be silently consumed as a marker block. These tokens must never appear as
+// literal content. The round-trip test (byte-compare vs committed files) is the
+// guard that catches any such collision.
 
 export const MARKER_RE = /^<!--\/?@(cc|codex)-->$/;
 
