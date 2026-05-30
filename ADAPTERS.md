@@ -6,11 +6,11 @@ hooks; Codex uses a single `SKILL.md` + references; Copilot is future). This
 file tracks how those surfaces relate, what is shared, what is deliberately
 divergent, and what still needs reconciliation.
 
-> **Phase status:** B (subdirectory adapters, manual sync). Phase A (extract a
-> single `core/` + a `build.mjs` that assembles every adapter from it) is the
-> planned successor. This file is the drift inventory that makes Phase A
-> tractable — you cannot extract a clean core until you can see, side by side,
-> exactly what is shared.
+> **Phase status:** A implemented (`core/` + `build.mjs` assemble every adapter;
+> see "Phase A — implemented" below). This file remains the drift inventory and
+> the source of the core-vs-adapter boundary the build encodes. (Phase B —
+> subdirectory adapters with manual sync — was the predecessor; the manual sync
+> it described is now done by `build.mjs`.)
 
 ## Surfaces
 
