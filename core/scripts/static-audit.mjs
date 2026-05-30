@@ -192,30 +192,17 @@ function scanFile(file, root, stats, findings) {
       });
     }
 
-    for (const m of text.matchAll(/<iframe\b(?![^>]*\s(?:title|aria-hidden)\s*=)[^>]*>/gi)) {
-      addFinding(findings, stats, {
-        category: 'screenreader',
-        severity: 'warning',
-        wcag: 'WCAG 2.2: 4.1.2 Name, Role, Value',
-        level: 'A',
-        title: 'Inline frame is missing a title',
-        affected_users: 'Screen-reader users navigating by frame',
-        location: `${rel}:${lineOf(text, m.index || 0)}`,
-        description: 'An <iframe> with no title attribute is announced only as "frame", giving no indication of its content.',
-        fix: 'Add a descriptive title attribute, e.g. <iframe title="Location map">, or aria-hidden="true" if the frame is purely decorative.',
-        code_before: snippetAt(text, m.index || 0),
-      });
-    }
-
     // List structure (axe "list"): a <ul>/<ol> whose first child is not <li>.
     // Conservative Tier-1 heuristic: inspect only the FIRST child after the open
-    // tag (skipping whitespace + comments), tag-branch only, and skip PascalCase
-    // framework components to avoid false positives in jsx/vue/svelte. Stray
-    // non-li children later in the list are deferred to Tier-2 axe.
-    for (const m of text.matchAll(/<(?:ul|ol)\b[^>]*>\s*(?:<!--[\s\S]*?-->\s*)*<([a-zA-Z][\w-]*)/gi)) {
-      const lc = m[1].toLowerCase();
+    // tag (skipping whitespace + comments), tag-branch only, skip PascalCase
+    // framework components, and skip lists with an explicit role= (author has
+    // taken control of the semantics). Stray non-li children later in the list,
+    // and visibility, are deferred to Tier-2 axe.
+    for (const m of text.matchAll(/<(?:ul|ol)\b([^>]*)>\s*(?:<!--[\s\S]*?-->\s*)*<([a-zA-Z][\w-]*)/gi)) {
+      if (/\brole\s*=/.test(m[1])) continue; // author-controlled ARIA semantics
+      const lc = m[2].toLowerCase();
       if (lc === 'li' || lc === 'script' || lc === 'template') continue;
-      if (/^[A-Z]/.test(m[1])) continue; // framework component, not a literal element
+      if (/^[A-Z]/.test(m[2])) continue; // framework component, not a literal element
       addFinding(findings, stats, {
         category: 'screenreader',
         severity: 'warning',

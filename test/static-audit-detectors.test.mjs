@@ -88,16 +88,6 @@ test('link-name: attribute matching is whitespace-anchored (data-* safe, spaced 
 const findingsMatching = (audit, titleRe, wcagRe) =>
   audit.findings.filter((f) => titleRe.test(f.title) && wcagRe.test(f.wcag));
 
-test('frame-title: untitled iframe is flagged; titled and aria-hidden are not', () => {
-  const audit = runScanner(`<!DOCTYPE html><html lang="en"><head><title>t</title>
-<meta name="viewport" content="width=device-width, initial-scale=1"></head><body><main>
-<iframe src="/a"></iframe>
-<iframe src="/b" title="Map"></iframe>
-<iframe src="/c" aria-hidden="true"></iframe>
-</main></body></html>`);
-  assert.equal(findingsMatching(audit, /frame/i, /4\.1\.2/).length, 1, 'only the untitled iframe should flag');
-});
-
 test('meta-viewport: zoom-disabling viewport is flagged; zoomable is not', () => {
   const noScale = runScanner(`<!DOCTYPE html><html lang="en"><head><title>t</title>
 <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no"></head><body><main><h1>x</h1></main></body></html>`);
@@ -121,7 +111,8 @@ test('list: ul/ol with a non-li first child is flagged; valid lists, components,
 <meta name="viewport" content="width=device-width, initial-scale=1"></head><body><main>
 <ul>  <!-- c -->  <li>a</li><li>b</li></ul>
 <ul><CategoryItem/></ul>
+<ul role="list"><div role="listitem">x</div></ul>
 <ol></ol>
 </main></body></html>`);
-  assert.equal(findingsMatching(ok, /list/i, /1\.3\.1/).length, 0, 'valid list, PascalCase component, empty list must not flag');
+  assert.equal(findingsMatching(ok, /list/i, /1\.3\.1/).length, 0, 'valid list, component, role-overridden list, empty list must not flag');
 });

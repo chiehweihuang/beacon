@@ -10,9 +10,12 @@ output and are classified here from the same criteria.
 
 | Rule | WCAG | Sites | Effort | Priority | Notes |
 |---|---|---|---|---|---|
-| `list` | 1.3.1 | 4 | small | medium | `<ul>/<ol>` with a non-`<li>` direct child. |
-| `meta-viewport` (zoom-disable) | 1.4.4 | 2 | small | medium | viewport `user-scalable=no` / `maximum-scale<5`. Beacon checks presence only. |
-| `frame-title` | 4.1.2 | 1 | tiny | low | `<iframe>` without `title`. Trivial, mirrors img-alt. (Workflow cluster failed; classified here.) |
+| `list` | 1.3.1 | 4 | small | medium | `<ul>/<ol>` first child not `<li>`; role-guarded. Verified: fires ikea/rakuten/vercel; first-child-only misses guardian/notion. SHIPPED. |
+| `meta-viewport` (zoom-disable) | 1.4.4 | 2 | small | medium | viewport `user-scalable=no` / `maximum-scale<5`. Verified: fires on exactly excalidraw + vercel. SHIPPED. |
+
+> Both were built and verified against the real survey snapshots. `frame-title` was a third
+> candidate but was **pulled** after verification (see below) — a reminder that synthetic tests
+> are not enough; detectors must be checked against the actual pages axe flagged.
 
 ### `list` (1.3.1) sketch
 First-child heuristic (a full nesting check needs a parser, defer that to Tier-2):
@@ -28,9 +31,11 @@ flag `user-scalable=(no|0|false)` or `maximum-scale` parsed `< 5`. Low FP (token
 unambiguous zoom-killers per axe). Guard `isNaN`; `< 5` strict (5+ is valid). Finding-only,
 no extra pass tick (the presence block already records the responsive pass).
 
-### `frame-title` (4.1.2) sketch
-`<iframe>` lacking a `title` attribute, same shape as the img-alt detector. Skip iframes with
-`aria-hidden="true"`.
+### `frame-title` (4.1.2) — pulled after verification
+A naive `<iframe>`-without-`title` regex fired on hidden GTM/tracking iframes on 7 of 7 verified
+sites, while axe flagged only 1/50. axe ignores iframes that are not in the accessibility tree
+(display:none, 0-size, JS-hydrated), which a static regex cannot determine. Reclassified
+Tier-2 (needs computed visibility); not shipped.
 
 ## Fix mapping, not a new detector
 
@@ -58,8 +63,10 @@ must be exercised there.
 `meta-refresh` (2.2.1, pedagogical on w3-wai), `blink` (2.2.2, obsolete element). Technically
 static-detectable in places, but single-site and low value-per-effort.
 
-## Net actionable
+## Net actionable (after snapshot verification)
 
-Three small detectors (`list`, `meta-viewport` zoom, `frame-title`) and one mapping touch
-(`label` 3.3.2 <-> 4.1.2). Everything else is either already covered, genuinely Tier-2, or not
-worth a Tier-1 detector. The survey's headline (contrast 18/50) stays Tier-2 by nature.
+Two detectors shipped: `list` (1.3.1, role-guarded, first-child heuristic) and `meta-viewport`
+zoom-disable (1.4.4). `frame-title` was pulled (Tier-2 visibility problem). `label` left at
+3.3.2 (a more precise criterion than axe's 4.1.2; not remapped). Everything else is already
+covered, genuinely Tier-2, or not worth a Tier-1 detector. The survey headline (contrast 18/50)
+stays Tier-2 by nature.
