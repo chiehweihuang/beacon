@@ -105,26 +105,34 @@ mini-grammar, not loose text substitution:
 1. **A marker line is recognized only when the trimmed line equals exactly**
    `<!--@cc-->`, `<!--/@cc-->`, `<!--@codex-->`, or `<!--/@codex-->`. Anything
    else on the line means it is content, not a marker.
-2. **Inside fenced code blocks (` ``` ` … ` ``` `) and inside the YAML
-   frontmatter (the first `---` … `---` block), markers are NOT interpreted** —
-   they pass through as literal content. This prevents a code sample or a
-   frontmatter value that happens to contain `<!--@cc-->` from being treated as a
-   build directive. `build.mjs` tracks fence and frontmatter state while scanning.
+2. **Markers are interpreted EVERYWHERE, including inside fenced code blocks.**
+   (An earlier draft proposed passing markers through untouched inside ` ``` `
+   fences. That is WRONG for this content: verified empirically, 10 of inspect's
+   30 marker lines land inside the Step 2 ` ```bash ` block — that fenced block is
+   exactly where the CC/codex reorder lives. Fence pass-through would leave those
+   10 markers un-stripped and break byte-identity. The spike, which interprets
+   markers everywhere, round-trips 14/0.) So `build.mjs` does NOT track fence or
+   frontmatter state; it matches the exact-line tokens uniformly.
 3. **No nesting, no interleaving.** A `@cc` block may not open inside another
    `@cc`/`@codex` block. `build.mjs` rejects (exits non-zero with the line number)
    any open-without-close, close-without-open, or nested/interleaved markers.
-4. **Collision = hard fail.** If a content line outside a marker block would, when
-   trimmed, equal a marker token (i.e. real content needs the literal string
-   `<!--@cc-->`), the build fails loudly. Escape convention: write the token with a
-   zero-width-safe placeholder documented in the build (e.g. `<!--@​cc-->`),
-   or — preferred — never put marker-literal strings in content. This case is not
-   expected today (no current content contains the tokens) but the build must
-   detect it rather than silently mis-split.
-5. **Reordered/duplicated blocks are named.** Where the same logical content
-   appears twice (once per surface, as with the inspect Step 2 reorder), the core
-   file carries a `<!-- DUP: <label> — edit both @cc and @codex copies -->` note
-   adjacent to the pair, and the round-trip test asserts the pair stays in sync by
-   label. This is the mitigation for the "edit one copy only" trap.
+4. **Collision = hard fail (caught by balance check).** The tokens are deliberately
+   unusual HTML comments; no a11y content line is expected to equal one exactly. If
+   one ever did, it would be read as a marker and the surrounding block would fail
+   the balance check (unclosed / unmatched) → loud failure, never a silent
+   mis-split. A round-trip + a "no stray tokens in built output" assertion guard
+   this. There is no in-band escape (fencing does not help, per rule 2); if literal
+   token text were ever genuinely needed in content, split the line or HTML-encode
+   `<!--` — not expected today.
+5. **Reordered/duplicated blocks are reported, not annotated in-file.** Where the
+   same logical content appears in both a `@cc` and a `@codex` block (as with the
+   inspect Step 2 reorder), an in-core `<!-- DUP -->` comment can NOT be used: it
+   is not a marker token, so `buildVariant` would emit it into both outputs and
+   break byte-identity. Instead, `build.mjs` emits an **advisory** that lists
+   content lines appearing in both a `@cc` and a `@codex` block (the duplicated
+   lines a future edit would have to change in both places), and the round-trip
+   test asserts current sync. The "edit one copy only" trap is mitigated by the
+   advisory + the test, with no in-file annotation.
 
 ### Validation (spike, 2026-05-30)
 
