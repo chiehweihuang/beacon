@@ -192,6 +192,44 @@ function scanFile(file, root, stats, findings) {
       });
     }
 
+    for (const m of text.matchAll(/<iframe\b(?![^>]*\s(?:title|aria-hidden)\s*=)[^>]*>/gi)) {
+      addFinding(findings, stats, {
+        category: 'screenreader',
+        severity: 'warning',
+        wcag: 'WCAG 2.2: 4.1.2 Name, Role, Value',
+        level: 'A',
+        title: 'Inline frame is missing a title',
+        affected_users: 'Screen-reader users navigating by frame',
+        location: `${rel}:${lineOf(text, m.index || 0)}`,
+        description: 'An <iframe> with no title attribute is announced only as "frame", giving no indication of its content.',
+        fix: 'Add a descriptive title attribute, e.g. <iframe title="Location map">, or aria-hidden="true" if the frame is purely decorative.',
+        code_before: snippetAt(text, m.index || 0),
+      });
+    }
+
+    // List structure (axe "list"): a <ul>/<ol> whose first child is not <li>.
+    // Conservative Tier-1 heuristic: inspect only the FIRST child after the open
+    // tag (skipping whitespace + comments), tag-branch only, and skip PascalCase
+    // framework components to avoid false positives in jsx/vue/svelte. Stray
+    // non-li children later in the list are deferred to Tier-2 axe.
+    for (const m of text.matchAll(/<(?:ul|ol)\b[^>]*>\s*(?:<!--[\s\S]*?-->\s*)*<([a-zA-Z][\w-]*)/gi)) {
+      const lc = m[1].toLowerCase();
+      if (lc === 'li' || lc === 'script' || lc === 'template') continue;
+      if (/^[A-Z]/.test(m[1])) continue; // framework component, not a literal element
+      addFinding(findings, stats, {
+        category: 'screenreader',
+        severity: 'warning',
+        wcag: 'WCAG 2.2: 1.3.1 Info and Relationships',
+        level: 'A',
+        title: 'List contains a non-list-item child',
+        affected_users: 'Screen-reader users navigating by list semantics',
+        location: `${rel}:${lineOf(text, m.index || 0)}`,
+        description: `A <ul>/<ol> has a direct child that is not <li>, <script>, or <template> (found <${lc}>). Screen readers may not announce the list or its item count correctly.`,
+        fix: 'Make <li> the only structural child; move wrapper elements inside an <li>, or use role="list"/role="listitem" if a non-standard structure is unavoidable.',
+        code_before: snippetAt(text, m.index || 0),
+      });
+    }
+
     for (const m of text.matchAll(/<button\b((?!aria-label|aria-labelledby)[^>])*>\s*(<[^>]+>\s*)*<\/button>/gi)) {
       addFinding(findings, stats, {
         category: 'keyboard',
@@ -268,6 +306,32 @@ function scanFile(file, root, stats, findings) {
         fix: 'Add <meta name="viewport" content="width=device-width, initial-scale=1">.',
       });
     } else addCheck(stats, 'responsive', 'pass');
+
+    // Viewport present but disables zoom (axe "meta-viewport", WCAG 1.4.4). The
+    // presence check above only verifies the tag exists; this parses its content.
+    if (/\.html?$/.test(file)) {
+      for (const m of text.matchAll(/<meta\s+[^>]*name=["']viewport["'][^>]*>/gi)) {
+        const cm = m[0].match(/content=["']([^"']*)["']/i);
+        const content = cm ? cm[1].toLowerCase() : '';
+        const noScale = /user-scalable\s*=\s*(?:no|0|false)/.test(content);
+        const maxM = content.match(/maximum-scale\s*=\s*([0-9.]+)/);
+        const lowMax = !!maxM && !Number.isNaN(parseFloat(maxM[1])) && parseFloat(maxM[1]) < 5;
+        if (noScale || lowMax) {
+          addFinding(findings, stats, {
+            category: 'responsive',
+            severity: 'warning',
+            wcag: 'WCAG 2.2: 1.4.4 Resize Text',
+            level: 'AA',
+            title: 'Viewport meta disables zoom',
+            affected_users: 'Low-vision users who pinch-zoom, and mobile users',
+            location: `${rel}:${lineOf(text, m.index || 0)}`,
+            description: `The viewport meta tag prevents zoom (${noScale ? 'user-scalable=no' : 'maximum-scale below 5'}), so users cannot enlarge text.`,
+            fix: 'Remove user-scalable=no and any maximum-scale below 5; use content="width=device-width, initial-scale=1".',
+            code_before: snippetAt(text, m.index || 0),
+          });
+        }
+      }
+    }
 
     if (/\.html?$/.test(file)) {
       if (!/<meta\s+name=["']description["'][^>]*content=["'][^"']+["'][^>]*>/i.test(text)) {

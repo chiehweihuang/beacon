@@ -84,3 +84,44 @@ test('link-name: attribute matching is whitespace-anchored (data-* safe, spaced 
   const hits = linkNameFindings(audit);
   assert.equal(hits.length, 2, `expected 2 hits (spaced href + data-title link), got ${hits.length}`);
 });
+
+const findingsMatching = (audit, titleRe, wcagRe) =>
+  audit.findings.filter((f) => titleRe.test(f.title) && wcagRe.test(f.wcag));
+
+test('frame-title: untitled iframe is flagged; titled and aria-hidden are not', () => {
+  const audit = runScanner(`<!DOCTYPE html><html lang="en"><head><title>t</title>
+<meta name="viewport" content="width=device-width, initial-scale=1"></head><body><main>
+<iframe src="/a"></iframe>
+<iframe src="/b" title="Map"></iframe>
+<iframe src="/c" aria-hidden="true"></iframe>
+</main></body></html>`);
+  assert.equal(findingsMatching(audit, /frame/i, /4\.1\.2/).length, 1, 'only the untitled iframe should flag');
+});
+
+test('meta-viewport: zoom-disabling viewport is flagged; zoomable is not', () => {
+  const noScale = runScanner(`<!DOCTYPE html><html lang="en"><head><title>t</title>
+<meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no"></head><body><main><h1>x</h1></main></body></html>`);
+  assert.equal(findingsMatching(noScale, /viewport|zoom/i, /1\.4\.4/).length, 1, 'user-scalable=no must flag');
+  const lowMax = runScanner(`<!DOCTYPE html><html lang="en"><head><title>t</title>
+<meta name="viewport" content="width=device-width, maximum-scale=1"></head><body><main><h1>x</h1></main></body></html>`);
+  assert.equal(findingsMatching(lowMax, /viewport|zoom/i, /1\.4\.4/).length, 1, 'maximum-scale<5 must flag');
+  const ok = runScanner(`<!DOCTYPE html><html lang="en"><head><title>t</title>
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=5"></head><body><main><h1>x</h1></main></body></html>`);
+  assert.equal(findingsMatching(ok, /viewport|zoom/i, /1\.4\.4/).length, 0, 'maximum-scale=5 is valid, must not flag');
+});
+
+test('list: ul/ol with a non-li first child is flagged; valid lists, components, empty are not', () => {
+  const bad = runScanner(`<!DOCTYPE html><html lang="en"><head><title>t</title>
+<meta name="viewport" content="width=device-width, initial-scale=1"></head><body><main>
+<ul><div>not an item</div></ul>
+<ol><a href="/x">link</a></ol>
+</main></body></html>`);
+  assert.equal(findingsMatching(bad, /list/i, /1\.3\.1/).length, 2, 'two non-li-first-child lists must flag');
+  const ok = runScanner(`<!DOCTYPE html><html lang="en"><head><title>t</title>
+<meta name="viewport" content="width=device-width, initial-scale=1"></head><body><main>
+<ul>  <!-- c -->  <li>a</li><li>b</li></ul>
+<ul><CategoryItem/></ul>
+<ol></ol>
+</main></body></html>`);
+  assert.equal(findingsMatching(ok, /list/i, /1\.3\.1/).length, 0, 'valid list, PascalCase component, empty list must not flag');
+});
