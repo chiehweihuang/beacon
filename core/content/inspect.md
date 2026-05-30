@@ -62,10 +62,10 @@ Run automated tools first. Treat this as the baseline tier — if any tool is un
 <!--/@codex-->
 
 <!--@cc-->
-**Why default-on:** Beacon's Tier 1 static analysis cannot detect computed-style issues (color contrast in particular). The improve pipeline confirmed this empirically — a single real-world site survey (tokyotaiwanradar.com, 2026-05-26) surfaced a `color-contrast` violation axe-core caught and Tier 1 missed. Running axe-core in-process closes that detection gap without re-implementing contrast math.
+**Why default-on:** Beacon's Tier 1 static analysis cannot detect computed-style issues (color contrast in particular). The improve pipeline confirmed this empirically. A 50-site real-world survey (2026-05-31) found `color-contrast` violations axe-core caught and the Tier 1 static scanner missed on 18 of the 50 sites, the single largest cross-site detection gap (next: `link-name` on 9). Running axe-core in-process closes that gap without re-implementing contrast math.
 <!--/@cc-->
 <!--@codex-->
-**Why default-on:** Beacon's Tier 1 static analysis cannot detect computed-style issues (color contrast in particular). A real-world site survey (tokyotaiwanradar.com, 2026-05-26) confirmed axe-core catches a `color-contrast` violation the static scanner misses. Running axe-core closes that gap without re-implementing contrast math.
+**Why default-on:** Beacon's Tier 1 static analysis cannot detect computed-style issues (color contrast in particular). A 50-site real-world survey (2026-05-31) confirmed axe-core catches `color-contrast` violations the static scanner misses on 18 of the 50 sites, the largest cross-site gap. Running axe-core closes that gap without re-implementing contrast math.
 <!--/@codex-->
 
 ```bash

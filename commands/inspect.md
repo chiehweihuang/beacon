@@ -56,7 +56,7 @@ Ask the user (if not already specified):
 
 Run automated tools first. Treat this as the baseline tier — if any of the tools below is unavailable, log the gap and continue, but do not skip the entire step on the assumption that "manual will catch it".
 
-**Why default-on:** Beacon's Tier 1 static analysis cannot detect computed-style issues (color contrast in particular). The improve pipeline confirmed this empirically — a single real-world site survey (tokyotaiwanradar.com, 2026-05-26) surfaced a `color-contrast` violation axe-core caught and Tier 1 missed. Running axe-core in-process closes that detection gap without re-implementing contrast math.
+**Why default-on:** Beacon's Tier 1 static analysis cannot detect computed-style issues (color contrast in particular). The improve pipeline confirmed this empirically. A 50-site real-world survey (2026-05-31) found `color-contrast` violations axe-core caught and the Tier 1 static scanner missed on 18 of the 50 sites, the single largest cross-site detection gap (next: `link-name` on 9). Running axe-core in-process closes that gap without re-implementing contrast math.
 
 ```bash
 # axe-core via Playwright — REQUIRED baseline if Playwright MCP is available

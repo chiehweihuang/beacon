@@ -206,6 +206,27 @@ function scanFile(file, root, stats, findings) {
       });
     }
 
+    // Link accessible-name (mirrors button-name). Tier-1 heuristic: attribute
+    // checks are whitespace-anchored so data-href / data-title don't false-match,
+    // but they are not quote-aware. Links wrapping <img> are skipped to avoid
+    // flagging a link named by the image's alt; alt-less images are caught by the
+    // img-alt check above. Known Tier-1 gaps deferred to Tier-2 axe: empty or
+    // hidden-alt images inside links, and empty aria-label / title.
+    for (const m of text.matchAll(/<a\b(?![^>]*\s(?:aria-label|aria-labelledby|title)\s*=)[^>]*\shref\s*=[^>]*>\s*(?:<(?!\/?a\b|img\b)[^>]+>\s*)*<\/a>/gi)) {
+      addFinding(findings, stats, {
+        category: 'screenreader',
+        severity: 'warning',
+        wcag: 'WCAG 2.2: 4.1.2 Name, Role, Value',
+        level: 'A',
+        title: 'Link may not have an accessible name',
+        affected_users: 'Screen-reader, voice-control, and keyboard users',
+        location: `${rel}:${lineOf(text, m.index || 0)}`,
+        description: 'A link whose content is only an icon or nested element, with no text, aria-label, aria-labelledby, or title, has no accessible name. Screen readers announce it as a bare "link", and voice-control users cannot target it by name.',
+        fix: 'Add visible link text, an aria-label, aria-labelledby, or title; if the link wraps an image, give the <img> meaningful alt text.',
+        code_before: snippetAt(text, m.index || 0),
+      });
+    }
+
     for (const m of text.matchAll(/<(div|span)\b[^>]*(onClick|onclick)[^>]*>/g)) {
       addFinding(findings, stats, {
         category: 'keyboard',

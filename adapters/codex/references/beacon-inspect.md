@@ -56,7 +56,7 @@ Ask the user (if not already specified):
 
 Run automated tools first. Treat this as the baseline tier — if any tool is unavailable, log the gap and continue, but do not skip the entire step on the assumption that "manual will catch it".
 
-**Why default-on:** Beacon's Tier 1 static analysis cannot detect computed-style issues (color contrast in particular). A real-world site survey (tokyotaiwanradar.com, 2026-05-26) confirmed axe-core catches a `color-contrast` violation the static scanner misses. Running axe-core closes that gap without re-implementing contrast math.
+**Why default-on:** Beacon's Tier 1 static analysis cannot detect computed-style issues (color contrast in particular). A 50-site real-world survey (2026-05-31) confirmed axe-core catches `color-contrast` violations the static scanner misses on 18 of the 50 sites, the largest cross-site gap. Running axe-core closes that gap without re-implementing contrast math.
 
 ```bash
 # Beacon-native deterministic Tier 1 baseline — zero external deps, no browser.
