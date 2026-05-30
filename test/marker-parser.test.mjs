@@ -53,3 +53,20 @@ test('findDuplicatedLines reports content in both cc and codex blocks', () => {
   const dup = ['<!--@cc-->', 'A', 'B', '<!--/@cc-->', '<!--@codex-->', 'B', 'A', '<!--/@codex-->'].join('\n');
   assert.deepEqual(findDuplicatedLines(dup).sort(), ['A', 'B']);
 });
+
+import { lcsMerge } from '../tools/lcs.mjs';
+
+test('lcsMerge + buildVariant round-trip reproduces both inputs', () => {
+  const cc = ['# Doc', 'one', 'two', 'cc-three', 'four'].join('\n');
+  const codex = ['# Doc', 'one', 'two', 'codex-three', 'four'].join('\n');
+  const core = lcsMerge(cc, codex);
+  assert.equal(buildVariant(core, 'cc'), cc);
+  assert.equal(buildVariant(core, 'codex'), codex);
+});
+
+test('lcsMerge on identical inputs yields zero markers', () => {
+  const same = ['a', 'b', 'c'].join('\n');
+  const core = lcsMerge(same, same);
+  assert.equal(core, same);
+  assert.equal(buildVariant(core, 'cc'), same);
+});
