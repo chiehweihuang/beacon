@@ -71,7 +71,11 @@ Decisions about content that drifted and was pulled back across surfaces.
 - **Not yet wired:** `scripts/static-audit.mjs` is present but not yet referenced from `commands/inspect.md`'s flow. Wiring it into Step 2 / Step 2a is a deliberate follow-up, sequenced AFTER PR #6 (`feat/inspect-step2-default-on`) merges, to avoid a conflicting edit to the same Step 2 region. Until wired, it is invocable manually: `node scripts/static-audit.mjs --scope "..." --output audit-results.json <paths>`.
 - **Calibration note (non-blocking):** the deterministic script and agent-judgment Tier 1 can disagree on the same fixture (script found 19 findings / score 36 vs an agent's hand-audit of 13 findings / score 18 on bad-ecommerce). This agent-vs-script divergence is itself useful signal and is exactly what the `a11y-skill-workspace` pipeline is built to surface. Not reconciled here.
 
-## Phase A — designed (structure A2)
+## Phase A — implemented (structure A2)
+
+> Build it with `node build.mjs`; verify with `node build.mjs --check`;
+> re-derive core from committed variants with `node extract.mjs`; deploy the
+> codex adapter with `node tools/deploy-codex.mjs`. Tests: `node --test test/*.test.mjs`.
 
 > Full design: `docs/superpowers/specs/2026-05-30-phase-a-core-extraction-design.md`
 > (spike-validated 14/0). An earlier sketch here proposed an A3-style layout with

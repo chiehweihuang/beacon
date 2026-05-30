@@ -6,3 +6,13 @@
 # (Documentation of intent; marketplace install still ships them — they are inert
 # to the plugin loader, which only reads ./commands, hooks.json, and
 # ${CLAUDE_PLUGIN_ROOT}/scripts.)
+
+# Build tooling + core source + tests are not part of the installed plugin.
+# export-ignore keeps them out of `git archive` tarballs; the plugin loader
+# ignores them regardless, but this keeps install payloads lean.
+core/ export-ignore
+tools/ export-ignore
+test/ export-ignore
+extract.mjs export-ignore
+build.mjs export-ignore
+docs/ export-ignore
