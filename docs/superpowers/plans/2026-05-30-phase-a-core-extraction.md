@@ -8,6 +8,8 @@
 
 **Tech Stack:** Node 24 (ESM `.mjs`, `node --test`); no package.json (`.mjs` is ESM natively). Pure stdlib (`node:fs`, `node:path`, `node:os`). Git for the migration.
 
+> **CRLF NOTE (load-bearing — surfaced in Task 1):** this repo has `core.autocrlf=true`, so the *committed* blobs are already LF, but the *working tree* is checked out as CRLF. Therefore **every file read in `extract.mjs`, `build.mjs`, `test/build-roundtrip.test.mjs`, and `tools/deploy-codex.mjs` MUST normalize CRLF→LF** (`String#replace(/\r\n?/g, '\n')`), and every write is LF. This makes line endings deterministic regardless of git config, matches the committed LF blobs, and makes "git diff empty after build" a real byte-level invariant rather than one masked by autocrlf. The code blocks below already include this normalization — do not remove it.
+
 **Spec:** `docs/superpowers/specs/2026-05-30-phase-a-core-extraction-design.md` (design v2 — spike-validated 14/0 + codex-reviewed).
 
 **Repo / branch:** `C:/Code/personal/beacon`, branch `feat/phase-a-core-extraction` (off master). PRs #6/#7/#8 already merged.
@@ -561,7 +563,7 @@ import { buildVariant, findDuplicatedLines } from '../tools/markers.mjs';
 import { CONTENT } from '../tools/manifest.mjs';
 
 const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), '..');
-const read = (p) => readFileSync(resolve(ROOT, p), 'utf8');
+const read = (p) => readFileSync(resolve(ROOT, p), 'utf8').replace(/\r\n?/g, '\n'); // normalize CRLF→LF (autocrlf working tree)
 
 for (const n of CONTENT) {
   test(`${n}: marked core round-trips to both committed variants byte-identically`, () => {
@@ -625,7 +627,7 @@ import { CONTENT } from './tools/manifest.mjs';
 const ROOT = resolve(dirname(fileURLToPath(import.meta.url)));
 const REFERENCES = ['wcag-quick', 'patterns', 'legal-brief', 'disabilities', 'cases', 'documents'];
 const SCRIPTS = ['static-audit', 'generate-report'];
-const read = (p) => readFileSync(resolve(ROOT, p), 'utf8');
+const read = (p) => readFileSync(resolve(ROOT, p), 'utf8').replace(/\r\n?/g, '\n'); // normalize CRLF→LF (autocrlf working tree)
 const write = (p, t) => { mkdirSync(dirname(resolve(ROOT, p)), { recursive: true }); writeFileSync(resolve(ROOT, p), t); };
 
 for (const n of CONTENT) {
@@ -695,8 +697,10 @@ const args = process.argv.slice(2);
 const CHECK = args.includes('--check');
 const PRUNE = args.includes('--prune');
 
+const readLF = (abs) => readFileSync(abs, 'utf8').replace(/\r\n?/g, '\n'); // normalize CRLF→LF (autocrlf working tree)
+
 function render(entry) {
-  const src = readFileSync(resolve(ROOT, entry.src), 'utf8');
+  const src = readLF(resolve(ROOT, entry.src));
   if (entry.kind === 'copy') return src;
   const keep = entry.kind === 'variant:cc' ? 'cc' : 'codex';
   const out = buildVariant(src, keep);
@@ -717,7 +721,7 @@ function main() {
 
   // Advisory: duplicated (reordered) content lines per content file.
   for (const e of GENERATED.filter((x) => x.kind === 'variant:cc')) {
-    const dup = findDuplicatedLines(readFileSync(resolve(ROOT, e.src), 'utf8'));
+    const dup = findDuplicatedLines(readLF(resolve(ROOT, e.src)));
     if (dup.length) console.error(`note: ${e.src} has ${dup.length} duplicated (reordered) line(s) — edit both @cc/@codex copies`);
   }
 
@@ -735,7 +739,7 @@ function main() {
   if (CHECK) {
     let diff = 0;
     for (const b of built) {
-      const cur = existsSync(resolve(ROOT, b.out)) ? readFileSync(resolve(ROOT, b.out), 'utf8') : null;
+      const cur = existsSync(resolve(ROOT, b.out)) ? readLF(resolve(ROOT, b.out)) : null;
       if (cur !== b.text) { console.error(`--check: ${b.out} differs from core regeneration`); diff++; }
     }
     rmSync(staging, { recursive: true, force: true });
@@ -883,12 +887,13 @@ function walk(dir, out = []) {
   return out;
 }
 
+const readLF = (p) => readFileSync(p, 'utf8').replace(/\r\n?/g, '\n'); // normalize CRLF→LF; codex skill wants LF
 let copied = 0;
 for (const srcFile of walk(SRC)) {
   const rel = relative(SRC, srcFile);
   const destFile = join(DEST, rel);
-  const srcText = readFileSync(srcFile, 'utf8');
-  const destText = existsSync(destFile) ? readFileSync(destFile, 'utf8') : null;
+  const srcText = readLF(srcFile);
+  const destText = existsSync(destFile) ? readLF(destFile) : null;
   if (destText !== srcText) {
     mkdirSync(dirname(destFile), { recursive: true });
     writeFileSync(destFile, srcText);
