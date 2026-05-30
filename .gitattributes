@@ -1,0 +1,8 @@
+# Normalize line endings to LF for all text. Phase A build writes LF; this keeps
+# the repo consistent and removes the CRLF-vs-LF false diffs seen in Phase B.
+* text=auto eol=lf
+
+# Build tooling + core source are not part of the installed plugin surface.
+# (Documentation of intent; marketplace install still ships them — they are inert
+# to the plugin loader, which only reads ./commands, hooks.json, and
+# ${CLAUDE_PLUGIN_ROOT}/scripts.)
