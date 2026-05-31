@@ -55,20 +55,29 @@ test('link-name: text links and aria-labelled links are not flagged', () => {
   assert.equal(linkNameFindings(audit).length, 0, 'named links must not be flagged');
 });
 
-test('link-name: image-wrapped links defer to img-alt; whitespace-only link is flagged', () => {
+test('link-name: image-wrapped links defer to image-alt; whitespace-only link is flagged', () => {
   const audit = runScanner(`<!DOCTYPE html><html lang="en"><head><title>t</title>
 <meta name="viewport" content="width=device-width, initial-scale=1"></head><body><main>
 <a href="/named"><img src="/a.png" alt="Home"></a>
 <a href="/altless"><img src="/b.png"></a>
 <a href="/blank">   </a>
 </main></body></html>`);
-  // Links wrapping <img> are intentionally NOT flagged by link-name (avoids
-  // false-positiving alt-named links); only the whitespace-only link is nameless.
-  const linkHits = linkNameFindings(audit);
-  assert.equal(linkHits.length, 1, `only the whitespace-only link should be a link-name hit, got ${linkHits.length}`);
-  // The alt-less image is still surfaced — coverage is not silently lost.
+  // Any link wrapping an <img> defers to the image-alt check (avoids double-
+  // reporting and over-firing on hidden image links). Only the blank link is nameless.
+  assert.equal(linkNameFindings(audit).length, 1, 'only the blank link is a link-name hit');
   const imgAlt = audit.findings.filter((f) => /image/i.test(f.title) && /1\.1\.1/.test(f.wcag));
-  assert.ok(imgAlt.length >= 1, 'alt-less <img> must still be flagged by img-alt');
+  assert.ok(imgAlt.length >= 1, 'alt-less <img> is surfaced by image-alt');
+});
+
+test('link-name: link named by a descendant (svg aria-label / svg title) is not flagged', () => {
+  const audit = runScanner(`<!DOCTYPE html><html lang="en"><head><title>t</title>
+<meta name="viewport" content="width=device-width, initial-scale=1"></head><body><main>
+<a href="/s1"><svg aria-label="Search"><path d="M0 0"/></svg></a>
+<a href="/s2"><svg><title>Menu</title><path d="M0 0"/></svg></a>
+<a href="/s3"><i class="icon-x"></i></a>
+</main></body></html>`);
+  // s1 (descendant aria-label) and s2 (svg <title>) are named -> not flagged; s3 (icon font) is nameless.
+  assert.equal(linkNameFindings(audit).length, 1, 'only the unnamed icon-font link should flag');
 });
 
 test('link-name: attribute matching is whitespace-anchored (data-* safe, spaced =)', () => {
@@ -113,6 +122,7 @@ test('list: ul/ol with a non-li first child is flagged; valid lists, components,
 <ul><CategoryItem/></ul>
 <ul role="list"><div role="listitem">x</div></ul>
 <ol></ol>
+<script>var tpl = "<ul><div>x</div></ul>";</script>
 </main></body></html>`);
-  assert.equal(findingsMatching(ok, /list/i, /1\.3\.1/).length, 0, 'valid list, component, role-overridden list, empty list must not flag');
+  assert.equal(findingsMatching(ok, /list/i, /1\.3\.1/).length, 0, 'valid list, component, role-overridden list, empty list, and HTML string inside <script> must not flag');
 });

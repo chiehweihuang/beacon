@@ -105,6 +105,12 @@ function scanFile(file, root, stats, findings) {
   const jsLike = ['js', 'cjs', 'mjs', 'ts', 'jsx', 'tsx', 'vue', 'svelte'].includes(ext);
 
   if (markup) {
+    // Char ranges of <script>/<style> bodies. The structural detectors below skip
+    // matches inside them so HTML-looking strings in JS/CSS are not flagged as real
+    // elements (e.g. a `"<ul><div>"` template string inside an inline script).
+    const masked = [...text.matchAll(/<(script|style)\b[^>]*>[\s\S]*?<\/\1>/gi)].map(s => [s.index, s.index + s[0].length]);
+    const inMasked = (i) => masked.some(([s, e]) => i >= s && i < e);
+
     addCheck(stats, 'screenreader', /<html[^>]+lang=/.test(text) || !/\.html?$/.test(file) ? 'pass' : 'fail');
     if (/\.html?$/.test(file) && !/<html[^>]+lang=/.test(text)) {
       addFinding(findings, stats, {
@@ -199,6 +205,7 @@ function scanFile(file, root, stats, findings) {
     // taken control of the semantics). Stray non-li children later in the list,
     // and visibility, are deferred to Tier-2 axe.
     for (const m of text.matchAll(/<(?:ul|ol)\b([^>]*)>\s*(?:<!--[\s\S]*?-->\s*)*<([a-zA-Z][\w-]*)/gi)) {
+      if (inMasked(m.index)) continue; // HTML-looking string inside <script>/<style>
       if (/\brole\s*=/.test(m[1])) continue; // author-controlled ARIA semantics
       const lc = m[2].toLowerCase();
       if (lc === 'li' || lc === 'script' || lc === 'template') continue;
@@ -231,13 +238,26 @@ function scanFile(file, root, stats, findings) {
       });
     }
 
-    // Link accessible-name (mirrors button-name). Tier-1 heuristic: attribute
-    // checks are whitespace-anchored so data-href / data-title don't false-match,
-    // but they are not quote-aware. Links wrapping <img> are skipped to avoid
-    // flagging a link named by the image's alt; alt-less images are caught by the
-    // img-alt check above. Known Tier-1 gaps deferred to Tier-2 axe: empty or
-    // hidden-alt images inside links, and empty aria-label / title.
-    for (const m of text.matchAll(/<a\b(?![^>]*\s(?:aria-label|aria-labelledby|title)\s*=)[^>]*\shref\s*=[^>]*>\s*(?:<(?!\/?a\b|img\b)[^>]+>\s*)*<\/a>/gi)) {
+    // Link accessible-name. A link is "named" if it OR a descendant carries a
+    // non-empty aria-label / aria-labelledby / title, OR it wraps ANY <img>
+    // (deferred to the image-alt check above, which surfaces alt-less images), OR
+    // an <svg><title> with text, OR it has visible text. Inspecting the BODY (not
+    // just the <a> tag) means an icon link named by a child's aria-label is no
+    // longer false-flagged. Tier-1: not DOM-aware, NOT visibility-aware (hidden
+    // nameless links are over-reported vs axe — true of every static check here),
+    // and skips matches inside <script>/<style>.
+    for (const m of text.matchAll(/<a\b([^>]*)>([\s\S]*?)<\/a>/gi)) {
+      if (inMasked(m.index)) continue;
+      const attrs = m[1], body = m[2];
+      if (!/\shref\s*=/.test(attrs)) continue; // anchor without href is not a link
+      const svgTitle = body.match(/<title\b[^>]*>([\s\S]*?)<\/title>/i);
+      const named =
+        /\s(?:aria-label|aria-labelledby|title)\s*=\s*["'][^"']/.test(attrs) ||
+        /\s(?:aria-label|aria-labelledby|title)\s*=\s*["'][^"']/.test(body) ||
+        /<img\b/i.test(body) || // wraps an image -> defer to the image-alt check
+        (!!svgTitle && svgTitle[1].trim().length > 0) ||
+        body.replace(/<[^>]*>/g, '').replace(/&[a-z#0-9]+;/gi, ' ').trim().length > 0;
+      if (named) continue;
       addFinding(findings, stats, {
         category: 'screenreader',
         severity: 'warning',
@@ -246,8 +266,8 @@ function scanFile(file, root, stats, findings) {
         title: 'Link may not have an accessible name',
         affected_users: 'Screen-reader, voice-control, and keyboard users',
         location: `${rel}:${lineOf(text, m.index || 0)}`,
-        description: 'A link whose content is only an icon or nested element, with no text, aria-label, aria-labelledby, or title, has no accessible name. Screen readers announce it as a bare "link", and voice-control users cannot target it by name.',
-        fix: 'Add visible link text, an aria-label, aria-labelledby, or title; if the link wraps an image, give the <img> meaningful alt text.',
+        description: 'A link with no visible text, no aria-label/aria-labelledby/title (on it or a descendant), and no image alt or SVG title has no accessible name. Screen readers announce it as a bare "link".',
+        fix: 'Add visible link text, an aria-label/aria-labelledby/title, give a wrapped <img> meaningful alt text, or add an <svg><title>.',
         code_before: snippetAt(text, m.index || 0),
       });
     }
