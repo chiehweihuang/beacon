@@ -206,7 +206,7 @@ function scanFile(file, root, stats, findings) {
     // and visibility, are deferred to Tier-2 axe.
     for (const m of text.matchAll(/<(?:ul|ol)\b([^>]*)>\s*(?:<!--[\s\S]*?-->\s*)*<([a-zA-Z][\w-]*)/gi)) {
       if (inMasked(m.index)) continue; // HTML-looking string inside <script>/<style>
-      if (/\brole\s*=/.test(m[1])) continue; // author-controlled ARIA semantics
+      if (/\brole\s*=/.test(m[1]) || /\saria-hidden\s*=\s*["']true/i.test(m[1])) continue; // author-controlled ARIA / hidden from a11y tree
       const lc = m[2].toLowerCase();
       if (lc === 'li' || lc === 'script' || lc === 'template') continue;
       if (/^[A-Z]/.test(m[2])) continue; // framework component, not a literal element
@@ -250,6 +250,7 @@ function scanFile(file, root, stats, findings) {
       if (inMasked(m.index)) continue;
       const attrs = m[1], body = m[2];
       if (!/\shref\s*=/.test(attrs)) continue; // anchor without href is not a link
+      if (/\saria-hidden\s*=\s*["']true/i.test(attrs)) continue; // removed from the a11y tree
       const svgTitle = body.match(/<title\b[^>]*>([\s\S]*?)<\/title>/i);
       const named =
         /\s(?:aria-label|aria-labelledby|title)\s*=\s*["'][^"']/.test(attrs) ||

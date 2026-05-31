@@ -75,9 +75,11 @@ test('link-name: link named by a descendant (svg aria-label / svg title) is not 
 <a href="/s1"><svg aria-label="Search"><path d="M0 0"/></svg></a>
 <a href="/s2"><svg><title>Menu</title><path d="M0 0"/></svg></a>
 <a href="/s3"><i class="icon-x"></i></a>
+<a href="/s4" aria-hidden="true" tabindex="-1"><i class="icon-x"></i></a>
 </main></body></html>`);
-  // s1 (descendant aria-label) and s2 (svg <title>) are named -> not flagged; s3 (icon font) is nameless.
-  assert.equal(linkNameFindings(audit).length, 1, 'only the unnamed icon-font link should flag');
+  // s1 (descendant aria-label) and s2 (svg <title>) are named; s4 is aria-hidden (out of the
+  // a11y tree). Only s3 (visible icon font, no name) should flag.
+  assert.equal(linkNameFindings(audit).length, 1, 'only the unnamed, non-hidden icon-font link should flag');
 });
 
 test('link-name: attribute matching is whitespace-anchored (data-* safe, spaced =)', () => {
@@ -121,6 +123,7 @@ test('list: ul/ol with a non-li first child is flagged; valid lists, components,
 <ul>  <!-- c -->  <li>a</li><li>b</li></ul>
 <ul><CategoryItem/></ul>
 <ul role="list"><div role="listitem">x</div></ul>
+<ul aria-hidden="true"><div>x</div></ul>
 <ol></ol>
 <script>var tpl = "<ul><div>x</div></ul>";</script>
 </main></body></html>`);
