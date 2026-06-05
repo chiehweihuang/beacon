@@ -659,21 +659,9 @@ When designing responsive layouts:
 - [ ] Orientation works in both portrait and landscape
 - [ ] Performance budget < 500KB initial load
 
-## Anonymized Feedback
+## Data Boundary
 
-This skill supports the same opt-in anonymous data collection as a11y-audit. When the user completes a design consultation, offer to log an anonymized record:
-
-```json
-{
-  "date": "2026-04-04",
-  "skill": "a11y-design-guide",
-  "pattern_used": "modal-dialog",
-  "consultation_type": "design",
-  "platform": "web"
-}
-```
-
-Append only to a local private stats file if the user explicitly opts in. No code, no paths, no project names.
+Beacon keeps design consultation notes and audit artifacts local unless the user explicitly shares them outside the plugin. Maintainer-run offline evaluation can improve future detectors, and users receive those improvements by updating Beacon.
 
 ## References
 

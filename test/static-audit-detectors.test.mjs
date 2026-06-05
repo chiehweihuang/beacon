@@ -28,6 +28,22 @@ function runScanner(html) {
   }
 }
 
+function runScannerDir(filesByName) {
+  const dir = mkdtempSync(join(tmpdir(), 'beacon-detok-dir-'));
+  try {
+    const out = join(dir, 'audit-results.json');
+    for (const [name, body] of Object.entries(filesByName)) {
+      writeFileSync(join(dir, name), body);
+    }
+    execFileSync('node', [SCANNER, '--scope', 'detector-dir-test', '--output', out, dir], {
+      stdio: ['ignore', 'pipe', 'pipe'], cwd: dir,
+    });
+    return JSON.parse(readFileSync(out, 'utf8').replace(/\r\n?/g, '\n'));
+  } finally {
+    rmSync(dir, { recursive: true, force: true });
+  }
+}
+
 const linkNameFindings = (audit) =>
   audit.findings.filter((f) => /link/i.test(f.title) && /4\.1\.2/.test(f.wcag));
 
@@ -128,4 +144,50 @@ test('list: ul/ol with a non-li first child is flagged; valid lists, components,
 <script>var tpl = "<ul><div>x</div></ul>";</script>
 </main></body></html>`);
   assert.equal(findingsMatching(ok, /list/i, /1\.3\.1/).length, 0, 'valid list, component, role-overridden list, empty list, and HTML string inside <script> must not flag');
+});
+
+test('AEO: missing canonical and JSON-LD produce actionable findings', () => {
+  const audit = runScanner(`<!DOCTYPE html><html lang="en"><head><title>t</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="description" content="Readable page summary.">
+</head><body><main><h1>x</h1></main></body></html>`);
+  const keys = new Set(audit.findings.filter((f) => f.category === 'agent').map((f) => f.key));
+  assert.ok(keys.has('canonical-missing'), 'missing canonical should be an actionable AEO finding');
+  assert.ok(keys.has('jsonld-missing'), 'missing JSON-LD should be an actionable AEO finding');
+
+  const ok = runScanner(`<!DOCTYPE html><html lang="en"><head><title>t</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="description" content="Readable page summary.">
+<link rel="canonical" href="https://example.com/page">
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"Article","headline":"x"}</script>
+</head><body><main><h1>x</h1></main></body></html>`);
+  const okKeys = new Set(ok.findings.filter((f) => f.category === 'agent').map((f) => f.key));
+  assert.equal(okKeys.has('canonical-missing'), false, 'present canonical should not be flagged');
+  assert.equal(okKeys.has('jsonld-missing'), false, 'present JSON-LD should not be flagged');
+});
+
+test('AEO: directory scan checks site-level agent-readiness files', () => {
+  const page = `<!DOCTYPE html><html lang="en"><head><title>t</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="description" content="Readable page summary.">
+<link rel="canonical" href="https://example.com/page">
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"Article","headline":"x"}</script>
+</head><body><main><h1>x</h1></main></body></html>`;
+
+  const missing = runScannerDir({ 'page.html': page });
+  const missingKeys = new Set(missing.findings.filter((f) => f.category === 'agent').map((f) => f.key));
+  assert.ok(missingKeys.has('robots-txt-missing'), 'directory scans should flag missing robots.txt');
+  assert.ok(missingKeys.has('sitemap-missing'), 'directory scans should flag missing sitemap.xml');
+  assert.ok(missingKeys.has('llms-txt-missing'), 'directory scans should flag missing llms.txt as optional agent-readiness guidance');
+
+  const present = runScannerDir({
+    'page.html': page,
+    'robots.txt': 'User-agent: *\nAllow: /\nSitemap: https://example.com/sitemap.xml\nContent-Signal: search=yes, ai-input=yes, ai-train=no\n',
+    'sitemap.xml': '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"></urlset>',
+    'llms.txt': '# Example\n\nImportant pages: https://example.com/page\n',
+  });
+  const presentKeys = new Set(present.findings.filter((f) => f.category === 'agent').map((f) => f.key));
+  assert.equal(presentKeys.has('robots-txt-missing'), false, 'present robots.txt should not be flagged');
+  assert.equal(presentKeys.has('sitemap-missing'), false, 'present sitemap.xml should not be flagged');
+  assert.equal(presentKeys.has('llms-txt-missing'), false, 'present llms.txt should not be flagged');
 });

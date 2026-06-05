@@ -6,10 +6,11 @@
 //   node static-audit.mjs --scope "My page" --output audit-results.json <file-or-dir>...
 
 import { readFileSync, writeFileSync, statSync, readdirSync } from 'fs';
-import { join, relative } from 'path';
+import { basename, join, relative } from 'path';
 
 const SKIP_DIRS = new Set(['.git', 'node_modules', 'dist', 'build', '.next', '.nuxt', 'coverage']);
 const FILE_PATTERN = /\.(html?|css|scss|less|jsx|tsx|vue|svelte|js|cjs|mjs|ts)$/i;
+const AGENT_FILE_NAMES = new Set(['robots.txt', 'sitemap.xml', 'llms.txt', 'openapi.json', 'openapi.yaml', 'openapi.yml', 'mcp.json', 'server-card.json']);
 
 const CATEGORY_NAMES = {
   contrast: 'Color & Contrast',
@@ -53,7 +54,7 @@ function collect(inputPath, out = []) {
     }
     return out;
   }
-  if (FILE_PATTERN.test(inputPath)) out.push(inputPath);
+  if (FILE_PATTERN.test(inputPath) || AGENT_FILE_NAMES.has(basename(inputPath).toLowerCase())) out.push(inputPath);
   return out;
 }
 
@@ -114,6 +115,7 @@ function scanFile(file, root, stats, findings) {
     addCheck(stats, 'screenreader', /<html[^>]+lang=/.test(text) || !/\.html?$/.test(file) ? 'pass' : 'fail');
     if (/\.html?$/.test(file) && !/<html[^>]+lang=/.test(text)) {
       addFinding(findings, stats, {
+        key: 'html-lang-missing',
         category: 'screenreader',
         severity: 'warning',
         wcag: 'WCAG 2.2: 3.1.1 Language of Page',
@@ -129,6 +131,7 @@ function scanFile(file, root, stats, findings) {
 
     if (/\.html?$/.test(file) && !/<title>[^<]+<\/title>/i.test(text)) {
       addFinding(findings, stats, {
+        key: 'document-title-missing',
         category: 'screenreader',
         severity: 'warning',
         wcag: 'WCAG 2.2: 2.4.2 Page Titled',
@@ -142,6 +145,7 @@ function scanFile(file, root, stats, findings) {
 
     if (!/<main\b|role=["']main["']/.test(text)) {
       addFinding(findings, stats, {
+        key: 'main-landmark-missing',
         category: 'screenreader',
         severity: 'tip',
         wcag: 'WCAG 2.2: 1.3.1 Info and Relationships',
@@ -156,6 +160,7 @@ function scanFile(file, root, stats, findings) {
     const headings = [...text.matchAll(/<h([1-6])\b/gi)].map(m => ({ level: Number(m[1]), index: m.index || 0 }));
     if (headings.length === 0) {
       addFinding(findings, stats, {
+        key: 'headings-missing',
         category: 'screenreader',
         severity: 'warning',
         wcag: 'WCAG 2.2: 2.4.6 Headings and Labels',
@@ -170,6 +175,7 @@ function scanFile(file, root, stats, findings) {
       for (let i = 1; i < headings.length; i++) {
         if (headings[i].level > headings[i - 1].level + 1) {
           addFinding(findings, stats, {
+            key: 'heading-level-skipped',
             category: 'screenreader',
             severity: 'tip',
             wcag: 'WCAG 2.2: 1.3.1 Info and Relationships',
@@ -186,6 +192,7 @@ function scanFile(file, root, stats, findings) {
 
     for (const m of text.matchAll(/<img\b(?![^>]*\balt=)[^>]*>/gi)) {
       addFinding(findings, stats, {
+        key: 'image-alt-missing',
         category: 'screenreader',
         severity: 'warning',
         wcag: 'WCAG 2.2: 1.1.1 Non-text Content',
@@ -211,6 +218,7 @@ function scanFile(file, root, stats, findings) {
       if (lc === 'li' || lc === 'script' || lc === 'template') continue;
       if (/^[A-Z]/.test(m[2])) continue; // framework component, not a literal element
       addFinding(findings, stats, {
+        key: 'list-non-li-child',
         category: 'screenreader',
         severity: 'warning',
         wcag: 'WCAG 2.2: 1.3.1 Info and Relationships',
@@ -226,6 +234,7 @@ function scanFile(file, root, stats, findings) {
 
     for (const m of text.matchAll(/<button\b((?!aria-label|aria-labelledby)[^>])*>\s*(<[^>]+>\s*)*<\/button>/gi)) {
       addFinding(findings, stats, {
+        key: 'button-name-missing',
         category: 'keyboard',
         severity: 'warning',
         wcag: 'WCAG 2.2: 4.1.2 Name, Role, Value',
@@ -260,6 +269,7 @@ function scanFile(file, root, stats, findings) {
         body.replace(/<[^>]*>/g, '').replace(/&[a-z#0-9]+;/gi, ' ').trim().length > 0;
       if (named) continue;
       addFinding(findings, stats, {
+        key: 'link-name-missing',
         category: 'screenreader',
         severity: 'warning',
         wcag: 'WCAG 2.2: 4.1.2 Name, Role, Value',
@@ -275,6 +285,7 @@ function scanFile(file, root, stats, findings) {
 
     for (const m of text.matchAll(/<(div|span)\b[^>]*(onClick|onclick)[^>]*>/g)) {
       addFinding(findings, stats, {
+        key: 'clickable-non-button',
         category: 'keyboard',
         severity: 'critical',
         wcag: 'WCAG 2.2: 2.1.1 Keyboard',
@@ -290,6 +301,7 @@ function scanFile(file, root, stats, findings) {
 
     for (const m of text.matchAll(/<input\b(?![^>]*(aria-label|aria-labelledby|id=|type=["']hidden["']))[^>]*>/gi)) {
       addFinding(findings, stats, {
+        key: 'input-label-missing',
         category: 'forms',
         severity: 'warning',
         wcag: 'WCAG 2.2: 3.3.2 Labels or Instructions',
@@ -304,6 +316,7 @@ function scanFile(file, root, stats, findings) {
 
     if (/\.html?$/.test(file) && !/<meta\s+name=["']viewport["'][^>]*>/i.test(text)) {
       addFinding(findings, stats, {
+        key: 'viewport-meta-missing',
         category: 'responsive',
         severity: 'warning',
         wcag: 'WCAG 2.2: 1.4.10 Reflow',
@@ -326,6 +339,7 @@ function scanFile(file, root, stats, findings) {
         const lowMax = !!maxM && !Number.isNaN(parseFloat(maxM[1])) && parseFloat(maxM[1]) < 5;
         if (noScale || lowMax) {
           addFinding(findings, stats, {
+            key: 'viewport-zoom-disabled',
             category: 'responsive',
             severity: 'warning',
             wcag: 'WCAG 2.2: 1.4.4 Resize Text',
@@ -344,6 +358,7 @@ function scanFile(file, root, stats, findings) {
     if (/\.html?$/.test(file)) {
       if (!/<meta\s+name=["']description["'][^>]*content=["'][^"']+["'][^>]*>/i.test(text)) {
         addFinding(findings, stats, {
+          key: 'meta-description-missing',
           category: 'agent',
           severity: 'tip',
           wcag: 'AEO structural hygiene',
@@ -357,11 +372,37 @@ function scanFile(file, root, stats, findings) {
         });
       } else addCheck(stats, 'agent', 'pass');
 
-      if (!/<link\s+rel=["']canonical["'][^>]*>/i.test(text)) addCheck(stats, 'agent', 'review');
-      else addCheck(stats, 'agent', 'pass');
+      if (!/<link\s+rel=["']canonical["'][^>]*>/i.test(text)) {
+        addFinding(findings, stats, {
+          key: 'canonical-missing',
+          category: 'agent',
+          severity: 'tip',
+          wcag: 'AEO structural hygiene',
+          level: 'Review',
+          title: 'Canonical link is missing',
+          affected_users: 'Search and answer-engine users when duplicate URLs or variants exist',
+          location: rel,
+          description: 'No canonical URL was found in the static HTML, so crawlers may have to infer the preferred URL.',
+          fix: 'Add <link rel="canonical" href="https://example.com/preferred-url"> for indexable public pages.',
+          legal_exposure: 'Not a legal issue; affects search / answer-engine clarity.',
+        });
+      } else addCheck(stats, 'agent', 'pass');
 
-      if (!/<script\s+type=["']application\/ld\+json["'][^>]*>/i.test(text)) addCheck(stats, 'agent', 'review');
-      else addCheck(stats, 'agent', 'pass');
+      if (!/<script\s+type=["']application\/ld\+json["'][^>]*>/i.test(text)) {
+        addFinding(findings, stats, {
+          key: 'jsonld-missing',
+          category: 'agent',
+          severity: 'tip',
+          wcag: 'AEO structural hygiene',
+          level: 'Review',
+          title: 'JSON-LD structured data is missing',
+          affected_users: 'Search and answer-engine users trying to identify the page entity and content type',
+          location: rel,
+          description: 'No JSON-LD structured data was found in the static HTML.',
+          fix: 'Add page-appropriate Schema.org JSON-LD, such as Organization, Article, FAQPage, Product, BreadcrumbList, or WebSite.',
+          legal_exposure: 'Not a legal issue; affects answer-engine and search clarity.',
+        });
+      } else addCheck(stats, 'agent', 'pass');
     }
   }
 
@@ -369,6 +410,7 @@ function scanFile(file, root, stats, findings) {
     for (const m of text.matchAll(/outline\s*:\s*(none|0)\b/gi)) {
       if (!/focus-visible/.test(text)) {
         addFinding(findings, stats, {
+          key: 'focus-outline-removed',
           category: 'keyboard',
           severity: 'critical',
           wcag: 'WCAG 2.2: 2.4.7 Focus Visible',
@@ -387,6 +429,7 @@ function scanFile(file, root, stats, findings) {
     for (const m of text.matchAll(/minmax\(\s*\d+px/gi)) {
       if (!/minmax\(\s*min\(\s*\d+px\s*,\s*100%\s*\)/i.test(text)) {
         addFinding(findings, stats, {
+          key: 'fixed-minmax-overflow',
           category: 'responsive',
           severity: 'warning',
           wcag: 'WCAG 2.2: 1.4.10 Reflow',
@@ -403,6 +446,7 @@ function scanFile(file, root, stats, findings) {
 
     if (/(animation|transition)\s*:/.test(text) && !/prefers-reduced-motion/.test(text)) {
       addFinding(findings, stats, {
+        key: 'motion-reduced-motion-missing',
         category: 'motion',
         severity: 'warning',
         wcag: 'WCAG 2.2: 2.3.3 Animation from Interactions',
@@ -416,6 +460,7 @@ function scanFile(file, root, stats, findings) {
 
     if (/width\s*:\s*[4-9]\d{2,}px|min-width\s*:\s*[4-9]\d{2,}px/.test(text)) {
       addFinding(findings, stats, {
+        key: 'large-fixed-width',
         category: 'responsive',
         severity: 'tip',
         wcag: 'WCAG 2.2: 1.4.10 Reflow',
@@ -433,6 +478,7 @@ function scanFile(file, root, stats, findings) {
       const ctx = snippetAt(text, m.index || 0);
       if (!/keydown|keyup|<button|role\s*=\s*["']button["']/.test(ctx)) {
         addFinding(findings, stats, {
+          key: 'click-handler-keyboard-missing',
           category: 'keyboard',
           severity: 'critical',
           wcag: 'WCAG 2.2: 2.1.1 Keyboard',
@@ -455,6 +501,73 @@ function scanFile(file, root, stats, findings) {
   addCheck(stats, 'media', 'review');
 }
 
+function hasDirectoryInput(paths) {
+  return paths.some(p => {
+    try { return statSync(p).isDirectory(); }
+    catch { return false; }
+  });
+}
+
+function hasCollectedFile(files, root, name) {
+  const lower = name.toLowerCase();
+  return files.some(file => {
+    const rel = relative(root, file).replace(/\\/g, '/').toLowerCase();
+    return rel === lower || rel.endsWith('/' + lower);
+  });
+}
+
+function addSiteAgentReadinessFindings(inputPaths, files, root, stats, findings) {
+  if (!hasDirectoryInput(inputPaths)) return;
+
+  if (!hasCollectedFile(files, root, 'robots.txt')) {
+    addFinding(findings, stats, {
+      key: 'robots-txt-missing',
+      category: 'agent',
+      severity: 'tip',
+      wcag: 'Agent readiness structural hygiene',
+      level: 'Review',
+      title: 'robots.txt was not found in the scanned site files',
+      affected_users: 'Search crawlers, answer-engine crawlers, and site operators controlling crawler access',
+      location: 'site root',
+      description: 'No robots.txt file was found in the scanned directory. Agents and crawlers may have less explicit guidance about what they can access.',
+      fix: 'Add a site-root robots.txt. For public AI-facing sites, consider explicit sitemap and Content-Signal directives that match your policy.',
+      legal_exposure: 'Not a legal issue; affects crawler and agent access clarity.',
+    });
+  } else addCheck(stats, 'agent', 'pass');
+
+  if (!hasCollectedFile(files, root, 'sitemap.xml')) {
+    addFinding(findings, stats, {
+      key: 'sitemap-missing',
+      category: 'agent',
+      severity: 'tip',
+      wcag: 'Agent readiness structural hygiene',
+      level: 'Review',
+      title: 'sitemap.xml was not found in the scanned site files',
+      affected_users: 'Search and answer-engine crawlers discovering canonical public pages',
+      location: 'site root',
+      description: 'No sitemap.xml file was found in the scanned directory.',
+      fix: 'Add a site-root sitemap.xml and reference it from robots.txt so crawlers can discover important public URLs.',
+      legal_exposure: 'Not a legal issue; affects URL discovery for search and answer engines.',
+    });
+  } else addCheck(stats, 'agent', 'pass');
+
+  if (!hasCollectedFile(files, root, 'llms.txt')) {
+    addFinding(findings, stats, {
+      key: 'llms-txt-missing',
+      category: 'agent',
+      severity: 'tip',
+      wcag: 'Agent readiness structural hygiene',
+      level: 'Review',
+      title: 'llms.txt was not found in the scanned site files',
+      affected_users: 'AI agents and answer engines looking for a concise site map or content guide',
+      location: 'site root',
+      description: 'No llms.txt file was found in the scanned directory. This proposed convention is optional, but can help agents find the most important content.',
+      fix: 'Consider adding a site-root llms.txt that describes the site, key pages, docs, APIs, and crawl/use policy in plain text.',
+      legal_exposure: 'Not a legal issue; affects optional AI-agent content discovery.',
+    });
+  } else addCheck(stats, 'agent', 'pass');
+}
+
 function scoreCategory(cat) {
   const total = cat.pass + cat.fail;
   if (total === 0) return cat.review > 0 ? 60 : 100;
@@ -469,6 +582,16 @@ function priorityFor(severity) {
   return 'P2';
 }
 
+function criteriaFromFindings(findings) {
+  const criteria = new Set();
+  for (const f of findings) {
+    for (const m of String(f.wcag || '').matchAll(/\b([1-4]\.\d\.\d{1,2})\b/g)) {
+      criteria.add(m[1]);
+    }
+  }
+  return [...criteria].sort((a, b) => a.localeCompare(b, undefined, { numeric: true }));
+}
+
 function main() {
   const opts = parseArgs(process.argv.slice(2));
   const root = process.cwd();
@@ -477,6 +600,7 @@ function main() {
   const findings = [];
 
   for (const file of files) scanFile(file, root, stats, findings);
+  addSiteAgentReadinessFindings(opts.paths, files, root, stats, findings);
 
   const categories = CATEGORY_ORDER.map(id => {
     const cat = stats[id];
@@ -487,6 +611,7 @@ function main() {
   const critical = findings.filter(f => f.severity === 'critical').length;
   const warnings = findings.filter(f => f.severity === 'warning').length;
   const tips = findings.filter(f => f.severity === 'tip').length;
+  const legalCriteria = criteriaFromFindings(findings);
 
   const audit = {
     metadata: {
@@ -502,7 +627,7 @@ function main() {
       audit_tier: 'Tier 1 (static file scan only)',
       audit_methods: [
         `Static scan of ${files.length} UI-like file(s)`,
-        'Pattern checks for semantic HTML, keyboard traps, labels, reflow, motion, and AEO structure',
+        'Pattern checks for semantic HTML, keyboard traps, labels, reflow, motion, AEO structure, and site-level agent-readiness files when a directory is scanned',
         'Runtime behavior, contrast ratios, and screen-reader task completion were not fully verified',
       ],
     },
@@ -517,19 +642,24 @@ function main() {
     },
     findings,
     legal_risk: {
-      overall_level: critical ? 'high' : warnings ? 'medium' : 'low',
-      overall_score: critical ? 8 : warnings ? 5 : 2,
+      assessment_mode: 'wcag_criteria_context',
+      narrative: 'Technical WCAG criteria mapping only. This is not a legal opinion and is not derived from warning counts.',
+      mapped_criteria: legalCriteria,
       jurisdictions: [
-        { name: 'US ADA', law: 'ADA Title III', risk_level: critical ? 'high' : warnings ? 'medium' : 'low', detail: 'Public-facing web UI may create access barriers.', score: critical ? 8 : warnings ? 5 : 2 },
-        { name: 'EU EAA', law: 'European Accessibility Act', risk_level: warnings || critical ? 'medium' : 'low', detail: 'Applies to many consumer digital services.', score: warnings || critical ? 5 : 2 },
-        { name: 'Japan JIS', law: 'JIS X 8341-3', risk_level: warnings || critical ? 'medium' : 'low', detail: 'Relevant for Japanese public and enterprise accessibility expectations.', score: warnings || critical ? 5 : 2 },
-        { name: 'Taiwan', law: 'Taiwan accessibility standards', risk_level: warnings || critical ? 'medium' : 'low', detail: 'Relevant for Taiwan public-sector and public-facing services.', score: warnings || critical ? 5 : 2 },
+        { name: 'US ADA', law: 'ADA Title III / Section 508 context', detail: 'Use the mapped WCAG criteria as technical evidence; legal exposure depends on business model, sector, and jurisdiction-specific facts.', criteria: legalCriteria },
+        { name: 'EU EAA', law: 'European Accessibility Act', detail: 'Use the mapped WCAG criteria as technical evidence for consumer digital-service accessibility planning.', criteria: legalCriteria },
+        { name: 'Japan JIS', law: 'JIS X 8341-3 context', detail: 'Use the mapped WCAG criteria as technical evidence; confirm procurement or sector requirements separately.', criteria: legalCriteria },
+        { name: 'Taiwan', law: 'Taiwan accessibility context', detail: 'Use the mapped WCAG criteria as technical evidence only; confirm current local program, certification, and seal requirements before making a compliance claim.', criteria: legalCriteria },
+        { name: 'Canada ACA', law: 'Accessible Canada Act context', detail: 'Use the mapped WCAG criteria as technical evidence; applicability depends on organization type and regulated context.', criteria: legalCriteria },
+        { name: 'Australia DDA', law: 'Disability Discrimination Act context', detail: 'Use the mapped WCAG criteria as technical evidence; legal assessment requires local context and counsel.', criteria: legalCriteria },
       ],
     },
     remediation: findings.map(f => ({
       priority: priorityFor(f.severity),
+      key: f.key,
       title: f.title,
       location: f.location,
+      wcag: f.wcag,
       fix: f.fix || 'Review and fix.',
     })),
     testing_recommendations: [
