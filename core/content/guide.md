@@ -109,7 +109,7 @@ For context on where this guide sits in the overall workflow:
 |-------|-------|--------------|-------------------|
 | Design (this) | `/beacon:guide` | Pattern recommendations, defaults, scaffolds | Predict your specific users, context, edge cases |
 | Development | `/beacon:advisor` | Real-time checks on code edits via PostToolUse hook | Verify runtime behaviour, dynamic interactions |
-| Review | `/beacon:inspect` | Tier 1–3 audit, scoring, legal risk assessment | Detect ~60–70% of WCAG criteria that need humans |
+| Review | `/beacon:inspect` | Tier 1–3 audit, scoring, jurisdiction-aware WCAG context | Detect ~60–70% of WCAG criteria that need humans |
 | Real-world | (out of skill scope) | Real disabled-user testing, hired disabled team members, iterative pre-launch consultation | (this is what closes the gap the three skills can't) |
 
 When the user finishes a design consultation with this skill, suggest the next phase rather than implying the work is done. Example closer:

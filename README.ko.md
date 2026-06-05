@@ -45,7 +45,7 @@ Tier 1은 빠른 기준선이지 최종 판정이 아닙니다. Tier 1과 Tier 2
 }
 ```
 
-Plugin facts: `beacon`, version `2.0.9`, MIT, repository `chiehweihuang/beacon`.
+Plugin facts: `beacon`, version `2.0.10`, MIT, repository `chiehweihuang/beacon`.
 
 ## Categories
 

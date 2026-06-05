@@ -27,7 +27,7 @@ Check for `a11y-audience` setting in CLAUDE.md or user instruction. Default: `de
 | `expert` | Criterion + fix only | ~30/issue |
 | `dev` | Criterion + code example | ~80/issue |
 | `designer` | Who is affected + experience impact | ~70/issue |
-| `lead` | Legal risk + business impact | ~90/issue |
+| `lead` | Jurisdiction context + business impact | ~90/issue |
 | `team` | Checklist for PR review | ~60/issue |
 
 ## Output Format

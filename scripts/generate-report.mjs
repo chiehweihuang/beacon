@@ -81,7 +81,7 @@ const I18N = {
     // Tabs
     tab_overview: '總覽',
     tab_findings: '發現項',
-    tab_legal: '法律風險',
+    tab_legal: '法域脈絡',
     tab_methodology: '方法論與限制',
     tab_remediation: '修復計畫',
     // Section headings (suggestion-toned)
@@ -91,7 +91,7 @@ const I18N = {
     h2_tips: '參考建議與最佳實踐',
     h2_remediation_priority: '修復優先序',
     h2_testing_recommendations: '測試建議',
-    h2_legal_risk: '法律風險評估',
+    h2_legal_risk: '法域脈絡與 WCAG 對照',
     h2_manual_checks: '人工檢查項',
     h2_passed_checks: '通過項',
     h2_not_applicable_checks: '不適用項',
@@ -137,7 +137,7 @@ const I18N = {
     finding_reason: '原因',
     finding_learn_more: 'Learn more',
     finding_empty: '此分類目前無發現項目。',
-    // Legal risk
+    // Jurisdiction context
     legal_deadline: '截止日',
     legal_overall: '整體風險',
     // Remediation (suggestion-toned)
@@ -172,7 +172,7 @@ const I18N = {
   en: {
     tab_overview: 'Overview',
     tab_findings: 'Findings',
-    tab_legal: 'Legal Risk',
+    tab_legal: 'Jurisdiction Context',
     tab_methodology: 'Methodology & Limits',
     tab_remediation: 'Remediation',
     h2_category_summary: 'Category Summary',
@@ -181,7 +181,7 @@ const I18N = {
     h2_tips: 'Suggestions & Best Practices',
     h2_remediation_priority: 'Remediation Priority',
     h2_testing_recommendations: 'Testing Recommendations',
-    h2_legal_risk: 'Legal Risk Assessment',
+    h2_legal_risk: 'Jurisdiction Context & WCAG Mapping',
     h2_manual_checks: 'Manual Checks',
     h2_passed_checks: 'Passed Checks',
     h2_not_applicable_checks: 'Not Applicable Checks',
@@ -1523,7 +1523,7 @@ const html = `<!DOCTYPE html>
   .code-before pre { border: 1px solid var(--fail); }
   .code-after pre { border: 1px solid var(--pass); }
 
-  /* Legal Risk */
+  /* Jurisdiction context */
   .risk-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 1rem; margin: 1rem 0; }
   .risk-card { background: var(--surface); padding: 1rem; border-radius: 8px; border-left: 4px solid var(--accent); }
   .risk-header { display: flex; justify-content: space-between; align-items: center; }

@@ -45,7 +45,7 @@ Claude Code config 需在 `extraKnownMarketplaces` 加入：
 }
 ```
 
-Plugin facts：`beacon`、version `2.0.9`、MIT、repository `chiehweihuang/beacon`。
+Plugin facts：`beacon`、version `2.0.10`、MIT、repository `chiehweihuang/beacon`。
 
 ## 檢查類別
 

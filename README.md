@@ -73,7 +73,7 @@ Plugin facts:
 | Field | Value |
 |---|---|
 | Name | `beacon` |
-| Version | `2.0.9` |
+| Version | `2.0.10` |
 | Repository | `chiehweihuang/beacon` |
 | License | MIT |
 | Author | chiehweihuang |

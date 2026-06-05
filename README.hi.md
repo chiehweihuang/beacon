@@ -47,7 +47,7 @@ Marketplace जोड़ें:
 }
 ```
 
-Plugin facts: `beacon`, version `2.0.9`, MIT, repository `chiehweihuang/beacon`.
+Plugin facts: `beacon`, version `2.0.10`, MIT, repository `chiehweihuang/beacon`.
 
 ## Categories
 
