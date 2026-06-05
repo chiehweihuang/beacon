@@ -7,7 +7,7 @@
     {
       "name": "beacon",
       "source": "./",
-      "description": "Accessibility + AEO inspection for Claude Code. Lighthouse-style scoring, interactive reports, legal risk assessment, and auto-advisory hook."
+      "description": "Accessibility + AEO inspection for Claude Code. Lighthouse-style scoring, interactive reports, jurisdiction-aware WCAG context, and auto-advisory hook."
     }
   ]
 }

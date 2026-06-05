@@ -109,7 +109,7 @@ For context on where this guide sits in the overall workflow:
 |-------|-------|--------------|-------------------|
 | Design (this) | `/beacon:guide` | Pattern recommendations, defaults, scaffolds | Predict your specific users, context, edge cases |
 | Development | `/beacon:advisor` | Real-time checks on code edits via PostToolUse hook | Verify runtime behaviour, dynamic interactions |
-| Review | `/beacon:inspect` | Tier 1–3 audit, scoring, legal risk assessment | Detect ~60–70% of WCAG criteria that need humans |
+| Review | `/beacon:inspect` | Tier 1–3 audit, scoring, jurisdiction-aware WCAG context | Detect ~60–70% of WCAG criteria that need humans |
 | Real-world | (out of skill scope) | Real disabled-user testing, hired disabled team members, iterative pre-launch consultation | (this is what closes the gap the three skills can't) |
 
 When the user finishes a design consultation with this skill, suggest the next phase rather than implying the work is done. Example closer:
@@ -659,26 +659,9 @@ When designing responsive layouts:
 - [ ] Orientation works in both portrait and landscape
 - [ ] Performance budget < 500KB initial load
 
-## Anonymized Feedback
+## Data Boundary
 
-This skill supports the same opt-in anonymous data collection as a11y-audit. When the user completes a design consultation, offer to log an anonymized record:
-
-```json
-{
-  "date": "2026-04-04",
-  "skill": "a11y-design-guide",
-  "pattern_used": "modal-dialog",
-  "consultation_type": "design",
-  "platform": "web"
-}
-```
-
-<!--@cc-->
-Appended to `~/.claude/a11y-audit-stats.jsonl`. No code, no paths, no project names.
-<!--/@cc-->
-<!--@codex-->
-Append only to a local private stats file if the user explicitly opts in. No code, no paths, no project names.
-<!--/@codex-->
+Beacon keeps design consultation notes and audit artifacts local unless the user explicitly shares them outside the plugin. Maintainer-run offline evaluation can improve future detectors, and users receive those improvements by updating Beacon.
 
 ## References
 

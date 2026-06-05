@@ -45,7 +45,7 @@ These are intentionally listed so contributors and auto-research loops can targe
 ### Report (HTML) edges
 
 - **`buildScoreRing` label argument** is now a bilingual `<span>` pair, but a few SVG fallback paths might still hit it as plain text under uncommon JSON shapes. Not breaking anything observed, but worth fuzz-testing.
-- **`buildLegalRiskHTML` uppercases `j.risk_level`** for the badge ("HIGH", "MEDIUM"). This is still imperative-toned compared to the tone pass elsewhere. Likely candidate for "Higher exposure" / "Notable exposure" / "Moderate exposure" / "Lower exposure" mapping.
+- **`buildLegalRiskHTML` keeps the legacy function/data key name** for backwards compatibility even though the rendered UI now says "Jurisdiction Context". A future schema version should rename the JSON surface from `legal_risk` to `jurisdiction_context` while preserving a migration path for old audit files.
 - **Comparison banner** (when `--previous` is passed) has not been audited for tone — only its labels were i18n'd.
 - **CSV / JSON export of audit results** does not exist. Currently only the rendered HTML report is the human-facing output; JSON is the source of truth but consumers have to parse it themselves.
 - **`audit-results.json` schema is not formally documented**. Implicit schema lives in `commands/inspect.md` step 6 and in actual generated files. A JSON Schema document would help auto-research and tooling integration.

@@ -243,15 +243,14 @@ type AuditResults = {
     axe_node_count?: number | string;
   }>;
   legal_risk?: {
-    overall_level: "critical" | "high" | "medium" | "low";
-    overall_score: number;     // 1-10
-    narrative?: string;
+    assessment_mode: "wcag_criteria_context";
+    narrative?: string;        // states that this is not legal advice
+    mapped_criteria?: string[]; // WCAG criteria found in this audit
     jurisdictions: Array<{
       name: string;
       law: string;
-      risk_level: "critical" | "high" | "medium" | "low";
-      score: number;           // 1-10
-      detail?: string;
+      detail?: string;         // jurisdiction context, not a legal conclusion
+      criteria?: string[];     // mapped WCAG criteria relevant to this context
       deadline?: string;
     }>;
   };

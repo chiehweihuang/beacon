@@ -3,7 +3,7 @@ description: >-
   Lighthouse-style accessibility inspection: 0-100 scoring across 10 categories (contrast,
   keyboard, screen reader, forms, media, motion, touch, cognitive, responsive, AEO),
   interactive HTML report with score rings and code diffs, before/after comparison with
-  previous inspections, legal risk scoring for 6 jurisdictions (US ADA, EU EAA, Japan JIS,
+  previous inspections, legal context mapping for 6 jurisdictions (US ADA, EU EAA, Japan JIS,
   Taiwan, Canada ACA, Australia DDA), framework-specific fix patterns (React/Vue/Angular/
   Svelte/HTML), and CI/CD pipeline integration. Calibrated against a 44-site benchmark.
   Three-tier architecture: static analysis → Playwright browser audit → manual testing
@@ -16,15 +16,15 @@ description: >-
 
 # Accessibility Audit v2.1
 
-Conduct a structured accessibility audit that produces **quantitative scores** and an **interactive HTML report** — not just a checklist. Think Lighthouse for accessibility, but with legal risk assessment and human-centered explanations.
+Conduct a structured accessibility audit that produces **quantitative scores** and an **interactive HTML report** — not just a checklist. Think Lighthouse for accessibility, but with jurisdiction-aware context and human-centered explanations.
 
 ## What This Version Adds
 
 1. **Scoring** — 0-100 score per category and overall, like Lighthouse
 2. **HTML Report** — Interactive visual report with score rings, collapsible findings, code diffs
 3. **Before/After Comparison** — Load a previous audit JSON to show deltas
-4. **Legal Risk Scoring** — Per-jurisdiction risk level with exposure scores
-5. **Anonymized Feedback** — Opt-in aggregate stats for continuous improvement
+4. **Jurisdiction Context** — Per-jurisdiction framing tied to the WCAG criteria found in the audit, without presenting mechanical warning counts as legal risk
+5. **Local Artifacts Only** — Beacon keeps audit artifacts local; detector updates come from maintainer-run offline work and plugin releases
 6. **Confidence Level** — Indicates how much of the page was auditable (CSR/SPA detection)
 7. **Unverifiable State** — Items that cannot be confirmed from static HTML are flagged, not penalized
 8. **Pedagogical Demo Detection** — Intentionally bad examples in educational content are excluded from scoring
@@ -50,13 +50,13 @@ Ask the user (if not already specified):
 3. **Target jurisdictions**: US ADA, EU EAA, Japan JIS, Taiwan, Canada ACA, Australia DDA?
 4. **Platform**: Web / iOS / Android / Desktop?
 5. **Previous audit**: Is there a previous `audit-results.json` to compare against?
-6. **Feedback opt-in**: Would you like to contribute anonymized aggregate data to improve this skill?
+6. **Data boundary**: Beacon keeps audit artifacts local unless you explicitly decide to share them outside the plugin.
 
 ### Step 2: Automated Scan (default-on)
 
 Run automated tools first. Treat this as the baseline tier — if any of the tools below is unavailable, log the gap and continue, but do not skip the entire step on the assumption that "manual will catch it".
 
-**Why default-on:** Beacon's Tier 1 static analysis cannot detect computed-style issues (color contrast in particular). The improve pipeline confirmed this empirically — a single real-world site survey (tokyotaiwanradar.com, 2026-05-26) surfaced a `color-contrast` violation axe-core caught and Tier 1 missed. Running axe-core in-process closes that detection gap without re-implementing contrast math.
+**Why default-on:** Beacon's Tier 1 static analysis cannot detect computed-style issues (color contrast in particular). The improve pipeline confirmed this empirically. A 50-site real-world survey (2026-05-31) found `color-contrast` violations axe-core caught and the Tier 1 static scanner missed on 18 of the 50 sites, the single largest cross-site detection gap (next: `link-name` on 9). Running axe-core in-process closes that gap without re-implementing contrast math.
 
 ```bash
 # axe-core via Playwright — REQUIRED baseline if Playwright MCP is available
@@ -79,6 +79,8 @@ node scripts/static-audit.mjs --scope "<scope>" --output audit-results.json <fil
 `scripts/static-audit.mjs` is Beacon's own scanner: it walks the given files, applies pattern checks for the same 10 categories the report scores, and writes the `audit-results.json` source-of-truth. The external tools (axe/Lighthouse/eslint) cross-check it; axe in particular covers the computed-style class (contrast) the static scanner structurally cannot. Use both when available.
 
 **Fallback chain:** if Playwright MCP is unavailable, fall back to the Beacon-native static scanner + Tier 1 manual analysis AND record `"requires_live_audit": true` in `audit-results.json` metadata so the maintainer knows the contrast/computed-style class of findings was not exercised.
+
+**Contrast verification gate (do not skip):** Color contrast is the single largest real-world gap a static scan cannot see (18 of 50 sites in the 2026-05-31 survey). Before writing `audit-results.json`, answer explicitly: was contrast actually exercised by a rendering engine (axe-core via a browser) this run? If not, whether because no browser was available or because the run skipped it, you MUST (a) set `"requires_live_audit": true` in metadata, and (b) emit the `contrast` category as an explicit unverified finding (severity tip, title "Contrast not verified, run Tier 2"), not a silent `review` count. Never report a passing contrast score from a static-only run.
 
 Automated tools catch ~30-40% of WCAG criteria. The remaining 60-70% (cognitive load, screen-reader task completion, dynamic interaction quality) requires manual review — but for the 30-40% that *is* automatable, skipping the run produces silent false negatives.
 
@@ -424,24 +426,15 @@ Overall score is a weighted average:
 | Media | 5% |
 | Agent | 5% |
 
-### Step 5: Assess Legal Risk
+### Step 5: Map Jurisdiction Context
 
-For each selected jurisdiction, calculate an exposure score (1-10):
+For each selected jurisdiction, map the findings to the WCAG criteria they implicate. Do not convert warning counts into a legal conclusion.
 
-| Factor | Impact |
-|--------|--------|
-| Level A violation exists | +4 |
-| Level AA violation exists | +2 |
-| Jurisdiction has active lawsuits (US ADA) | +2 |
-| Deadline approaching (EU EAA, ADA Title II) | +1 |
-| CAPTCHA or overlay widget detected | +3 |
-| No accessibility statement present | +1 |
-
-Cap at 10. Map to risk levels:
-- 8-10: CRITICAL
-- 5-7: HIGH
-- 3-4: MEDIUM
-- 1-2: LOW
+The legal section should state:
+- Which WCAG criteria were found.
+- Which jurisdictions are relevant to review.
+- That this is technical accessibility evidence, not a legal opinion.
+- That Taiwan-specific certification, seal, and current-version claims must be verified before asserting compliance.
 
 Reference: `../references/legal-brief.md`
 
@@ -492,16 +485,15 @@ Write `audit-results.json` in the project root (or user-specified location). Thi
     }
   ],
   "legal_risk": {
-    "overall_level": "high",
-    "overall_score": 6,
+    "assessment_mode": "wcag_criteria_context",
+    "narrative": "Technical WCAG criteria mapping only. This is not a legal opinion and is not derived from warning counts.",
+    "mapped_criteria": ["1.4.3"],
     "jurisdictions": [
       {
         "name": "US ADA Title III",
         "law": "Americans with Disabilities Act",
-        "risk_level": "high",
-        "score": 7,
-        "detail": "3 Level A violations. 8,667 lawsuits in 2025.",
-        "deadline": null
+        "detail": "Use the mapped WCAG criteria as technical evidence; legal exposure depends on business model, sector, and jurisdiction-specific facts.",
+        "criteria": ["1.4.3"]
       }
     ]
   },
@@ -569,9 +561,9 @@ Last reviewed on [date] based on:
 - Manual review against WCAG 2.2 AA
 ```
 
-### Step 9: Anonymized Feedback (Opt-in)
+### Step 9: Local Audit Summary
 
-If the user opted in during Step 1, save anonymized aggregate data to `~/.claude/a11y-audit-stats.jsonl` (one JSON line per audit). This data contains NO source code, file paths, or project names:
+If useful, write a local summary file next to the generated audit artifacts. Do not send it anywhere, and do not describe this as telemetry or product analytics.
 
 ```json
 {
@@ -583,17 +575,19 @@ If the user opted in during Step 1, save anonymized aggregate data to `~/.claude
   "finding_counts": { "critical": 3, "warning": 7, "tip": 5 },
   "top_violations": ["1.4.3", "2.4.7", "1.1.1"],
   "jurisdictions": ["US ADA", "Japan JIS"],
-  "legal_risk_level": "high",
+  "legal_context": "WCAG criteria mapped; no legal conclusion",
   "has_previous": true,
   "score_delta": 12
 }
 ```
 
-What this enables:
-- Track which WCAG criteria are most commonly violated (to improve skill guidance)
-- Track score improvement trends across audits
-- Identify which categories need better skill coverage
-- All data stays local unless the user explicitly shares the file
+What this enables locally:
+- Compare WCAG criteria across your own audits
+- Track score changes across your own project snapshots
+- Identify which categories need more work in the current product
+- Keep audit artifacts local unless the user explicitly shares the file
+
+Beacon keeps these results local unless the user explicitly shares them outside the plugin. Detector improvements come from maintainer-run offline evaluation and plugin updates.
 
 ### Step 10: Follow Up
 
