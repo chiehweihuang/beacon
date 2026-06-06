@@ -1,0 +1,18 @@
+{
+  "defaultBranch": "master",
+  "tagPrefix": "v",
+  "versionFile": ".claude-plugin/plugin.json",
+  "versionField": "version",
+  "test": "node --test",
+  "verify": "node build.mjs --check",
+  "changelogFile": "CHANGELOG.md",
+  "readmeSync": [
+    { "file": "README.md", "pattern": "| Version | `{VERSION}` |" }
+  ],
+  "prePublish": ["gh auth switch --user chiehweihuang"],
+  "postRelease": [
+    "node tools/deploy-codex.mjs",
+    "gh auth switch --user devBrightRaven"
+  ],
+  "githubRelease": true
+}
