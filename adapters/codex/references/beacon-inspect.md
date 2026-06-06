@@ -227,6 +227,31 @@ If the page appears to be educational (accessibility tutorial, demo site, traini
 
 **Action:** Exclude these elements from scoring. Note them in the report as "Pedagogical demo — excluded from score" with a brief explanation of what the demo teaches.
 
+### Step 2d: Performance & Best-Practices Signal (Lighthouse, supplementary)
+
+Beacon scores accessibility with axe-core. Lighthouse is used here ONLY for the categories axe does not cover — performance, best-practices, seo — as a **supplementary signal that is never folded into the accessibility score**. Skip this step entirely if Lighthouse or Chrome is unavailable; the a11y audit stands on its own.
+
+**Run Lighthouse in parallel with the Tier 2 axe-core audit, NOT inside the same page load.** The two have opposite needs: axe-core wants the fully rendered, warm DOM; Lighthouse performance wants a cold, throttled, from-scratch load. Sharing one page load would pollute the performance numbers. Start the two runs together — the browser axe-core drives and the Chrome that Lighthouse launches are independent — so total wall-clock collapses to the slower of the two rather than their sum.
+
+Exclude `accessibility` from the Lighthouse categories (axe-core is the stronger a11y engine and this avoids double-counting). The three remaining categories share one trace, so adding best-practices and seo on top of performance is nearly free:
+
+```bash
+# 1. Lighthouse for the three non-a11y categories
+npx lighthouse <url> --only-categories=performance,best-practices,seo \
+  --output=json --output-path=lh.json --quiet \
+  --chrome-flags="--headless=new --no-sandbox"
+
+# 2. Normalize and merge into the audit source-of-truth
+node scripts/lighthouse-extract.mjs lh.json --merge audit-results.json
+```
+
+`scripts/lighthouse-extract.mjs` normalizes the raw report into a compact `lighthouse` object (category scores, Core Web Vitals, main-thread breakdown, DOM stats, opportunities) and derives the value-add: **cross-cutting root causes** — a single cause such as an oversized DOM mapped to every dimension it harms (performance + a11y + AEO), the insight no single tool surfaces on its own. `generate-report.mjs` renders a "Performance" tab automatically whenever this object is present.
+
+Carry these caveats into the report (the extractor already embeds them):
+- Lighthouse scores swing run-to-run with device emulation, CPU throttle, and machine load. Present them as directional, not absolute.
+- This is a supplementary signal and is NOT part of the Beacon accessibility score.
+- The Lighthouse CLI default is mobile emulation with 4x CPU throttle; a desktop run (`--preset=desktop`) typically scores 15-25 points higher. Note the form factor when comparing.
+
 ### Step 3: Manual Review
 
 Check each category systematically. Read `../references/wcag-quick.md` for criterion details.

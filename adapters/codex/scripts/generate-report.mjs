@@ -1232,6 +1232,114 @@ function buildLimitationsHTML(audit) {
     </div>`;
 }
 
+// Performance Signals tab — rendered ONLY when audit.lighthouse is present.
+// Lighthouse covers the categories axe-core does not (performance / best-practices
+// / seo). This is a SUPPLEMENTARY signal, never folded into the a11y score. The
+// headline is the cross-cutting section: one root cause (e.g. an oversized DOM)
+// mapped to every Beacon dimension it harms.
+const AFFECTS_LABEL = {
+  performance: ['效能', 'Performance'],
+  a11y: ['無障礙', 'Accessibility'],
+  aeo: ['AEO', 'AEO'],
+};
+
+function affectsBadges(affects = []) {
+  return affects
+    .map((a) => {
+      const [zh, en] = AFFECTS_LABEL[a] || [a, a];
+      return `<span style="display:inline-block;font-size:.72rem;padding:.1rem .45rem;margin:0 .25rem .25rem 0;border:1px solid var(--border);border-radius:999px;color:var(--text);background:var(--bg);">${bi(zh, en)}</span>`;
+    })
+    .join('');
+}
+
+function perfChip(label, score) {
+  if (score == null) return '';
+  return `<div style="flex:1;min-width:120px;text-align:center;padding:.9rem .6rem;border:1px solid var(--border);border-radius:10px;background:var(--surface);">
+    <div style="font-size:2rem;font-weight:700;line-height:1;color:${scoreColor(score)};">${score}</div>
+    <div style="font-size:.82rem;margin-top:.35rem;color:var(--text);">${escapeHtml(label)}</div>
+  </div>`;
+}
+
+function buildPerformanceHTML(audit) {
+  const lh = audit.lighthouse;
+  if (!lh) return '';
+
+  const meta = [
+    lh.form_factor ? `${bi('裝置', 'Device')}: ${escapeHtml(lh.form_factor)}` : '',
+    lh.version ? `Lighthouse ${escapeHtml(lh.version)}` : '',
+    lh.final_url ? escapeHtml(lh.final_url) : '',
+  ].filter(Boolean).join(' &middot; ');
+
+  const banner = `<div role="note" style="border:1px solid var(--warn);border-radius:8px;padding:.8rem 1rem;margin:.5rem 0 1.2rem;background:var(--bg);">
+    <div style="font-size:.9rem;color:var(--text);">&#9888; ${bi(lh.note_zh || '', lh.note_en || '')}</div>
+    ${meta ? `<div style="font-size:.78rem;margin-top:.4rem;color:var(--text);opacity:.75;">${meta}</div>` : ''}
+  </div>`;
+
+  const chips = (lh.categories || []).length
+    ? `<div style="display:flex;gap:.7rem;flex-wrap:wrap;margin-bottom:1.4rem;">
+        ${lh.categories.map((c) => perfChip(c.title, c.score)).join('')}
+      </div>`
+    : '';
+
+  const crossCutting = (lh.cross_cutting || []).length
+    ? `<h3>${bi('跨維度根因', 'Cross-cutting root causes')}</h3>
+       <p class="category-desc">${bi(
+         '同一個根因同時影響多個維度。這是單一工具看不到、Beacon 整合後才浮現的洞察。',
+         'One root cause harms several dimensions at once — the insight no single tool surfaces, only the integrated view does.',
+       )}</p>
+       ${lh.cross_cutting.map((c) => `
+         <div style="border-left:3px solid var(--accent);padding:.6rem .9rem;margin:.6rem 0;background:var(--surface);border-radius:0 8px 8px 0;">
+           <div style="font-weight:600;color:var(--text);margin-bottom:.3rem;">${bi(c.title_zh || '', c.title_en || '')}</div>
+           <div style="margin-bottom:.5rem;">${affectsBadges(c.affects)}</div>
+           <div style="font-size:.88rem;color:var(--text);">${bi(c.detail_zh || '', c.detail_en || '')}</div>
+         </div>`).join('')}`
+    : '';
+
+  const vitals = (lh.metrics || []).length
+    ? `<h3>${bi('核心網頁指標 (Core Web Vitals)', 'Core Web Vitals')}</h3>
+       <table class="summary-table">
+         <thead><tr><th>${bi('指標', 'Metric')}</th><th class="num">${bi('數值', 'Value')}</th><th class="num">${bi('分數', 'Score')}</th></tr></thead>
+         <tbody>
+           ${lh.metrics.map((m) => `<tr>
+             <td>${escapeHtml(m.label)}</td>
+             <td class="num">${escapeHtml(m.value || '--')}</td>
+             <td class="num" style="color:${m.score == null ? 'var(--text)' : scoreColor(m.score)};font-weight:600;">${m.score == null ? '--' : m.score}</td>
+           </tr>`).join('')}
+         </tbody>
+       </table>`
+    : '';
+
+  let mainthread = '';
+  if ((lh.mainthread || []).length) {
+    const max = Math.max(...lh.mainthread.map((m) => m.ms), 1);
+    mainthread = `<h3>${bi('主執行緒工作拆解', 'Main-thread work breakdown')}</h3>
+      <div style="margin:.5rem 0 1.2rem;">
+        ${lh.mainthread.map((m) => `
+          <div style="display:flex;align-items:center;gap:.6rem;margin:.3rem 0;">
+            <div style="flex:0 0 11rem;font-size:.84rem;color:var(--text);">${escapeHtml(m.group)}</div>
+            <div style="flex:1;background:var(--bg);border-radius:4px;overflow:hidden;">
+              <div style="width:${Math.round((m.ms / max) * 100)}%;min-width:2px;height:1.1rem;background:var(--accent);"></div>
+            </div>
+            <div style="flex:0 0 5rem;text-align:right;font-size:.84rem;font-variant-numeric:tabular-nums;color:var(--text);">${m.ms.toLocaleString('en-US')} ms</div>
+          </div>`).join('')}
+      </div>`;
+  }
+
+  const opportunities = (lh.opportunities || []).length
+    ? `<h3>${bi('優化機會', 'Opportunities')}</h3>
+       <ul>${lh.opportunities.map((o) => `<li>${escapeHtml(o.title)}${o.value ? ` &mdash; ${escapeHtml(o.value)}` : ''}${o.savings_ms ? ` <span style="opacity:.7;">(~${o.savings_ms.toLocaleString('en-US')} ms)</span>` : ''}</li>`).join('')}</ul>`
+    : '';
+
+  const issueList = (title, items) =>
+    items && items.length
+      ? `<h3>${title}</h3><ul>${items.map((i) => `<li>${escapeHtml(i.title)}${i.value ? ` &mdash; ${escapeHtml(i.value)}` : ''}</li>`).join('')}</ul>`
+      : '';
+
+  return `${banner}${chips}${crossCutting}${vitals}${mainthread}${opportunities}
+    ${issueList(bi('最佳實務問題', 'Best Practices issues'), lh.best_practices_issues)}
+    ${issueList(bi('SEO 問題', 'SEO issues'), lh.seo_issues)}`;
+}
+
 const html = `<!DOCTYPE html>
 <html lang="en">
 <head>
@@ -1979,6 +2087,7 @@ ${buildContextBanner()}
   <button type="button" role="tab" class="tab" data-tab-btn="legal" aria-selected="false" aria-controls="tab-legal">${t('tab_legal')}</button>
   <button type="button" role="tab" class="tab" data-tab-btn="methodology" aria-selected="false" aria-controls="tab-methodology">${t('tab_methodology')}</button>
   <button type="button" role="tab" class="tab" data-tab-btn="remediation" aria-selected="false" aria-controls="tab-remediation">${t('tab_remediation')}</button>
+  ${audit.lighthouse ? `<button type="button" role="tab" class="tab" data-tab-btn="performance" aria-selected="false" aria-controls="tab-performance">${bi('效能訊號', 'Performance')}</button>` : ''}
 </div>
 
 <!-- Overview Tab -->
@@ -2055,6 +2164,12 @@ ${buildContextBanner()}
   <h2>${t('h2_testing_recommendations')}</h2>
 ${audit.testing_recommendations ? `<ul>${audit.testing_recommendations.map(rec => `<li>${escapeHtml(rec)}</li>`).join('')}</ul>` : `<p class="empty">${t('rem_empty')}</p>`}
 </div>
+
+${audit.lighthouse ? `<!-- Performance Signals Tab -->
+<div id="tab-performance" class="tab-content" role="tabpanel">
+  <h2>${bi('效能訊號 (Lighthouse)', 'Performance Signals (Lighthouse)')}</h2>
+  ${buildPerformanceHTML(audit)}
+</div>` : ''}
 </main>
 
 <script>

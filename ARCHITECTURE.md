@@ -264,6 +264,21 @@ type AuditResults = {
   testing_recommendations?: string[];
   screenshots?: Array<{ label: string; path: string }>;
   dark_mode_analysis?: object;  // free-form per-audit notes
+  lighthouse?: {                // supplementary Lighthouse signal (Step 2d), NOT in the a11y score
+    source: 'lighthouse';
+    version?: string;
+    form_factor?: string;       // "mobile" | "desktop"
+    final_url?: string;
+    note_zh?: string; note_en?: string;  // run-to-run variance + not-in-a11y-score caveat
+    categories: Array<{ id: string; title: string; score: number | null }>;  // performance/best-practices/seo
+    metrics: Array<{ id: string; key: string; label: string; value: string | null; ms: number | null; score: number | null }>;
+    mainthread: Array<{ group: string; ms: number }>;
+    dom: { nodes: number; depth: number | null; maxChildren: number | null } | null;
+    opportunities: Array<{ id: string; title: string; value: string; savings_ms: number; score: number | null }>;
+    best_practices_issues: Array<{ id: string; title: string; value: string }>;
+    seo_issues: Array<{ id: string; title: string; value: string }>;
+    cross_cutting: Array<{ signal: string; title_zh: string; title_en: string; detail_zh: string; detail_en: string; affects: string[] }>;
+  };
 };
 ```
 
