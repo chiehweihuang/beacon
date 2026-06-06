@@ -6,6 +6,8 @@ Accessibility + AEO inspection plugin for Claude Code.
 
 Beacon is a fast accessibility baseline for agent-assisted UI work: static heuristics first, live audit support when available, and report language that explains what to fix and why. It is useful in the same part of the workflow where teams use Lighthouse, axe, Pa11y, or WAVE, but Beacon is tuned for agent coding sessions, jurisdiction-aware WCAG context, Answer Engine Optimization, and human-centered explanations.
 
+As of 2.1.0, `beacon:inspect` also folds in Lighthouse performance, best-practices, and SEO as supplementary signals and connects them back to accessibility through shared cross-cutting root causes — for example, an oversized DOM that slows style and layout, burdens screen-reader traversal, and hampers AI crawlability at the same time. These signals sit beside the accessibility score; they are not part of it.
+
 Beacon is not a compliance certificate, not a legal opinion, and not a replacement for testing with disabled users. A high Beacon score means the automated checks found fewer problems in the inspected evidence. It does not prove that the product is fully accessible.
 
 Beacon runs locally; site files stay on your machine unless you explicitly share them. The installed plugin does not change itself inside your environment. Maintainers may run offline evaluation loops and add better detectors in later releases; users benefit by updating the plugin.
@@ -16,7 +18,7 @@ Beacon provides three Claude Code commands:
 
 | Command | Use it when | What you get |
 |---|---|---|
-| `beacon:inspect` | You have a page, component, HTML file, or UI change to review. | A 0-100 baseline score, 10 category scores, findings, jurisdiction context notes, remediation order, and an interactive HTML report. |
+| `beacon:inspect` | You have a page, component, HTML file, or UI change to review. | A 0-100 baseline score, 10 category scores, findings, jurisdiction context notes, remediation order, and an interactive HTML report — plus an optional Performance tab (Lighthouse performance/best-practices/SEO) when a browser is available. |
 | `beacon:guide` | You are about to design or code UI. | Accessible patterns, component guidance, WCAG reminders, and design tradeoffs before code is written. |
 | `beacon:advisor` | You are editing HTML, CSS, JSX, TSX, Vue, or Svelte. | Contextual accessibility prompts while you work. It also runs through the Claude Code PostToolUse hook for UI file edits. |
 
@@ -73,7 +75,7 @@ Plugin facts:
 | Field | Value |
 |---|---|
 | Name | `beacon` |
-| Version | `2.0.10` |
+| Version | `2.1.0` |
 | Repository | `chiehweihuang/beacon` |
 | License | MIT |
 | Author | chiehweihuang |
@@ -115,6 +117,12 @@ If a report says `requires_live_audit: true`, Beacon found signals that static e
 | Responsive | 320px reflow, zoom, viewport settings, fixed widths, fluid typography, and layout overflow. |
 | Agent/AEO | Schema.org, metadata, canonical links, heading outline, crawlable content, `robots.txt`, `sitemap.xml`, optional `llms.txt`, and answer-engine clarity. |
 
+### Performance Signal (supplementary)
+
+When Lighthouse and Chrome are available, `beacon:inspect` also runs Lighthouse for **performance, best-practices, and SEO** — the categories axe-core does not cover — in parallel with the live audit, and shows them in a Performance tab. These are supplementary signals: they are **not** part of the 0-100 accessibility score, and axe-core remains the accessibility engine.
+
+Their value is cross-cutting root causes: one cause (such as an oversized DOM) mapped to every dimension it harms — performance, accessibility, and AEO at once — which no single-purpose tool surfaces on its own. Lighthouse scores vary run-to-run with device emulation and CPU throttle (the CLI default is mobile with 4x CPU throttle; `--preset=desktop` typically scores 15-25 points higher), so treat them as directional, not absolute.
+
 ## Jurisdiction Context Coverage
 
 Beacon maps findings to WCAG-linked context across six legal and regulatory environments:
@@ -152,6 +160,7 @@ Then read in this order:
 4. Methodology & Limits to understand evidence strength.
 5. Remediation priority for a practical fix order.
 6. Jurisdiction context notes if the surface is public-facing or regulated.
+7. Performance Signals tab, when present, for the Lighthouse performance/best-practices/SEO snapshot and its cross-cutting root causes. These scores are directional and separate from the accessibility score.
 
 Do not use the score alone to decide release readiness. Keyboard walkthroughs, zoom/reflow checks, and assistive technology tests matter more than a clean-looking dashboard.
 
@@ -164,6 +173,13 @@ Beacon also runs in Codex as a skill. The source lives in `adapters/codex/`; dep
 ```
 
 The Codex adapter carries the same accessibility and AEO knowledge without the Claude Code hook layer. Codex invokes Beacon by skill or goal, not by PostToolUse hook. See [ADAPTERS.md](./ADAPTERS.md).
+
+## Changelog
+
+See [CHANGELOG.md](./CHANGELOG.md) for the full history. Recent highlights:
+
+- **2.1.0** — Lighthouse performance/best-practices/SEO signal in `beacon:inspect`, with cross-cutting root causes and a Performance report tab. Supplementary; not part of the accessibility score. Backward compatible.
+- **2.0.10** — Phase A core-extraction build system (`core/` + `build.mjs` + marker grammar), Codex adapter, deterministic Tier 1 static scanner with new detectors (link-name, list, meta-viewport-zoom, frame-title), contrast verification gate, and default-on automated scan.
 
 ## Development Notes
 
