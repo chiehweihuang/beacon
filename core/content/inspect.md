@@ -172,6 +172,18 @@ If Playwright MCP tools are available (`mcp__plugin_playwright_playwright__*`), 
      });
    `
 
+3b. Run Beacon's structural detectors on the RENDERED DOM (this is what covers SPAs):
+   browser_evaluate -> document.documentElement.outerHTML
+   Write the returned HTML to a rendered snapshot (e.g. .snapshots/<scope>-rendered.html),
+   then run the static scanner on the SNAPSHOT instead of the raw page source:
+     node scripts/static-audit.mjs --scope "<scope> (rendered)" --output audit-results.json <snapshot>.html
+   The scanner's structural pattern checks — language-of-page mismatch (3.1.1),
+   authentication barriers (3.3.8), labels, lists, viewport, AEO, and the rest —
+   then see post-JS content. On a JS-rendered page the raw HTML is near-empty, so a
+   static-only run returns INSUFFICIENT (language) or never sees client-injected
+   widgets (CAPTCHA); running it against the rendered snapshot turns those into real
+   verdicts. Axe (step 3) covers computed-style/contrast; this step covers structure.
+
 4. Tab order test:
    browser_press_key -> Tab (repeat 30x, record focus path)
 
