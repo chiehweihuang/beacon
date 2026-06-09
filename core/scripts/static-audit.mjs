@@ -8,6 +8,7 @@
 import { readFileSync, writeFileSync, statSync, readdirSync } from 'fs';
 import { basename, join, relative } from 'path';
 import { extractText, assessLang } from './lang-detect.mjs';
+import { detectAuthBarriers } from './auth-detect.mjs';
 
 const SKIP_DIRS = new Set(['.git', 'node_modules', 'dist', 'build', '.next', '.nuxt', 'coverage']);
 const FILE_PATTERN = /\.(html?|css|scss|less|jsx|tsx|vue|svelte|js|cjs|mjs|ts)$/i;
@@ -355,6 +356,29 @@ function scanFile(file, root, stats, findings) {
         description: 'The input has no obvious id or ARIA label in static markup.',
         fix: 'Pair it with a <label for="..."> or use aria-labelledby when a visible label already exists.',
         code_before: snippetAt(text, m.index || 0),
+      });
+    }
+
+    // Authentication barriers (3.3.8): cognitive-function-test CAPTCHAs and
+    // paste-blocked password fields that Lighthouse does not flag. INFO signals
+    // (invisible reCAPTCHA / v3 / Turnstile) are not 3.3.8 barriers — skip them.
+    // Object-recognition CAPTCHAs (reCAPTCHA v2 / hCaptcha) are REVIEW, not fail,
+    // because 3.3.8 Minimum exempts them. See core/scripts/auth-detect.mjs.
+    for (const sig of detectAuthBarriers(text)) {
+      if (sig.band !== 'FLAG' && sig.band !== 'REVIEW') continue;
+      addFinding(findings, stats, {
+        key: sig.key,
+        category: 'forms',
+        severity: sig.band === 'FLAG' ? 'warning' : 'tip',
+        check: sig.band === 'REVIEW' ? 'review' : 'fail',
+        wcag: sig.wcag,
+        level: sig.level || 'AA',
+        title: sig.title,
+        affected_users: sig.affected_users,
+        location: `${rel}:${lineOf(text, sig.index || 0)}`,
+        description: sig.description,
+        fix: sig.fix,
+        code_before: sig.code_before || snippetAt(text, sig.index || 0),
       });
     }
 
