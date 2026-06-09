@@ -7,6 +7,7 @@
 
 import { readFileSync, writeFileSync, statSync, readdirSync } from 'fs';
 import { basename, join, relative } from 'path';
+import { extractText, assessLang } from './lang-detect.mjs';
 
 const SKIP_DIRS = new Set(['.git', 'node_modules', 'dist', 'build', '.next', '.nuxt', 'coverage']);
 const FILE_PATTERN = /\.(html?|css|scss|less|jsx|tsx|vue|svelte|js|cjs|mjs|ts)$/i;
@@ -81,12 +82,16 @@ function addCheck(stats, category, status) {
 }
 
 function addFinding(findings, stats, f) {
+  // `check` controls which stats bucket this finding lands in (default 'fail').
+  // REVIEW-level findings pass check:'review' so they don't count as hard fails.
+  // It is stripped from the emitted finding object.
+  const { check = 'fail', ...rest } = f;
   findings.push({
-    level: f.level || 'AA',
-    legal_exposure: f.legal_exposure || 'May affect ADA / EAA / JIS / Taiwan accessibility expectations depending on deployment context.',
-    ...f,
+    level: rest.level || 'AA',
+    legal_exposure: rest.legal_exposure || 'May affect ADA / EAA / JIS / Taiwan accessibility expectations depending on deployment context.',
+    ...rest,
   });
-  addCheck(stats, f.category, 'fail');
+  addCheck(stats, rest.category, check);
 }
 
 function isMarkup(ext) {
@@ -127,6 +132,45 @@ function scanFile(file, root, stats, findings) {
         code_before: '<html>',
         code_after: '<html lang="zh-Hant">',
       });
+    }
+
+    // Declared lang present: does it match the actual content language? (3.1.1)
+    // The wrong-lang case axe/Lighthouse structurally miss — a declared lang is
+    // always syntactically valid. On JS-heavy pages the static text is too thin
+    // to judge, so assessLang returns INSUFFICIENT and we emit nothing (the
+    // Tier-2 rendered-DOM path covers those). See core/scripts/lang-detect.mjs.
+    const langDecl = /\.html?$/.test(file) && text.match(/<html[^>]*\blang=["']([^"']+)["']/i);
+    if (langDecl) {
+      const verdict = assessLang(langDecl[1], extractText(text));
+      const suggest = { han: 'zh-Hant', jpn: 'ja', hangul: 'ko', latin: 'en' }[verdict.detectedFamily] || 'the correct language';
+      if (verdict.status === 'FLAG') {
+        addFinding(findings, stats, {
+          key: 'html-lang-mismatch',
+          category: 'screenreader',
+          severity: 'warning',
+          wcag: 'WCAG 2.2: 3.1.1 Language of Page',
+          title: 'Declared page language does not match the content',
+          affected_users: 'Screen-reader users (wrong pronunciation rules) and machine-translation users',
+          location: `${rel}:1`,
+          description: `Content-language mismatch: ${verdict.note}. A wrong language declaration is worse than a missing one. Assistive technology applies confidently wrong pronunciation and translation rules.`,
+          fix: `Set <html lang> to the actual content language (detected: ${verdict.detectedFamily}).`,
+          code_before: `<html lang="${verdict.declared}">`,
+          code_after: `<html lang="${suggest}">`,
+        });
+      } else if (verdict.status === 'REVIEW') {
+        addFinding(findings, stats, {
+          key: 'html-lang-mismatch-review',
+          category: 'screenreader',
+          severity: 'tip',
+          check: 'review',
+          wcag: 'WCAG 2.2: 3.1.1 Language of Page',
+          title: 'Page language may not match the content',
+          affected_users: 'Screen-reader users and machine-translation users',
+          location: `${rel}:1`,
+          description: `Possible content-language mismatch: ${verdict.note}. This can be legitimate untagged bilingual content, so verify the primary language before changing it.`,
+          fix: 'Confirm <html lang> matches the primary content language, and mark other-language passages with their own lang attribute (3.1.2 Language of Parts).',
+        });
+      }
     }
 
     if (/\.html?$/.test(file) && !/<title>[^<]+<\/title>/i.test(text)) {
