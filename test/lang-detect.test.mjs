@@ -18,6 +18,7 @@ const SCANNER = resolve(ROOT, 'core/scripts/static-audit.mjs');
 
 const HAN = '中文內容測試範例文字資料庫系統設計';
 const JPN = 'これはひらがなとカタカナと漢字の日本語のテキストです';
+const HANGUL = '안녕하세요한국어콘텐츠테스트데이터베이스시스템설계웹페이지내용';
 
 // Build plain text with exactly `cjk` fraction of meaningful chars being Han.
 function mix(cjk, n = 1400) {
@@ -58,6 +59,19 @@ test('FLAG: Japanese content declared as Chinese (kana disambiguation)', () => {
   const v = assessLang('zh', JPN.repeat(40));
   assert.equal(v.status, 'FLAG');
   assert.equal(v.detectedFamily, 'jpn');
+});
+
+test('CJK cross-script mismatches flag (regression: codex-found gap)', () => {
+  assert.equal(assessLang('ko', HANGUL.repeat(20)).status, 'PASS');   // Korean correctly declared
+  assert.equal(assessLang('ko', mix(0.95)).status, 'FLAG');           // ko declared, Chinese (han) content
+  assert.equal(assessLang('zh', HANGUL.repeat(20)).status, 'FLAG');   // zh declared, Korean content
+  assert.equal(assessLang('ko', JPN.repeat(40)).status, 'FLAG');      // ko declared, Japanese content
+  assert.equal(assessLang('ja', mix(0.95)).status, 'REVIEW');         // ja declared, all-Han: kanji-heavy JA or Chinese?
+});
+
+test('BCP47 script subtag overrides the language guess', () => {
+  assert.equal(assessLang('zh-Latn-pinyin', 'a'.repeat(1400)).status, 'PASS'); // explicitly Latin script
+  assert.equal(assessLang('zh-Hant', mix(0.95)).status, 'PASS');               // explicitly Han script
 });
 
 test('FLAG: Japanese content on a latin-declared page', () => {

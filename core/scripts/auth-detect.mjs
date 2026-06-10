@@ -75,7 +75,7 @@ export function detectAuthBarriers(text) {
   // --- Distorted-text / transcription CAPTCHA (no exemption -> hard fail) ---
   // An <img> captcha that is NOT the reCAPTCHA/hCaptcha widget, plus a prompt to
   // transcribe what is shown, is a character-transcription test = a 3.3.8 fail.
-  const imgCaptcha = /<img\b[^>]*\b(?:src|alt|id|class|name)\s*=\s*["'][^"']*captcha[^"']*["'][^>]*>/i;
+  const imgCaptcha = /<img\b[^>]*captcha[^>]*>/i;   // quoted or unquoted; matches stripWidgets()
   const transcribePhrase = /(?:enter|type|input)\b[^<>]{0,30}\b(?:characters|letters|code|text)\b[^<>]{0,20}\b(?:you see|shown|above|in the image|below)\b|請?輸入(?:圖片中|上方|下列)?(?:的)?驗證碼|看不清楚.{0,6}(?:換一張|刷新)/i;
   const isWidget = /g-recaptcha|h-captcha|cf-turnstile|recaptcha\/api/i;
   if ((imgCaptcha.test(text) || transcribePhrase.test(text)) && !partOfWidget(text, imgCaptcha, isWidget)) {
@@ -93,7 +93,9 @@ export function detectAuthBarriers(text) {
   // --- Password field that blocks paste / password managers ----------------
   for (const m of text.matchAll(/<input\b[^>]*>/gi)) {
     const tag = m[0];
-    if (!/type\s*=\s*["']password["']/i.test(tag)) continue;
+    // Accept quoted OR unquoted attribute values (both are valid HTML); the
+    // lookbehind stops `data-type="password"` / custom-*-type from matching.
+    if (!/(?<![-\w])type\s*=\s*["']?password\b/i.test(tag)) continue;
     if (/\bonpaste\s*=/i.test(tag)) {
       signals.push({ key: 'auth-password-paste-blocked', band: 'FLAG', wcag: WCAG, level: 'AA',
         index: m.index || 0,
@@ -102,7 +104,7 @@ export function detectAuthBarriers(text) {
         description: 'An onpaste handler on a password field typically blocks pasting, removing the password-manager / copy-paste mechanism that makes password entry acceptable under 3.3.8.',
         fix: 'Remove the paste restriction; allow password managers and paste.',
         code_before: tag.slice(0, 120) });
-    } else if (/autocomplete\s*=\s*["'](?:off|false)["']/i.test(tag)) {
+    } else if (/autocomplete\s*=\s*["']?(?:off|false)\b/i.test(tag)) {
       signals.push({ key: 'auth-password-autocomplete-off', band: 'REVIEW', wcag: WCAG, level: 'AA',
         index: m.index || 0,
         title: 'Password field disables autocomplete',

@@ -58,6 +58,15 @@ test('password field with autocomplete=off is REVIEW', () => {
   assert.equal(one('<input type="password" name="pw" autocomplete="off">', 'auth-password-autocomplete-off').band, 'REVIEW');
 });
 
+test('unquoted HTML attribute values are detected (regression: codex-found gap)', () => {
+  assert.equal(one('<input type=password name=pw onpaste="return false">', 'auth-password-paste-blocked').band, 'FLAG');
+  assert.equal(one('<input type=password autocomplete=off>', 'auth-password-autocomplete-off').band, 'REVIEW');
+});
+
+test('data-type="password" does not trigger the password scan', () => {
+  assert.equal(bandsOf('<input data-type="password" type="text">').length, 0);
+});
+
 // --- false-positive guards -----------------------------------------------
 test('prose that merely mentions "captcha" is not flagged', () => {
   assert.deepEqual(detectAuthBarriers('<article><p>This article explains how a CAPTCHA protects forms.</p></article>'), []);

@@ -29,6 +29,19 @@ export function declaredFamily(primary) {
   return 'other';
 }
 
+// A BCP47 script subtag (4 letters: zh-Latn, ja-Hira, zh-Hant) explicitly states
+// the script, which overrides the primary-language guess. Returns null for
+// scripts we do not model (so the caller can treat it as 'other').
+function scriptFamily(script) {
+  switch (script) {
+    case 'latn': return 'latin';
+    case 'hans': case 'hant': case 'hani': return 'han';
+    case 'hang': return 'hangul';
+    case 'hira': case 'kana': case 'jpan': return 'jpn';
+    default: return null; // cyrl / arab / thai / ... not modelled
+  }
+}
+
 function decodeEntities(s) {
   return s
     .replace(/&#x([0-9a-fA-F]+);/g, (_, h) => safeFromCodePoint(parseInt(h, 16)))
@@ -54,14 +67,14 @@ export function extractText(html) {
 }
 
 function countScripts(text) {
-  let han = 0, kana = 0, hangul = 0, latin = 0;
-  for (const ch of text) {
-    const c = ch.codePointAt(0);
-    if ((c >= 0x4E00 && c <= 0x9FFF) || (c >= 0x3400 && c <= 0x4DBF)) han++;
-    else if (c >= 0x3040 && c <= 0x30FF) kana++;                 // hiragana + katakana
-    else if (c >= 0xAC00 && c <= 0xD7A3) hangul++;
-    else if ((c >= 0x41 && c <= 0x5A) || (c >= 0x61 && c <= 0x7A) || (c >= 0xC0 && c <= 0x24F)) latin++;
-  }
+  // Unicode script properties cover all extension blocks (Han Ext-B+, halfwidth
+  // kana, Hangul Jamo) and exclude non-letters (digits and symbols like x/division
+  // are Common, not Latin) — more correct than hand-rolled BMP ranges.
+  const count = (re) => (text.match(re) || []).length;
+  const han = count(/\p{Script=Han}/gu);
+  const kana = count(/\p{Script=Hiragana}|\p{Script=Katakana}/gu);
+  const hangul = count(/\p{Script=Hangul}/gu);
+  const latin = count(/\p{Script=Latin}/gu);
   return { han, kana, hangul, latin, total: han + kana + hangul + latin };
 }
 
@@ -90,7 +103,9 @@ export function detectContentLanguage(plainText) {
 export function assessLang(declaredLang, plainText) {
   if (!declaredLang) return { status: 'NO_LANG', note: '<html lang> absent' };
   const declared = String(declaredLang).toLowerCase();
-  const dFam = declaredFamily(declared.split('-')[0]);
+  const parts = declared.split('-');
+  const scriptTag = parts.slice(1).find((p) => /^[a-z]{4}$/.test(p)); // BCP47 script subtag
+  const dFam = scriptTag ? (scriptFamily(scriptTag) || 'other') : declaredFamily(parts[0]);
   const det = detectContentLanguage(plainText);
   const { cjkRatio, latinRatio } = det;
   const pct = x => (x * 100).toFixed(0) + '%';
@@ -116,14 +131,23 @@ export function assessLang(declaredLang, plainText) {
     if (latinRatio > LATIN_DOM && cjkRatio < 0.10)
       return { status: 'FLAG', declared, detectedFamily: 'latin', confidence: latinRatio,
                note: `declared "${declared}" but ${pct(latinRatio)} latin / only ${pct(cjkRatio)} CJK` };
+    // The content's CJK script must match the DECLARED CJK script. A high CJK
+    // ratio alone is not enough: zh/ja/ko are three different scripts (han / han+
+    // kana / hangul), so declaring one over another (lang="ko" on Chinese,
+    // lang="zh" on Korean) is a real mismatch, not a pass.
     const cf = cjkFamily(det.counts);
+    if (cf === dFam)
+      return { status: 'PASS', declared, detectedFamily: cf, confidence: cjkRatio };
     if (dFam === 'han' && cf === 'jpn')
       return { status: 'FLAG', declared, detectedFamily: 'jpn', confidence: cjkRatio,
                note: `declared Chinese ("${declared}") but kana present; content is Japanese` };
-    if (cjkRatio >= CJK_REVIEW || cf === dFam)
-      return { status: 'PASS', declared, detectedFamily: cf, confidence: cjkRatio };
-    return { status: 'REVIEW', declared, detectedFamily: cf, confidence: cjkRatio,
-             note: `declared ${dFam}; content unclear (${pct(cjkRatio)} CJK)` };
+    if (dFam === 'jpn' && cf === 'han')
+      // Japanese can be kanji-heavy with little kana in a short sample, so this is
+      // ambiguous (genuinely Japanese, or actually Chinese) rather than a hard fail.
+      return { status: 'REVIEW', declared, detectedFamily: 'han', confidence: cjkRatio,
+               note: `declared Japanese ("${declared}") but no kana in the sampled text; verify it is not Chinese` };
+    return { status: 'FLAG', declared, detectedFamily: cf, confidence: cjkRatio,
+             note: `declared ${dFam} ("${declared}") but content script is ${cf}` };
   }
 
   // Family not modelled yet (ar / he / ru / th ...).
