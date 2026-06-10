@@ -140,7 +140,7 @@ function scanFile(file, root, stats, findings) {
     // always syntactically valid. On JS-heavy pages the static text is too thin
     // to judge, so assessLang returns INSUFFICIENT and we emit nothing (the
     // Tier-2 rendered-DOM path covers those). See core/scripts/lang-detect.mjs.
-    const langDecl = /\.html?$/.test(file) && text.match(/<html[^>]*\blang=["']([^"']+)["']/i);
+    const langDecl = /\.html?$/.test(file) && text.match(/<html[^>]*\blang=["']?([^\s"'>]+)/i); // quoted or unquoted
     if (langDecl) {
       const verdict = assessLang(langDecl[1], extractText(text));
       const suggest = { han: 'zh-Hant', jpn: 'ja', hangul: 'ko', latin: 'en' }[verdict.detectedFamily] || 'the correct language';

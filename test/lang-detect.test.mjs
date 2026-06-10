@@ -126,3 +126,8 @@ test('static-audit does not flag a correctly declared zh-Hant page', () => {
   const audit = runScanner(`<!doctype html><html lang="zh-Hant"><head><title>t</title></head><body><main><p>${mix(0.95)}</p></main></body></html>`);
   assert.equal(audit.findings.filter((f) => String(f.key).startsWith('html-lang-mismatch')).length, 0);
 });
+
+test('static-audit reads UNQUOTED <html lang=..> (regression: codex follow-up)', () => {
+  const audit = runScanner(`<!doctype html><html lang=en><head><title>t</title></head><body><main><p>${mix(0.7)}</p></main></body></html>`);
+  assert.equal(audit.findings.filter((f) => f.key === 'html-lang-mismatch').length, 1, 'unquoted lang=en + CJK must flag');
+});
