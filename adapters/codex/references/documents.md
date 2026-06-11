@@ -31,7 +31,8 @@ Reference: Jedi Lin's research (2023) analyzed 33 digital document formats and i
 
 - Adobe Acrobat Pro: built-in accessibility checker + tag editor
 - PAC (PDF Accessibility Checker): free, tests against PDF/UA + WCAG
-- axe PDF: Deque's PDF testing tool
+- axe PDF: PDF ruleset inside Deque's commercial suite (49 automated rules in 2.0, rule list public on Deque University; unlike web axe-core it is not open source)
+- veraPDF: free, open-source PDF/UA validator (CLI — scriptable for batch/CI)
 - CommonLook: enterprise PDF remediation
 
 ### When to Flag
