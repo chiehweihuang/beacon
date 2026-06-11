@@ -29,12 +29,16 @@ try {
 const toolInput = data.tool_input || data.input || {};
 const filePath = toolInput.file_path || toolInput.path || '';
 
-// Only trigger on UI files
+// Only trigger on UI files, document sources, or code that can generate PDFs
 const UI_FILE_PATTERN = /\.(html?|css|scss|less|jsx|tsx|vue|svelte|swift|kt|dart|xaml)$/i;
 const JS_FILE_PATTERN = /\.(js|cjs|mjs|ts)$/i;
+const DOC_FILE_PATTERN = /\.(tex|typ)$/i;   // LaTeX / Typst — compile to PDF
+const PY_FILE_PATTERN = /\.py$/i;           // only fires when PDF-gen indicators present
 const isStrictUIFile = UI_FILE_PATTERN.test(filePath);
 const isJSFile = !isStrictUIFile && JS_FILE_PATTERN.test(filePath);
-if (!isStrictUIFile && !isJSFile) process.exit(0);
+const isDocFile = DOC_FILE_PATTERN.test(filePath);
+const isPyFile = PY_FILE_PATTERN.test(filePath);
+if (!isStrictUIFile && !isJSFile && !isDocFile && !isPyFile) process.exit(0);
 
 // Don't trigger on skill/command files or config files
 if (/[/\\](skills|commands|plugins|scripts)[/\\]/.test(filePath)) process.exit(0);
@@ -51,11 +55,18 @@ if (!scanContent) {
   }
 }
 
-// For plain JS/TS, only trigger when the file contains UI indicators.
-if (isJSFile) {
-  const UI_INDICATORS = /createElement\(|innerHTML|document\.querySelector|className\s*=|<(div|button|input|form|nav|header|footer|a|section|article|dialog)[\s>]|styled[.(]|from ['"]styled-components['"]|return\s*\(\s*</;
-  if (!UI_INDICATORS.test(scanContent || '')) process.exit(0);
-}
+// PDF-generation indicators: library names and print-to-PDF calls across the
+// JS (jsPDF, pdfmake, PDFKit, headless-Chrome page.pdf) and Python (ReportLab,
+// WeasyPrint, fpdf, xhtml2pdf) ecosystems, plus generic html-to-pdf converters.
+const PDF_GEN_INDICATORS = /jsPDF|pdfmake|pdfkit|new PDFDocument\s*\(|page\.pdf\s*\(|printToPDF|html2pdf|wkhtmltopdf|dompdf|TCPDF|mpdf|reportlab|weasyprint|xhtml2pdf|fpdf/i;
+const isPdfGen = isDocFile || PDF_GEN_INDICATORS.test(scanContent || '');
+
+// For plain JS/TS, only trigger when the file contains UI indicators or PDF
+// generation. For Python, ONLY PDF generation (don't spam every .py edit).
+const UI_INDICATORS = /createElement\(|innerHTML|document\.querySelector|className\s*=|<(div|button|input|form|nav|header|footer|a|section|article|dialog)[\s>]|styled[.(]|from ['"]styled-components['"]|return\s*\(\s*</;
+const hasUIIndicators = UI_INDICATORS.test(scanContent || '');
+if (isJSFile && !hasUIIndicators && !isPdfGen) process.exit(0);
+if (isPyFile && !isPdfGen) process.exit(0);
 
 // Determine file type for targeted advice
 const ext = filePath.match(/\.(\w+)$/)?.[1]?.toLowerCase() || '';
@@ -131,6 +142,26 @@ if (c) {
   if ((isHTML || isJS) && /tabindex\s*=\s*["']?[1-9]/.test(c)) {
     findings.push('⚠ tabindex > 0 detected — custom tab order breaks Shift+Tab reverse navigation unless all focusable elements in the sequence are also managed');
   }
+
+  // ── PDF output detectors (WCAG applies to PDFs too; untagged = unreadable) ──
+  if (isPdfGen) {
+    // Libraries with no tagged-PDF support at all — structural dead end
+    if (/jsPDF|pdfmake|wkhtmltopdf/i.test(c)) {
+      findings.push('⚠ jsPDF / pdfmake / wkhtmltopdf cannot emit tagged (accessible) PDFs — output is untagged no matter how semantic the source. For accessible output use headless-Chrome page.pdf with tagged:true, PDFKit tagged mode, WeasyPrint, or tagged LaTeX');
+    }
+    // Print-to-PDF without explicit tagging (Playwright is untagged by default)
+    if (/page\.pdf\s*\(|printToPDF/i.test(c) && !/tagged\s*:\s*true/.test(c)) {
+      findings.push('⚠ page.pdf()/printToPDF without tagged: true — print-to-PDF output is untagged by default in Playwright (version-dependent in Puppeteer). Set tagged: true explicitly and verify with PAC');
+    }
+    // PDFKit without tagged document mode
+    if (/new PDFDocument\s*\(/.test(c) && !/tagged\s*:\s*true/.test(c)) {
+      findings.push('⚠ PDFKit document without { tagged: true } — also set lang and displayTitle, and build the structure tree (doc.struct) for headings/tables');
+    }
+    // LaTeX source without document metadata declaration
+    if (ext === 'tex' && !/\\DocumentMetadata/.test(c)) {
+      findings.push('⚠ LaTeX source without \\DocumentMetadata — recent kernels support \\DocumentMetadata{lang=..., tagging=on} (tagged-PDF project) for accessible output');
+    }
+  }
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -159,7 +190,7 @@ if (isCSS) {
   );
 }
 
-if (isJS) {
+if (isJS && hasUIIndicators) {
   checks.push(
     'Semantic elements used? (<button>, not <div> with onClick)',
     'Click handlers paired with keyboard support? (Enter/Space for non-native triggers)',
@@ -169,12 +200,25 @@ if (isJS) {
   );
 }
 
+if (isPdfGen) {
+  checks.push(
+    'Tagged PDF output enabled? (untagged = screen readers must guess reading order)',
+    'Document title + language metadata set? (and displayTitle, so the viewer shows the title, not the filename)',
+    'Headings tagged H1-H6, bookmarks/outline generated for long documents?',
+    'Images have alt text; decorative images marked as artifacts?',
+    'Tables tagged with header cells? (and never screenshots of tables)',
+    'Real selectable text, not rasterized? (scanned pages need an OCR text layer)',
+    'Fonts embedded? (critical for CJK glyph rendering)',
+    'Verified with PAC / veraPDF / Acrobat checker before shipping?',
+  );
+}
+
 checks.push('Works without color alone? (shape, text, icon as alternatives)');
 
 // ─────────────────────────────────────────────────────────────────────────────
 // Compose output
 // ─────────────────────────────────────────────────────────────────────────────
-const lines = [`A11Y Check (${ext.toUpperCase()} modified):`];
+const lines = [`A11Y Check (${ext.toUpperCase()} modified${isPdfGen ? ' · PDF output' : ''}):`];
 
 if (findings.length > 0) {
   lines.push('', 'Detected issues (fix before proceeding):');
@@ -189,7 +233,9 @@ lines.push(
   findings.length > 0
     ? 'Fix detected issues above. Then verify checklist items.'
     : 'If issues found, apply fixes. If clean, proceed silently.',
-  'For detailed patterns: invoke /beacon:advisor or read the references/ directory in the beacon plugin.',
+  isPdfGen
+    ? 'For document specifics: read references/documents.md in the beacon plugin (PDF/UA, Matterhorn checkpoints, EPUB alternative).'
+    : 'For detailed patterns: invoke /beacon:advisor or read the references/ directory in the beacon plugin.',
 );
 
 process.stdout.write(

@@ -9,8 +9,11 @@ description: >-
   want to build and you recognize accessibility implications. Even if they don't mention
   accessibility — if they're designing UI, this skill helps them do it right from the start.
   Also use when the user asks for accessible color palettes, typography systems, or layout
-  patterns. This is the "before you code" skill; a11y-advisor is the "while you code" skill;
-  a11y-audit is the "after you code" skill.
+  patterns. ALSO triggers for document output: designing or generating a PDF, report,
+  invoice, certificate, slide deck, or print layout (LaTeX, Typst, jsPDF, PDFKit,
+  headless-Chrome print-to-PDF, ReportLab, WeasyPrint) — document accessibility is decided
+  at the authoring stage, before export. This is the "before you code" skill; a11y-advisor
+  is the "while you code" skill; a11y-audit is the "after you code" skill.
 ---
 
 # Accessible Design Guide
@@ -337,6 +340,34 @@ When loaded:
 ```
 
 For errors, use `role="alert"` (implicitly `aria-live="assertive"`).
+
+### Documents & PDF Output
+
+PDF accessibility is decided at **authoring time**, not export time. An export step can only preserve structure that already exists in the source — and the most common failure is authoring something semantic, then exporting through a path that throws the semantics away.
+
+**Choose an output path that can emit tagged PDF**
+
+| Path | Tagged-PDF support |
+|------|--------------------|
+| Headless Chrome `page.pdf()` | Set `tagged: true` explicitly (Playwright emits untagged by default) |
+| PDFKit | `new PDFDocument({ tagged: true, lang, displayTitle: true })` + structure tree (`doc.struct`) |
+| LaTeX | Recent kernels: `\DocumentMetadata{lang=..., tagging=on}` (tagged-PDF project) |
+| WeasyPrint | `--pdf-variant=pdf/ua-1` (experimental) |
+| Typst | Check current `--pdf-standard` support; verify output with PAC |
+| jsPDF / pdfmake / wkhtmltopdf | **No tagged output** — avoid for accessible deliverables |
+
+**Design rules (before export)**
+
+- Author in semantic source: real headings (HTML h1-h6, Word styles, LaTeX sectioning), real lists, real tables with header rows. Conversion preserves structure; it never adds it.
+- Title + language metadata. For CJK documents: correct `lang` AND embedded fonts — both break silently otherwise.
+- Alt text at authoring time; mark decorative images as artifacts.
+- Never rasterize text. Scanned sources need an OCR text layer before distribution.
+- Long documents: bookmarks/outline generated from headings.
+- Prefer HTML or EPUB distribution when PDF is not legally required — EPUB reflows for low vision; PDF is fixed-layout.
+
+**Verify**: PAC (free) / veraPDF / Acrobat accessibility checker. "Looks fine in a viewer" says nothing about the tag tree a screen reader navigates.
+
+Full reference: `references/documents.md` (PDF/UA standards, Matterhorn 136 checkpoints, EPUB, Office documents).
 
 ## Color & Contrast Guide
 
