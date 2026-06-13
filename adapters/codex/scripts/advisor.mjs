@@ -8,6 +8,11 @@ import { join } from 'path';
 
 const UI_FILE_PATTERN = /\.(html?|css|scss|less|jsx|tsx|vue|svelte|swift|kt|dart|xaml)$/i;
 const JS_FILE_PATTERN = /\.(js|cjs|mjs|ts)$/i;
+const DOC_FILE_PATTERN = /\.(tex|typ)$/i;   // LaTeX / Typst — compile to PDF
+const PY_FILE_PATTERN = /\.py$/i;           // only when PDF-gen indicators present
+// PDF generation across the JS (jsPDF, pdfmake, PDFKit, headless-Chrome page.pdf)
+// and Python (ReportLab, WeasyPrint, fpdf, xhtml2pdf) ecosystems + html-to-pdf.
+const PDF_GEN_INDICATORS = /jsPDF|pdfmake|pdfkit|new PDFDocument\s*\(|page\.pdf\s*\(|printToPDF|html2pdf|wkhtmltopdf|dompdf|TCPDF|mpdf|reportlab|weasyprint|xhtml2pdf|fpdf/i;
 const SKIP_DIRS = new Set(['.git', 'node_modules', 'dist', 'build', '.next', '.nuxt', 'coverage']);
 
 function usage() {
@@ -24,7 +29,8 @@ function collect(inputPath, out = []) {
     }
     return out;
   }
-  if (UI_FILE_PATTERN.test(inputPath) || JS_FILE_PATTERN.test(inputPath)) out.push(inputPath);
+  if (UI_FILE_PATTERN.test(inputPath) || JS_FILE_PATTERN.test(inputPath) ||
+      DOC_FILE_PATTERN.test(inputPath) || PY_FILE_PATTERN.test(inputPath)) out.push(inputPath);
   return out;
 }
 
@@ -37,7 +43,13 @@ function scan(filePath) {
   const ext = filePath.match(/\.(\w+)$/)?.[1]?.toLowerCase() || '';
   const isStrictUIFile = UI_FILE_PATTERN.test(filePath);
   const isJSFile = !isStrictUIFile && JS_FILE_PATTERN.test(filePath);
-  if (isJSFile && !looksLikeUiJs(content)) return null;
+  const isDocFile = DOC_FILE_PATTERN.test(filePath);
+  const isPyFile = PY_FILE_PATTERN.test(filePath);
+  const isPdfGen = isDocFile || PDF_GEN_INDICATORS.test(content);
+  // JS/TS only matters if UI-like OR it generates a PDF (e.g. jsPDF). Plain .py
+  // only matters when PDF-gen indicators are present (do not spam every .py).
+  if (isJSFile && !looksLikeUiJs(content) && !isPdfGen) return null;
+  if (isPyFile && !isPdfGen) return null;
 
   const isHTML = ['html', 'htm', 'jsx', 'tsx', 'vue', 'svelte'].includes(ext);
   const isCSS = ['css', 'scss', 'less'].includes(ext);
@@ -87,6 +99,23 @@ function scan(filePath) {
     findings.push(`input-method-specific copy detected ("${inputMethodMatch[0].replace(/["'>]/g, '').trim()}"); prefer "select", "activate", or "open"`);
   }
 
+  // PDF output (WCAG applies to PDFs too; untagged = unreadable). Same detectors
+  // as the Claude-side a11y-advisor hook, in this advisor's bare-string style.
+  if (isPdfGen) {
+    if (/jsPDF|pdfmake|wkhtmltopdf/i.test(content)) {
+      findings.push('jsPDF / pdfmake / wkhtmltopdf cannot emit tagged (accessible) PDFs; use headless-Chrome page.pdf with tagged:true, PDFKit tagged mode, WeasyPrint, or tagged LaTeX');
+    }
+    if (/page\.pdf\s*\(|printToPDF/i.test(content) && !/tagged\s*:\s*true/.test(content)) {
+      findings.push('page.pdf()/printToPDF without tagged: true; print-to-PDF output is untagged by default. Set tagged: true and verify with PAC');
+    }
+    if (/new PDFDocument\s*\(/.test(content) && !/tagged\s*:\s*true/.test(content)) {
+      findings.push('PDFKit document without { tagged: true }; also set lang + displayTitle and build the structure tree (doc.struct)');
+    }
+    if (ext === 'tex' && !/\\DocumentMetadata/.test(content)) {
+      findings.push('LaTeX source without \\DocumentMetadata; recent kernels support \\DocumentMetadata{lang=..., tagging=on} for accessible output');
+    }
+  }
+
   if (isHTML) {
     checks.push(
       'semantic elements (<button>, <nav>, <main>, <article>)',
@@ -117,8 +146,21 @@ function scan(filePath) {
     );
   }
 
+  if (isPdfGen) {
+    checks.push(
+      'tagged PDF output enabled (untagged = screen readers guess reading order)',
+      'document title + language metadata set (and displayTitle, so the viewer shows the title not the filename)',
+      'headings tagged H1-H6; bookmarks/outline for long documents',
+      'images have alt text; decorative images marked as artifacts',
+      'tables tagged with header cells (never screenshots of tables)',
+      'real selectable text, not rasterized (scanned pages need an OCR text layer)',
+      'fonts embedded (critical for CJK glyph rendering)',
+      'verified with PAC / veraPDF / Acrobat checker',
+    );
+  }
+
   checks.push('works without color alone');
-  return { filePath, ext, findings, checks };
+  return { filePath, ext, isPdfGen, findings, checks };
 }
 
 const args = process.argv.slice(2);
@@ -131,7 +173,7 @@ for (const file of files) {
   const result = scan(file);
   if (!result) continue;
   issueCount += result.findings.length;
-  console.log(`\nA11Y Check: ${result.filePath}`);
+  console.log(`\nA11Y Check: ${result.filePath}${result.isPdfGen ? ' (PDF output)' : ''}`);
   if (result.findings.length) {
     console.log('Detected issues:');
     for (const item of result.findings) console.log(`  - ${item}`);
