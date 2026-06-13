@@ -6,7 +6,7 @@ import { existsSync, readdirSync } from 'node:fs';
 import { resolve } from 'node:path';
 
 const REFERENCES = ['wcag-quick', 'patterns', 'legal-brief', 'disabilities', 'cases', 'documents'];
-const SCRIPTS = ['static-audit', 'generate-report', 'lighthouse-extract', 'lang-detect', 'auth-detect', 'pdf-detect'];
+const SCRIPTS = ['static-audit', 'generate-report', 'lighthouse-extract', 'lang-detect', 'auth-detect', 'pdf-detect', 'pdf-triage'];
 export const CONTENT = ['guide', 'inspect', 'advisor'];
 
 export const GENERATED = [
