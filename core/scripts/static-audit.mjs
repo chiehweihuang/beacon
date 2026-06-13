@@ -9,9 +9,11 @@ import { readFileSync, writeFileSync, statSync, readdirSync } from 'fs';
 import { basename, join, relative } from 'path';
 import { extractText, assessLang } from './lang-detect.mjs';
 import { detectAuthBarriers } from './auth-detect.mjs';
+import { assessPdf } from './pdf-detect.mjs';
 
 const SKIP_DIRS = new Set(['.git', 'node_modules', 'dist', 'build', '.next', '.nuxt', 'coverage']);
-const FILE_PATTERN = /\.(html?|css|scss|less|jsx|tsx|vue|svelte|js|cjs|mjs|ts)$/i;
+const FILE_PATTERN = /\.(html?|css|scss|less|jsx|tsx|vue|svelte|js|cjs|mjs|ts|pdf)$/i;
+const PDF_PATTERN = /\.pdf$/i;
 const AGENT_FILE_NAMES = new Set(['robots.txt', 'sitemap.xml', 'llms.txt', 'openapi.json', 'openapi.yaml', 'openapi.yml', 'mcp.json', 'server-card.json']);
 
 const CATEGORY_NAMES = {
@@ -103,7 +105,32 @@ function isStyle(ext) {
   return ['css', 'scss', 'less'].includes(ext);
 }
 
+// PDFs are a separate accessibility surface and are binary — read as a Buffer
+// and route to the PDF probe (assessPdf) instead of the utf8 text detectors.
+function scanPdfFile(file, root, stats, findings) {
+  const rel = relative(root, file) || file;
+  const result = assessPdf(readFileSync(file)); // no 'utf8' -> Buffer
+  if (result.status === 'INSUFFICIENT') return;
+  for (const f of result.findings) {
+    if (f.band !== 'FLAG' && f.band !== 'REVIEW') continue;
+    addFinding(findings, stats, {
+      key: f.key,
+      category: 'screenreader',
+      severity: f.band === 'FLAG' ? 'warning' : 'tip',
+      check: f.band === 'REVIEW' ? 'review' : 'fail',
+      wcag: f.wcag,
+      level: f.level || 'A',
+      title: f.title,
+      affected_users: f.affected_users,
+      location: rel,
+      description: f.description,
+      fix: f.fix,
+    });
+  }
+}
+
 function scanFile(file, root, stats, findings) {
+  if (PDF_PATTERN.test(file)) return scanPdfFile(file, root, stats, findings);
   const text = readFileSync(file, 'utf8');
   const rel = relative(root, file) || file;
   const ext = file.match(/\.(\w+)$/)?.[1]?.toLowerCase() || '';
