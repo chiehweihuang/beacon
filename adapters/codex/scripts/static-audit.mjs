@@ -8,7 +8,7 @@
 import { readFileSync, writeFileSync, statSync, readdirSync } from 'fs';
 import { basename, join, relative } from 'path';
 import { extractText, assessLang } from './lang-detect.mjs';
-import { detectAuthBarriers } from './auth-detect.mjs';
+import { detectAuthBarriers, detectAuthBarriersInSource } from './auth-detect.mjs';
 import { assessPdf } from './pdf-detect.mjs';
 
 const SKIP_DIRS = new Set(['.git', 'node_modules', 'dist', 'build', '.next', '.nuxt', 'coverage']);
@@ -569,6 +569,32 @@ function scanFile(file, root, stats, findings) {
   }
 
   if (jsLike) {
+    // Source-level auth barriers (3.3.8) the markup scan misses: a JS-set
+    // password type with clipboard blocking, and JS-rendered / tag-manager-
+    // injected CAPTCHA. Source detection is heuristic (minified/indirected code
+    // defeats it), so these are REVIEW/INFO, never a hard FLAG. The Tier-2
+    // rendered-DOM snapshot is authoritative for the injected-widget case.
+    const markupPasteFlagged = findings.some(
+      (f) => f.key === 'auth-password-paste-blocked' && f.location.startsWith(rel + ':')
+    );
+    for (const sig of detectAuthBarriersInSource(text)) {
+      if (sig.band !== 'FLAG' && sig.band !== 'REVIEW') continue;
+      if (sig.key === 'auth-password-clipboard-blocked-js' && markupPasteFlagged) continue;
+      addFinding(findings, stats, {
+        key: sig.key,
+        category: 'forms',
+        severity: sig.band === 'FLAG' ? 'warning' : 'tip',
+        check: sig.band === 'REVIEW' ? 'review' : 'fail',
+        wcag: sig.wcag,
+        level: sig.level || 'AA',
+        title: sig.title,
+        affected_users: sig.affected_users,
+        location: `${rel}:${lineOf(text, sig.index || 0)}`,
+        description: sig.description,
+        fix: sig.fix,
+        code_before: sig.code_before || snippetAt(text, sig.index || 0),
+      });
+    }
     for (const m of text.matchAll(/addEventListener\s*\(\s*['"]click['"]/g)) {
       const ctx = snippetAt(text, m.index || 0);
       if (!/keydown|keyup|<button|role\s*=\s*["']button["']/.test(ctx)) {
