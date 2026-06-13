@@ -34,6 +34,7 @@ Reference: Jedi Lin's research (2023) analyzed 33 digital document formats and i
 - axe PDF: PDF ruleset inside Deque's commercial suite (49 automated rules in 2.0, rule list public on Deque University; unlike web axe-core it is not open source)
 - veraPDF: free, open-source PDF/UA validator (CLI — scriptable for batch/CI)
 - CommonLook: enterprise PDF remediation
+- OCRmyPDF: free, open-source (MPL-2.0) CLI that adds a searchable OCR text layer (via Tesseract) to scanned/image-only PDFs and can output PDF/A — the practical remediation when a PDF has no real text layer; it does not create tag structure, so a PDF/UA pass still requires tagging
 
 ### When to Flag
 
