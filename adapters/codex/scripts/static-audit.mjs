@@ -7,7 +7,7 @@
 
 import { readFileSync, writeFileSync, statSync, readdirSync } from 'fs';
 import { basename, join, relative } from 'path';
-import { extractText, assessLang } from './lang-detect.mjs';
+import { extractText, assessLang, detectLangParts } from './lang-detect.mjs';
 import { detectAuthBarriers, detectAuthBarriersInSource } from './auth-detect.mjs';
 import { assessPdf } from './pdf-detect.mjs';
 
@@ -197,6 +197,24 @@ function scanFile(file, root, stats, findings) {
           location: `${rel}:1`,
           description: `Possible content-language mismatch: ${verdict.note}. This can be legitimate untagged bilingual content, so verify the primary language before changing it.`,
           fix: 'Confirm <html lang> matches the primary content language, and mark other-language passages with their own lang attribute (3.1.2 Language of Parts).',
+        });
+      }
+
+      // 3.1.2 Language of Parts: a foreign-language passage with no inline lang.
+      // Independent of the 3.1.1 verdict — a page can pass 3.1.1 yet have unmarked parts.
+      const parts = detectLangParts(text);
+      if (parts.status === 'REVIEW') {
+        addFinding(findings, stats, {
+          key: 'html-lang-parts-unmarked',
+          category: 'screenreader',
+          severity: 'tip',
+          check: 'review',
+          wcag: 'WCAG 2.2: 3.1.2 Language of Parts',
+          title: 'Foreign-language passage may not carry its own lang attribute',
+          affected_users: 'Screen-reader users (wrong pronunciation rules on the foreign passage)',
+          location: `${rel}:1`,
+          description: `${parts.note}. A passage in a language other than the page default needs its own lang so assistive tech switches pronunciation. Heuristic (cannot pinpoint the passage), so verify.`,
+          fix: 'Wrap each foreign-language passage in an element with the correct lang, e.g. <span lang="ja">...</span> or <blockquote lang="fr">...</blockquote>.',
         });
       }
     }

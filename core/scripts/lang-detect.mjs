@@ -153,3 +153,35 @@ export function assessLang(declaredLang, plainText) {
   // Family not modelled yet (ar / he / ru / th ...).
   return { status: 'UNMODELLED', declared, note: `declared family for "${declared}" not modelled` };
 }
+
+const PARTS_FOREIGN_MIN = 60;          // a foreign-script run worth flagging (3.1.2)
+const PARTS_FOREIGN_MAX_RATIO = 0.40;  // above this it is a 3.1.1 page mismatch, not parts
+
+// WCAG 3.1.2 Language of Parts: a passage in a different language from the page
+// should carry its own lang attribute. axe checks only the page-level lang (3.1.1).
+// Heuristic (regex, no DOM): the page declares lang X and is mostly X's script,
+// but a substantial amount of a DIFFERENT script appears with NO inline lang=
+// markup -> foreign passages are likely unmarked. REVIEW only (FP-prone: brand
+// names, loanwords). Coarse: any inline lang= is taken as "the author marks parts",
+// and it cannot pinpoint which passage. Takes raw HTML.
+export function detectLangParts(html) {
+  const m = String(html).match(/<html[^>]*\blang=["']?([^"'\s>]+)/i);
+  if (!m) return { status: 'SKIP' };
+  const pageFam = declaredFamily(m[1].toLowerCase().split('-')[0]);
+  if (pageFam === 'other') return { status: 'SKIP' };
+  const innerLang = (html.match(/<(?!html\b)[a-z][^>]*\blang\s*=/gi) || []).length;
+  const counts = countScripts(extractText(html));
+  if (counts.total < MIN_SAMPLE) return { status: 'INSUFFICIENT' };
+  // Native script = the page's declared family; everything else is "foreign".
+  const foreign = pageFam === 'latin' ? (counts.han + counts.kana + counts.hangul) : counts.latin;
+  const ratio = foreign / counts.total;
+  if (foreign < PARTS_FOREIGN_MIN) return { status: 'PASS', foreign };
+  if (ratio > PARTS_FOREIGN_MAX_RATIO)
+    return { status: 'PASS_311', foreign, note: 'foreign script is dominant — a 3.1.1 page-language mismatch, not 3.1.2 parts' };
+  if (innerLang > 0)
+    return { status: 'PASS', foreign, innerLang, note: `${innerLang} inline lang= attribute(s) present; assume foreign parts are marked` };
+  return {
+    status: 'REVIEW', declared: m[1], foreign,
+    note: `~${foreign} chars of a different script in a lang="${m[1]}" page with no inline lang= markup; foreign passages may be unmarked`,
+  };
+}

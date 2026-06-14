@@ -11,7 +11,7 @@ import { fileURLToPath } from 'node:url';
 import { tmpdir } from 'node:os';
 import { execFileSync } from 'node:child_process';
 
-import { assessLang, extractText, detectContentLanguage } from '../core/scripts/lang-detect.mjs';
+import { assessLang, extractText, detectContentLanguage, detectLangParts } from '../core/scripts/lang-detect.mjs';
 
 const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), '..');
 const SCANNER = resolve(ROOT, 'core/scripts/static-audit.mjs');
@@ -130,4 +130,29 @@ test('static-audit does not flag a correctly declared zh-Hant page', () => {
 test('static-audit reads UNQUOTED <html lang=..> (regression: codex follow-up)', () => {
   const audit = runScanner(`<!doctype html><html lang=en><head><title>t</title></head><body><main><p>${mix(0.7)}</p></main></body></html>`);
   assert.equal(audit.findings.filter((f) => f.key === 'html-lang-mismatch').length, 1, 'unquoted lang=en + CJK must flag');
+});
+
+// === 3.1.2 Language of Parts (foreign passage should carry its own lang) ===
+test('parts: unmarked foreign passage on an en page -> REVIEW', () => {
+  const html = `<html lang="en"><body><p>${'The annual report covers operations across regions. '.repeat(12)}</p><blockquote>${JPN.repeat(5)}</blockquote></body></html>`;
+  assert.equal(detectLangParts(html).status, 'REVIEW');
+});
+
+test('parts: foreign passage WITH inline lang= -> PASS', () => {
+  const html = `<html lang="en"><body><p>${'The annual report covers operations across regions. '.repeat(12)}</p><blockquote lang="ja">${JPN.repeat(5)}</blockquote></body></html>`;
+  assert.equal(detectLangParts(html).status, 'PASS');
+});
+
+test('parts: a tiny foreign brand name does not flag', () => {
+  const html = `<html lang="en"><body><p>${'We partner with global firms across regions and sectors. '.repeat(10)}楽天</p></body></html>`;
+  assert.equal(detectLangParts(html).status, 'PASS');
+});
+
+test('parts: a mostly-foreign page is a 3.1.1 mismatch, not 3.1.2 parts', () => {
+  assert.equal(detectLangParts(`<html lang="en"><body><p>${HAN.repeat(30)}</p></body></html>`).status, 'PASS_311');
+});
+
+test('static-audit emits html-lang-parts-unmarked for an en page with an unmarked foreign passage', () => {
+  const audit = runScanner(`<!doctype html><html lang="en"><head><title>t</title></head><body><p>${'The annual report covers operations across regions. '.repeat(12)}</p><blockquote>${JPN.repeat(5)}</blockquote></body></html>`);
+  assert.equal(audit.findings.filter((f) => f.key === 'html-lang-parts-unmarked').length, 1);
 });
