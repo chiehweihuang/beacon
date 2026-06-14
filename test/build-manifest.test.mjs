@@ -7,9 +7,9 @@ test('GENERATED covers 3 content files x 2 surfaces = 6 variant entries', () => 
   assert.equal(variants.length, 6);
 });
 
-test('GENERATED covers 6 references + 7 scripts x 2 surfaces = 26 copy entries', () => {
+test('GENERATED covers 6 references + 8 scripts x 2 surfaces = 28 copy entries', () => {
   const copies = GENERATED.filter((e) => e.kind === 'copy');
-  assert.equal(copies.length, 26);
+  assert.equal(copies.length, 28);
 });
 
 test('every GENERATED entry has out, src, kind, overwrite=true', () => {

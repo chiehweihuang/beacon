@@ -10,6 +10,7 @@ import { basename, join, relative } from 'path';
 import { extractText, assessLang, detectLangParts } from './lang-detect.mjs';
 import { detectAuthBarriers, detectAuthBarriersInSource } from './auth-detect.mjs';
 import { assessPdf } from './pdf-detect.mjs';
+import { detectQualityFlags } from './quality-detect.mjs';
 
 const SKIP_DIRS = new Set(['.git', 'node_modules', 'dist', 'build', '.next', '.nuxt', 'coverage']);
 const FILE_PATTERN = /\.(html?|css|scss|less|jsx|tsx|vue|svelte|js|cjs|mjs|ts|pdf)$/i;
@@ -418,6 +419,26 @@ function scanFile(file, root, stats, findings) {
         check: sig.band === 'REVIEW' ? 'review' : 'fail',
         wcag: sig.wcag,
         level: sig.level || 'AA',
+        title: sig.title,
+        affected_users: sig.affected_users,
+        location: `${rel}:${lineOf(text, sig.index || 0)}`,
+        description: sig.description,
+        fix: sig.fix,
+        code_before: sig.code_before || snippetAt(text, sig.index || 0),
+      });
+    }
+
+    // Content-quality red-flags (alt 1.1.1 / link purpose 2.4.4 / role-echo label):
+    // axe checks these EXIST, not whether they are meaningful. All REVIEW (the
+    // meaningful-vs-present judgment that needs an LLM is the gated 3b follow-up).
+    for (const sig of detectQualityFlags(text)) {
+      addFinding(findings, stats, {
+        key: sig.key,
+        category: 'screenreader',
+        severity: 'tip',
+        check: 'review',
+        wcag: sig.wcag,
+        level: sig.level || 'A',
         title: sig.title,
         affected_users: sig.affected_users,
         location: `${rel}:${lineOf(text, sig.index || 0)}`,
