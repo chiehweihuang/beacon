@@ -188,14 +188,32 @@ If Playwright MCP tools are available (`mcp__plugin_playwright_playwright__*`), 
    widgets (CAPTCHA); running it against the rendered snapshot turns those into real
    verdicts. Axe (step 3) covers computed-style/contrast; this step covers structure.
 
-4. Tab order test:
-   browser_press_key -> Tab (repeat 30x, record focus path)
+4. Keyboard focus-flow capture (2.1.2 / 2.4.3 / 2.4.7 / 2.4.11 / 2.1.1) — runtime
+   behaviors a static scan and axe cannot see. Drive Tab, capture a trace, analyze it:
+   a. browser_evaluate -> interactiveTotal =
+      document.querySelectorAll('a[href],button,input,select,textarea,[tabindex]:not([tabindex="-1"])').length
+   b. Press Tab up to ~50 times; at each stop browser_evaluate on document.activeElement:
+      { tag, name (accessible name), rect: getBoundingClientRect(),
+        focusVisible: el.matches(':focus-visible') AND a non-none outline/box-shadow,
+        obscuredBy: a selector when document.elementFromPoint(rect center) is NOT the
+        focused element (covered by a sticky header/overlay) }.
+      Record reachedEnd: did focus reach the end sentinel / wrap to <body> within the cap?
+   c. Save the trace as JSON and run:  node scripts/focus-flow.mjs <trace>.json
+      It flags keyboard traps, invisible focus, obscured focus, suspect order, and
+      unreachable interactive elements. Merge its findings into audit-results.json.
 
-5. Viewport reflow test:
+5. Multi-state pass — Lighthouse/axe audit ONE state; real pages have many. For each
+   significant state (open each dialog/menu, submit a form with INVALID input to surface
+   errors, expand disclosures, load async content), re-capture the rendered DOM (step 3b)
+   and re-run axe (step 3) + the focus-flow capture (step 4) on THAT state. Form error
+   states especially: confirm the error is announced (aria-live / role="alert") and the
+   field is marked aria-invalid — only observable after submission.
+
+6. Viewport reflow test:
    browser_resize -> width=320, height=800
    browser_take_screenshot -> evidence of reflow behavior
 
-6. Contrast spot-check (on specific elements):
+7. Contrast spot-check (on specific elements):
    browser_evaluate -> getComputedStyle on flagged elements
 ```
 
