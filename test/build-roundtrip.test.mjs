@@ -34,7 +34,6 @@ test('references + scripts are already content-identical across surfaces', () =>
   for (const [a, b] of shared) assert.equal(read(a), read(b), `${a} != ${b}`);
 });
 
-test('inspect has duplicated (reordered) content — advisory present, sync held', () => {
-  const core = lcsMerge(read('commands/inspect.md'), read('adapters/codex/references/beacon-inspect.md'));
-  assert.ok(Array.isArray(findDuplicatedLines(core)));
+test('inspect has no unannotated duplicated reordered content', () => {
+  assert.deepEqual(findDuplicatedLines(read('core/content/inspect.md')), []);
 });

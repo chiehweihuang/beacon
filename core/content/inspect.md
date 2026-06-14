@@ -73,10 +73,12 @@ Run automated tools first. Treat this as the baseline tier — if any tool is un
 # axe-core via Playwright — REQUIRED baseline if Playwright MCP is available
 <!--/@cc-->
 <!--@codex-->
+<!--@duplicate-ok-->
 # Beacon-native deterministic Tier 1 baseline — zero external deps, no browser.
 # Produces audit-results.json compatible with generate-report.mjs. Run this
 # even when the tools below are unavailable: it is the reproducible starting
 # point you then enrich with judgment.
+<!--@duplicate-ok-->
 node scripts/static-audit.mjs --scope "<scope>" --output audit-results.json <file-or-dir>...
 
 # axe-core via Playwright — REQUIRED baseline if a browser is available
@@ -91,10 +93,12 @@ npx lighthouse <url> --only-categories=accessibility --output=json
 npx eslint --rule 'jsx-a11y/*' src/
 <!--@cc-->
 
+<!--@duplicate-ok-->
 # Beacon-native deterministic Tier 1 baseline — zero external deps, no browser.
 # Produces audit-results.json directly compatible with generate-report.mjs.
 # Run this even when the external tools above are unavailable: it is the
 # reproducible starting point you then enrich with judgment.
+<!--@duplicate-ok-->
 node scripts/static-audit.mjs --scope "<scope>" --output audit-results.json <file-or-dir>...
 <!--/@cc-->
 ```

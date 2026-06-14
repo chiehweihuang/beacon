@@ -54,6 +54,35 @@ test('findDuplicatedLines reports content in both cc and codex blocks', () => {
   assert.deepEqual(findDuplicatedLines(dup).sort(), ['A', 'B']);
 });
 
+test('findDuplicatedLines ignores explicitly annotated reordered duplicates', () => {
+  const dup = [
+    '<!--@cc-->',
+    '<!--@duplicate-ok-->',
+    'A',
+    '<!--/@cc-->',
+    '<!--@codex-->',
+    '<!--@duplicate-ok-->',
+    'A',
+    '<!--/@codex-->',
+  ].join('\n');
+  assert.deepEqual(findDuplicatedLines(dup), []);
+  assert.equal(buildVariant(dup, 'cc'), 'A');
+  assert.equal(buildVariant(dup, 'codex'), 'A');
+});
+
+test('findDuplicatedLines still reports duplicates annotated on only one side', () => {
+  const dup = [
+    '<!--@cc-->',
+    '<!--@duplicate-ok-->',
+    'A',
+    '<!--/@cc-->',
+    '<!--@codex-->',
+    'A',
+    '<!--/@codex-->',
+  ].join('\n');
+  assert.deepEqual(findDuplicatedLines(dup), ['A']);
+});
+
 import { lcsMerge } from '../tools/lcs.mjs';
 
 test('lcsMerge + buildVariant round-trip reproduces both inputs', () => {

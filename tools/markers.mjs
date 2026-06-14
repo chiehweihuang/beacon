@@ -8,6 +8,7 @@
 // guard that catches any such collision.
 
 export const MARKER_RE = /^<!--\/?@(cc|codex)-->$/;
+export const DUPLICATE_OK_RE = /^<!--@duplicate-ok-->$/;
 
 const lines = (s) => s.split('\n');
 
@@ -41,6 +42,7 @@ export function buildVariant(core, keep) {
   let skipping = false;
   for (const line of lines(core)) {
     const t = line.trim();
+    if (DUPLICATE_OK_RE.test(t)) continue;
     if (t === `<!--@${drop}-->`) { skipping = true; continue; }
     if (t === `<!--/@${drop}-->`) { skipping = false; continue; }
     if (t === `<!--@${keep}-->` || t === `<!--/@${keep}-->`) continue;
@@ -54,7 +56,7 @@ export function buildVariant(core, keep) {
 export function assertNoStrayTokens(text, label) {
   const ls = lines(text);
   for (let i = 0; i < ls.length; i++) {
-    if (MARKER_RE.test(ls[i].trim())) {
+    if (MARKER_RE.test(ls[i].trim()) || DUPLICATE_OK_RE.test(ls[i].trim())) {
       throw new Error(`${label}: stray marker token at line ${i + 1}: ${ls[i].trim()}`);
     }
   }
@@ -62,16 +64,31 @@ export function assertNoStrayTokens(text, label) {
 
 // Advisory: content lines that appear in BOTH a @cc and a @codex block
 // (the duplicated lines a future edit must change in both places).
+// Place <!--@duplicate-ok--> immediately before an intentional duplicate line
+// when the two variants need different ordering.
 export function findDuplicatedLines(core) {
   const cc = new Set(), codex = new Set();
+  const ignoredCc = new Set(), ignoredCodex = new Set();
   let mode = null;
+  let duplicateOk = false;
   for (const line of lines(core)) {
     const t = line.trim();
-    if (t === '<!--@cc-->') { mode = 'cc'; continue; }
-    if (t === '<!--@codex-->') { mode = 'codex'; continue; }
-    if (t === '<!--/@cc-->' || t === '<!--/@codex-->') { mode = null; continue; }
-    if (mode === 'cc' && line.trim()) cc.add(line);
-    else if (mode === 'codex' && line.trim()) codex.add(line);
+    if (t === '<!--@cc-->') { mode = 'cc'; duplicateOk = false; continue; }
+    if (t === '<!--@codex-->') { mode = 'codex'; duplicateOk = false; continue; }
+    if (t === '<!--/@cc-->' || t === '<!--/@codex-->') { mode = null; duplicateOk = false; continue; }
+    if (DUPLICATE_OK_RE.test(t)) { duplicateOk = true; continue; }
+    if (!line.trim()) continue;
+    if (mode === 'cc') {
+      cc.add(line);
+      if (duplicateOk) ignoredCc.add(line);
+      duplicateOk = false;
+    } else if (mode === 'codex') {
+      codex.add(line);
+      if (duplicateOk) ignoredCodex.add(line);
+      duplicateOk = false;
+    } else {
+      duplicateOk = false;
+    }
   }
-  return [...cc].filter((l) => codex.has(l));
+  return [...cc].filter((l) => codex.has(l) && !(ignoredCc.has(l) && ignoredCodex.has(l)));
 }
