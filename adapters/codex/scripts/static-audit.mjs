@@ -103,7 +103,7 @@ function usage() {
 }
 
 function parseArgs(argv) {
-  const opts = { scope: 'Static UI audit', url: null, output: 'audit-results.json', date: null, mergeFindings: null, paths: [] };
+  const opts = { scope: 'Static UI audit', url: null, output: 'audit-results.json', date: null, mergeFindings: null, llmJudgment: null, paths: [] };
   for (let i = 0; i < argv.length; i++) {
     const arg = argv[i];
     if (arg === '--scope') opts.scope = argv[++i] || usage();
@@ -111,6 +111,7 @@ function parseArgs(argv) {
     else if (arg === '--output') opts.output = argv[++i] || usage();
     else if (arg === '--date') opts.date = argv[++i] || usage();
     else if (arg === '--merge-findings') opts.mergeFindings = argv[++i] || usage();
+    else if (arg === '--llm-judgment') opts.llmJudgment = argv[++i] || usage();
     else opts.paths.push(arg);
   }
   if (opts.paths.length === 0) usage();
@@ -855,6 +856,29 @@ function mergeExternalFindings(file, stats, findings) {
   console.error(`--merge-findings: merged ${merged}, skipped ${skipped} from ${file}`);
 }
 
+// P8: the LLM's irreducible semantic judgment (meaningful-alt quality, reading-order sense,
+// cognitive load — the ~60% no engine can touch) has a sanctioned, QUARANTINED home: a
+// passthrough block the script copies verbatim, never scores, and labels "not reproducible".
+// Keeping it structurally separate is what stops judgment variance from contaminating the
+// deterministic machine layer. The script stays sole author of the file; the agent only
+// supplies content for this clearly-walled-off block.
+function loadLlmJudgment(file) {
+  let raw;
+  try { raw = JSON.parse(readFileSync(file, 'utf8')); }
+  catch (e) { console.error(`--llm-judgment: cannot read/parse ${file}: ${e.message}`); process.exit(1); }
+  const list = Array.isArray(raw) ? raw : (Array.isArray(raw?.items) ? raw.items : null);
+  if (!list) { console.error(`--llm-judgment: ${file} must be an array or {"items":[...]}`); process.exit(1); }
+  const items = list
+    .filter((j) => j && typeof j.observation === 'string' && j.observation.trim())
+    .map((j) => ({ criterion: j.criterion || j.wcag || null, category: j.category || null, observation: j.observation, note: j.note || null }));
+  return {
+    label: 'LLM judgment — not reproducible, excluded from the machine score',
+    reproducible: false,
+    scored: false,
+    items,
+  };
+}
+
 function main() {
   const opts = parseArgs(process.argv.slice(2));
   const root = process.cwd();
@@ -937,6 +961,10 @@ function main() {
       'Treat this static score as a regression baseline, not a completion certificate.',
     ],
   };
+
+  // Attach the quarantined LLM-judgment block AFTER scoring — it is never folded into
+  // findings, stats, or any score (P8 structural separation).
+  if (opts.llmJudgment) audit.llm_judgment = loadLlmJudgment(opts.llmJudgment);
 
   writeFileSync(opts.output, JSON.stringify(audit, null, 2));
   console.log(`Wrote ${opts.output}`);

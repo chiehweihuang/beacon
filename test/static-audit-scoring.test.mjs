@@ -126,3 +126,24 @@ test('P3: engine_fingerprint is stamped, well-formed, and deterministic', () => 
   assert.match(a, /^beacon-static-audit@\d+\+ruleset\.[0-9a-f]{12}$/, 'fingerprint = detector-version + ruleset hash');
   assert.equal(a, b, 'fingerprint must be deterministic across runs (it gates the reproducibility contract)');
 });
+
+test('P8: --llm-judgment is quarantined verbatim and never touches the score', () => {
+  const baseOverall = run({ args: ['--date', '2020-01-01'] }).audit.summary.overall_score;
+  const { file, cleanup } = (() => {
+    const dir = mkdtempSync(join(tmpdir(), 'beacon-llm-'));
+    const f = join(dir, 'j.json');
+    writeFileSync(f, JSON.stringify([
+      { observation: 'alt="logo" is technically present but says nothing useful', criterion: '1.1.1', category: 'screenreader' },
+      { note: 'no observation -> must be dropped' },
+    ]));
+    return { file: f, cleanup: () => rmSync(dir, { recursive: true, force: true }) };
+  })();
+  try {
+    const { audit } = run({ args: ['--date', '2020-01-01', '--llm-judgment', file] });
+    assert.ok(audit.llm_judgment, 'llm_judgment block must be present');
+    assert.equal(audit.llm_judgment.reproducible, false, 'must be labelled not reproducible');
+    assert.equal(audit.llm_judgment.scored, false, 'must be labelled not scored');
+    assert.equal(audit.llm_judgment.items.length, 1, 'invalid (no-observation) item is dropped');
+    assert.equal(audit.summary.overall_score, baseOverall, 'llm_judgment must NOT change the machine score');
+  } finally { cleanup(); }
+});

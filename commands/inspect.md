@@ -535,6 +535,26 @@ category/overall formulas, and writes the authoritative artifact. Pass `--date <
 `audit-results.json` and change a score, severity, or count — that is the agent-in-the-verdict-path
 behavior P1 removed.
 
+**Your judgment has a sanctioned home — keep it out of the score.** The irreducible ~60% of
+WCAG no engine can decide (is this `alt` *meaningful*; does the reading order make *sense*;
+cognitive load; dynamic-interaction quality) is real and valuable, but it is **not
+reproducible**, so it must never enter `findings` or any score. Put it in a separate file and
+pass it through the script:
+
+```bash
+# llm-judgment.json: a JSON array of { "observation": "...", "criterion": "1.1.1" (opt),
+# "category": "screenreader" (opt), "note": "..." (opt) }.
+node scripts/static-audit.mjs --scope "<scope>" \
+  --merge-findings manual-findings.json \
+  --llm-judgment llm-judgment.json \
+  --output audit-results.json <file-or-dir>...
+```
+
+The script copies it verbatim into a quarantined `llm_judgment` block (labelled
+"not reproducible, excluded from the machine score") and never lets it touch the score. This is
+P8: the agent is the orchestration + narration shell (scope, browser-driving, human-readable
+explanation, semantic judgment), never the author of the machine verdict.
+
 The script emits this shape (reference — do not author it by hand):
 
 ```json
