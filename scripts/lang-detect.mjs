@@ -103,11 +103,34 @@ export function detectContentLanguage(plainText) {
 export function assessLang(declaredLang, plainText) {
   if (!declaredLang) return { status: 'NO_LANG', note: '<html lang> absent' };
   const declared = String(declaredLang).toLowerCase();
+
+  // Encoding guard: a page mis-decoded from a legacy charset (Shift_JIS, Big5,
+  // GBK, ...) as UTF-8 becomes mojibake full of U+FFFD replacement chars, whose
+  // surviving ASCII would otherwise score as "latin" and produce a spurious
+  // mismatch. If the text is substantially replacement chars we cannot judge the
+  // language — report the encoding problem rather than guess.
+  const text = String(plainText);
+  const repl = (text.match(/�/g) || []).length;
+  if (repl > 2 && repl / Math.max(text.length, 1) > 0.02)
+    return { status: 'INSUFFICIENT', declared, detectedFamily: 'unknown',
+             note: `content appears mis-decoded (${repl} replacement characters); likely a non-UTF-8 charset (e.g. Shift_JIS / Big5 / GBK). Fix the page encoding before language can be assessed.` };
+
   const parts = declared.split('-');
   const scriptTag = parts.slice(1).find((p) => /^[a-z]{4}$/.test(p)); // BCP47 script subtag
-  const dFam = scriptTag ? (scriptFamily(scriptTag) || 'other') : declaredFamily(parts[0]);
+  // A bare ISO-3166 country code where a language subtag belongs ("jp" for "ja")
+  // is itself a 3.1.1 failure; map it to the intended language so the content is
+  // still judged instead of punting UNMODELLED on the malformed code.
+  const COUNTRY_AS_LANG = { jp: 'ja', kr: 'ko', cn: 'zh', tw: 'zh' };
+  const invalidCode = !scriptTag && Object.prototype.hasOwnProperty.call(COUNTRY_AS_LANG, parts[0]);
+  const primary = invalidCode ? COUNTRY_AS_LANG[parts[0]] : parts[0];
+  const dFam = scriptTag ? (scriptFamily(scriptTag) || 'other') : declaredFamily(primary);
   const det = detectContentLanguage(plainText);
   const { cjkRatio, latinRatio } = det;
+
+  // Malformed language code: a real 3.1.1 problem regardless of the content.
+  if (invalidCode)
+    return { status: 'FLAG', declared, detectedFamily: det.family,
+             note: `declared "${parts[0]}" is a country code, not a valid language code — use "${COUNTRY_AS_LANG[parts[0]]}"; content detected as ${det.family}` };
   const pct = x => (x * 100).toFixed(0) + '%';
 
   if (det.family === 'unknown')

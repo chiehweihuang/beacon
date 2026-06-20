@@ -54,6 +54,24 @@ test('FP guard: a meaningful aria-label is NOT flagged', () => {
   assert.equal(keys('<button aria-label="Close dialog">x</button>').filter((k) => k === 'quality-label-role-echo').length, 0);
 });
 
+// --- round-2 calibration fixes (FP/FN found on 36 real pages) -------------
+// FP: aria-label="Menu" on a nav toggle is standard good practice, not a role echo.
+test('FP guard: aria-label="Menu" on a nav button is NOT a role echo', () => {
+  assert.equal(keys('<button aria-label="Menu" aria-expanded="false">x</button>').filter((k) => k === 'quality-label-role-echo').length, 0);
+});
+// FP: a link whose text is a code/element name ("<link>", "<details>") is meaningful.
+test('FP guard: link text that is a code/element name is NOT generic', () => {
+  assert.deepEqual(detectQualityFlags('<a href="/link"><code>&lt;link&gt;</code></a>'), []);
+});
+// FN: data-aria-label is NOT an accessible-name override; the generic link must still flag.
+test('data-aria-label does NOT suppress a generic-link flag', () => {
+  assert.ok(has('<a href="/r" data-aria-label="tracking">Read more</a>', 'quality-link-generic'));
+});
+// FN: common zh-Hant CTA not previously covered.
+test('zh-Hant 了解更多 generic link is flagged', () => {
+  assert.ok(has('<a href="/r">了解更多</a>', 'quality-link-generic'));
+});
+
 // --- black-box through static-audit --------------------------------------
 function runScanner(html) {
   const dir = mkdtempSync(join(tmpdir(), 'beacon-quality-'));

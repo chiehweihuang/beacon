@@ -57,7 +57,9 @@ test('link-name: icon-only link with no accessible name is flagged', () => {
   const hits = linkNameFindings(audit);
   assert.equal(hits.length, 1, `expected exactly 1 nameless-link finding, got ${hits.length}`);
   assert.match(hits[0].wcag, /4\.1\.2/);
-  assert.equal(hits[0].severity, 'warning');
+  // P1: the severity matrix (single source) mandates 4.1.2 = critical; the script applies
+  // it at addFinding, so this finding is normalised from its native 'warning' to 'critical'.
+  assert.equal(hits[0].severity, 'critical');
 });
 
 test('link-name: text links and aria-labelled links are not flagged', () => {

@@ -7,7 +7,7 @@
 
 import { readFileSync, writeFileSync, statSync, readdirSync } from 'fs';
 import { basename, join, relative } from 'path';
-import { extractText, assessLang, detectLangParts } from './lang-detect.mjs';
+import { extractText, assessLang } from './lang-detect.mjs';
 import { detectAuthBarriers, detectAuthBarriersInSource } from './auth-detect.mjs';
 import { assessPdf } from './pdf-detect.mjs';
 import { detectQualityFlags } from './quality-detect.mjs';
@@ -32,18 +32,63 @@ const CATEGORY_NAMES = {
 
 const CATEGORY_ORDER = ['contrast', 'keyboard', 'screenreader', 'forms', 'responsive', 'touch', 'cognitive', 'motion', 'media', 'agent'];
 
+// P1: the verdict path is owned by this script, not the agent. The weighted-average
+// table and the severity matrix below are the SINGLE SOURCE for scoring — inspect.md
+// Step 4 documents them but forbids the agent from hand-applying them. Weights sum to 100.
+const CATEGORY_WEIGHTS = {
+  screenreader: 18, keyboard: 13, contrast: 13, forms: 13,
+  responsive: 12, touch: 8, cognitive: 8, motion: 5, media: 5, agent: 5,
+};
+const WEIGHT_SUM = Object.values(CATEGORY_WEIGHTS).reduce((a, b) => a + b, 0);
+
+// SEVERITY MATRIX — WCAG criterion -> mandated severity. Overrides a finding's own
+// severity when the criterion appears here (mirrors inspect.md Step 4). Applied at the
+// single funnel addFinding(), so native and merged findings are normalised identically.
+const SEVERITY_MATRIX = {
+  '1.1.1': 'critical', '1.2.2': 'critical', '1.3.1': 'critical', '1.3.6': 'tip',
+  '1.4.1': 'critical', '1.4.2': 'critical', '1.4.3': 'warning', '1.4.4': 'warning',
+  '1.4.10': 'warning', '1.4.11': 'warning', '1.4.12': 'warning', '2.1.1': 'critical',
+  '2.2.2': 'critical', '2.3.1': 'critical', '2.4.1': 'warning', '2.4.2': 'critical',
+  '2.4.7': 'warning', '2.4.11': 'warning', '3.1.1': 'critical', '3.3.2': 'critical',
+  '4.1.2': 'critical',
+};
+
+function criterionOf(wcag) {
+  const m = String(wcag || '').match(/\b([1-4]\.\d\.\d{1,2})\b/);
+  return m ? m[1] : null;
+}
+
+// Matrix wins when the finding's WCAG criterion is listed; otherwise the finding keeps
+// its own severity (or 'warning' as a last resort for merged findings with none).
+function mandatedSeverity(wcag, fallback) {
+  const c = criterionOf(wcag);
+  return (c && SEVERITY_MATRIX[c]) || fallback || 'warning';
+}
+
+// Reproducibility (P3 precursor): the stamped date must be injectable so two runs of the
+// same page can be byte-identical. --date wins; else SOURCE_DATE_EPOCH (reproducible-builds
+// convention); else today. Live runs that pass neither keep the old today's-date behaviour.
+function resolveDate(optDate) {
+  if (optDate) return optDate;
+  const epoch = process.env.SOURCE_DATE_EPOCH;
+  if (epoch && /^\d+$/.test(epoch)) return new Date(Number(epoch) * 1000).toISOString().slice(0, 10);
+  return new Date().toISOString().slice(0, 10);
+}
+
 function usage() {
   console.error('Usage: node static-audit.mjs [--scope name] [--url url] [--output audit-results.json] <file-or-dir>...');
   process.exit(1);
 }
 
 function parseArgs(argv) {
-  const opts = { scope: 'Static UI audit', url: null, output: 'audit-results.json', paths: [] };
+  const opts = { scope: 'Static UI audit', url: null, output: 'audit-results.json', date: null, mergeFindings: null, paths: [] };
   for (let i = 0; i < argv.length; i++) {
     const arg = argv[i];
     if (arg === '--scope') opts.scope = argv[++i] || usage();
     else if (arg === '--url') opts.url = argv[++i] || usage();
     else if (arg === '--output') opts.output = argv[++i] || usage();
+    else if (arg === '--date') opts.date = argv[++i] || usage();
+    else if (arg === '--merge-findings') opts.mergeFindings = argv[++i] || usage();
     else opts.paths.push(arg);
   }
   if (opts.paths.length === 0) usage();
@@ -75,7 +120,7 @@ function snippetAt(text, index) {
 
 function makeStats() {
   const stats = {};
-  for (const id of CATEGORY_ORDER) stats[id] = { id, name: CATEGORY_NAMES[id], pass: 0, fail: 0, review: 0, score: 0 };
+  for (const id of CATEGORY_ORDER) stats[id] = { id, name: CATEGORY_NAMES[id], pass: 0, fail: 0, review: 0, score: 0, sev: { critical: 0, warning: 0, tip: 0 } };
   return stats;
 }
 
@@ -90,12 +135,21 @@ function addFinding(findings, stats, f) {
   // REVIEW-level findings pass check:'review' so they don't count as hard fails.
   // It is stripped from the emitted finding object.
   const { check = 'fail', ...rest } = f;
+  // Single funnel for the severity matrix: native and merged findings normalise here.
+  // The matrix asserts the severity of a CONFIRMED violation, so it only applies to
+  // check:'fail'. An unverifiable (review) finding keeps its own softer severity — an
+  // unconfirmed item must not be inflated to critical just because its criterion is.
+  const severity = check === 'fail' ? mandatedSeverity(rest.wcag, rest.severity) : (rest.severity || 'warning');
   findings.push({
     level: rest.level || 'AA',
     legal_exposure: rest.legal_exposure || 'May affect ADA / EAA / JIS / Taiwan accessibility expectations depending on deployment context.',
     ...rest,
+    severity,
   });
   addCheck(stats, rest.category, check);
+  // Only confirmed violations (check:'fail') drive the severity penalty; unverifiable
+  // (review) findings never reduce the score (inspect.md Step 4 three-state rule).
+  if (check === 'fail') stats[rest.category].sev[severity] += 1;
 }
 
 function isMarkup(ext) {
@@ -201,23 +255,13 @@ function scanFile(file, root, stats, findings) {
         });
       }
 
-      // 3.1.2 Language of Parts: a foreign-language passage with no inline lang.
-      // Independent of the 3.1.1 verdict — a page can pass 3.1.1 yet have unmarked parts.
-      const parts = detectLangParts(text);
-      if (parts.status === 'REVIEW') {
-        addFinding(findings, stats, {
-          key: 'html-lang-parts-unmarked',
-          category: 'screenreader',
-          severity: 'tip',
-          check: 'review',
-          wcag: 'WCAG 2.2: 3.1.2 Language of Parts',
-          title: 'Foreign-language passage may not carry its own lang attribute',
-          affected_users: 'Screen-reader users (wrong pronunciation rules on the foreign passage)',
-          location: `${rel}:1`,
-          description: `${parts.note}. A passage in a language other than the page default needs its own lang so assistive tech switches pronunciation. Heuristic (cannot pinpoint the passage), so verify.`,
-          fix: 'Wrap each foreign-language passage in an element with the correct lang, e.g. <span lang="ja">...</span> or <blockquote lang="fr">...</blockquote>.',
-        });
-      }
+      // 3.1.2 Language of Parts: GATED OFF (not emitted). The char-counting
+      // detectLangParts scored 0 true positives / 2 false positives on a 36-page
+      // real-world calibration (2026-06-15): on real CJK pages the foreign script is
+      // almost always proper names / brands, which 3.1.2 explicitly exempts, and
+      // char-counting cannot model passage-vs-proper-name. Re-enable only after a
+      // redesign (passage segmentation + per-segment language ID). The detectLangParts
+      // function is retained for that redesign but is no longer wired into scoring.
     }
 
     if (/\.html?$/.test(file) && !/<title>[^<]+<\/title>/i.test(text)) {
@@ -728,12 +772,16 @@ function addSiteAgentReadinessFindings(inputPaths, files, root, stats, findings)
   } else addCheck(stats, 'agent', 'pass');
 }
 
+// inspect.md Step 4 category formula (single source): base = pass/auditable, then a
+// severity penalty from confirmed-fail findings. unverifiable (review) is excluded from
+// both auditable and the penalty. Empty category falls back to a neutral 60/100.
 function scoreCategory(cat) {
-  const total = cat.pass + cat.fail;
-  if (total === 0) return cat.review > 0 ? 60 : 100;
-  const base = Math.round((cat.pass / total) * 100);
-  const reviewPenalty = Math.min(20, cat.review * 3);
-  return Math.max(0, Math.min(100, base - reviewPenalty));
+  const auditable = cat.pass + cat.fail;
+  if (auditable === 0) return cat.review > 0 ? 60 : 100;
+  const base = (cat.pass / auditable) * 100;
+  const sev = cat.sev || { critical: 0, warning: 0, tip: 0 };
+  const score = base - sev.critical * 12 - sev.warning * 5 - sev.tip * 1;
+  return Math.max(0, Math.min(100, Math.round(score)));
 }
 
 function priorityFor(severity) {
@@ -752,6 +800,39 @@ function criteriaFromFindings(findings) {
   return [...criteria].sort((a, b) => a.localeCompare(b, undefined, { numeric: true }));
 }
 
+// P1: the SOLE channel for Tier-2/manual findings (axe contrast, focus, human review) to
+// enter the scored artifact. The agent feeds findings as data; the script — never the
+// agent — applies the matrix and recomputes the verdict. Untrusted input: validated here.
+function mergeExternalFindings(file, stats, findings) {
+  let raw;
+  try { raw = JSON.parse(readFileSync(file, 'utf8')); }
+  catch (e) { console.error(`--merge-findings: cannot read/parse ${file}: ${e.message}`); process.exit(1); }
+  const list = Array.isArray(raw) ? raw : (Array.isArray(raw?.findings) ? raw.findings : null);
+  if (!list) { console.error(`--merge-findings: ${file} must be a findings array or {"findings":[...]}`); process.exit(1); }
+  let merged = 0, skipped = 0;
+  for (const f of list) {
+    if (!f || !CATEGORY_ORDER.includes(f.category)) {
+      skipped += 1;
+      console.error(`--merge-findings: skipped finding with invalid category: ${JSON.stringify(f).slice(0, 80)}`);
+      continue;
+    }
+    const severity = ['critical', 'warning', 'tip'].includes(f.severity) ? f.severity : undefined;
+    addFinding(findings, stats, {
+      category: f.category,
+      severity,
+      wcag: f.wcag || '',
+      key: f.key || 'external-finding',
+      title: f.title || 'External finding',
+      location: f.location || '',
+      fix: f.fix,
+      source: f.source || 'merged',
+      check: f.check === 'review' ? 'review' : 'fail',
+    });
+    merged += 1;
+  }
+  console.error(`--merge-findings: merged ${merged}, skipped ${skipped} from ${file}`);
+}
+
 function main() {
   const opts = parseArgs(process.argv.slice(2));
   const root = process.cwd();
@@ -761,13 +842,16 @@ function main() {
 
   for (const file of files) scanFile(file, root, stats, findings);
   addSiteAgentReadinessFindings(opts.paths, files, root, stats, findings);
+  if (opts.mergeFindings) mergeExternalFindings(opts.mergeFindings, stats, findings);
 
   const categories = CATEGORY_ORDER.map(id => {
     const cat = stats[id];
-    return { ...cat, score: scoreCategory(cat) };
+    // `sev` is internal scoring state — keep it out of the emitted artifact.
+    return { id: cat.id, name: cat.name, pass: cat.pass, fail: cat.fail, review: cat.review, score: scoreCategory(cat) };
   });
 
-  const overall = Math.round(categories.reduce((sum, cat) => sum + cat.score, 0) / categories.length);
+  // Weighted average (inspect.md Step 4 weight table) — not a simple mean.
+  const overall = Math.round(categories.reduce((sum, cat) => sum + cat.score * (CATEGORY_WEIGHTS[cat.id] || 0), 0) / WEIGHT_SUM);
   const critical = findings.filter(f => f.severity === 'critical').length;
   const warnings = findings.filter(f => f.severity === 'warning').length;
   const tips = findings.filter(f => f.severity === 'tip').length;
@@ -775,7 +859,7 @@ function main() {
 
   const audit = {
     metadata: {
-      date: new Date().toISOString().slice(0, 10),
+      date: resolveDate(opts.date),
       url: opts.url || undefined,
       scope: opts.scope,
       standard: 'WCAG 2.2 AA static baseline',

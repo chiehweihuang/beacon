@@ -147,7 +147,16 @@ If Playwright MCP tools are available (`mcp__plugin_playwright_playwright__*`), 
    verdicts. Axe (step 3) covers computed-style/contrast; this step covers structure.
 
 4. Keyboard focus-flow capture (2.1.2 / 2.4.3 / 2.4.7 / 2.4.11 / 2.1.1) — runtime
-   behaviors a static scan and axe cannot see. Drive Tab, capture a trace, analyze it:
+   behaviors a static scan and axe cannot see. STATUS: MANUAL AID ONLY — NOT SCORED.
+   A 2026-06-17 validation found this CAPTURE recipe produces systematic false
+   positives on real pages (kbd-trap 9/10, focus-unreachable 10/10): a fixed Tab cap
+   makes a long page read as a "trap", and the interactive selector over-counts
+   non-tabbable elements. The pure analyzer (focus-flow.mjs) is correct on crafted
+   fixtures, but the capture is not yet trustworthy. So drive a human keyboard pass and
+   use this only to GUIDE it; do NOT merge its findings into the scored
+   audit-results.json. Rework before scoring: derive the cap from the interactive
+   count, narrow the selector, then re-validate with a published false-positive rate.
+   Reference recipe (for the eventual reworked capture):
    a. browser_evaluate -> interactiveTotal =
       document.querySelectorAll('a[href],button,input,select,textarea,[tabindex]:not([tabindex="-1"])').length
    b. Press Tab up to ~50 times; at each stop browser_evaluate on document.activeElement:
@@ -407,7 +416,16 @@ This category covers both assistive technology agents (screen readers) and AI ag
 
 ### Step 4: Calculate Scores
 
-**Every check item MUST be classified as exactly one of:**
+> **The script owns scoring — you do not.** `static-audit.mjs` is the sole author of every
+> score, severity, and verdict in `audit-results.json`. The three-state model, the category
+> formula, the severity matrix, and the category weights below are all **implemented in the
+> script** and documented here only so you can read the report, not re-derive it. Do **NOT**
+> hand-compute scores, hand-apply the severity matrix, or edit any number in
+> `audit-results.json`. Your job is to produce *findings* (Step 3 manual review, Tier-2 axe
+> contrast/focus); the script turns findings into the scored artifact (Step 6). Hand-scoring is
+> exactly the stochastic step P1 removed — it is what made identical pages score differently.
+
+**Every check item MUST be classified as exactly one of (the script applies this):**
 
 | Verdict | Meaning | Score impact |
 |---------|---------|-------------|
@@ -493,9 +511,31 @@ The legal section should state:
 
 Reference: `../references/legal-brief.md`
 
-### Step 6: Build the Structured JSON
+### Step 6: Produce the Authoritative JSON (script-authored)
 
-Write `audit-results.json` in the project root (or user-specified location). This is the **source of truth** — the HTML report is generated from it.
+`audit-results.json` is the **source of truth**, and `static-audit.mjs` is its **sole author**.
+You do **not** write or edit it by hand. Instead, hand the script the findings that the
+automated scan could not produce on its own — your Step 3 manual review and the Tier-2 axe
+contrast/focus findings — as a small JSON file, and let the script compute the verdict, the
+severities (via the matrix), and the scores:
+
+```bash
+# manual-findings.json: a JSON array (or {"findings":[...]}) of finding objects, each with at
+# minimum { "category": "<one of the 10 ids>", "wcag": "1.4.3", "title": "...", "location": "..." }.
+# Optional: "severity" (overridden by the matrix when the WCAG criterion is listed),
+# "fix", and "check": "review" for an unverifiable finding that must NOT lower the score.
+node scripts/static-audit.mjs --scope "<scope>" \
+  --merge-findings manual-findings.json \
+  --output audit-results.json <file-or-dir>...
+```
+
+The script re-scans, folds in your merged findings, applies the severity matrix and the
+category/overall formulas, and writes the authoritative artifact. Pass `--date <YYYY-MM-DD>`
+(or set `SOURCE_DATE_EPOCH`) when you need a reproducible, byte-identical run. **Never** open
+`audit-results.json` and change a score, severity, or count — that is the agent-in-the-verdict-path
+behavior P1 removed.
+
+The script emits this shape (reference — do not author it by hand):
 
 ```json
 {

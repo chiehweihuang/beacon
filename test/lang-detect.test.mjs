@@ -87,6 +87,19 @@ test('NO_LANG / UNMODELLED edge cases', () => {
   assert.equal(assessLang('ar', mix(0)).status, 'UNMODELLED');     // script not modelled yet
 });
 
+// regression: ultracode calibration found a 100% miss on invalid country-codes
+test('FLAG: invalid country-code lang values (jp/kr/cn) are caught, not punted UNMODELLED', () => {
+  assert.equal(assessLang('jp', JPN.repeat(40)).status, 'FLAG');     // "jp" is a country code; content Japanese
+  assert.equal(assessLang('cn', mix(0.95)).status, 'FLAG');          // "cn" -> zh; content Chinese
+  assert.equal(assessLang('kr', HANGUL.repeat(20)).status, 'FLAG');  // "kr" -> ko; content Korean
+});
+
+// regression: ultracode calibration found a Shift-JIS mojibake page scored as latin -> spurious FLAG
+test('INSUFFICIENT: mis-decoded (mojibake) content is not flagged as a mismatch', () => {
+  const mojibake = 'A'.repeat(300) + '�'.repeat(300);          // replacement-char-heavy garble
+  assert.equal(assessLang('ja', mojibake).status, 'INSUFFICIENT');
+});
+
 // --- helpers -------------------------------------------------------------
 test('extractText strips script/style and decodes entities', () => {
   assert.equal(extractText('<p>中文</p><script>console.log("hi")</script>'), '中文');
@@ -152,7 +165,7 @@ test('parts: a mostly-foreign page is a 3.1.1 mismatch, not 3.1.2 parts', () => 
   assert.equal(detectLangParts(`<html lang="en"><body><p>${HAN.repeat(30)}</p></body></html>`).status, 'PASS_311');
 });
 
-test('static-audit emits html-lang-parts-unmarked for an en page with an unmarked foreign passage', () => {
+test('static-audit does NOT emit html-lang-parts-unmarked (3.1.2 gated off after calibration: 0 TP / 2 FP)', () => {
   const audit = runScanner(`<!doctype html><html lang="en"><head><title>t</title></head><body><p>${'The annual report covers operations across regions. '.repeat(12)}</p><blockquote>${JPN.repeat(5)}</blockquote></body></html>`);
-  assert.equal(audit.findings.filter((f) => f.key === 'html-lang-parts-unmarked').length, 1);
+  assert.equal(audit.findings.filter((f) => f.key === 'html-lang-parts-unmarked').length, 0);
 });
