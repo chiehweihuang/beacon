@@ -7,6 +7,7 @@
 
 import { readFileSync, writeFileSync, statSync, readdirSync } from 'fs';
 import { basename, join, relative } from 'path';
+import { createHash } from 'crypto';
 import { extractText, assessLang } from './lang-detect.mjs';
 import { detectAuthBarriers, detectAuthBarriersInSource } from './auth-detect.mjs';
 import { assessPdf } from './pdf-detect.mjs';
@@ -52,6 +53,27 @@ const SEVERITY_MATRIX = {
   '2.4.7': 'warning', '2.4.11': 'warning', '3.1.1': 'critical', '3.3.2': 'critical',
   '4.1.2': 'critical',
 };
+
+// P3: engine fingerprint. The reproducibility contract is "same page + same fingerprint
+// => identical machine layer". Bump DETECTOR_VERSION when detection/scoring LOGIC changes;
+// the ruleset hash auto-changes when the scoring CONTRACT (weights/matrix/formula) changes.
+// (axe / capture-recipe components are added when Tier-2 findings are merged with their own
+// engine provenance; the pure static engine here is axe-free, so claiming an axe version would
+// be dishonest.)
+const DETECTOR_VERSION = 'beacon-static-audit@2';
+
+function rulesetHash() {
+  const payload = JSON.stringify({
+    weights: CATEGORY_WEIGHTS,
+    matrix: SEVERITY_MATRIX,
+    formula: 'category=base-12crit-5warn-1tip; overall=weighted',
+  });
+  return createHash('sha256').update(payload).digest('hex').slice(0, 12);
+}
+
+function engineFingerprint() {
+  return `${DETECTOR_VERSION}+ruleset.${rulesetHash()}`;
+}
 
 function criterionOf(wcag) {
   const m = String(wcag || '').match(/\b([1-4]\.\d\.\d{1,2})\b/);
@@ -866,6 +888,7 @@ function main() {
       jurisdictions: ['US ADA', 'EU EAA', 'Japan JIS', 'Taiwan', 'Canada ACA', 'Australia DDA'],
       platform: 'Web',
       tool_version: 'beacon codex static baseline',
+      engine_fingerprint: engineFingerprint(),
       confidence_level: 'medium',
       requires_live_audit: true,
       audit_tier: 'Tier 1 (static file scan only)',

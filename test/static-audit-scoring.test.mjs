@@ -119,3 +119,10 @@ test('reproducible: two runs of the same page with a fixed date are byte-identic
   const b = run({ args: ['--date', '2020-01-01'] }).raw;
   assert.equal(a, b, 'same page + fixed date must produce byte-identical audit-results.json');
 });
+
+test('P3: engine_fingerprint is stamped, well-formed, and deterministic', () => {
+  const a = run({ args: ['--date', '2020-01-01'] }).audit.metadata.engine_fingerprint;
+  const b = run({ args: ['--date', '2020-01-01'] }).audit.metadata.engine_fingerprint;
+  assert.match(a, /^beacon-static-audit@\d+\+ruleset\.[0-9a-f]{12}$/, 'fingerprint = detector-version + ruleset hash');
+  assert.equal(a, b, 'fingerprint must be deterministic across runs (it gates the reproducibility contract)');
+});
