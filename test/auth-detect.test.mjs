@@ -19,6 +19,17 @@ const SCANNER = resolve(ROOT, 'core/scripts/static-audit.mjs');
 const one = (html, key) => detectAuthBarriers(html).find((s) => s.key === key);
 const bandsOf = (html) => detectAuthBarriers(html).map((s) => s.band);
 
+test('FP guard: id "refresh-captcha" must not false-match hCaptcha (word boundary)', () => {
+  const html = '<form><img id="refresh-captcha" src="r.png" alt="refresh"><input name="cap"></form>';
+  assert.equal(detectAuthBarriers(html).some((s) => /hcaptcha/i.test(s.key)), false,
+    'the substring "h-captcha" inside "refresh-captcha" must not trigger an hCaptcha signal');
+});
+
+test('regression: a real h-captcha class still flags after the word-boundary fix', () => {
+  assert.ok(one('<form><div class="h-captcha" data-sitekey="x"></div></form>', 'auth-hcaptcha'),
+    'a genuine h-captcha widget must still be detected');
+});
+
 // --- exemptions: not a 3.3.8 barrier -> INFO (no finding) ----------------
 test('reCAPTCHA v3 (render param) and invisible are INFO, not flagged', () => {
   assert.equal(one('<script src="https://www.google.com/recaptcha/api.js?render=K"></script>', 'auth-recaptcha-invisible').band, 'INFO');

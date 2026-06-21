@@ -28,7 +28,9 @@ export function detectAuthBarriers(text) {
   const has = re => re.test(text);
 
   // --- reCAPTCHA -----------------------------------------------------------
-  const reRecaptcha = /g-recaptcha|recaptcha\/api(?:2)?\.js|grecaptcha/i;
+  // Class tokens are \b-anchored so a substring (e.g. CSS class "bg-recaptcha") does
+  // not false-match; bare "grecaptcha" (the JS global) keeps its own boundary.
+  const reRecaptcha = /\bg-recaptcha\b|recaptcha\/api(?:2)?\.js|\bgrecaptcha\b/i;
   if (has(reRecaptcha)) {
     const v3 = /recaptcha\/api\.js\?[^"'<>]*\brender=/i.test(text) || /grecaptcha\s*\.\s*execute\s*\(/i.test(text);
     const invisible = /data-size\s*=\s*["']invisible["']/i.test(text) || /size\s*:\s*["']invisible["']/i.test(text);
@@ -48,7 +50,8 @@ export function detectAuthBarriers(text) {
   }
 
   // --- hCaptcha ------------------------------------------------------------
-  const reHcaptcha = /h-captcha|hcaptcha\.com|js\.hcaptcha/i;
+  // \b-anchored so the id "refresh-captcha" (contains "…h-captcha") does not false-match.
+  const reHcaptcha = /\bh-captcha\b|hcaptcha\.com|js\.hcaptcha/i;
   if (has(reHcaptcha)) {
     const invisible = /data-size\s*=\s*["']invisible["']/i.test(text);
     signals.push({
@@ -65,9 +68,9 @@ export function detectAuthBarriers(text) {
   }
 
   // --- Cloudflare Turnstile (managed, non-interactive) ---------------------
-  if (has(/challenges\.cloudflare\.com\/turnstile|cf-turnstile/i)) {
+  if (has(/challenges\.cloudflare\.com\/turnstile|\bcf-turnstile\b/i)) {
     signals.push({ key: 'auth-turnstile', band: 'INFO', wcag: WCAG,
-      index: indexOfMatch(text, /challenges\.cloudflare\.com\/turnstile|cf-turnstile/i),
+      index: indexOfMatch(text, /challenges\.cloudflare\.com\/turnstile|\bcf-turnstile\b/i),
       title: 'Cloudflare Turnstile present',
       description: 'Turnstile is a managed, non-interactive challenge with no user-facing cognitive test, so it does not fail 3.3.8.' });
   }
@@ -77,7 +80,7 @@ export function detectAuthBarriers(text) {
   // transcribe what is shown, is a character-transcription test = a 3.3.8 fail.
   const imgCaptcha = /<img\b[^>]*captcha[^>]*>/i;   // quoted or unquoted; matches stripWidgets()
   const transcribePhrase = /(?:enter|type|input)\b[^<>]{0,30}\b(?:characters|letters|code|text)\b[^<>]{0,20}\b(?:you see|shown|above|in the image|below)\b|請?輸入(?:圖片中|上方|下列)?(?:的)?驗證碼|看不清楚.{0,6}(?:換一張|刷新)/i;
-  const isWidget = /g-recaptcha|h-captcha|cf-turnstile|recaptcha\/api/i;
+  const isWidget = /\bg-recaptcha\b|\bh-captcha\b|\bcf-turnstile\b|recaptcha\/api/i;
   if ((imgCaptcha.test(text) || transcribePhrase.test(text)) && !partOfWidget(text, imgCaptcha, isWidget)) {
     const strong = imgCaptcha.test(text) && transcribePhrase.test(text);
     signals.push({

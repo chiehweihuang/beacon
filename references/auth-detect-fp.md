@@ -54,11 +54,21 @@ FLAG) and `auth-password-clipboard-blocked-js` (source REVIEW) on the same attri
 barrier is real (both TP), but it is one issue reported twice. Consider de-duplicating so a
 single attribute does not inflate the finding count.
 
+## Fixes applied (2026-06-22)
+
+- **Substring bug fixed.** The class-token regexes are now `\b`-anchored
+  (`/\bh-captcha\b/`, `/\bg-recaptcha\b/`, `/\bcf-turnstile\b/`), so `refresh-captcha` (and CSS
+  classes like `bg-recaptcha`) no longer false-match. The `a3-sample-form` FP is gone; the five
+  reCAPTCHA-v2 true positives and the real h-captcha TP are unaffected. Post-fix: **23 flags, 21
+  TP, 2 FP (9%)**.
+- **Remaining 2 FP are the documented context limitation** (`a2-hcaptcha.js`, `a2-index.html`):
+  real hCaptcha widgets inside developer token-generator tools, not auth gates. Not fixable by a
+  pattern tweak; the rendered Tier-2 path with surrounding form context is the path to narrow it.
+
 ## Verdict
 
-auth-detect is **publishable as a Tier-1 detector**, with one caveat: fix the `auth-hcaptcha`
-substring bug and document the tool-vs-form context limitation. The FLAG-band claims (the ones
-that lower a score) are 100% precise here. Re-run on a held-out set before any external
-"published FP rate" claim.
+auth-detect is **publishable as a Tier-1 detector**. The FLAG-band claims (the ones that lower a
+score) are 100% precise here, and the substring bug is fixed. Re-run on a held-out set before any
+external "published FP rate" claim.
 
 Raw: `beacon-detector-sim/p5-results.json`, `corpus-auth/`.

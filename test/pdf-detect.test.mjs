@@ -49,6 +49,21 @@ const compressedTaggedRaw = () => {
 const P_BOTH_CLEARED = (-1 & ~0b11) & ~16 & ~512; // copy(16) + a11y(512) bits cleared
 const P_A11Y_ONLY = (-1 & ~0b11) & ~512; // only a11y bit cleared
 
+// Encrypted + tagged, with NO /Lang and NO /Title. /P = -1 leaves all permission bits
+// set (encClass 'ok'), so the only candidate findings are the secondary lang/title
+// REVIEWs — which MUST be suppressed under encryption: their markers may be locked
+// inside encrypted streams we cannot read, so "missing" is unverifiable, not a fail.
+const encryptedTaggedNoSecondary = () => B(
+  '%PDF-1.7\n1 0 obj\n<< /Type /Catalog /StructTreeRoot 4 0 R /MarkInfo << /Marked true >> >>\nendobj\n4 0 obj\n<< /Type /StructTreeRoot >>\nendobj\n9 0 obj\n<< /Filter /Standard /P -1 >>\nendobj\ntrailer\n<< /Root 1 0 R /Encrypt 9 0 R >>\n%%EOF\n');
+
+test('encrypted tagged PDF suppresses the secondary lang/title checks (no false REVIEW)', () => {
+  const r = assessPdf(encryptedTaggedNoSecondary());
+  const keys = r.findings.map((f) => f.key);
+  assert.equal(keys.includes('pdf-lang-missing'), false, 'lang check is suppressed under encryption');
+  assert.equal(keys.includes('pdf-title-not-shown'), false, 'title check is suppressed under encryption');
+  assert.match(r.note, /Encrypted/, 'the note records that secondary checks were skipped');
+});
+
 const encryptedAtBlocked = () => B(
   `%PDF-1.6\n1 0 obj\n<< /Type /Catalog /StructTreeRoot 4 0 R /MarkInfo << /Marked true >> /Lang (en) /Title (Locked) /ViewerPreferences << /DisplayDocTitle true >> >>\nendobj\n4 0 obj\n<< /Type /StructTreeRoot >>\nendobj\n7 0 obj\n<< /Filter /Standard /V 2 /R 3 /P ${P_BOTH_CLEARED} >>\nendobj\ntrailer\n<< /Root 1 0 R /Encrypt 7 0 R >>\n%%EOF\n`);
 

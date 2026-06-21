@@ -198,9 +198,13 @@ export function assessPdf(buffer) {
   let usedInflate = false;
 
   // If the tag tree is not visible in the raw bytes but the file uses FlateDecode,
-  // the catalog is probably inside a compressed object stream — inflate and
-  // re-scan before concluding anything about tagging. We append inflated text so
-  // raw-visible markers (Info dict /Title, /Encrypt /P) are also still matched.
+  // the catalog is probably inside a compressed object stream — inflate and re-scan
+  // before concluding anything about TAGGING. We deliberately do NOT broaden this to
+  // the secondary markers (/Lang, /Title, /MarkInfo, /DisplayDocTitle): inflating
+  // every stream surfaces stray catalog-key occurrences from non-catalog objects
+  // (an outline entry's /Title, a nested /Lang), which mask real issues = false
+  // NEGATIVES. Reliable secondary checks need catalog-aware resolution
+  // (resolve /Root and /Info via the xref + object streams), a separate rewrite.
   if (!hasStructTreeRoot(text) && /\/FlateDecode\b/.test(text)) {
     const inflated = inflateAllStreams(buf);
     if (inflated) { text = text + '\n' + inflated; usedInflate = true; }
@@ -244,9 +248,11 @@ export function assessPdf(buffer) {
       description: `No /StructTreeRoot was found${inflateNote}. An untagged PDF has no defined reading order or element semantics, so assistive technology must guess the order from glyph positions, which collapses tables, multi-column layouts, and lists into scrambled text. This is the most damaging single PDF accessibility failure.`,
       fix: 'Produce a tagged PDF: enable "tagged PDF" / "document structure tags" on export (Word, InDesign, LibreOffice all support this) and add a /MarkInfo << /Marked true >>, or run a remediation pass (e.g. Acrobat "Autotag", or veraPDF to verify PDF/UA).',
     });
-  } else if (!marked) {
+  } else if (!marked && !enc.present) {
     // Tagged but not asserted /Marked true: the tree exists but the producer did
     // not confirm it is real. Lower severity — verify the tags are meaningful.
+    // Suppressed when encrypted: encrypted object streams will not inflate, so a
+    // "missing" marker cannot be distinguished from one we simply cannot read.
     findings.push({
       key: 'pdf-marked-false',
       band: 'REVIEW',
@@ -260,7 +266,8 @@ export function assessPdf(buffer) {
   }
 
   // --- REVIEW-level: missing language (only meaningful on a tagged doc) ----
-  if (tagged && !lang) {
+  // Suppressed under encryption (markers in encrypted streams are unverifiable).
+  if (tagged && !lang && !enc.present) {
     findings.push({
       key: 'pdf-lang-missing',
       band: 'REVIEW',
@@ -276,7 +283,7 @@ export function assessPdf(buffer) {
   // --- REVIEW-level: title not shown to the viewer -------------------------
   // 2.4.2 for PDF requires BOTH a title AND DisplayDocTitle true, so the viewer
   // shows the human title instead of the filename. Report on a tagged doc.
-  if (tagged && (!title || !displayTitle)) {
+  if (tagged && (!title || !displayTitle) && !enc.present) {
     const why = !title
       ? 'no document title (/Title or XMP dc:title) was found'
       : '/ViewerPreferences << /DisplayDocTitle true >> was not set, so the viewer shows the filename instead of the title';
@@ -307,12 +314,16 @@ export function assessPdf(buffer) {
   }
 
   // --- decide overall status ----------------------------------------------
+  // When encrypted, the secondary checks (lang/title/Marked) were skipped because
+  // their markers may be locked inside encrypted streams we cannot read — flag the
+  // limitation so a clean status is not read as "verified accessible".
+  const encNote = (enc.present && tagged) ? ' Encrypted: lang/title/Marked not verifiable (secondary checks skipped).' : '';
   if (findings.some((f) => f.band === 'FLAG'))
     return { status: 'FLAG', findings,
-      note: `Tagged=${tagged}; ${encClass === 'at-blocked' ? 'encryption blocks AT; ' : ''}${!tagged ? 'untagged' : 'critical PDF/UA failure'}.` };
+      note: `Tagged=${tagged}; ${encClass === 'at-blocked' ? 'encryption blocks AT; ' : ''}${!tagged ? 'untagged' : 'critical PDF/UA failure'}.${encNote}` };
   if (findings.some((f) => f.band === 'REVIEW'))
     return { status: 'REVIEW', findings,
-      note: `Tagged=${tagged}, lang=${lang ? langVal || 'yes' : 'no'}, title=${title}, displayDocTitle=${displayTitle}.` };
+      note: `Tagged=${tagged}, lang=${lang ? langVal || 'yes' : 'no'}, title=${title}, displayDocTitle=${displayTitle}.${encNote}` };
   return { status: 'PASS', findings: [],
-    note: `Tagged + /Marked true + /Lang (${langVal}) + shown title.${usedInflate ? ' (resolved via inflated object streams)' : ''}` };
+    note: `Tagged + /Marked true + /Lang (${langVal}) + shown title.${usedInflate ? ' (resolved via inflated object streams)' : ''}${encNote}` };
 }
