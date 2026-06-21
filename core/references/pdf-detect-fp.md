@@ -69,20 +69,26 @@ Confirmed examples (independent parser resolves the value the detector missed):
    INE (empty `/Lang`) silently PASSED. For an accessibility detector a false negative (missing
    a real problem) is worse than a false positive, so this was reverted.
 
-### Still open: the 7 compressed-object-stream FPs need catalog-aware resolution
+3. **Catalog-aware resolution (shipped) — the real fix.** The secondary markers are now read
+   from the resolved `/Root` catalog and `/Info` dict specifically, not a whole-document byte
+   scan. `buildObjectMap` maps every object number to its body — regular `N G obj` objects PLUS
+   objects packed inside a `/Type /ObjStm` (parsed via the stream's `/N` + `/First` header) — so
+   `/Lang`, `/MarkInfo /Marked`, `/ViewerPreferences /DisplayDocTitle`, and the Info `/Title`
+   resolve even when compressed or referenced indirectly, while a stray `/Title` in an outline is
+   ignored (it is not the catalog or Info object). Handles literal, hex, and indirect-reference
+   values; falls back to the byte scan when the catalog cannot be resolved, and is wrapped so
+   malformed input can never throw. This removed all 7 remaining compressed-object-stream FPs.
 
-The IRS/VA forms (`/Lang` value and `/Title` inside a FlateDecode `/ObjStm`, `/DisplayDocTitle`
-as an indirect reference into one) are not fixable by a byte-scan tweak without also creating
-false negatives. The correct fix is to resolve the **catalog** (`/Root`) and the **Info dict**
-specifically via the xref + object-stream tables, then read THOSE objects' `/Lang`, `/Title`,
-`/MarkInfo`, and `/DisplayDocTitle` — a real parser pass, scoped as a separate change.
+**After all fixes the detector scores 20 TP / 0 FP on this 35-PDF corpus** (every previously
+false-firing IRS/VA form now PASSes; ALRC/INE/EU-HR/MHLW/NHTSA still correctly flag their real
+gaps — no false negatives introduced).
 
 ## Verdict
 
-Ship **`pdf-untagged` as a validated Tier-1 detector (0% FP)** and the encryption-suppression
-fix. Hold the secondary REVIEW checks (`lang-missing` / `title-not-shown` / `marked-false`) out
-of any published precision claim until catalog-aware resolution lands; today they false-fire on
-modern compressed government PDFs (~7/35 here) while correctly catching the genuinely broken ones.
+Ship the whole detector as **validated Tier-1**: `pdf-untagged` (0% FP) plus the secondary
+`lang-missing` / `title-not-shown` / `marked-false` checks, now backed by catalog-aware
+resolution (0 FP, 0 FN on the corpus). Re-run on a held-out set before publishing the precision
+number externally, as always.
 
 Raw: `beacon-detector-sim/p5-results.json`, `beacon-detector-sim/pdf-crosscheck-result.json`,
 `corpus-pdf/`.

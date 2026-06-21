@@ -177,6 +177,74 @@ function classifyEncrypt(p) {
   return 'ok';                                          // extraction allowed
 }
 
+// --- catalog-aware marker resolution --------------------------------------
+// Map every object number -> its body text: regular `N G obj ... endobj` from the
+// raw bytes, PLUS objects packed inside a /Type /ObjStm (parsed via its /N + /First
+// header). This lets us read the catalog's OWN /Lang, /MarkInfo, /ViewerPreferences
+// and the Info dict's /Title even when they sit in compressed object streams — and,
+// crucially, only those objects, so a stray /Title in an outline never counts.
+function buildObjectMap(buf) {
+  const raw = buf.toString('latin1');
+  const map = new Map();
+  for (const m of raw.matchAll(/(\d+)\s+(\d+)\s+obj\b([\s\S]*?)endobj/g)) map.set(+m[1], m[3]);
+  for (const m of raw.matchAll(/<<([^>]*\/Type\s*\/ObjStm[\s\S]*?)>>\s*stream\r?\n/g)) {
+    const N = +(m[1].match(/\/N\s+(\d+)/)?.[1] || 0);
+    const First = +(m[1].match(/\/First\s+(\d+)/)?.[1] || 0);
+    if (!N || !First) continue;
+    const sStart = m.index + m[0].length;
+    const sEnd = raw.indexOf('endstream', sStart);
+    if (sEnd < 0) continue;
+    const inf = inflateOne(buf.subarray(sStart, sEnd));
+    if (!inf) continue;
+    const h = inf.slice(0, First).trim().split(/\s+/).map(Number);
+    for (let i = 0; i < N; i++) {
+      const start = First + h[2 * i + 1];
+      const end = (i + 1 < N) ? First + h[2 * i + 3] : inf.length;
+      if (Number.isFinite(start)) map.set(h[2 * i], inf.slice(start, end));
+    }
+  }
+  return map;
+}
+
+// A boolean key that may be inline (`/Key true`) or an indirect reference to a boolean.
+function boolFrom(text, inlineRe, refRe, get) {
+  const i = text.match(inlineRe);
+  if (i) return i[1] === 'true';
+  const r = text.match(refRe);
+  if (r) { const o = get(+r[1]); if (/(^|[^A-Za-z])true\b/.test(o)) return true; if (/(^|[^A-Za-z])false\b/.test(o)) return false; }
+  return null;
+}
+
+// Resolve the document catalog (/Root) and Info dict, then read THEIR markers only.
+// Returns { foundCatalog, lang (''=missing), marked (bool|null), disp (bool|null), title }.
+export function catalogMarkers(buf) {
+  const map = buildObjectMap(buf);
+  const raw = buf.toString('latin1');
+  const last = (re) => { const a = [...raw.matchAll(re)]; return a.length ? +a[a.length - 1][1] : null; };
+  const rootN = last(/\/Root\s+(\d+)\s+\d+\s+R/g);
+  const infoN = last(/\/Info\s+(\d+)\s+\d+\s+R/g);
+  const get = (n) => n != null ? (map.get(n) || '') : '';
+  const cat = get(rootN), info = get(infoN);
+
+  let lang = '';
+  if (cat) {
+    const l = cat.match(/\/Lang\s*\(([^)]*)\)/);
+    const hx = cat.match(/\/Lang\s*<([0-9A-Fa-f]+)>/);
+    if (l) lang = l[1];
+    else if (hx) lang = 'hex';
+    else { const r = cat.match(/\/Lang\s+(\d+)\s+\d+\s+R/); if (r) { const o = get(+r[1]); const s = o.match(/\(([^)]*)\)/) || o.match(/<([0-9A-Fa-f]+)>/); if (s) lang = s[1] || 'hex'; } }
+  }
+  let miText = cat; if (cat) { const r = cat.match(/\/MarkInfo\s+(\d+)\s+\d+\s+R/); if (r) miText = get(+r[1]); }
+  const marked = cat ? boolFrom(miText, /\/Marked\s+(true|false)\b/, /\/Marked\s+(\d+)\s+\d+\s+R/, get) : null;
+  let vpText = cat; if (cat) { const r = cat.match(/\/ViewerPreferences\s+(\d+)\s+\d+\s+R/); if (r) vpText = get(+r[1]); }
+  const disp = cat ? boolFrom(vpText, /\/DisplayDocTitle\s+(true|false)\b/, /\/DisplayDocTitle\s+(\d+)\s+\d+\s+R/, get) : null;
+  // /Title normally lives in the Info dict, but some producers put it in the catalog;
+  // check both (each is a single resolved object, so no stray-marker risk).
+  const titleIn = (t) => !!t && (/\/Title\s*\(([^)]*\S[^)]*)\)/.test(t) || /\/Title\s*<([0-9A-Fa-f]{2,})>/.test(t));
+  const title = titleIn(info) || titleIn(cat);
+  return { foundCatalog: !!cat, lang, marked, disp, title };
+}
+
 // --- public API -----------------------------------------------------------
 
 // assessPdf(buffer) -> { status, findings, note }
@@ -199,24 +267,30 @@ export function assessPdf(buffer) {
 
   // If the tag tree is not visible in the raw bytes but the file uses FlateDecode,
   // the catalog is probably inside a compressed object stream — inflate and re-scan
-  // before concluding anything about TAGGING. We deliberately do NOT broaden this to
-  // the secondary markers (/Lang, /Title, /MarkInfo, /DisplayDocTitle): inflating
-  // every stream surfaces stray catalog-key occurrences from non-catalog objects
-  // (an outline entry's /Title, a nested /Lang), which mask real issues = false
-  // NEGATIVES. Reliable secondary checks need catalog-aware resolution
-  // (resolve /Root and /Info via the xref + object streams), a separate rewrite.
+  // before concluding anything about TAGGING. This inflated `text` is used ONLY for the
+  // tagging check; the secondary markers (/Lang, /Title, /MarkInfo, /DisplayDocTitle) are
+  // resolved separately via catalogMarkers() below, which reads the catalog/Info objects
+  // specifically so stray occurrences in other objects can't cause false negatives.
   if (!hasStructTreeRoot(text) && /\/FlateDecode\b/.test(text)) {
     const inflated = inflateAllStreams(buf);
     if (inflated) { text = text + '\n' + inflated; usedInflate = true; }
   }
 
   const tagged = hasStructTreeRoot(text);
-  const marked = hasMarkedTrue(text);
-  const lang = hasLang(text);
-  const langVal = langValue(text);
-  const title = hasTitle(text);
-  const displayTitle = hasDisplayDocTitle(text);
   const enc = encryptPermissions(text);
+
+  // Secondary markers come from the RESOLVED catalog + Info objects, not a whole-document
+  // byte scan: that reads values locked in compressed object streams (no false positive)
+  // while ignoring stray /Title / /Lang in non-catalog objects like outlines (no false
+  // negative). If the catalog cannot be resolved (or the doc is encrypted, so its streams
+  // are unreadable), fall back to the byte scan; encrypted docs are suppressed below anyway.
+  let cm; try { cm = catalogMarkers(buf); } catch { cm = { foundCatalog: false }; }
+  const useCat = cm.foundCatalog && !enc.present;
+  const marked = useCat ? cm.marked === true : hasMarkedTrue(text);
+  const lang = useCat ? cm.lang !== '' : hasLang(text);
+  const langVal = useCat ? (cm.lang === 'hex' ? '' : cm.lang) : langValue(text);
+  const title = useCat ? cm.title : hasTitle(text);
+  const displayTitle = useCat ? cm.disp !== false : hasDisplayDocTitle(text);
   const encClass = enc.present ? classifyEncrypt(enc.p) : 'none';
 
   const findings = [];

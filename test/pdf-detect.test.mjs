@@ -64,6 +64,28 @@ test('encrypted tagged PDF suppresses the secondary lang/title checks (no false 
   assert.match(r.note, /Encrypted/, 'the note records that secondary checks were skipped');
 });
 
+// Catalog /Lang and Info /Title packed inside a real /Type /ObjStm (/N + /First header).
+// The raw bytes never show the /Lang value or /Title, so a whole-document byte scan would
+// false-fire lang-missing / title-not-shown. Catalog-aware resolution must read them.
+const objstmSecondary = () => {
+  const o1 = '<</Type/Catalog/StructTreeRoot 4 0 R/MarkInfo<</Marked true>>/Lang(de-DE)/ViewerPreferences<</DisplayDocTitle true>>>>';
+  const o5 = '<</Title(Resolved From ObjStm)>>';
+  const header = `1 0 5 ${o1.length} `;
+  const deflated = deflateSync(Buffer.from(header + o1 + o5, 'latin1'));
+  return concat(
+    `%PDF-1.5\n4 0 obj\n<< /Type /StructTreeRoot >>\nendobj\n6 0 obj\n<< /Type /ObjStm /N 2 /First ${header.length} /Filter /FlateDecode /Length ${deflated.length} >>\nstream\n`,
+    deflated,
+    `\nendstream\nendobj\ntrailer\n<< /Root 1 0 R /Info 5 0 R >>\n%%EOF\n`);
+};
+
+test('catalog-aware: /Lang and /Title inside an ObjStm resolve -> PASS (no false secondary REVIEW)', () => {
+  const r = assessPdf(objstmSecondary());
+  const keys = r.findings.map((f) => f.key);
+  assert.equal(keys.includes('pdf-lang-missing'), false, 'compressed catalog /Lang must be resolved, not flagged');
+  assert.equal(keys.includes('pdf-title-not-shown'), false, 'compressed Info /Title must be resolved, not flagged');
+  assert.equal(r.status, 'PASS', 'fully accessible compressed PDF passes');
+});
+
 const encryptedAtBlocked = () => B(
   `%PDF-1.6\n1 0 obj\n<< /Type /Catalog /StructTreeRoot 4 0 R /MarkInfo << /Marked true >> /Lang (en) /Title (Locked) /ViewerPreferences << /DisplayDocTitle true >> >>\nendobj\n4 0 obj\n<< /Type /StructTreeRoot >>\nendobj\n7 0 obj\n<< /Filter /Standard /V 2 /R 3 /P ${P_BOTH_CLEARED} >>\nendobj\ntrailer\n<< /Root 1 0 R /Encrypt 7 0 R >>\n%%EOF\n`);
 
