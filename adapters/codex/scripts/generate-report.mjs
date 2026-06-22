@@ -719,7 +719,7 @@ const reportCounts = {
 
 function scoreColor(score) {
   if (score >= 90) return 'var(--pass)';
-  if (score >= 50) return 'var(--warn)';
+  if (score >= 50) return 'var(--mid)';   // dedicated clean amber for the rings (not the muddy text --warn)
   return 'var(--fail)';
 }
 
@@ -1349,29 +1349,30 @@ const html = `<!DOCTYPE html>
 <style>
   /* Beacon Eval Design System v0.1 token mapping. Light is the default; auto mode can follow OS preference. */
   :root {
-    --bg: #fafaf8;
+    --bg: #ffffff;
     --surface: #ffffff;
-    --surface-2: #f0f0ec;
-    --text: #1a1a1a;
-    --text-muted: #4a4a44;
-    --text-soft: #6b6b60;
-    --border: #c8c8c0;
-    --border-soft: #d8d8d2;
+    --surface-2: #f1f5f9;
+    --text: #0f172a;
+    --text-muted: #475569;
+    --text-soft: #64748b;
+    --border: #cbd5e1;
+    --border-soft: #e2e8f0;
     --accent: #1a5cb0;
     --accent-hover: #0e3d7a;
-    --accent-bg: #dff0ff;
+    --accent-bg: #eff6ff;
     --accent-text: #ffffff;
-    --pass: #155a1e;
-    --pass-bg: #d6f0db;
-    --warn: #6b4000;
-    --warn-bg: #fdf0d0;
-    --fail: #8b1a1a;
-    --fail-bg: #fde8e8;
+    --pass: #15803d;
+    --pass-bg: #dcfce7;
+    --warn: #92400e;
+    --warn-bg: #fef3c7;
+    --mid: #d97706;
+    --fail: #b91c1c;
+    --fail-bg: #fee2e2;
     --tip: #1a5cb0;
-    --tip-bg: #dff0ff;
-    --info: #5a4000;
-    --info-bg: #fff8e0;
-    --info-border: #c89000;
+    --tip-bg: #eff6ff;
+    --info: #334155;
+    --info-bg: #f1f5f9;
+    --info-border: #1a5cb0;
     --font: 'Inter', 'Noto Sans TC', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
     --font-mono: 'JetBrains Mono', 'Cascadia Code', Consolas, monospace;
     --shadow: 0 1px 3px rgba(0,0,0,0.08), 0 1px 2px rgba(0,0,0,0.04);
@@ -1411,56 +1412,58 @@ const html = `<!DOCTYPE html>
 
   /* User-explicit override via toolbar button (wins over media query) */
   :root[data-theme="light"] {
-    --bg: #fafaf8;
+    --bg: #ffffff;
     --surface: #ffffff;
-    --surface-2: #f0f0ec;
-    --text: #1a1a1a;
-    --text-muted: #4a4a44;
-    --text-soft: #6b6b60;
-    --border: #c8c8c0;
-    --border-soft: #d8d8d2;
+    --surface-2: #f1f5f9;
+    --text: #0f172a;
+    --text-muted: #475569;
+    --text-soft: #64748b;
+    --border: #cbd5e1;
+    --border-soft: #e2e8f0;
     --accent: #1a5cb0;
     --accent-hover: #0e3d7a;
-    --accent-bg: #dff0ff;
+    --accent-bg: #eff6ff;
     --accent-text: #ffffff;
-    --pass: #155a1e;
-    --pass-bg: #d6f0db;
-    --warn: #6b4000;
-    --warn-bg: #fdf0d0;
-    --fail: #8b1a1a;
-    --fail-bg: #fde8e8;
+    --pass: #15803d;
+    --pass-bg: #dcfce7;
+    --warn: #92400e;
+    --warn-bg: #fef3c7;
+    --mid: #d97706;
+    --fail: #b91c1c;
+    --fail-bg: #fee2e2;
     --tip: #1a5cb0;
-    --tip-bg: #dff0ff;
-    --info: #5a4000;
-    --info-bg: #fff8e0;
-    --info-border: #c89000;
+    --tip-bg: #eff6ff;
+    --info: #334155;
+    --info-bg: #f1f5f9;
+    --info-border: #1a5cb0;
     --shadow: 0 1px 3px rgba(0,0,0,0.08), 0 1px 2px rgba(0,0,0,0.04);
     color-scheme: light;
   }
   :root[data-theme="dark"] {
-    --bg: #111116;
-    --surface: #1e1e28;
-    --surface-2: #1c1c24;
-    --text: #ededf0;
-    --text-muted: #b8b8c0;
-    --text-soft: #88889a;
-    --border: #38383f;
-    --border-soft: #2a2a32;
+    --bg: #0f172a;
+    --surface: #1e293b;
+    --surface-2: #182338;
+    --text: #e8edf4;
+    --text-muted: #b8c2d0;
+    --text-soft: #8b97a8;
+    --border: #334155;
+    --border-soft: #273449;
     --accent: #6aadff;
     --accent-hover: #9eceff;
     --accent-bg: #1a2e45;
     --accent-text: #0a0a10;
-    --pass: #7ee89a;
-    --pass-bg: #0e2e16;
-    --warn: #ffd97d;
-    --warn-bg: #2a1f00;
+    --pass: #5ee08a;
+    --pass-bg: #0f2e1c;
+    --warn: #fcd34d;
+    --warn-bg: #2b2410;
+    --mid: #fbbf24;
     --fail: #ff8a8a;
-    --fail-bg: #2e0e0e;
+    --fail-bg: #2e1414;
     --tip: #6aadff;
     --tip-bg: #1a2e45;
-    --info: #ffd97d;
-    --info-bg: #2a200a;
-    --info-border: #ffd97d;
+    --info: #93c5fd;
+    --info-bg: #16263f;
+    --info-border: #6aadff;
     --shadow: 0 1px 3px rgba(0,0,0,0.5), 0 1px 2px rgba(0,0,0,0.3);
     color-scheme: dark;
   }
