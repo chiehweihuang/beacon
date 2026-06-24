@@ -1,0 +1,8 @@
+[
+  { "id": "fp/prescriptive-in-comment", "fileKind": "js", "content": "// TODO: add a \"click here\" tooltip later", "expect": [], "note": "prescriptive copy inside a comment, not user-facing -> should NOT fire (documented FP mode)" },
+  { "id": "fp/tabindex-in-doc", "fileKind": "html", "content": "<code>tabindex=\"5\"</code> sets the tab position", "expect": [], "note": "tabindex shown as documentation text, not a real attribute -> should NOT fire (documented FP mode)" },
+  { "id": "fn/minmax-unrelated-min", "fileKind": "css", "content": ".g { grid-template-columns: minmax(200px, 1fr); }\n.x { width: min(50px, 100%); }", "expect": ["web/fixed-minmax-reflow"], "note": "the 200px track is a real reflow risk; an unrelated min(50px,100%) wrongly suppresses it (documented FN mode)" },
+  { "id": "fn/aria-hidden-cross-line", "fileKind": "html", "content": "<div aria-hidden=\"true\">\n  <button>x</button>\n</div>", "expect": ["web/aria-hidden-on-focusable"], "note": "focusable button inside an aria-hidden region across lines is a real focus trap; per-line heuristic misses it (documented FN mode)" },
+  { "id": "tn/role-alert-single", "fileKind": "html", "content": "<div role=\"alert\">only one</div>", "expect": [], "note": "a single role=alert is fine -> correct silence" },
+  { "id": "tn/minmax-fixed", "fileKind": "css", "content": ".g { grid-template-columns: minmax(min(200px, 100%), 1fr); }", "expect": [], "note": "the correctly fixed pattern -> correct silence" }
+]

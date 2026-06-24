@@ -1,0 +1,17 @@
+[
+  { "id": "cal/click-pos", "fileKind": "js", "content": "node.addEventListener('click', fn);", "expect": ["web/click-handler-no-keyboard"] },
+  { "id": "cal/divspan-pos", "fileKind": "html", "content": "<div onClick={fn}>x</div>", "expect": ["web/div-span-onclick"] },
+  { "id": "cal/outline-pos", "fileKind": "css", "content": ".b { outline: none; }", "expect": ["web/outline-none-without-focus-visible"] },
+  { "id": "cal/ariahidden-pos", "fileKind": "html", "content": "<span aria-hidden=\"true\"><a href=\"#\">x</a></span>", "expect": ["web/aria-hidden-on-focusable"] },
+  { "id": "cal/minmax-pos", "fileKind": "css", "content": ".g { grid-template-columns: minmax(200px, 1fr); }", "expect": ["web/fixed-minmax-reflow"] },
+  { "id": "cal/rolealert-pos", "fileKind": "html", "content": "<div role=\"alert\">a</div><div role=\"alert\">b</div>", "expect": ["web/multiple-role-alert"] },
+  { "id": "cal/focus-pos", "fileKind": "css", "content": ".b:focus { color: red; }", "expect": ["web/focus-without-focus-visible"] },
+  { "id": "cal/tabindex-pos", "fileKind": "html", "content": "<div tabindex=\"3\">x</div>", "expect": ["web/positive-tabindex"] },
+  { "id": "cal/prescriptive-pos", "fileKind": "html", "content": "<p>Click here to start</p>", "expect": ["web/prescriptive-input-copy"] },
+  { "id": "cal/pdf-lib-pos", "fileKind": "js", "content": "const d = new jsPDF(); d.save('a.pdf');", "expect": ["pdf/untagged-library"] },
+  { "id": "cal/pdf-print-pos", "fileKind": "ts", "content": "await page.pdf({ path: 'o.pdf' });", "expect": ["pdf/print-to-pdf-untagged"] },
+  { "id": "cal/pdf-pdfkit-pos", "fileKind": "js", "content": "const doc = new PDFDocument({ size: 'A4' });", "expect": ["pdf/pdfkit-untagged"] },
+  { "id": "cal/pdf-latex-pos", "fileKind": "tex", "content": "\\documentclass{article}\\begin{document}hi\\end{document}", "expect": ["pdf/latex-no-metadata"] },
+  { "id": "cal/clean-outline-neg", "fileKind": "css", "content": ".b { outline: none; }\n.b:focus-visible { outline: 2px; }", "expect": [] },
+  { "id": "cal/clean-button-neg", "fileKind": "html", "content": "<button onClick={fn}>x</button>", "expect": [] }
+]
