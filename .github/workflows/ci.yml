@@ -1,0 +1,22 @@
+name: ci
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+      # Hard gates: the full suite and the build/shipped-copy parity check.
+      - run: node --test
+      - run: node build.mjs --check
+      # Detector precision/recall, report-only for now: the seed corpus is a
+      # calibration set with documented 0.50 FP/FN modes, so an absolute
+      # --min-precision/--min-recall bar would fail day one. Turn it into a hard
+      # gate once a held-out corpus lands and the known modes are addressed.
+      - run: node tools/measure-detectors.mjs
