@@ -8,6 +8,17 @@
 // stderr + exit 0 was silently swallowed by Claude Code (verified 2026-05-05).
 
 import { readFileSync } from 'fs';
+import { dirname, join } from 'node:path';
+import { fileURLToPath } from 'node:url';
+import { scanRecords, loadRecords, fileKindForExt } from './pattern-runtime.mjs';
+
+// Web detectors are declarative: records in ./patterns/ (shipped from core/patterns)
+// run through the shared pattern-runtime, so this hook and the codex advisor share
+// one engine and cannot drift. Degrade to checklist-only if patterns are absent.
+let RECORDS = [];
+try {
+  RECORDS = loadRecords(join(dirname(fileURLToPath(import.meta.url)), 'patterns'));
+} catch { /* patterns not shipped */ }
 
 // Read hook input from stdin
 let input = '';
@@ -82,85 +93,11 @@ const findings = [];
 const c = scanContent;
 
 if (c) {
-  // Clickable non-button (HTML/JS) — keyboard trap risk
-  if ((isHTML || isJS) && /addEventListener\s*\(\s*['"]click['"]/.test(c)) {
-    // Only flag if there's no accompanying button/role=button on a nearby line
-    const lines = c.split('\n');
-    for (let i = 0; i < lines.length; i++) {
-      if (/addEventListener\s*\(\s*['"]click['"]/.test(lines[i])) {
-        const ctx = lines.slice(Math.max(0, i - 3), i + 4).join('\n');
-        if (!/<button|role\s*=\s*["']button["']/.test(ctx)) {
-          findings.push('⚠ click handler on non-button element (keyboard inaccessible) — use <button> or add role="button" + keydown Enter/Space');
-          break;
-        }
-      }
-    }
-  }
-
-  // outline: none without :focus-visible companion (CSS/HTML)
-  if ((isCSS || isHTML) && /outline\s*:\s*none|outline\s*:\s*0/.test(c)) {
-    const hasCompanion = /focus-visible/.test(c);
-    if (!hasCompanion) {
-      findings.push('⚠ outline:none/0 without :focus-visible companion — keyboard focus will be invisible (WCAG 2.4.7)');
-    }
-  }
-
-  // aria-hidden on focusable container (HTML/JS)
-  if ((isHTML || isJS) && /aria-hidden\s*=\s*["']true["']/.test(c)) {
-    const ariaHiddenLines = c.split('\n').filter(l => /aria-hidden\s*=\s*["']true["']/.test(l));
-    for (const line of ariaHiddenLines) {
-      // Warn if the same element or a nearby sibling has tabindex / focusable tag
-      if (/tabindex|<(button|a|input|select|textarea)/.test(line)) {
-        findings.push('⚠ aria-hidden="true" on or near focusable element — keyboard focus will be trapped inside hidden region');
-        break;
-      }
-    }
-  }
-
-  // minmax(Npx, ...) without min() wrapper — reflow failure (WCAG 1.4.10)
-  if (isCSS && /minmax\(\s*\d+px/.test(c) && !/min\(\s*\d+px/.test(c)) {
-    findings.push('⚠ minmax(Npx, ...) without min(Npx, 100%) — fixed min breaks 320px reflow (WCAG 1.4.10)');
-  }
-
-  // role="alert" appears more than once — screen reader dedup risk (web-general rule #2)
-  if ((isHTML || isJS) && (c.match(/role\s*=\s*["']alert["']/g) || []).length > 1) {
-    findings.push('⚠ multiple role="alert" elements — screen readers may silence all but the first simultaneous announcement');
-  }
-
-  // Prescriptive input-method copy — keyboard/switch users see wrong instructions (web-general rule #3)
-  const inputMethodMatch = c.match(/["'>](click|tap|swipe|pinch) (here|to |the )/i);
-  if (inputMethodMatch) {
-    findings.push(`⚠ prescriptive input-method copy ("${inputMethodMatch[0].replace(/["'>]/g,'').trim()}") — use device-agnostic wording ("select", "activate", "open")`);
-  }
-
-  // focus-visible pairing: :focus defined without :focus-visible (web-general rule #1)
-  if (isCSS && /:focus\s*\{/.test(c) && !/:focus-visible/.test(c)) {
-    findings.push('⚠ :focus style without :focus-visible — sighted keyboard users get focus ring; pointer users also get it unexpectedly. Pair :focus-visible with :focus');
-  }
-
-  // Custom tabindex > 0 without reverse-order handling (web-general rule #4)
-  if ((isHTML || isJS) && /tabindex\s*=\s*["']?[1-9]/.test(c)) {
-    findings.push('⚠ tabindex > 0 detected — custom tab order breaks Shift+Tab reverse navigation unless all focusable elements in the sequence are also managed');
-  }
-
-  // ── PDF output detectors (WCAG applies to PDFs too; untagged = unreadable) ──
-  if (isPdfGen) {
-    // Libraries with no tagged-PDF support at all — structural dead end
-    if (/jsPDF|pdfmake|wkhtmltopdf/i.test(c)) {
-      findings.push('⚠ jsPDF / pdfmake / wkhtmltopdf cannot emit tagged (accessible) PDFs — output is untagged no matter how semantic the source. For accessible output use headless-Chrome page.pdf with tagged:true, PDFKit tagged mode, WeasyPrint, or tagged LaTeX');
-    }
-    // Print-to-PDF without explicit tagging (Playwright is untagged by default)
-    if (/page\.pdf\s*\(|printToPDF/i.test(c) && !/tagged\s*:\s*true/.test(c)) {
-      findings.push('⚠ page.pdf()/printToPDF without tagged: true — print-to-PDF output is untagged by default in Playwright (version-dependent in Puppeteer). Set tagged: true explicitly and verify with PAC');
-    }
-    // PDFKit without tagged document mode
-    if (/new PDFDocument\s*\(/.test(c) && !/tagged\s*:\s*true/.test(c)) {
-      findings.push('⚠ PDFKit document without { tagged: true } — also set lang and displayTitle, and build the structure tree (doc.struct) for headings/tables');
-    }
-    // LaTeX source without document metadata declaration
-    if (ext === 'tex' && !/\\DocumentMetadata/.test(c)) {
-      findings.push('⚠ LaTeX source without \\DocumentMetadata — recent kernels support \\DocumentMetadata{lang=..., tagging=on} (tagged-PDF project) for accessible output');
-    }
+  // Web + PDF detectors are one declarative library (./patterns/) run through the
+  // shared pattern-runtime, so this hook and the codex advisor cannot drift.
+  const webKind = fileKindForExt(ext);
+  if (webKind) {
+    for (const f of scanRecords(RECORDS, c, webKind).findings) findings.push(`⚠ ${f.flag}`);
   }
 }
 

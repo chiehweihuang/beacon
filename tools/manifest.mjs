@@ -6,7 +6,8 @@ import { existsSync, readdirSync } from 'node:fs';
 import { resolve } from 'node:path';
 
 const REFERENCES = ['wcag-quick', 'patterns', 'legal-brief', 'disabilities', 'cases', 'documents', 'auth-detect-fp', 'pdf-detect-fp'];
-const SCRIPTS = ['static-audit', 'generate-report', 'lighthouse-extract', 'lang-detect', 'auth-detect', 'pdf-detect', 'pdf-triage', 'quality-detect', 'focus-flow'];
+const SCRIPTS = ['static-audit', 'generate-report', 'lighthouse-extract', 'lang-detect', 'auth-detect', 'pdf-detect', 'pdf-triage', 'quality-detect', 'focus-flow', 'pattern-runtime'];
+const PATTERNS = ['web', 'pdf', 'wcag-catalog']; // declarative detector records + wcag catalog; shipped to both surfaces
 export const CONTENT = ['guide', 'inspect', 'advisor'];
 
 export const GENERATED = [
@@ -14,10 +15,12 @@ export const GENERATED = [
   ...CONTENT.map((n) => ({ out: `commands/${n}.md`, src: `core/content/${n}.md`, kind: 'variant:cc', overwrite: true })),
   ...REFERENCES.map((n) => ({ out: `references/${n}.md`, src: `core/references/${n}.md`, kind: 'copy', overwrite: true })),
   ...SCRIPTS.map((n) => ({ out: `scripts/${n}.mjs`, src: `core/scripts/${n}.mjs`, kind: 'copy', overwrite: true })),
+  ...PATTERNS.map((n) => ({ out: `scripts/patterns/${n}.json`, src: `core/patterns/${n}.json`, kind: 'copy', overwrite: true })),
   // Codex adapter
   ...CONTENT.map((n) => ({ out: `adapters/codex/references/beacon-${n}.md`, src: `core/content/${n}.md`, kind: 'variant:codex', overwrite: true })),
   ...REFERENCES.map((n) => ({ out: `adapters/codex/references/${n}.md`, src: `core/references/${n}.md`, kind: 'copy', overwrite: true })),
   ...SCRIPTS.map((n) => ({ out: `adapters/codex/scripts/${n}.mjs`, src: `core/scripts/${n}.mjs`, kind: 'copy', overwrite: true })),
+  ...PATTERNS.map((n) => ({ out: `adapters/codex/scripts/patterns/${n}.json`, src: `core/patterns/${n}.json`, kind: 'copy', overwrite: true })),
 ];
 
 // Every file present in core/ must map to >=1 GENERATED entry, else it would be
@@ -25,7 +28,7 @@ export const GENERATED = [
 export function validateCoreMapping(root) {
   const srcSet = new Set(GENERATED.map((e) => e.src));
   const errors = [];
-  for (const dir of ['core/content', 'core/references', 'core/scripts']) {
+  for (const dir of ['core/content', 'core/references', 'core/scripts', 'core/patterns']) {
     const abs = resolve(root, dir);
     if (!existsSync(abs)) continue;
     for (const f of readdirSync(abs)) {

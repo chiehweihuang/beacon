@@ -4,7 +4,15 @@
 //   node advisor.mjs <file> [file...]
 
 import { readFileSync, statSync, readdirSync } from 'fs';
-import { join } from 'path';
+import { join, dirname } from 'path';
+import { fileURLToPath } from 'url';
+import { scanRecords, loadRecords, fileKindForExt } from './pattern-runtime.mjs';
+
+// Web detectors share the same declarative library + runtime as the CC hook.
+let RECORDS = [];
+try {
+  RECORDS = loadRecords(join(dirname(fileURLToPath(import.meta.url)), 'patterns'));
+} catch { /* patterns not shipped: degrade to checklist-only */ }
 
 const UI_FILE_PATTERN = /\.(html?|css|scss|less|jsx|tsx|vue|svelte|swift|kt|dart|xaml)$/i;
 const JS_FILE_PATTERN = /\.(js|cjs|mjs|ts)$/i;
@@ -57,64 +65,12 @@ function scan(filePath) {
   const findings = [];
   const checks = [];
 
-  if ((isHTML || isJS) && /addEventListener\s*\(\s*['"]click['"]/.test(content)) {
-    const lines = content.split('\n');
-    for (let i = 0; i < lines.length; i++) {
-      if (/addEventListener\s*\(\s*['"]click['"]/.test(lines[i])) {
-        const ctx = lines.slice(Math.max(0, i - 3), i + 4).join('\n');
-        if (!/<button|role\s*=\s*["']button["']|keydown|keyup/.test(ctx)) {
-          findings.push('click handler may be keyboard-inaccessible; use <button> or add role/button keyboard handling');
-          break;
-        }
-      }
-    }
+  const webKind = fileKindForExt(ext);
+  if (webKind) {
+    for (const f of scanRecords(RECORDS, content, webKind).findings) findings.push(f.flag);
   }
 
-  if ((isHTML || isJS) && /<(div|span)[^>]+onClick=/.test(content)) {
-    findings.push('onClick on <div>/<span>; prefer native <button> or add correct role, tabindex, and Enter/Space handling');
-  }
-
-  if ((isCSS || isHTML) && /outline\s*:\s*(none|0)\b/.test(content) && !/focus-visible/.test(content)) {
-    findings.push('outline:none/0 without :focus-visible replacement; keyboard focus may be invisible');
-  }
-
-  if ((isHTML || isJS) && /aria-hidden\s*=\s*["']true["'][^>]*(tabindex|<(button|a|input|select|textarea))/.test(content)) {
-    findings.push('aria-hidden region appears to contain focusable content; this can trap assistive-tech users');
-  }
-
-  if (isCSS && /minmax\(\s*\d+px/.test(content) && !/min\(\s*\d+px\s*,\s*100%/.test(content)) {
-    findings.push('minmax(Npx, ...) may break 320px reflow; use minmax(min(Npx, 100%), 1fr)');
-  }
-
-  if ((isHTML || isJS) && (content.match(/role\s*=\s*["']alert["']/g) || []).length > 1) {
-    findings.push('multiple role="alert" regions; simultaneous announcements may be dropped');
-  }
-
-  if ((isHTML || isJS) && /tabindex\s*=\s*["']?[1-9]/.test(content)) {
-    findings.push('positive tabindex detected; custom tab order often breaks reverse navigation');
-  }
-
-  const inputMethodMatch = content.match(/["'>](click|tap|swipe|pinch) (here|to |the )/i);
-  if (inputMethodMatch) {
-    findings.push(`input-method-specific copy detected ("${inputMethodMatch[0].replace(/["'>]/g, '').trim()}"); prefer "select", "activate", or "open"`);
-  }
-
-  // PDF output (WCAG applies to PDFs too; untagged = unreadable). Same detectors
-  // as the Claude-side a11y-advisor hook, in this advisor's bare-string style.
-  if (isPdfGen) {
-    if (/jsPDF|pdfmake|wkhtmltopdf/i.test(content)) {
-      findings.push('jsPDF / pdfmake / wkhtmltopdf cannot emit tagged (accessible) PDFs; use headless-Chrome page.pdf with tagged:true, PDFKit tagged mode, WeasyPrint, or tagged LaTeX');
-    }
-    if (/page\.pdf\s*\(|printToPDF/i.test(content) && !/tagged\s*:\s*true/.test(content)) {
-      findings.push('page.pdf()/printToPDF without tagged: true; print-to-PDF output is untagged by default. Set tagged: true and verify with PAC');
-    }
-    if (/new PDFDocument\s*\(/.test(content) && !/tagged\s*:\s*true/.test(content)) {
-      findings.push('PDFKit document without { tagged: true }; also set lang + displayTitle and build the structure tree (doc.struct)');
-    }
-    if (ext === 'tex' && !/\\DocumentMetadata/.test(content)) {
-      findings.push('LaTeX source without \\DocumentMetadata; recent kernels support \\DocumentMetadata{lang=..., tagging=on} for accessible output');
-    }
-  }
+  // PDF detectors are records too (pdf/* in ./patterns/); scanRecords above runs them.
 
   if (isHTML) {
     checks.push(

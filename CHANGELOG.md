@@ -3,6 +3,53 @@
 All notable changes to Beacon are documented here. Versions follow the plugin
 manifest (`.claude-plugin/plugin.json`); dates are release-prep dates.
 
+## [2.2.0] — Unreleased
+
+### Added
+
+- **Declarative pattern library for the advisor detectors.** The web and PDF
+  detectors run by the PostToolUse hook (`scripts/a11y-advisor-hook.mjs`) and the
+  codex advisor (`adapters/codex/scripts/advisor.mjs`) are no longer hardcoded in
+  each script. They are declarative records in `core/patterns/` (`web.json`,
+  `pdf.json`), validated against `wcag-catalog.json` and executed by one shared
+  interpreter, `core/scripts/pattern-runtime.mjs`. Both surfaces import the same
+  runtime and load the same records, so they can no longer drift; the two copies
+  had already diverged in four guards and two detectors before this change. 13
+  records (9 web + 4 PDF) reproduce every prior detector.
+- **`tools/validate-patterns.mjs`** with five gates on every record: schema, regex
+  compilation, namespaced-unique id, WCAG-catalog cross-check, and a claim + leak
+  lint (no over-claims, REVIEW-band messages must hedge, and `fix.example` may
+  contain only synthetic identifiers so a contributed record cannot leak client
+  code).
+- **Characterization baseline** `test/detector-baseline.test.mjs` locking every
+  web + PDF detector's fire/silent behaviour across both runtimes; the prior hook
+  test had covered none of the web detectors. Plus `test/pattern-runtime.test.mjs`
+  and `test/patterns-schema.test.mjs`.
+
+### Changed
+
+- **The two detector runtimes were reconciled before externalisation** (a
+  deliberate, reviewed behaviour merge, locked by the baseline): the CC hook
+  gained `keydown|keyup` suppression on click handlers, a `<div>/<span> onClick`
+  detector, a word-boundary on `outline`, and the tighter `min(Npx, 100%)` reflow
+  guard; the codex advisor gained the `:focus`-without-`:focus-visible` detector
+  and per-line `aria-hidden` scanning. Detector behaviour is otherwise preserved.
+
+### Notes
+
+- The pattern library is **v1.0 (data-only)**: detectors become declarative and
+  contribution-ready, but the contribution flow (agent drafts, human approves, PR;
+  CI schema-validation; local memory) is deferred to v1.1, and cross-person
+  aggregation to v2. See [ROADMAP.md](./ROADMAP.md).
+- **This version also carries prior unreleased detector work committed on the
+  branch since v2.1.0 that still needs its own changelog lines**: WCAG 3.1.1
+  declared-vs-content language mismatch, 3.1.2 Language of Parts, 3.3.8
+  authentication barriers, a PDF accessibility probe with a `pdf-triage` CLI and
+  codex PDF parity, `quality-detect`, keyboard `focus-flow`, and the P1/P3/P5/P8
+  audit-integrity changes. Per the round-2 calibration notes, external precision
+  claims for the language and auth detectors are gated on held-out validation
+  before release.
+
 ## [2.1.0] — 2026-06-06
 
 ### Added

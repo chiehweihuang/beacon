@@ -1,0 +1,217 @@
+[
+  {
+    "id": "web/click-handler-no-keyboard",
+    "schema_version": 1,
+    "band": "REVIEW",
+    "wcag": { "sc": "2.1.1", "level": "A", "title": "Keyboard" },
+    "applies_to": { "fileKinds": ["html", "js", "ts"] },
+    "matcher": {
+      "kind": "regex-guarded",
+      "pattern": "addEventListener\\s*\\(\\s*['\"]click['\"]",
+      "guard": [
+        { "mustNotContain": "<button|role\\s*=\\s*[\"']button[\"']|keydown|keyup", "scope": "window", "before": 3, "after": 3 }
+      ]
+    },
+    "message": { "flag": "Possible keyboard trap: a click handler on a non-button element with no nearby keyboard handler; use <button> or add role=\"button\" plus keydown for Enter and Space" },
+    "fix": {
+      "hint": "Use a native <button>, or add role=\"button\", tabindex=\"0\", and a keydown handler for Enter and Space.",
+      "example": {
+        "before": "el.addEventListener('click', fn)",
+        "after": "<button type=\"button\">label</button>"
+      }
+    },
+    "false_positive_notes": [
+      "Window heuristic: a keyboard handler more than 3 lines from the click binding is not seen and the line still flags.",
+      "A click binding on an already-native control on a distant line still flags."
+    ]
+  },
+  {
+    "id": "web/div-span-onclick",
+    "schema_version": 1,
+    "band": "FLAG",
+    "wcag": { "sc": "2.1.1", "level": "A", "title": "Keyboard" },
+    "applies_to": { "fileKinds": ["html", "js", "ts"] },
+    "matcher": {
+      "kind": "regex",
+      "pattern": "<(div|span)[^>]+onClick="
+    },
+    "message": { "flag": "onClick on a <div>/<span>; non-native controls are not keyboard operable by default" },
+    "fix": {
+      "hint": "Use a native <button>, or add role=\"button\", tabindex=\"0\", and Enter/Space key handling.",
+      "example": {
+        "before": "<div onClick={fn}>label</div>",
+        "after": "<button type=\"button\" onClick={fn}>label</button>"
+      }
+    },
+    "false_positive_notes": [
+      "Fires on any div/span with an onClick attribute even when role=\"button\", tabindex, and key handlers are correctly present."
+    ]
+  },
+  {
+    "id": "web/outline-none-without-focus-visible",
+    "schema_version": 1,
+    "band": "FLAG",
+    "wcag": { "sc": "2.4.7", "level": "AA", "title": "Focus Visible" },
+    "applies_to": { "fileKinds": ["css", "html"] },
+    "matcher": {
+      "kind": "regex-guarded",
+      "pattern": "outline\\s*:\\s*(none|0)\\b",
+      "flags": "i",
+      "guard": [{ "mustNotContain": "focus-visible", "scope": "whole-file" }]
+    },
+    "message": { "flag": "outline:none/0 with no :focus-visible companion; keyboard focus will be invisible" },
+    "fix": {
+      "hint": "Pair every outline:none with a :focus-visible rule that restores a visible ring.",
+      "example": {
+        "before": ".btn:focus { outline: none; }",
+        "after": ".btn:focus-visible { outline: 2px solid currentColor; outline-offset: 2px; }"
+      }
+    },
+    "false_positive_notes": [
+      "Suppressed when :focus-visible appears anywhere in the same file; a separate reset file with the companion still flags."
+    ]
+  },
+  {
+    "id": "web/aria-hidden-on-focusable",
+    "schema_version": 1,
+    "band": "REVIEW",
+    "wcag": { "sc": "4.1.2", "level": "A", "title": "Name, Role, Value" },
+    "applies_to": { "fileKinds": ["html", "js", "ts"] },
+    "matcher": {
+      "kind": "regex-guarded",
+      "pattern": "aria-hidden\\s*=\\s*[\"']true[\"']",
+      "guard": [{ "mustContain": "tabindex|<(button|a|input|select|textarea)", "scope": "line" }]
+    },
+    "message": { "flag": "Possible focus trap: a line with aria-hidden=\"true\" also contains a focusable element; hidden regions should not be focusable" },
+    "fix": {
+      "hint": "Move focusable content out of the aria-hidden region, or add tabindex=\"-1\" to remove it from the tab order.",
+      "example": {
+        "before": "<span aria-hidden=\"true\"><a href=\"#\">x</a></span>",
+        "after": "<span aria-hidden=\"true\"><a href=\"#\" tabindex=\"-1\">x</a></span>"
+      }
+    },
+    "false_positive_notes": [
+      "Per-line heuristic: aria-hidden and a focusable element on different lines are not correlated.",
+      "Same-line aria-hidden plus a focusable element that is intentionally inert still flags."
+    ]
+  },
+  {
+    "id": "web/fixed-minmax-reflow",
+    "schema_version": 1,
+    "band": "FLAG",
+    "wcag": { "sc": "1.4.10", "level": "AA", "title": "Reflow" },
+    "applies_to": { "fileKinds": ["css"] },
+    "matcher": {
+      "kind": "regex-guarded",
+      "pattern": "minmax\\(\\s*\\d+px",
+      "guard": [{ "mustNotContain": "min\\(\\s*\\d+px\\s*,\\s*100%", "scope": "whole-file" }]
+    },
+    "message": { "flag": "minmax(Npx, ...) with a fixed minimum; columns can overflow at 320px. Wrap with min(Npx, 100%)" },
+    "fix": {
+      "hint": "Use minmax(min(Npx, 100%), 1fr) so the track can shrink below its pixel floor.",
+      "example": {
+        "before": ".grid { grid-template-columns: minmax(200px, 1fr); }",
+        "after": ".grid { grid-template-columns: minmax(min(200px, 100%), 1fr); }"
+      }
+    },
+    "false_positive_notes": [
+      "Suppressed by any min(Npx, 100%) in the file even if it belongs to a different rule."
+    ]
+  },
+  {
+    "id": "web/multiple-role-alert",
+    "schema_version": 1,
+    "band": "FLAG",
+    "wcag": { "sc": "4.1.3", "level": "AA", "title": "Status Messages" },
+    "applies_to": { "fileKinds": ["html", "js", "ts"] },
+    "matcher": {
+      "kind": "regex-count",
+      "pattern": "role\\s*=\\s*[\"']alert[\"']",
+      "flags": "g",
+      "threshold": 1
+    },
+    "message": { "flag": "More than one role=\"alert\" region; simultaneous announcements may be dropped by screen readers" },
+    "fix": {
+      "hint": "Use a single shared live region, or downgrade non-urgent ones to role=\"status\".",
+      "example": {
+        "before": "<div role=\"alert\">a</div><div role=\"alert\">b</div>",
+        "after": "<div role=\"alert\">a</div><div role=\"status\">b</div>"
+      }
+    },
+    "false_positive_notes": [
+      "Counts every occurrence including regions rendered conditionally and never shown at the same time."
+    ]
+  },
+  {
+    "id": "web/focus-without-focus-visible",
+    "schema_version": 1,
+    "band": "FLAG",
+    "wcag": { "sc": "2.4.7", "level": "AA", "title": "Focus Visible" },
+    "applies_to": { "fileKinds": ["css"] },
+    "matcher": {
+      "kind": "regex-guarded",
+      "pattern": ":focus\\s*\\{",
+      "guard": [{ "mustNotContain": ":focus-visible", "scope": "whole-file" }]
+    },
+    "message": { "flag": ":focus styled with no :focus-visible; pointer users get an unexpected focus ring. Pair :focus-visible with :focus" },
+    "fix": {
+      "hint": "Add a :focus-visible rule so the ring shows for keyboard users without surprising pointer users.",
+      "example": {
+        "before": ".btn:focus { outline: 2px solid; }",
+        "after": ".btn:focus-visible { outline: 2px solid currentColor; }"
+      }
+    },
+    "false_positive_notes": [
+      "Suppressed by any :focus-visible in the file; a :focus rule whose companion lives in a separate file still flags."
+    ]
+  },
+  {
+    "id": "web/positive-tabindex",
+    "schema_version": 1,
+    "band": "FLAG",
+    "wcag": { "sc": "2.4.3", "level": "A", "title": "Focus Order" },
+    "applies_to": { "fileKinds": ["html", "js", "ts"] },
+    "matcher": {
+      "kind": "regex",
+      "pattern": "tabindex\\s*=\\s*[\"']?[1-9]"
+    },
+    "message": { "flag": "Positive tabindex; a custom tab order often breaks reverse (Shift+Tab) navigation" },
+    "fix": {
+      "hint": "Use tabindex=\"0\" or rely on DOM order instead of a positive value.",
+      "example": {
+        "before": "<div tabindex=\"3\">x</div>",
+        "after": "<div tabindex=\"0\">x</div>"
+      }
+    },
+    "false_positive_notes": [
+      "Matches a positive value anywhere, including inside a string or comment."
+    ]
+  },
+  {
+    "id": "web/prescriptive-input-copy",
+    "schema_version": 1,
+    "band": "FLAG",
+    "wcag": { "sc": "1.3.3", "level": "A", "title": "Sensory Characteristics" },
+    "applies_to": { "fileKinds": ["html", "js", "ts"] },
+    "matcher": {
+      "kind": "regex",
+      "pattern": "[\"'>](click|tap|swipe|pinch) (here|to |the )",
+      "flags": "i"
+    },
+    "message": {
+      "flag": "Input-method-specific copy ($0); not everyone clicks, taps, or swipes. Use device-agnostic wording such as select, activate, or open",
+      "capture": { "group": 0, "strip": "\"'>" }
+    },
+    "fix": {
+      "hint": "Replace click/tap/swipe wording with device-neutral verbs like select, activate, choose, or open.",
+      "example": {
+        "before": "<p>Click here to start</p>",
+        "after": "<p>Select start to begin</p>"
+      }
+    },
+    "false_positive_notes": [
+      "Matches the literal verbs only; press and localized text are not covered.",
+      "Can fire inside code or strings that are not user-facing copy."
+    ]
+  }
+]

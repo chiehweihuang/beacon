@@ -1,8 +1,36 @@
 # Beacon Roadmap
 
-Snapshot as of **2026-05-20 · v2.0.8**.
+Snapshot **2026-06-25**. Last released **v2.1.0**; active initiative **Pattern Library v1.0** (Steps 0-5 done; release prepped as v2.2.0, not yet tagged).
 
-This file is the entry point for any agent or contributor (human or automated) who needs to know **where Beacon is now and where it could go next**. For internals see [ARCHITECTURE.md](./ARCHITECTURE.md). For day-to-day skill behaviour see `commands/*.md`.
+This file is the single place to see **where Beacon is, where it is heading, and how far the current work has got**. Glance here instead of watching individual commits. For internals see [ARCHITECTURE.md](./ARCHITECTURE.md); for skill behaviour see `commands/*.md`.
+
+---
+
+## Where Beacon is heading (active)
+
+**The thesis (direction · this rarely changes).** Beacon is a distributed *signal* each developer or agent carries, not a central scanner like Lighthouse. The payoff is collective: stop AI from regenerating the **same** accessibility mistakes. To get there, detectors stop being hardcoded copies and become shared, contributable **data**.
+
+**The active initiative: Pattern Library.** Externalise the advisor's detectors into one declarative library that any carrier can read and, later, contribute to.
+
+| Phase | When | What it delivers |
+|---|---|---|
+| **v1.0 · data-only** | now | One declarative pattern library; the CC hook and the codex advisor stop drifting by sharing one runtime. No contribution automation yet. |
+| **v1.1 · contribution** | next (once a 2nd carrier exists) | Agent drafts a pattern → human approves → PR; CI schema-validates; independent-model review. Optional local "you fixed this before" memory. |
+| **v2 · collective** | later | Cross-person aggregation of contributed patterns into a shared map (needs backend + consent). |
+
+### Build progress · Pattern Library v1.0
+
+Updated after each step. This is the live "how far have we got" line.
+
+- [x] **Step 0**: Reconcile the two detector runtimes (CC hook + codex advisor) + characterization baseline · `test/detector-baseline.test.mjs` 52/52 green
+- [x] **Step 1**: Declarative schema + 9 web records + validator (5 gates) · `test/patterns-schema.test.mjs` 11/11, full suite 236/236, `--check` clean
+- [x] **Step 2**: Register `core/patterns/` in the build manifest so the records actually ship · build ships 48 outputs, `--check` clean
+- [x] **Step 3**: Shared `core/scripts/pattern-runtime.mjs` interpreter (`regex` / `regex-guarded` / `regex-count`) · `test/pattern-runtime.test.mjs` 29/29
+- [x] **Step 4**: Rewire BOTH runtimes to read the data (behaviour-preserving vs the Step 0 baseline) · baseline still 52/52
+- [x] **Step 5**: Migrate the 4 PDF records; inline detectors removed from both runtimes · 13 records, full suite 265/265
+- [ ] **Step 6**: Ship the v1.0 data-only release (version bump + CHANGELOG + tag/push) · awaiting go
+
+**Deliberate behaviour changes in this initiative** (recorded so they are not mistaken for regressions): the CC hook gained `keydown|keyup` suppression on click handlers, a `<div>/<span> onClick` detector, a word-boundary on `outline`, and the tighter `min(Npx, 100%)` reflow guard; the codex advisor gained the `:focus`-without-`:focus-visible` detector and per-line `aria-hidden` scanning. The two runtimes are now behaviour-identical, locked by the Step 0 baseline.
 
 ---
 

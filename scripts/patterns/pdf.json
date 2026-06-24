@@ -1,0 +1,46 @@
+[
+  {
+    "id": "pdf/untagged-library",
+    "schema_version": 1,
+    "band": "FLAG",
+    "wcag": { "sc": "1.3.1", "level": "A", "title": "Info and Relationships" },
+    "applies_to": { "fileKinds": ["html", "css", "js", "ts", "py", "tex", "typ"], "requireIndicatorSet": "pdf-gen" },
+    "matcher": { "kind": "regex", "pattern": "jsPDF|pdfmake|wkhtmltopdf", "flags": "i" },
+    "message": { "flag": "jsPDF / pdfmake / wkhtmltopdf cannot emit tagged (accessible) PDFs; the output is untagged no matter how semantic the source is. Use headless-Chrome page.pdf with tagged:true, PDFKit tagged mode, WeasyPrint, or tagged LaTeX" },
+    "fix": { "hint": "Switch to a tagged-PDF capable path: headless-Chrome page.pdf({ tagged: true }), PDFKit tagged mode, WeasyPrint, or tagged LaTeX." },
+    "false_positive_notes": ["Fires on the library name even when a separate tagged-output path also exists in the project."]
+  },
+  {
+    "id": "pdf/print-to-pdf-untagged",
+    "schema_version": 1,
+    "band": "FLAG",
+    "wcag": { "sc": "1.3.1", "level": "A", "title": "Info and Relationships" },
+    "applies_to": { "fileKinds": ["html", "css", "js", "ts", "py", "tex", "typ"], "requireIndicatorSet": "pdf-gen" },
+    "matcher": { "kind": "regex-guarded", "pattern": "page\\.pdf\\s*\\(|printToPDF", "flags": "i", "guard": [{ "mustNotContain": "tagged\\s*:\\s*true", "scope": "whole-file" }] },
+    "message": { "flag": "page.pdf()/printToPDF without tagged: true; print-to-PDF output is untagged by default in Playwright. Set tagged: true explicitly and verify with PAC" },
+    "fix": { "hint": "Pass { tagged: true } to page.pdf()/printToPDF and verify the result with PAC or veraPDF." },
+    "false_positive_notes": ["A tagged: true anywhere in the file suppresses this, even on an unrelated call."]
+  },
+  {
+    "id": "pdf/pdfkit-untagged",
+    "schema_version": 1,
+    "band": "FLAG",
+    "wcag": { "sc": "1.3.1", "level": "A", "title": "Info and Relationships" },
+    "applies_to": { "fileKinds": ["html", "css", "js", "ts", "py", "tex", "typ"], "requireIndicatorSet": "pdf-gen" },
+    "matcher": { "kind": "regex-guarded", "pattern": "new PDFDocument\\s*\\(", "guard": [{ "mustNotContain": "tagged\\s*:\\s*true", "scope": "whole-file" }] },
+    "message": { "flag": "PDFKit document without { tagged: true }; also set lang and displayTitle and build the structure tree (doc.struct) for headings and tables" },
+    "fix": { "hint": "Construct PDFKit with { tagged: true }, set lang and displayTitle, and add doc.struct nodes for headings, lists, and tables." },
+    "false_positive_notes": ["A tagged: true anywhere in the file suppresses this."]
+  },
+  {
+    "id": "pdf/latex-no-metadata",
+    "schema_version": 1,
+    "band": "FLAG",
+    "wcag": { "sc": "1.3.1", "level": "A", "title": "Info and Relationships" },
+    "applies_to": { "fileKinds": ["tex"] },
+    "matcher": { "kind": "regex-guarded", "pattern": "\\\\documentclass|\\\\begin\\s*\\{\\s*document\\s*\\}", "guard": [{ "mustNotContain": "\\\\DocumentMetadata", "scope": "whole-file" }] },
+    "message": { "flag": "LaTeX source without \\DocumentMetadata; recent kernels support \\DocumentMetadata{lang=..., tagging=on} for tagged (accessible) output" },
+    "fix": { "hint": "Add \\DocumentMetadata{lang=..., tagging=on} at the top of the document on a recent LaTeX kernel." },
+    "false_positive_notes": ["Fires for a LaTeX document that lacks \\DocumentMetadata even if accessibility is handled by another toolchain."]
+  }
+]
