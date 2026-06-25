@@ -1,3 +1,9 @@
 # Personal tool config / local indexes (never committed)
 .codegraph/
 .cursor/
+
+# Tooling scratch / local artifacts (never committed)
+.playwright-mcp/
+.firecrawl/
+/_*.mjs
+/*.png
