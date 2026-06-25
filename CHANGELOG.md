@@ -91,13 +91,25 @@ work committed on the branch since v2.1.0.
   contribution-ready, but the contribution flow (agent drafts, human approves, PR;
   CI schema-validation; local memory) is deferred to v1.1, and cross-person
   aggregation to v2. See [ROADMAP.md](./ROADMAP.md).
-- **Precision posture.** External precision claims for the **language (3.1.1 /
-  3.1.2)** and **authentication (3.3.8)** detectors are gated on held-out
-  validation. As of this release: 3.1.1 has calibration-set validation only, 3.1.2
-  is experimental (real-page precision needs rework), and keyboard `focus-flow`
-  runtime capture is not reliable — so these ship as capabilities **without
-  external precision claims**. The held-out corpus added here covers the four
-  regex-ceiling web detectors, **not** the language/auth detectors.
+- **Precision posture (held-out validated).** The language (3.1.1) and
+  authentication (3.3.8) detectors now have a held-out validation set
+  (`corpus/holdout-{lang,auth}.cases.json`, 36 realistic cases, scored by
+  `tools/measure-semantic.mjs`). Scoped results:
+  - **3.1.1** precision 1.00 / recall 0.50 — no false flags (holds even on CJK
+    pages that are ~55% Latin); reliably catches CJK-vs-Latin and cross-CJK-script
+    (zh/ja/ko) mismatches and country-code-as-language errors, but is
+    **structurally blind to Latin-language-vs-Latin-language** mismatches (it
+    counts scripts, so an en-declared French / German / Spanish / Vietnamese page
+    reads as "Latin" and passes). The recall ceiling is the script method itself,
+    not a defect.
+  - **3.3.8** precision 0.88 / recall 0.54 — catches inline markup/JS barriers
+    (paste-blocked password, text CAPTCHA, reCAPTCHA v2 / hCaptcha, inline
+    clipboard block); the heuristic source scan misses obfuscated / aliased /
+    non-English-prompt / form-level cases, and it scans HTML comments (so captcha
+    markup quoted in a comment can false-positive).
+  - **3.1.2** stays experimental and **gated off** in static-audit (0 TP / 2 FP on
+    real pages); keyboard `focus-flow` runtime capture is not reliable, so keyboard
+    review stays manual. Neither carries an external precision claim.
 
 ## [2.1.0] — 2026-06-06
 

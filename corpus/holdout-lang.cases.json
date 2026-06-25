@@ -1,0 +1,152 @@
+[
+  {
+    "id": "ho/lang/strength/1",
+    "declaredLang": "en",
+    "text": "歡迎光臨我們的線上書店。本月新書推薦涵蓋文學、歷史、科普與生活風格四大類別,所有商品皆享有會員專屬折扣。加入會員即可累積點數,點數可於下次結帳時折抵現金,並不定期收到我們精選的閱讀電子報。我們提供超商取貨、宅配到府與門市自取三種配送方式,訂單滿新台幣六百元即可享有免運優惠。若您對任何一本書籍有疑問,歡迎透過客服信箱或線上即時聊天與我們聯繫,客服時間為週一至週五上午九點到下午六點。感謝您長期以來對本店的支持與愛護,我們會持續引進更多優質的中文與翻譯書籍,陪伴每一位讀者度過美好的閱讀時光。",
+    "expect": [
+      "html-lang-mismatch"
+    ],
+    "note": "strength / TP: detector correctly flags | true=Traditional Chinese. A Shopify/WordPress storefront theme ships with the default <html lang=\"en\"> and a Taiwanese bookshop owner localised every word o"
+  },
+  {
+    "id": "ho/lang/strength/2",
+    "declaredLang": "jp",
+    "text": "このたびは当ホテルの公式サイトにお越しいただき、誠にありがとうございます。当館は京都駅から徒歩五分の好立地にあり、観光やビジネスの拠点として多くのお客様にご利用いただいております。客室は和室と洋室をご用意しており、それぞれに専用の温泉露天風呂を備えております。朝食は地元の旬の食材を使った和定食をお楽しみいただけます。ご予約はオンラインまたはお電話にて承っております。チェックインは午後三時から、チェックアウトは午前十一時までとなっております。ご不明な点がございましたら、フロントスタッフまでお気軽にお問い合わせくださいませ。皆様のお越しを心よりお待ち申し上げております。",
+    "expect": [
+      "html-lang-mismatch"
+    ],
+    "note": "strength / TP: detector correctly flags | true=Japanese. A Japanese ryokan's CMS hand-coded lang=\"jp\" (the ISO country code) instead of the correct BCP47 language subtag lang=\"ja\";"
+  },
+  {
+    "id": "ho/lang/strength/3",
+    "declaredLang": "zh",
+    "text": "私たちの料理教室へようこそ。ここでは家庭で気軽に作れる和食を中心に、季節の食材を活かしたレシピをご紹介しています。毎週土曜日に開催される体験レッスンでは、だしの取り方から始まり、煮物や焼き魚、季節の炊き込みご飯まで丁寧にお教えします。初めての方でも安心してご参加いただけるよう、少人数制を採用しております。エプロンと筆記用具だけお持ちいただければ、あとの材料や調理器具はすべてこちらでご用意いたします。レッスンの最後には、ご自身で作った料理を皆さんで囲んで召し上がっていただきます。和やかな雰囲気の中で、日本の食文化の奥深さをぜひ体感してください。",
+    "expect": [
+      "html-lang-mismatch"
+    ],
+    "note": "strength / TP: detector correctly flags | true=Japanese. A Japanese cooking-class site was built from a Chinese-market template (lang=\"zh\") and the body copy was rewritten in Japanese, bu"
+  },
+  {
+    "id": "ho/lang/strength/4",
+    "declaredLang": "ko",
+    "text": "歡迎來到本公司的企業官方網站。我們成立於二零零八年,專注於工業自動化設備的研發與製造,產品廣泛應用於汽車、電子與食品加工等多個產業領域。多年來我們始終堅持以品質為本、以創新為核心的經營理念,並通過國際標準認證,贏得海內外眾多客戶的信賴與肯定。公司設有完善的售後服務體系,提供從方案規劃、設備安裝到後續維護的一站式整體解決方案。展望未來,我們將持續加大研發投入,擴展海外市場,致力於成為全球領先的智慧製造解決方案供應商。誠摯歡迎各界先進蒞臨指導,共創美好未來。",
+    "expect": [
+      "html-lang-mismatch"
+    ],
+    "note": "strength / TP: detector correctly flags | true=Chinese. A multinational manufacturer reuses one Korean-built corporate template (lang=\"ko\") across all regional sites;"
+  },
+  {
+    "id": "ho/lang/strength/5",
+    "declaredLang": "en-US",
+    "text": "저희 온라인 강의 플랫폼에 오신 것을 환영합니다. 이곳에서는 프로그래밍, 디자인, 마케팅, 외국어 등 다양한 분야의 강좌를 언제 어디서나 자유롭게 수강하실 수 있습니다. 모든 강의는 현업 전문가가 직접 제작하였으며, 기초부터 심화까지 단계별로 구성되어 있어 초보자도 부담 없이 학습을 시작할 수 있습니다. 수강생은 강의 영상을 무제한으로 반복해서 볼 수 있고, 학습 진도에 따라 수료증을 발급받을 수 있습니다. 또한 질의응답 게시판을 통해 강사에게 직접 궁금한 점을 물어볼 수 있으며, 동료 수강생들과 학습 자료를 공유하며 함께 성장할 수 있습니다. 지금 바로 가입하시고 새로운 배움의 여정을 시작해 보세요. 여러분의 성장을 진심으로 응원합니다.",
+    "expect": [
+      "html-lang-mismatch"
+    ],
+    "note": "strength / TP: detector correctly flags | true=Korean. A Korean e-learning startup built on a US-targeted SaaS boilerplate left the regionalised lang=\"en-US\" in the document head while "
+  },
+  {
+    "id": "ho/lang/strength/6",
+    "declaredLang": "fr",
+    "text": "感谢您访问我们的旅行预订平台。在这里,您可以轻松搜索并预订全球数千个目的地的机票、酒店和当地体验活动。我们与众多航空公司和酒店集团建立了长期合作关系,致力于为每一位旅客提供最具竞争力的价格和最优质的服务。无论您是计划一次浪漫的蜜月之旅,还是一场说走就走的周末短途旅行,我们的智能推荐系统都能根据您的偏好量身定制行程方案。平台还提供全天候多语言客服支持,确保您在旅途中遇到任何问题都能及时获得帮助。注册成为会员后,您将享受积分返现、专属折扣和优先预订等多重权益。立即开启您的下一段精彩旅程吧。",
+    "expect": [
+      "html-lang-mismatch"
+    ],
+    "note": "strength / TP: detector correctly flags | true=Simplified Chinese. A travel-booking platform serving the Chinese market was forked from a French-language reference implementation;"
+  },
+  {
+    "id": "ho/lang/ceiling/1",
+    "declaredLang": "en",
+    "text": "Bienvenue sur notre plateforme de réservation en ligne. Pour réserver votre séjour, veuillez sélectionner vos dates d'arrivée et de départ dans le calendrier ci-dessous. Notre établissement propose des chambres confortables avec vue sur le jardin, ainsi qu'un petit-déjeuner continental servi chaque matin entre sept heures et dix heures. Les annulations gratuites sont possibles jusqu'à quarante-huit heures avant la date d'arrivée. Au-delà de ce délai, des frais correspondant à la première nuit seront appliqués. Si vous avez des questions concernant votre réservation, n'hésitez pas à contacter notre service clientèle par téléphone ou par courriel. Nous nous engageons à vous répondre dans les plus brefs délais et à rendre votre séjour aussi agréable que possible.",
+    "expect": [
+      "html-lang-mismatch"
+    ],
+    "note": "ceiling / FN: real issue the detector misses | true=French. A French hotel using an English-language website template (lang='en' baked into the theme's <html>) but filling the page with Fren"
+  },
+  {
+    "id": "ho/lang/ceiling/2",
+    "declaredLang": "en-US",
+    "text": "Herzlich willkommen auf der Internetseite unserer Stadtverwaltung. Hier finden Sie alle wichtigen Informationen zu den Öffnungszeiten der Ämter, zur Beantragung von Ausweisdokumenten sowie zu aktuellen Bauvorhaben im Stadtgebiet. Bürgerinnen und Bürger können viele Anträge mittlerweile bequem online ausfüllen und einreichen, ohne persönlich erscheinen zu müssen. Bitte beachten Sie, dass für bestimmte Dienstleistungen eine vorherige Terminvereinbarung erforderlich ist. Die zuständigen Mitarbeiterinnen und Mitarbeiter stehen Ihnen während der Sprechzeiten gerne zur Verfügung. Sollten Sie Fragen haben, die auf dieser Seite nicht beantwortet werden, wenden Sie sich bitte an das Bürgerbüro im Erdgeschoss des Rathauses oder nutzen Sie unser Kontaktformular.",
+    "expect": [
+      "html-lang-mismatch"
+    ],
+    "note": "ceiling / FN: real issue the detector misses | true=German. A German municipal government site where the developer left the boilerplate lang='en-US' from a US starter template while the enti"
+  },
+  {
+    "id": "ho/lang/ceiling/3",
+    "declaredLang": "fr",
+    "text": "Thank you for choosing our subscription service. Your account has been successfully created and a confirmation message has just been sent to the email address you provided during registration. To get started, please verify your email by clicking the link in that message, and then complete your profile so we can tailor our recommendations to your interests. Your free trial begins today and lasts for fourteen days, after which your selected plan will renew automatically unless you cancel beforehand. You can manage your subscription, update your payment method, or change your plan at any time from the billing section of your dashboard. If you run into any difficulty, our support team is available around the clock and is always happy to help you resolve any issue quickly.",
+    "expect": [
+      "html-lang-mismatch"
+    ],
+    "note": "ceiling / FN: real issue the detector misses | true=English. A SaaS product whose localisation pipeline served the French locale shell (lang='fr' set by the i18n router) but the English fallb"
+  },
+  {
+    "id": "ho/lang/ceiling/4",
+    "declaredLang": "en",
+    "text": "Chào mừng bạn đến với cửa hàng trực tuyến của chúng tôi. Tại đây bạn có thể tìm thấy nhiều sản phẩm chất lượng cao với mức giá hợp lý và chính sách đổi trả linh hoạt trong vòng ba mươi ngày. Để đặt hàng, bạn chỉ cần thêm sản phẩm vào giỏ hàng, sau đó tiến hành thanh toán bằng thẻ ngân hàng hoặc ví điện tử. Đơn hàng của bạn sẽ được giao tận nơi trong khoảng từ hai đến năm ngày làm việc tùy theo khu vực. Nếu bạn có bất kỳ thắc mắc nào về sản phẩm hoặc quá trình vận chuyển, vui lòng liên hệ với bộ phận chăm sóc khách hàng của chúng tôi qua số điện thoại được hiển thị ở cuối trang. Chúng tôi luôn sẵn sàng hỗ trợ bạn.",
+    "expect": [
+      "html-lang-mismatch"
+    ],
+    "note": "ceiling / FN: real issue the detector misses | true=Vietnamese. A Vietnamese e-commerce store built on an English Shopify theme that hardcodes lang='en';"
+  },
+  {
+    "id": "ho/lang/ceiling/5",
+    "declaredLang": "es",
+    "text": "Bem-vindo ao portal de notícias da nossa região. Aqui você encontra as principais reportagens sobre política, economia, cultura e esporte, atualizadas ao longo de todo o dia por nossa equipe de jornalistas. Acreditamos que o acesso à informação de qualidade é um direito fundamental, e por isso trabalhamos para oferecer conteúdo apurado, imparcial e relevante para a vida dos nossos leitores. Você pode personalizar a sua experiência criando uma conta gratuita, salvando as matérias que deseja ler mais tarde e recebendo um resumo diário diretamente no seu correio eletrônico. Caso encontre algum erro em nossas publicações ou queira sugerir uma pauta, entre em contato pela seção de fale conosco. Sua participação ajuda a tornar o nosso jornalismo cada vez melhor.",
+    "expect": [
+      "html-lang-mismatch"
+    ],
+    "note": "ceiling / FN: real issue the detector misses | true=Portuguese. A Brazilian Portuguese news portal whose CMS template inherited lang='es' from a pan-Latin-American Spanish network configuration;"
+  },
+  {
+    "id": "ho/lang/ceiling/6",
+    "declaredLang": "en-GB",
+    "text": "Benvenuti nel sito ufficiale del nostro museo civico. Le nostre collezioni permanenti raccolgono opere che spaziano dall'arte antica fino al Novecento, offrendo ai visitatori un percorso completo attraverso la storia artistica del territorio. Il museo è aperto dal martedì alla domenica, dalle nove del mattino alle diciotto, mentre il lunedì rimane chiuso per consentire le normali operazioni di manutenzione e pulizia delle sale. L'ingresso è gratuito per i bambini fino a sei anni e per le persone con disabilità accompagnate da un assistente. Sono inoltre disponibili visite guidate su prenotazione, condotte da personale esperto, che permettono di approfondire le opere più significative. Per maggiori informazioni sugli orari, sulle tariffe e sulle mostre temporanee in corso, vi invitiamo a consultare le pagine dedicate del nostro sito.",
+    "expect": [
+      "html-lang-mismatch"
+    ],
+    "note": "ceiling / FN: real issue the detector misses | true=Italian. An Italian municipal museum site built on a UK WordPress theme that ships lang='en-GB' in header.php;"
+  },
+  {
+    "id": "ho/lang/precision/1",
+    "declaredLang": "zh-Hant",
+    "text": "歡迎使用我們的 SaaS 平台。本服務整合 GitHub、Slack 與 Notion，讓團隊在同一個 dashboard 管理所有專案。你可以透過 OAuth 2.0 登入，系統會自動同步你的 repository 與 pull request 狀態。我們的 API 採用 RESTful 設計，所有 endpoint 都回傳 JSON 格式，並支援 webhook 即時通知。開發者只要在 config.yaml 設定 token，就能呼叫 client SDK。費用方面，Free 方案每月免費，Pro 方案為 USD 12，Enterprise 方案請聯絡 sales@example.com 詢價。若需要技術支援，請至 support.example.com 開立工單，我們的工程師會在 24 小時內回覆。本平台部署於 AWS，使用 PostgreSQL 與 Redis，並透過 CDN 加速全球存取。",
+    "expect": [],
+    "note": "precision / TN: correct silence | true=Traditional Chinese (zh-Hant). A Taiwanese developer-tools SaaS landing/docs page: real Traditional Chinese prose carrying heavy English product names, URLs, cod"
+  },
+  {
+    "id": "ho/lang/precision/2",
+    "declaredLang": "ja",
+    "text": "このワイヤレスイヤホンは Bluetooth 5.3 に対応し、最大 30 時間のバッテリー駆動を実現しました。ノイズキャンセリング機能により、電車やカフェでも音楽に集中できます。専用アプリ SoundLink を App Store または Google Play からダウンロードすると、イコライザーを自由にカスタマイズできます。IPX4 の防水性能で、ランニングやワークアウトにも安心してお使いいただけます。USB Type-C による急速充電に対応し、わずか 10 分の充電で 2 時間の再生が可能です。カラーはブラック、ホワイト、ネイビーの 3 色をご用意しました。詳しい仕様は公式サイト www.example.co.jp をご覧ください。送料無料、30 日間の返品保証付きです。",
+    "expect": [],
+    "note": "precision / TN: correct silence | true=Japanese (ja). A Japanese e-commerce product detail page for wireless earbuds: authentic Japanese prose (hiragana + katakana + kanji) with the he"
+  },
+  {
+    "id": "ho/lang/precision/3",
+    "declaredLang": "ko",
+    "text": "이 핀테크 앱은 여러 은행 계좌를 한곳에서 관리할 수 있도록 도와줍니다. Open Banking API 를 통해 안전하게 연동되며, 모든 데이터는 AES-256 으로 암호화됩니다. 사용자는 Face ID 또는 PIN 으로 간편하게 로그인할 수 있습니다. 매달 지출 내역을 자동으로 분류하고, 예산 대비 사용량을 보기 쉬운 dashboard 로 보여줍니다. Premium 요금제를 구독하면 투자 리포트와 신용 점수 모니터링 기능을 추가로 이용할 수 있습니다. 앱은 App Store 와 Google Play 에서 무료로 다운로드할 수 있으며, 자세한 내용은 help.example.com 을 참고하시기 바랍니다. 문의 사항은 이메일 support@example.com 으로 보내 주세요.",
+    "expect": [],
+    "note": "precision / TN: correct silence | true=Korean (ko). A Korean fintech mobile-app marketing page: genuine Korean (Hangul) body text interleaved with the English fintech jargon and bran"
+  },
+  {
+    "id": "ho/lang/precision/4",
+    "declaredLang": "en",
+    "text": "Our annual hardware roundup covers the best gadgets from across Asia this year. The standout release came from 任天堂 (Nintendo), whose new handheld console drew long queues at launch. Sony and Panasonic both shipped impressive cameras, while a smaller Kyoto startup surprised reviewers with a foldable e-reader. One engineer told us their design motto is simply 「より少なく」, meaning \"less is more,\" a philosophy that shows in every clean line of the product. We tested battery life, screen brightness, and durability across a dozen devices over six weeks. Prices ranged widely, from budget options under a hundred dollars to premium flagships well above a thousand. Our full scoring methodology and the complete ranking table are available further down the page.",
+    "expect": [],
+    "note": "precision / TN: correct silence | true=English (en). An English tech-review article about Asian hardware: predominantly English prose with incidental CJK from a brand name (任天堂) and o"
+  },
+  {
+    "id": "ho/lang/precision/5",
+    "declaredLang": "de",
+    "text": "Willkommen in der Dokumentation unserer Plattform. Mit unserem Service können Sie Ihre gesamte Infrastruktur an einem zentralen Ort verwalten. Nach der Anmeldung über Single Sign-On stehen Ihnen alle Funktionen sofort zur Verfügung. Unsere API ist vollständig REST-basiert und liefert Antworten im JSON-Format zurück. Entwickler hinterlegen einfach ihren Access Token in der Konfigurationsdatei und können danach jeden Endpoint aufrufen. Für die Bereitstellung empfehlen wir den Einsatz von Docker und Kubernetes, da beide eine zuverlässige Skalierung ermöglichen. Sollten Fehler auftreten, finden Sie ausführliche Logs im Dashboard unter dem Reiter Monitoring. Bei Fragen steht Ihnen unser Support-Team jederzeit zur Verfügung. Die vollständige Preisübersicht sowie alle Geschäftsbedingungen entnehmen Sie bitte der entsprechenden Seite.",
+    "expect": [],
+    "note": "precision / TN: correct silence | true=German (de). A German developer-documentation page: authentic German prose carrying the unavoidable English technical loanwords of DevOps writi"
+  },
+  {
+    "id": "ho/lang/precision/6",
+    "declaredLang": "fr-CA",
+    "text": "Le festival de jazz de Montréal a une fois de plus attiré des milliers de spectateurs venus de partout dans le monde. Pendant dix jours, les rues du centre-ville se sont transformées en une immense scène à ciel ouvert où se sont produits des artistes locaux et internationaux. Les organisateurs soulignent que cette édition a battu tous les records de fréquentation depuis sa création. De nombreux musiciens émergents ont profité de cette vitrine exceptionnelle pour se faire connaître auprès d'un public attentif et passionné. Les amateurs de musique ont pu assister gratuitement à plusieurs concerts en plein air, tandis que les spectacles en salle affichaient complet plusieurs semaines à l'avance. La ville espère que cet engouement se poursuivra lors des prochaines éditions et continuera de rayonner bien au-delà des frontières du Québec.",
+    "expect": [],
+    "note": "precision / TN: correct silence | true=French (fr-CA). A Canadian-French cultural news article about the Montreal jazz festival: fully authentic French prose with a region subtag (fr-CA"
+  }
+]

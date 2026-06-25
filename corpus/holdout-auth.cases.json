@@ -1,0 +1,154 @@
+[
+  {
+    "id": "ho/auth/strength/1",
+    "fileKind": "html",
+    "content": "<form action=\"/login\" method=\"post\">\n  <label for=\"email\">Email</label>\n  <input id=\"email\" type=\"email\" name=\"email\" autocomplete=\"email\" required>\n  <label for=\"pwd\">Password</label>\n  <input id=\"pwd\" type=\"password\" name=\"password\" autocomplete=\"current-password\"\n         onpaste=\"return false;\" oncopy=\"return false;\" required>\n  <button type=\"submit\">Sign in</button>\n</form>",
+    "expect": [
+      "auth-password-paste-blocked"
+    ],
+    "note": "strength / TP: detector correctly flags. The 'disable paste on password to force re-typing' pattern shipped by countless legacy banking and enterprise login forms;"
+  },
+  {
+    "id": "ho/auth/strength/2",
+    "fileKind": "html",
+    "content": "<div class=\"captcha-row\">\n  <img src=\"/auth/captcha.jpg?ts=1719300000\" alt=\"CAPTCHA\" class=\"captcha-img\" width=\"160\" height=\"48\">\n  <a href=\"#\" class=\"captcha-refresh\" aria-label=\"Get a new image\">↻</a>\n</div>\n<label for=\"cap\">Security check</label>\n<input id=\"cap\" name=\"captcha_code\" type=\"text\" autocomplete=\"off\" maxlength=\"6\">\n<p class=\"hint\">Please enter the characters you see in the image above.</p>",
+    "expect": [
+      "auth-text-captcha"
+    ],
+    "note": "strength / TP: detector correctly flags. The classic self-hosted PHP/server-rendered image CAPTCHA (an <img> of distorted characters plus a 'type the characters you see' p"
+  },
+  {
+    "id": "ho/auth/strength/3",
+    "fileKind": "html",
+    "content": "<form id=\"signup\" action=\"/account/create\" method=\"post\">\n  <input type=\"email\" name=\"email\" autocomplete=\"email\" required>\n  <input type=\"password\" name=\"password\" autocomplete=\"new-password\" required>\n  <div class=\"g-recaptcha\" data-sitekey=\"6Lc_aQ4UAAAAALxxxxxxxxxxxxxxxx\" data-theme=\"light\"></div>\n  <button type=\"submit\">Create account</button>\n</form>\n<script src=\"https://www.google.com/recaptcha/api.js\" async defer></script>",
+    "expect": [
+      "auth-recaptcha-v2"
+    ],
+    "note": "strength / TP: detector correctly flags. The verbatim Google reCAPTCHA v2 'I'm not a robot' checkbox integration: a div.g-recaptcha with data-sitekey plus the api.js inclu"
+  },
+  {
+    "id": "ho/auth/strength/4",
+    "fileKind": "html",
+    "content": "<form method=\"POST\" action=\"{{ url_for('auth.register') }}\">\n  {{ form.csrf_token }}\n  {{ form.username(class=\"input\") }}\n  {{ form.password(class=\"input\", autocomplete=\"new-password\") }}\n  <div class=\"h-captcha\" data-sitekey=\"10000000-ffff-ffff-ffff-000000000001\"></div>\n  <button type=\"submit\" class=\"btn btn-primary\">Register</button>\n</form>\n<script src=\"https://js.hcaptcha.com/1/api.js\" async defer></script>",
+    "expect": [
+      "auth-hcaptcha"
+    ],
+    "note": "strength / TP: detector correctly flags. A Flask/Jinja2 + WTForms register template (the {{ form.field() }} macro idiom) with the standard hCaptcha div.h-captcha widget an"
+  },
+  {
+    "id": "ho/auth/strength/5",
+    "fileKind": "jsx",
+    "content": "import { useRef } from \"react\";\n\nexport function PasswordField({ register }) {\n  const passwordInput = useRef(null);\n  return (\n    <input\n      ref={passwordInput}\n      type=\"password\"\n      name=\"password\"\n      autoComplete=\"current-password\"\n      onPaste={(e) => {\n        e.preventDefault();\n        return false;\n      }}\n      {...register(\"password\", { required: true })}\n    />\n  );\n}",
+    "expect": [
+      "auth-password-clipboard-blocked-js"
+    ],
+    "note": "strength / TP: detector correctly flags. A React Hook Form password component with an inline onPaste handler calling e.preventDefault() — the typical React way developers "
+  },
+  {
+    "id": "ho/auth/strength/6",
+    "fileKind": "ts",
+    "content": "// Renders the login challenge once the reCAPTCHA library is ready.\ndeclare const grecaptcha: { render(c: string, opts: Record<string, unknown>): number };\n\nexport function mountLoginChallenge(containerId: string): void {\n  grecaptcha.render(containerId, {\n    sitekey: import.meta.env.VITE_RECAPTCHA_SITE_KEY,\n    theme: \"light\",\n    callback: (token: string) => submitLogin(token),\n  });\n}",
+    "expect": [
+      "auth-recaptcha-js-render"
+    ],
+    "note": "strength / TP: detector correctly flags. A Vite/TypeScript SPA module that mounts reCAPTCHA explicitly via grecaptcha.render() into an empty container, the standard 'expli"
+  },
+  {
+    "id": "ho/auth/ceiling/1",
+    "fileKind": "js",
+    "content": "// login.bundle behaviour split across the module\nfunction blockPaste(e) {\n  e.preventDefault();\n  return false;\n}\n\nfunction initSecureLogin() {\n  const pwInput = document.getElementById('password');\n  // Security: stop users pasting credentials so they 'really know' their password\n  pwInput.addEventListener('paste', blockPaste);\n  pwInput.addEventListener('drop', blockPaste);\n}\ndocument.addEventListener('DOMContentLoaded', initSecureLogin);",
+    "expect": [
+      "auth-password-clipboard-blocked-js"
+    ],
+    "note": "ceiling / FN: real issue the detector misses. Hand-rolled vanilla-JS login hardening;"
+  },
+  {
+    "id": "ho/auth/ceiling/2",
+    "fileKind": "html",
+    "content": "<form method=\"post\" action=\"/connexion\">\n  <fieldset>\n    <legend>Verification de securite</legend>\n    <img class=\"verify-code\" src=\"/challenge/render?id=8f2a\" alt=\"\" width=\"150\" height=\"50\">\n    <label for=\"code\">Saisissez les caracteres affiches ci-dessus pour continuer</label>\n    <input id=\"code\" name=\"code\" type=\"text\" inputmode=\"text\" required>\n  </fieldset>\n</form>",
+    "expect": [
+      "auth-text-captcha"
+    ],
+    "note": "ceiling / FN: real issue the detector misses. A French-locale login (connexion) with a self-hosted distorted-text challenge served from a generic /challenge/render path, no 'ca"
+  },
+  {
+    "id": "ho/auth/ceiling/3",
+    "fileKind": "html",
+    "content": "<form id=\"signin\" onpaste=\"return false;\" oncopy=\"return false;\" autocomplete=\"off\">\n  <label for=\"user\">Email</label>\n  <input id=\"user\" name=\"email\" type=\"email\">\n  <label for=\"pw\">Password</label>\n  <input id=\"pw\" name=\"password\" type=\"password\">\n  <button type=\"submit\">Sign in</button>\n</form>",
+    "expect": [
+      "auth-password-paste-blocked"
+    ],
+    "note": "ceiling / FN: real issue the detector misses. Paste/copy disabled at the <form> wrapper level (a single onpaste on the form covers every child input) is a widespread 'paste-pro"
+  },
+  {
+    "id": "ho/auth/ceiling/4",
+    "fileKind": "py",
+    "content": "from django import forms\n\nclass LoginForm(forms.Form):\n    username = forms.CharField()\n    password = forms.CharField(\n        widget=forms.PasswordInput(attrs={\n            'class': 'form-control',\n            # disable paste so users cannot dump a copied password in\n            'oninput': \"this.value = this.dataset.last || ''\",\n            'onbeforeinput': \"if (event.inputType === 'insertFromPaste') event.preventDefault();\",\n        })\n    )",
+    "expect": [
+      "auth-password-clipboard-blocked-js"
+    ],
+    "note": "ceiling / FN: real issue the detector misses. Django PasswordInput whose paste-blocking is expressed via onbeforeinput/oninput attrs (the modern way to intercept paste without "
+  },
+  {
+    "id": "ho/auth/ceiling/5",
+    "fileKind": "ts",
+    "content": "export function hardenPasswordField(): void {\n  const field = document.querySelector<HTMLInputElement>('[data-role=\"secret\"]');\n  if (!field) return;\n  field.type = 'password';\n  // discourage password managers from autofilling the secret\n  field.setAttribute('autocomplete', 'off');\n  field.setAttribute('readonly', 'true');\n  field.addEventListener('focus', () => field.removeAttribute('readonly'));\n}",
+    "expect": [
+      "auth-password-autocomplete-off"
+    ],
+    "note": "ceiling / FN: real issue the detector misses. A TS helper that sets a field to type=password and then forces autocomplete=off plus the readonly-until-focus trick, both common '"
+  },
+  {
+    "id": "ho/auth/ceiling/6",
+    "fileKind": "html",
+    "content": "<div class=\"sicherheitsabfrage\">\n  <img src=\"/sicherheit/zeichen.png?token=ab12cd\" alt=\"\" width=\"160\" height=\"50\">\n  <label for=\"sicherheitscode\">Bitte geben Sie die oben angezeigten Zeichen ein, um fortzufahren</label>\n  <input id=\"sicherheitscode\" name=\"sc\" type=\"text\" autocomplete=\"off\" maxlength=\"6\">\n  <a href=\"/sicherheit/neu\">Neues Bild</a>\n</div>",
+    "expect": [
+      "auth-text-captcha"
+    ],
+    "note": "ceiling / FN: real issue the detector misses. A German-locale distorted-text challenge ('Bitte geben Sie die oben angezeigten Zeichen ein') with a non-captcha image path and a "
+  },
+  {
+    "id": "ho/auth/precision/1",
+    "fileKind": "html",
+    "content": "<section class=\"bg-recaptcha relative isolate px-6 py-24 sm:py-32 lg:px-8\">\n  <div class=\"mx-auto max-w-md\">\n    <h1 class=\"text-2xl font-semibold\">Sign in to your account</h1>\n    <form action=\"/session\" method=\"post\" class=\"mt-8 space-y-4\">\n      <label class=\"block text-sm\">Email\n        <input type=\"email\" name=\"email\" autocomplete=\"username\" class=\"mt-1 w-full rounded border\">\n      </label>\n      <label class=\"block text-sm\">Password\n        <input type=\"password\" name=\"password\" autocomplete=\"current-password\" class=\"mt-1 w-full rounded border\">\n      </label>\n      <button type=\"submit\" class=\"w-full rounded bg-indigo-600 py-2 text-white\">Continue</button>\n    </form>\n  </div>\n</section>",
+    "expect": [],
+    "note": "precision / TN: correct silence. Tailwind CSS utility-class naming on a sign-in hero;"
+  },
+  {
+    "id": "ho/auth/precision/2",
+    "fileKind": "html",
+    "content": "<form id=\"loginForm\" action=\"/auth/login\" method=\"post\">\n  <input type=\"email\" name=\"email\" autocomplete=\"username\" required>\n  <input type=\"password\" name=\"password\" autocomplete=\"current-password\" required>\n  <input type=\"hidden\" name=\"recaptcha_token\" id=\"recaptcha_token\">\n  <button type=\"submit\">Log in</button>\n</form>\n<script src=\"https://www.google.com/recaptcha/api.js?render=6Lc_aBcDeFgHiJkLmNoPqRsTuVwXyZ\"></script>\n<script>\n  grecaptcha.ready(function () {\n    grecaptcha.execute('6Lc_aBcDeFgHiJkLmNoPqRsTuVwXyZ', { action: 'login' })\n      .then(function (token) { document.getElementById('recaptcha_token').value = token; });\n  });\n</script>",
+    "expect": [],
+    "note": "precision / TN: correct silence. Standard Google reCAPTCHA v3 site integration as documented by Google (render= query param + grecaptcha.execute)"
+  },
+  {
+    "id": "ho/auth/precision/3",
+    "fileKind": "html",
+    "content": "<%= form_with url: registrations_path, method: :post do |f| %>\n  <%= f.email_field :email, autocomplete: \"username\" %>\n  <%= f.password_field :password, autocomplete: \"new-password\" %>\n  <div class=\"cf-turnstile\"\n       data-sitekey=\"0x4AAAAAAABkMYinukE8nzY\"\n       data-size=\"invisible\"\n       data-action=\"signup\"></div>\n  <%= f.submit \"Create account\" %>\n<% end %>\n<script src=\"https://challenges.cloudflare.com/turnstile/v0/api.js\" async defer></script>",
+    "expect": [],
+    "note": "precision / TN: correct silence. Cloudflare Turnstile invisible-mode widget embedded in a Rails `form_with` registration form"
+  },
+  {
+    "id": "ho/auth/precision/4",
+    "fileKind": "js",
+    "content": "// Editorial copy-protection on a paywalled long-form article. Blocks copy/cut so\n// scraped excerpts don't leak the full piece. This is NOT an auth field — no password\n// anywhere — so looksPasswordRelated() must gate it out and the detector stays silent.\nfunction protectArticleBody() {\n  const body = document.querySelector('article.story__body');\n  if (!body) return;\n  ['copy', 'cut', 'contextmenu'].forEach((evt) => {\n    body.addEventListener(evt, (e) => {\n      e.preventDefault();\n      showPaywallToast('Subscribe to copy from this article.');\n      return false;\n    });\n  });\n}\ndocument.addEventListener('DOMContentLoaded', protectArticleBody);",
+    "expect": [],
+    "note": "precision / TN: correct silence. Newspaper/Medium-style copy-protection script attached to an article body element (`article.story__body`)"
+  },
+  {
+    "id": "ho/auth/precision/5",
+    "fileKind": "html",
+    "content": "<form action=\"/login\" method=\"post\">\n  <input type=\"email\" name=\"email\" autocomplete=\"username\">\n  <input type=\"password\" name=\"password\" autocomplete=\"current-password\">\n  <div class=\"g-recaptcha\" data-sitekey=\"6Lc_v2SiteKeyExample00000000000000000\">\n    <noscript>\n      <img class=\"recaptcha-fallback\" src=\"/recaptcha/fallback?captcha=challenge\" alt=\"reCAPTCHA challenge\">\n    </noscript>\n  </div>\n  <button type=\"submit\">Sign in</button>\n</form>\n<script src=\"https://www.google.com/recaptcha/api.js\" async defer></script>",
+    "expect": [
+      "auth-recaptcha-v2"
+    ],
+    "note": "precision / TP: detector correctly flags. Standard reCAPTCHA v2 checkbox widget with its built-in `<noscript>` fallback image, as Google ships it"
+  },
+  {
+    "id": "ho/auth/precision/6",
+    "fileKind": "html",
+    "content": "<!-- v4 auth: dropped the old <img src=\"/img/captcha.png\" alt=\"captcha\"> text challenge for passkeys; remove note after QA -->\n<form action=\"/login\" method=\"post\">\n  <label for=\"email\">Email</label>\n  <input id=\"email\" type=\"email\" name=\"email\" autocomplete=\"username\">\n  <label for=\"pw\">Password</label>\n  <input id=\"pw\" type=\"password\" name=\"password\" autocomplete=\"current-password\">\n  <button type=\"submit\">Sign in</button>\n</form>",
+    "expect": [],
+    "note": "precision / FP: detector fires on content with no real barrier/mismatch. A realistic developer migration comment that still references the removed <img ...captcha...> markup;"
+  }
+]
