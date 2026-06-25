@@ -5,6 +5,10 @@ manifest (`.claude-plugin/plugin.json`); dates are release-prep dates.
 
 ## [2.2.0] — Unreleased
 
+Ships the **Pattern Library v1.0** (detectors become shared, contributable data)
+and folds in the detector, PDF, language, authentication, and audit-integrity
+work committed on the branch since v2.1.0.
+
 ### Added
 
 - **Declarative pattern library for the advisor detectors.** The web and PDF
@@ -25,6 +29,33 @@ manifest (`.claude-plugin/plugin.json`); dates are release-prep dates.
   web + PDF detector's fire/silent behaviour across both runtimes; the prior hook
   test had covered none of the web detectors. Plus `test/pattern-runtime.test.mjs`
   and `test/patterns-schema.test.mjs`.
+- **Deterministic detector measurement harness** (`tools/measure-detectors.mjs`)
+  over a labelled corpus (`corpus/*.cases.json`), reporting per-detector
+  precision/recall (TP/FP/FN). Ships a calibration seed set plus a **held-out set
+  (41 real-world cases)** for the four known regex-ceiling modes
+  (prescriptive-input-copy, positive-tabindex, fixed-minmax-reflow,
+  aria-hidden-on-focusable); held-out P/R 0.56/0.58 records the ceiling as a
+  regression baseline. The held-out collection also surfaced two
+  previously-undocumented misfires: aria-hidden flags the canonical `tabindex="-1"`
+  remediation, and fixed-minmax flags auto-fill RAM grids.
+- **GitHub Actions CI** (`.github/workflows/ci.yml`): `node --test`, build
+  `--check` parity, and the detector measurement (report-only).
+- **WCAG 3.1.1 declared-vs-content language mismatch** detection in `static-audit`
+  (flags an `<html lang>` that disagrees with the page's actual language), wired
+  into Tier-2 so it also covers SPA/CSR pages.
+- **WCAG 3.3.8 authentication barriers** (source-level): JS-set passwords,
+  clipboard blocks on auth fields, and hCaptcha-style cognitive function tests.
+- **PDF accessibility probe** in `static-audit` (WCAG 1.3.1 / 2.4.2 / 3.1.1 /
+  4.1.x) and a **`pdf-triage` batch CLI** for auditing a site's PDFs; the codex
+  advisor gains PDF-generation parity with the CC hook.
+- **`quality-detect`** heuristic content-quality red-flags (generic alt text, bare
+  link text).
+- **WCAG 3.1.2 Language of Parts** (unmarked foreign passages) — *experimental*:
+  the static heuristic over-flags on real multilingual pages and is not relied
+  upon for scoring (see Notes).
+- **Keyboard `focus-flow` + multi-state auditing** — the analyzer ships, but live
+  capture is not reliable on real pages, so keyboard review stays manual (see
+  Notes).
 
 ### Changed
 
@@ -34,6 +65,25 @@ manifest (`.claude-plugin/plugin.json`); dates are release-prep dates.
   detector, a word-boundary on `outline`, and the tighter `min(Npx, 100%)` reflow
   guard; the codex advisor gained the `:focus`-without-`:focus-visible` detector
   and per-line `aria-hidden` scanning. Detector behaviour is otherwise preserved.
+- **Audit integrity** (P1/P3/P8): `static-audit.mjs` is now the sole author of
+  `audit-results.json` (P1); each run stamps an `engine_fingerprint` for
+  reproducibility (P3); and LLM judgement is quarantined out of the deterministic
+  machine score (P8).
+- **Report palette**: cool-slate scheme; fixed a muddy score-ring colour.
+
+### Fixed
+
+- **PDF detection**: catalog-aware secondary-marker resolution (11 false positives
+  → 0).
+- **auth-hcaptcha** word boundary + a PDF encryption-suppression follow-up (P5).
+- **static-audit** now reads an unquoted `<html lang=…>`.
+- Addressed independent codex-review findings on the 3.1.1 / 3.x detectors.
+
+### Docs
+
+- Published the auth-detect and pdf-detect false-positive tables.
+- Added OCRmyPDF (OCR text-layer remediation) and veraPDF to the PDF tools
+  reference.
 
 ### Notes
 
@@ -41,14 +91,13 @@ manifest (`.claude-plugin/plugin.json`); dates are release-prep dates.
   contribution-ready, but the contribution flow (agent drafts, human approves, PR;
   CI schema-validation; local memory) is deferred to v1.1, and cross-person
   aggregation to v2. See [ROADMAP.md](./ROADMAP.md).
-- **This version also carries prior unreleased detector work committed on the
-  branch since v2.1.0 that still needs its own changelog lines**: WCAG 3.1.1
-  declared-vs-content language mismatch, 3.1.2 Language of Parts, 3.3.8
-  authentication barriers, a PDF accessibility probe with a `pdf-triage` CLI and
-  codex PDF parity, `quality-detect`, keyboard `focus-flow`, and the P1/P3/P5/P8
-  audit-integrity changes. Per the round-2 calibration notes, external precision
-  claims for the language and auth detectors are gated on held-out validation
-  before release.
+- **Precision posture.** External precision claims for the **language (3.1.1 /
+  3.1.2)** and **authentication (3.3.8)** detectors are gated on held-out
+  validation. As of this release: 3.1.1 has calibration-set validation only, 3.1.2
+  is experimental (real-page precision needs rework), and keyboard `focus-flow`
+  runtime capture is not reliable — so these ship as capabilities **without
+  external precision claims**. The held-out corpus added here covers the four
+  regex-ceiling web detectors, **not** the language/auth detectors.
 
 ## [2.1.0] — 2026-06-06
 
