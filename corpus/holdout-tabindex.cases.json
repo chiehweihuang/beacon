@@ -1,0 +1,98 @@
+[
+  {
+    "id": "ho/tabindex/ceiling/1",
+    "fileKind": "html",
+    "content": "<h2>Anti-pattern: positive tab order</h2>\n<p>Avoid hardcoding the focus sequence. Markup like\n<code>&lt;nav tabindex=\"2\"&gt;</code> forces a custom order that breaks\nShift+Tab. Prefer source order instead.</p>",
+    "expect": [],
+    "note": "ceiling / FP-exposer: regex fires on non-flaggable text. MDN Web Docs and the WAI-ARIA Authoring Practices both document the positive-tabindex anti-pattern with the value escaped as HTML entities ("
+  },
+  {
+    "id": "ho/tabindex/ceiling/2",
+    "fileKind": "ts",
+    "content": "// ESLint rule: jsx-a11y/no-noninteractive-tabindex\n// Disallowed: tabindex=\"4\" on a non-interactive element such as <div> or <li>.\n// Use tabindex={0} only when the element is genuinely interactive.\nexport const ruleId = 'no-noninteractive-tabindex';",
+    "expect": [],
+    "note": "ceiling / FP-exposer: regex fires on non-flaggable text. The eslint-plugin-jsx-a11y rule no-noninteractive-tabindex ships docstrings and rule descriptions that quote the offending pattern verbatim "
+  },
+  {
+    "id": "ho/tabindex/ceiling/3",
+    "fileKind": "js",
+    "content": "const LINT_MESSAGE =\n  'Positive tabindex (e.g. tabindex=\"5\") changes the default focus order ' +\n  'and is hard to maintain. Use tabindex=\"0\" or remove it.';\nexport default LINT_MESSAGE;",
+    "expect": [],
+    "note": "ceiling / FP-exposer: regex fires on non-flaggable text. Accessibility linters such as axe-core and Lighthouse store human-readable violation messages as string constants that quote the bad value ("
+  },
+  {
+    "id": "ho/tabindex/ceiling/4",
+    "fileKind": "html",
+    "content": "<figure>\n  <figcaption>Before: a brittle custom focus order</figcaption>\n  <pre><code class=\"language-html\">&lt;button tabindex=\"3\"&gt;Submit&lt;/button&gt;\n&lt;input tabindex=\"1\" name=\"email\"&gt;</code></pre>\n</figure>",
+    "expect": [],
+    "note": "ceiling / FP-exposer: regex fires on non-flaggable text. Documentation generators (Docusaurus, VitePress, Prism/highlight.js) render fenced code blocks as escaped HTML inside <pre><code>."
+  },
+  {
+    "id": "ho/tabindex/ceiling/5",
+    "fileKind": "ts",
+    "content": "describe('positive-tabindex detector', () => {\n  it('flags a positive value', () => {\n    const html = '<div tabindex=\"6\">x</div>';\n    expect(run(html)).toContain('web/positive-tabindex');\n  });\n});",
+    "expect": [],
+    "note": "ceiling / FP-exposer: regex fires on non-flaggable text. Detector and linter test suites (Jest/Vitest idiom) embed the offending markup as a string fixture to assert the rule fires."
+  },
+  {
+    "id": "ho/tabindex/ceiling/6",
+    "fileKind": "js",
+    "content": "/**\n * @deprecated Do not set a positive tabindex.\n * Passing tabindex=\"7\" reorders focus and breaks reverse Tab navigation.\n * @example <div tabindex=\"0\"> // correct\n */\nexport function makeFocusable(el) {\n  el.setAttribute('tabindex', '0');\n}",
+    "expect": [],
+    "note": "ceiling / FP-exposer: regex fires on non-flaggable text. JSDoc/TSDoc convention places @deprecated warnings and @example tags that quote the discouraged value (tabindex=\"7\") above the function."
+  },
+  {
+    "id": "ho/tabindex/anchor/1",
+    "fileKind": "html",
+    "content": "<form action=\"/checkout\" method=\"post\">\n  <label for=\"card\">Card number</label>\n  <input type=\"text\" id=\"card\" name=\"card\" tabindex=\"1\">\n  <label for=\"exp\">Expiry</label>\n  <input type=\"text\" id=\"exp\" name=\"exp\" tabindex=\"2\">\n  <label for=\"cvc\">CVC</label>\n  <input type=\"text\" id=\"cvc\" name=\"cvc\" tabindex=\"3\">\n  <button type=\"submit\" tabindex=\"4\">Pay</button>\n</form>",
+    "expect": [
+      "web/positive-tabindex"
+    ],
+    "note": "anchor / TP anchor: detector correctly fires. Classic hand-authored checkout form pattern where developers manually sequence inputs with tabindex 1..4 — a widely documented anti-pattern "
+  },
+  {
+    "id": "ho/tabindex/anchor/2",
+    "fileKind": "html",
+    "content": "<nav class=\"main-nav\">\n  <a href=\"/\" tabindex=\"10\">Home</a>\n  <a href=\"/products\" tabindex=\"20\">Products</a>\n  <a href=\"/pricing\" tabindex=\"30\">Pricing</a>\n  <a href=\"/contact\" tabindex=\"40\">Contact</a>\n</nav>",
+    "expect": [
+      "web/positive-tabindex"
+    ],
+    "note": "anchor / TP anchor: detector correctly fires. The 'leave gaps of 10' tabindex convention (10/20/30/40) was a common navigation pattern carried over from old form-builder and CMS template"
+  },
+  {
+    "id": "ho/tabindex/anchor/3",
+    "fileKind": "html",
+    "content": "<div class=\"modal\" role=\"dialog\" aria-modal=\"true\" aria-labelledby=\"title\">\n  <h2 id=\"title\">Confirm deletion</h2>\n  <p>This action cannot be undone.</p>\n  <div class=\"modal-actions\">\n    <button class=\"btn-cancel\" tabindex=\"2\">Cancel</button>\n    <button class=\"btn-danger\" tabindex=\"1\">Delete</button>\n  </div>\n</div>",
+    "expect": [
+      "web/positive-tabindex"
+    ],
+    "note": "anchor / TP anchor: detector correctly fires. Developers reaching for positive tabindex to force a primary action to be focused first in a dialog while keeping the visual/DOM order Cance"
+  },
+  {
+    "id": "ho/tabindex/anchor/4",
+    "fileKind": "html",
+    "content": "<table>\n  <tbody>\n    <tr>\n      <td><span class=\"cell-edit\" contenteditable=\"true\" tabindex=\"5\">100</span></td>\n      <td><span class=\"cell-edit\" contenteditable=\"true\" tabindex=\"6\">200</span></td>\n      <td><span class=\"cell-edit\" contenteditable=\"true\" tabindex=\"7\">300</span></td>\n    </tr>\n  </tbody>\n</table>",
+    "expect": [
+      "web/positive-tabindex"
+    ],
+    "note": "anchor / TP anchor: detector correctly fires. Spreadsheet-like editable-grid markup where each contenteditable cell gets an incrementing positive tabindex to control row traversal is a r"
+  },
+  {
+    "id": "ho/tabindex/anchor/5",
+    "fileKind": "js",
+    "content": "function buildSkipButton(label) {\n  const wrapper = document.createElement('div');\n  wrapper.innerHTML = '<button class=\"skip\" tabindex=\"1\">' + label + '</button>';\n  return wrapper.firstElementChild;\n}\n\ndocument.querySelector('#toolbar').append(buildSkipButton('Skip ahead'));",
+    "expect": [
+      "web/positive-tabindex"
+    ],
+    "note": "anchor / TP anchor: detector correctly fires. Imperative DOM construction via innerHTML string templates that bake in tabindex=\"1\" to push a control to the front of the tab order is a co"
+  },
+  {
+    "id": "ho/tabindex/anchor/6",
+    "fileKind": "ts",
+    "content": "import { html, LitElement } from 'lit';\n\nexport class SearchBar extends LitElement {\n  render() {\n    return html`\n      <input type=\"search\" name=\"q\" tabindex=\"1\" placeholder=\"Search...\">\n      <button type=\"submit\" tabindex=\"2\">Go</button>\n    `;\n  }\n}",
+    "expect": [
+      "web/positive-tabindex"
+    ],
+    "note": "anchor / TP anchor: detector correctly fires. Lit's html tagged-template literal uses raw lowercase HTML attributes (tabindex, not React's camelCase tabIndex), so component authors seque"
+  }
+]

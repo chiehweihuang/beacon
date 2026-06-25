@@ -1,0 +1,66 @@
+[
+  {
+    "id": "ho/prescriptive/ceiling/1",
+    "fileKind": "js",
+    "content": "// Legacy copy was >Click here to download the report<. Marketing replaced it\n// with the descriptive label below in the 2024 redesign; kept for git blame context.\nconst downloadLabel = t('reports.download', 'Download the quarterly report');",
+    "expect": [],
+    "note": "ceiling / FP-exposer: regex fires on non-flaggable text. JS line-comment convention preserving old copy for git-blame context;"
+  },
+  {
+    "id": "ho/prescriptive/ceiling/2",
+    "fileKind": "ts",
+    "content": "logger.debug(`CTA variant rendered: \"click here to continue\" (control bucket=${bucket})`);",
+    "expect": [],
+    "note": "ceiling / FP-exposer: regex fires on non-flaggable text. Standard `logger.debug` / structured-logging idiom (winston/pino) where the message string quotes a CTA variant name for A/B-test debugging;"
+  },
+  {
+    "id": "ho/prescriptive/ceiling/3",
+    "fileKind": "ts",
+    "content": "it('rejects prescriptive button labels in the linter', () => {\n  const violation = lintCopy('Click here to submit');\n  expect(violation.message).toContain(\"'Click here to' is not descriptive\");\n});",
+    "expect": [],
+    "note": "ceiling / FP-exposer: regex fires on non-flaggable text. Jest/Vitest unit-test idiom: an assertion string `\"'Click here to' is not descriptive\"` describing what a copy-linter should reject;"
+  },
+  {
+    "id": "ho/prescriptive/ceiling/6",
+    "fileKind": "ts",
+    "content": "// TRANSLATOR NOTE: do NOT translate the old string 'Swipe here to dismiss';\n// it was removed in v3 and replaced by an icon button with aria-label.\nconst dismissAria = i18n.t('toast.dismiss', 'Dismiss notification');",
+    "expect": [],
+    "note": "ceiling / FP-exposer: regex fires on non-flaggable text. Localization translator-note comment convention (gettext `#."
+  },
+  {
+    "id": "ho/prescriptive/anchor/1",
+    "fileKind": "html",
+    "content": "<a href=\"/checkout\" class=\"cta-button\">Click here to complete your purchase</a>",
+    "expect": [
+      "web/prescriptive-input-copy"
+    ],
+    "note": "anchor / TP anchor: detector correctly fires. Bootstrap 5 documented call-to-action button/link markup;"
+  },
+  {
+    "id": "ho/prescriptive/anchor/2",
+    "fileKind": "html",
+    "content": "<button type=\"submit\" aria-label=\"Tap to pay with saved card\">\n  <span class=\"icon-card\" aria-hidden=\"true\"></span>\n  Tap to pay\n</button>",
+    "expect": [
+      "web/prescriptive-input-copy"
+    ],
+    "note": "anchor / TP anchor: detector correctly fires. Apple Pay / Google Pay integration buttons commonly rendered with a 'Tap to pay' label;"
+  },
+  {
+    "id": "ho/prescriptive/anchor/5",
+    "fileKind": "js",
+    "content": "function renderTooltip(el) {\n  el.innerHTML = '<span class=\"tooltip-body\">Click here to learn more about your plan</span>';\n}",
+    "expect": [
+      "web/prescriptive-input-copy"
+    ],
+    "note": "anchor / TP anchor: detector correctly fires. Vanilla JS / jQuery tooltip rendering idiom assigning a markup string to innerHTML, as shown in Tippy.js and Popper.js usage examples."
+  },
+  {
+    "id": "ho/prescriptive/anchor/6",
+    "fileKind": "ts",
+    "content": "const dialog = html`<div class=\"modal\"><p>Tap to confirm and close this dialog</p></div>`;",
+    "expect": [
+      "web/prescriptive-input-copy"
+    ],
+    "note": "anchor / TP anchor: detector correctly fires. Lit (lit-html) tagged template literal markup, the standard way Lit components author DOM in TypeScript per the lit.dev component docs."
+  }
+]

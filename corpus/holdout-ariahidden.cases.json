@@ -1,0 +1,102 @@
+[
+  {
+    "id": "ho/ariahidden/ceiling/1",
+    "fileKind": "html",
+    "content": "<div class=\"carousel-slide\" aria-hidden=\"true\">\n  <img src=\"hero.jpg\" alt=\"Spring sale\" />\n  <a href=\"/sale\" class=\"slide-cta\">Shop the sale</a>\n</div>",
+    "expect": [
+      "web/aria-hidden-on-focusable"
+    ],
+    "note": "ceiling / FN-exposer: real defect the regex misses. Bootstrap/Slick/Swiper-style carousels mark off-screen slides with aria-hidden=\"true\" on the slide wrapper while leaving the slide's CTA lin"
+  },
+  {
+    "id": "ho/ariahidden/ceiling/2",
+    "fileKind": "html",
+    "content": "<div\n  class=\"icon-decoration\"\n  aria-hidden=\"true\"\n>\n  <button type=\"button\" class=\"close\">×</button>\n</div>",
+    "expect": [
+      "web/aria-hidden-on-focusable"
+    ],
+    "note": "ceiling / FN-exposer: real defect the regex misses. Prettier with a long attribute list wraps each HTML attribute onto its own line (printWidth overflow), so aria-hidden=\"true\" sits alone whil"
+  },
+  {
+    "id": "ho/ariahidden/ceiling/3",
+    "fileKind": "ts",
+    "content": "export function OffscreenPanel() {\n  return (\n    <section aria-hidden=\"true\" className=\"drawer\">\n      <input\n        type=\"search\"\n        placeholder=\"Search...\"\n      />\n    </section>\n  );\n}",
+    "expect": [
+      "web/aria-hidden-on-focusable"
+    ],
+    "note": "ceiling / FN-exposer: real defect the regex misses. React/Next.js TSX where a collapsed drawer <section> is marked aria-hidden=\"true\" but its <input> child renders on its own JSX line — a comm"
+  },
+  {
+    "id": "ho/ariahidden/ceiling/4",
+    "fileKind": "html",
+    "content": "<li aria-hidden=\"true\">\n  <span class=\"sep\">/</span>\n  <select name=\"page-size\">\n    <option value=\"10\">10</option>\n    <option value=\"25\">25</option>\n  </select>\n</li>",
+    "expect": [
+      "web/aria-hidden-on-focusable"
+    ],
+    "note": "ceiling / FN-exposer: real defect the regex misses. Pagination/breadcrumb list items frequently get aria-hidden=\"true\" to silence decorative separators, but a real <select> control gets nested"
+  },
+  {
+    "id": "ho/ariahidden/ceiling/5",
+    "fileKind": "js",
+    "content": "container.innerHTML = `\n  <div class=\"tooltip\" aria-hidden=\"true\">\n    <p>Need help?</p>\n    <a href=\"/docs\">Read the guide</a>\n  </div>\n`;",
+    "expect": [
+      "web/aria-hidden-on-focusable"
+    ],
+    "note": "ceiling / FN-exposer: real defect the regex misses. Template-literal HTML injected via innerHTML in vanilla JS widgets (a common Web Component / tooltip-library idiom), where the hidden toolti"
+  },
+  {
+    "id": "ho/ariahidden/ceiling/6",
+    "fileKind": "html",
+    "content": "<div class=\"modal-backdrop\" aria-hidden=\"true\">\n  <div class=\"modal\" role=\"dialog\">\n    <textarea name=\"feedback\" rows=\"4\"></textarea>\n  </div>\n</div>",
+    "expect": [
+      "web/aria-hidden-on-focusable"
+    ],
+    "note": "ceiling / FN-exposer: real defect the regex misses. Modal libraries (e.g."
+  },
+  {
+    "id": "ho/ariahidden/anchor/1",
+    "fileKind": "html",
+    "content": "<a href=\"/dashboard\" aria-hidden=\"true\" tabindex=\"-1\">Skip duplicate link</a>",
+    "expect": [],
+    "note": "anchor / FP-exposer: regex fires on non-flaggable text. Deque University / MDN aria-hidden guidance documents the exact anti-pattern of an aria-hidden anchor that is still in the tab order;"
+  },
+  {
+    "id": "ho/ariahidden/anchor/2",
+    "fileKind": "html",
+    "content": "<button type=\"button\" class=\"carousel-control\" aria-hidden=\"true\">Next slide</button>",
+    "expect": [
+      "web/aria-hidden-on-focusable"
+    ],
+    "note": "anchor / TP anchor: detector correctly fires. Bootstrap and Splide carousel markup wrap prev/next controls as <button> elements;"
+  },
+  {
+    "id": "ho/ariahidden/anchor/3",
+    "fileKind": "js",
+    "content": "el.innerHTML = `<input type=\"search\" aria-hidden=\"true\" placeholder=\"Search\">`;",
+    "expect": [
+      "web/aria-hidden-on-focusable"
+    ],
+    "note": "anchor / TP anchor: detector correctly fires. Template-literal innerHTML assignment is the canonical vanilla-JS DOM construction idiom (MDN innerHTML docs, countless React-free widgets)."
+  },
+  {
+    "id": "ho/ariahidden/anchor/4",
+    "fileKind": "html",
+    "content": "<span class=\"icon\" aria-hidden=\"true\">&#9733;</span>",
+    "expect": [],
+    "note": "anchor / TN anchor: correct silence. The WAI-ARIA Authoring Practices and Font Awesome accessibility docs explicitly recommend aria-hidden=\"true\" on purely decorative icon glyph"
+  },
+  {
+    "id": "ho/ariahidden/anchor/5",
+    "fileKind": "html",
+    "content": "<i aria-hidden=\"true\" class=\"fa fa-chevron-right\"></i>",
+    "expect": [],
+    "note": "anchor / TN anchor: correct silence. Font Awesome's official accessibility documentation tells authors to add aria-hidden=\"true\" to its <i> icon element so screen readers skip t"
+  },
+  {
+    "id": "ho/ariahidden/anchor/6",
+    "fileKind": "html",
+    "content": "<span class=\"sep\" aria-hidden=\"true\">/</span>",
+    "expect": [],
+    "note": "anchor / TN anchor: correct silence. Breadcrumb separator markup in the WAI-ARIA Authoring Practices breadcrumb pattern uses aria-hidden=\"true\" on the visual separator (here a s"
+  }
+]

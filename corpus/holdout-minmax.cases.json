@@ -1,0 +1,77 @@
+[
+  {
+    "id": "ho/minmax/ceiling/2",
+    "fileKind": "css",
+    "content": ".product-listing {\n  display: grid;\n  grid-template-columns: minmax(360px, 1fr) minmax(360px, 1fr);\n  column-gap: 24px;\n}\n\n.thumbnail-figure {\n  max-width: min(96px, 100%);\n  margin-inline: auto;\n}",
+    "expect": [
+      "web/fixed-minmax-reflow"
+    ],
+    "note": "ceiling / FN-exposer: real defect the regex misses. Two-column product layout with explicit minmax tracks is the WooCommerce / Shopify Dawn theme storefront pattern;"
+  },
+  {
+    "id": "ho/minmax/ceiling/3",
+    "fileKind": "css",
+    "content": ".sidebar-layout {\n  display: grid;\n  grid-template-columns: minmax(280px, 320px) minmax(0, 1fr);\n}\n\n.tag-pill {\n  padding-inline: min(12px, 100%);\n  font-size: 0.8125rem;\n}",
+    "expect": [
+      "web/fixed-minmax-reflow"
+    ],
+    "note": "ceiling / FN-exposer: real defect the regex misses. The fixed-sidebar + fluid-content grid (minmax(280px, 320px) for the rail) is the documented 'holy grail' layout in the CSS Grid spec exampl"
+  },
+  {
+    "id": "ho/minmax/ceiling/5",
+    "fileKind": "css",
+    "content": ".pricing-table {\n  display: grid;\n  grid-template-columns: repeat(3, minmax(300px, 1fr));\n  align-items: stretch;\n}\n\n.check-icon {\n  width: min(20px, 100%);\n  height: min(20px, 100%);\n  fill: currentColor;\n}",
+    "expect": [
+      "web/fixed-minmax-reflow"
+    ],
+    "note": "ceiling / FN-exposer: real defect the regex misses. A three-tier pricing table built with repeat(3, minmax(300px, 1fr)) is the Stripe / Tailwind UI pricing-section convention;"
+  },
+  {
+    "id": "ho/minmax/ceiling/6",
+    "fileKind": "css",
+    "content": ".dashboard-widgets {\n  display: grid;\n  grid-template-columns: minmax(420px, 2fr) minmax(260px, 1fr);\n  grid-template-rows: auto;\n  gap: 16px;\n}\n\n.notification-dot {\n  max-inline-size: min(8px, 100%);\n  aspect-ratio: 1;\n}",
+    "expect": [
+      "web/fixed-minmax-reflow"
+    ],
+    "note": "ceiling / FN-exposer: real defect the regex misses. An asymmetric main-panel + rail dashboard using minmax(420px, 2fr) / minmax(260px, 1fr) is the Material Dashboard and Ant Design Pro layout "
+  },
+  {
+    "id": "ho/minmax/anchor/2",
+    "fileKind": "css",
+    "content": ".product-listing {\n  display: grid;\n  grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));\n}\n\n.product-listing__item {\n  padding: 16px;\n}",
+    "expect": [
+      "web/fixed-minmax-reflow"
+    ],
+    "note": "anchor / TP anchor: detector correctly fires. BEM-named e-commerce product grid using the auto-fit + minmax pattern documented on MDN's 'Realizing common layouts using grids' page;"
+  },
+  {
+    "id": "ho/minmax/anchor/3",
+    "fileKind": "css",
+    "content": ".sidebar-layout {\n  display: grid;\n  grid-template-columns: minmax(240px, 25%) 1fr;\n  column-gap: 24px;\n}",
+    "expect": [
+      "web/fixed-minmax-reflow"
+    ],
+    "note": "anchor / TP anchor: detector correctly fires. The fixed-sidebar-plus-fluid-content two-column grid from Every Layout's 'Sidebar' primitive and Kevin Powell tutorials, where the sidebar t"
+  },
+  {
+    "id": "ho/minmax/anchor/4",
+    "fileKind": "css",
+    "content": ".gallery {\n  display: grid;\n  grid-template-columns: repeat(auto-fill, minmax(min(220px, 100%), 1fr));\n  gap: 12px;\n}",
+    "expect": [],
+    "note": "anchor / TN anchor: correct silence. The min()-wrapped 'safe' RAM grid recommended in Chris Coyier's CSS-Tricks article 'Auto-Sizing Columns in CSS Grid: auto-fill vs auto-fit' "
+  },
+  {
+    "id": "ho/minmax/anchor/5",
+    "fileKind": "css",
+    "content": ".feature-cards {\n  display: grid;\n  grid-template-columns: repeat(\n    auto-fit,\n    minmax(min(300px, 100%), 1fr)\n  );\n}",
+    "expect": [],
+    "note": "anchor / TN anchor: correct silence. Prettier's default CSS formatting wraps long grid-template-columns function arguments onto separate indented lines;"
+  },
+  {
+    "id": "ho/minmax/anchor/6",
+    "fileKind": "css",
+    "content": ".dashboard-panels {\n  display: grid;\n  grid-template-columns: minmax(min(180px, 100%), 1fr) minmax(min(360px, 100%), 2fr);\n  gap: 20px;\n}",
+    "expect": [],
+    "note": "anchor / TN anchor: correct silence. A two-column dashboard layout where both tracks use the min(Npx, 100%) idiom from the MDN min() reference example for intrinsically responsi"
+  }
+]
