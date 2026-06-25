@@ -3,7 +3,7 @@
 All notable changes to Beacon are documented here. Versions follow the plugin
 manifest (`.claude-plugin/plugin.json`); dates are release-prep dates.
 
-## [2.2.0] — Unreleased
+## [2.2.0] — 2026-06-25
 
 Ships the **Pattern Library v1.0** (detectors become shared, contributable data)
 and folds in the detector, PDF, language, authentication, and audit-integrity
