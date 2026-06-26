@@ -65,6 +65,21 @@ test('runtime · aria-hidden-on-focusable · still fires on a focusable with no 
   assert.ok(firedIds('<button aria-hidden="true">x</button>', 'html').has('web/aria-hidden-on-focusable'));
 });
 
+// (2.3 structural strip) prescriptive-input-copy / positive-tabindex no longer
+// fire on text in comments or example-code blocks, but still fire on real copy /
+// attributes and on user-facing string literals (innerHTML copy, Lit templates).
+test('strip: prescriptive silent in a JS comment; fires on real copy + innerHTML string', () => {
+  assert.ok(!firedIds('// see the "Click here to" wording note\nconst x = 1;', 'js').has('web/prescriptive-input-copy'));
+  assert.ok(firedIds('<p>Click here to start</p>', 'html').has('web/prescriptive-input-copy'));
+  assert.ok(firedIds("el.innerHTML = '<span>Tap to pay</span>';", 'js').has('web/prescriptive-input-copy'));
+});
+test('strip: positive-tabindex silent in <code>/comment; fires on a real attribute + Lit template', () => {
+  assert.ok(!firedIds('<p>set <code>tabindex="5"</code> to reorder</p>', 'html').has('web/positive-tabindex'));
+  assert.ok(!firedIds('// avoid tabindex="3" on non-interactive elements\nx;', 'ts').has('web/positive-tabindex'));
+  assert.ok(firedIds('<div tabindex="3">x</div>', 'html').has('web/positive-tabindex'));
+  assert.ok(firedIds('return html`<input tabindex="1">`;', 'ts').has('web/positive-tabindex'));
+});
+
 test('fileKindForExt maps jsx/tsx/vue/svelte to html, scss to css, mjs to js', () => {
   assert.equal(fileKindForExt('jsx'), 'html');
   assert.equal(fileKindForExt('.tsx'), 'html');

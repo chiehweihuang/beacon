@@ -92,6 +92,55 @@ function composeFlag(message, match) {
   return message.flag.replace('$0', m);
 }
 
+// ── structural strip: blank non-user-facing regions before a regex runs, so
+// detectors like prescriptive-input-copy / positive-tabindex stop firing on text
+// in comments and example-code blocks. Dependency-free (a small comment-aware
+// lexer, not a full parser): it removes COMMENTS and rawtext/example blocks but
+// leaves string literals intact — a string can be user-facing (innerHTML copy)
+// or not, an ambiguity a static pass cannot settle, so stripping it would trade
+// FPs for FNs. Newlines are preserved so line-scoped guards keep working.
+const blankKeepNewlines = (m) => m.replace(/[^\n]/g, ' ');
+
+function stripHtmlNonUserFacing(s) {
+  return s
+    .replace(/<!--[\s\S]*?-->/g, blankKeepNewlines)
+    .replace(/<style[\s\S]*?<\/style>/gi, blankKeepNewlines)
+    .replace(/<code[\s\S]*?<\/code>/gi, blankKeepNewlines)
+    .replace(/<pre[\s\S]*?<\/pre>/gi, blankKeepNewlines);
+}
+
+// Blank // and /* */ comments while respecting string literals (so "https://" and
+// quoted copy survive). Handles escapes; backtick templates count as strings.
+function stripJsComments(s) {
+  let out = '', i = 0, str = null;
+  const n = s.length;
+  while (i < n) {
+    const c = s[i], c2 = s[i + 1];
+    if (str) {
+      if (c === '\\') { out += c + (i + 1 < n ? s[i + 1] : ''); i += 2; continue; }
+      out += c;
+      if (c === str) str = null;
+      i++; continue;
+    }
+    if (c === '"' || c === "'" || c === '`') { str = c; out += c; i++; continue; }
+    if (c === '/' && c2 === '/') { while (i < n && s[i] !== '\n') { out += ' '; i++; } continue; }
+    if (c === '/' && c2 === '*') {
+      out += '  '; i += 2;
+      while (i < n && !(s[i] === '*' && s[i + 1] === '/')) { out += s[i] === '\n' ? '\n' : ' '; i++; }
+      if (i < n) { out += '  '; i += 2; }
+      continue;
+    }
+    out += c; i++;
+  }
+  return out;
+}
+
+export function stripNonUserFacing(content, fileKind) {
+  if (fileKind === 'js' || fileKind === 'ts') return stripJsComments(content);
+  if (fileKind === 'html') return stripHtmlNonUserFacing(content);
+  return content;
+}
+
 // Run every applicable record against content. Returns the fired findings plus
 // any unknown matcher kinds encountered (so the caller can prompt an upgrade).
 export function scanRecords(records, content, fileKind) {
@@ -99,7 +148,8 @@ export function scanRecords(records, content, fileKind) {
   const unknownKinds = new Set();
   for (const r of records) {
     if (!applies(r, fileKind, content)) continue;
-    const res = evalMatcher(r.matcher, content);
+    const c = r.matcher.stripNonUserFacing ? stripNonUserFacing(content, fileKind) : content;
+    const res = evalMatcher(r.matcher, c);
     if (res.unknownKind) { unknownKinds.add(res.unknownKind); continue; }
     if (res.fired) {
       findings.push({

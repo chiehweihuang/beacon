@@ -173,7 +173,8 @@
     "applies_to": { "fileKinds": ["html", "js", "ts"] },
     "matcher": {
       "kind": "regex",
-      "pattern": "tabindex\\s*=\\s*[\"']?[1-9]"
+      "pattern": "tabindex\\s*=\\s*[\"']?[1-9]",
+      "stripNonUserFacing": true
     },
     "message": { "flag": "Positive tabindex; a custom tab order often breaks reverse (Shift+Tab) navigation" },
     "fix": {
@@ -184,7 +185,7 @@
       }
     },
     "false_positive_notes": [
-      "Matches a positive value anywhere, including inside a string or comment."
+      "Comments and <code>/<pre> example blocks are stripped before matching; a positive value inside a string literal can still match (user-facing-vs-not is a semantic call a static pass cannot settle)."
     ]
   },
   {
@@ -196,7 +197,8 @@
     "matcher": {
       "kind": "regex",
       "pattern": "[\"'>](click|tap|swipe|pinch) (here|to |the )",
-      "flags": "i"
+      "flags": "i",
+      "stripNonUserFacing": true
     },
     "message": {
       "flag": "Input-method-specific copy ($0); not everyone clicks, taps, or swipes. Use device-agnostic wording such as select, activate, or open",
@@ -211,7 +213,7 @@
     },
     "false_positive_notes": [
       "Matches the literal verbs only; press and localized text are not covered.",
-      "Can fire inside code or strings that are not user-facing copy."
+      "Comments and example-code blocks are stripped first; copy inside a string literal can still match — a string may be user-facing (innerHTML) or not, which is semantic."
     ]
   }
 ]
