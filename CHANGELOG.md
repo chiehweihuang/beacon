@@ -1,5 +1,24 @@
 # Changelog
 
+## [2.3.0] — 2026-06-26
+
+### Features
+
+- structural strip raises prescriptive/tabindex precision (498d327)
+- detect Latin-vs-Latin 3.1.1 mismatches by function-word profile (d989314)
+
+### Bug Fixes
+
+- eliminate two held-out false positives (precision -> 1.00) (f865645)
+
+### Documentation
+
+- keep the curated 2.2.0 section (28d7c85)
+
+### CI
+
+- hard-gate the semantic held-out (P>=1.0); fix corpus cross-pollution (3927220)
+
 All notable changes to Beacon are documented here. Versions follow the plugin
 manifest (`.claude-plugin/plugin.json`); dates are release-prep dates.
 
