@@ -60,7 +60,7 @@
     "expect": [
       "html-lang-mismatch"
     ],
-    "note": "ceiling / FN: real issue the detector misses | true=French. A French hotel using an English-language website template (lang='en' baked into the theme's <html>) but filling the page with Fren"
+    "note": "ceiling / caught (2.3 Latin-vs-Latin fix): script counting missed this; function-word ID now flags it | true=French. A French hotel using an English-language website template (lang='en' baked into the theme's <html>) but filling the page with Fren"
   },
   {
     "id": "ho/lang/ceiling/2",
@@ -69,7 +69,7 @@
     "expect": [
       "html-lang-mismatch"
     ],
-    "note": "ceiling / FN: real issue the detector misses | true=German. A German municipal government site where the developer left the boilerplate lang='en-US' from a US starter template while the enti"
+    "note": "ceiling / caught (2.3 Latin-vs-Latin fix): script counting missed this; function-word ID now flags it | true=German. A German municipal government site where the developer left the boilerplate lang='en-US' from a US starter template while the enti"
   },
   {
     "id": "ho/lang/ceiling/3",
@@ -78,7 +78,7 @@
     "expect": [
       "html-lang-mismatch"
     ],
-    "note": "ceiling / FN: real issue the detector misses | true=English. A SaaS product whose localisation pipeline served the French locale shell (lang='fr' set by the i18n router) but the English fallb"
+    "note": "ceiling / caught (2.3 Latin-vs-Latin fix): script counting missed this; function-word ID now flags it | true=English. A SaaS product whose localisation pipeline served the French locale shell (lang='fr' set by the i18n router) but the English fallb"
   },
   {
     "id": "ho/lang/ceiling/4",
@@ -87,7 +87,7 @@
     "expect": [
       "html-lang-mismatch"
     ],
-    "note": "ceiling / FN: real issue the detector misses | true=Vietnamese. A Vietnamese e-commerce store built on an English Shopify theme that hardcodes lang='en';"
+    "note": "ceiling / caught (2.3 Latin-vs-Latin fix): script counting missed this; function-word ID now flags it | true=Vietnamese. A Vietnamese e-commerce store built on an English Shopify theme that hardcodes lang='en';"
   },
   {
     "id": "ho/lang/ceiling/5",
@@ -96,7 +96,7 @@
     "expect": [
       "html-lang-mismatch"
     ],
-    "note": "ceiling / FN: real issue the detector misses | true=Portuguese. A Brazilian Portuguese news portal whose CMS template inherited lang='es' from a pan-Latin-American Spanish network configuration;"
+    "note": "ceiling / caught (2.3 Latin-vs-Latin fix): script counting missed this; function-word ID now flags it | true=Portuguese. A Brazilian Portuguese news portal whose CMS template inherited lang='es' from a pan-Latin-American Spanish network configuration;"
   },
   {
     "id": "ho/lang/ceiling/6",
@@ -105,7 +105,7 @@
     "expect": [
       "html-lang-mismatch"
     ],
-    "note": "ceiling / FN: real issue the detector misses | true=Italian. An Italian municipal museum site built on a UK WordPress theme that ships lang='en-GB' in header.php;"
+    "note": "ceiling / caught (2.3 Latin-vs-Latin fix): script counting missed this; function-word ID now flags it | true=Italian. An Italian municipal museum site built on a UK WordPress theme that ships lang='en-GB' in header.php;"
   },
   {
     "id": "ho/lang/precision/1",

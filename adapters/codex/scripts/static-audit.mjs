@@ -248,7 +248,7 @@ function scanFile(file, root, stats, findings) {
     const langDecl = /\.html?$/.test(file) && text.match(/<html[^>]*\blang=["']?([^\s"'>]+)/i); // quoted or unquoted
     if (langDecl) {
       const verdict = assessLang(langDecl[1], extractText(text));
-      const suggest = { han: 'zh-Hant', jpn: 'ja', hangul: 'ko', latin: 'en' }[verdict.detectedFamily] || 'the correct language';
+      const suggest = verdict.detectedLang || { han: 'zh-Hant', jpn: 'ja', hangul: 'ko', latin: 'en' }[verdict.detectedFamily] || 'the correct language';
       if (verdict.status === 'FLAG') {
         addFinding(findings, stats, {
           key: 'html-lang-mismatch',

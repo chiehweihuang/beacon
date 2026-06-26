@@ -98,6 +98,45 @@ export function detectContentLanguage(plainText) {
   return { family, cjkRatio, latinRatio, total, counts };
 }
 
+// Latin-script language identification via function-word (stopword) frequency.
+// Script counting cannot tell English from French/German/etc. — the 3.1.1
+// "Latin-vs-Latin" blind spot. A compact function-word profile per language
+// closes the common cases. CONSERVATIVE by design: returns a language only when
+// one profile clearly leads on a meaningful sample, else { lang: null } so the
+// caller falls back to PASS (precision is preserved over recall).
+const LATIN_STOPWORDS = {
+  en: ['the', 'and', 'of', 'to', 'in', 'is', 'that', 'for', 'with', 'are', 'as', 'was', 'this', 'have', 'from', 'they', 'will', 'would', 'there', 'be', 'on', 'at', 'by', 'an', 'or', 'not', 'but', 'we', 'you', 'your', 'all', 'can'],
+  fr: ['le', 'la', 'les', 'de', 'des', 'et', 'un', 'une', 'est', 'que', 'pour', 'dans', 'vous', 'nous', 'avec', 'sur', 'pas', 'plus', 'ce', 'cette', 'sont', 'qui', 'au', 'aux', 'du', 'par', 'son', 'ses', 'mais', 'leur'],
+  de: ['der', 'die', 'und', 'den', 'das', 'ist', 'ein', 'eine', 'mit', 'für', 'auch', 'sich', 'nicht', 'dem', 'sie', 'von', 'werden', 'wird', 'aber', 'oder', 'durch', 'auf', 'zu', 'im', 'eines', 'einer', 'als', 'wir', 'sind'],
+  es: ['el', 'la', 'los', 'las', 'de', 'que', 'en', 'un', 'una', 'es', 'por', 'con', 'para', 'su', 'lo', 'como', 'más', 'pero', 'sus', 'este', 'esta', 'son', 'al', 'del', 'se', 'no', 'nos', 'nuestro'],
+  pt: ['o', 'a', 'os', 'as', 'de', 'que', 'do', 'da', 'em', 'um', 'uma', 'para', 'com', 'não', 'se', 'por', 'mais', 'como', 'mas', 'dos', 'das', 'são', 'você', 'no', 'na', 'seu', 'sua', 'pelo'],
+  it: ['il', 'la', 'le', 'di', 'che', 'un', 'una', 'per', 'con', 'non', 'sono', 'gli', 'della', 'del', 'nel', 'alla', 'questo', 'anche', 'come', 'più', 'sia', 'una', 'lo', 'ed', 'dei', 'delle', 'suo'],
+  nl: ['de', 'het', 'een', 'van', 'en', 'is', 'op', 'dat', 'met', 'voor', 'niet', 'zijn', 'aan', 'er', 'ook', 'als', 'maar', 'door', 'over', 'naar', 'worden', 'wordt', 'om', 'te', 'uw'],
+};
+// Vietnamese is Latin-script but unmistakable by its stacked tone marks and đ —
+// far more reliable than stopwords for "Latin but clearly not a Western language".
+const VI_CHARS = /[đĐ]|[ạảãậầẩẫấệềểễếọỏộồổỗốợờởỡớịỉĩựừửữứ]/g;
+
+export function detectLatinLanguage(text) {
+  const s = String(text);
+  const viHits = (s.match(VI_CHARS) || []).length;
+  if (viHits >= 5) return { lang: 'vi', confidence: 0.9 };
+  // ponytail: word split keeps Latin-1 + common diacritic letters; good enough
+  // for function-word matching without a full Unicode word segmenter.
+  const words = s.toLowerCase().match(/[a-zàâäáãçéèêëíìîïñóòôöõúùûüœæß]+/g) || [];
+  if (words.length < 30) return { lang: null, confidence: 0 }; // too little to judge
+  const counts = Object.fromEntries(Object.entries(LATIN_STOPWORDS).map(([lang, sw]) => {
+    const set = new Set(sw);
+    return [lang, words.filter((w) => set.has(w)).length / words.length];
+  }));
+  const ranked = Object.entries(counts).sort((a, b) => b[1] - a[1]);
+  const [top, topRate] = ranked[0];
+  const second = ranked[1] ? ranked[1][1] : 0;
+  // Need a clear leader on a meaningful function-word density, else don't guess.
+  if (topRate < 0.06 || topRate < second * 1.3) return { lang: null, confidence: topRate };
+  return { lang: top, confidence: topRate };
+}
+
 // declaredLang: the raw <html lang> value (e.g. "en", "zh-Hant").
 // plainText: extracted visible text (use extractText first if you have HTML).
 export function assessLang(declaredLang, plainText) {
@@ -145,6 +184,15 @@ export function assessLang(declaredLang, plainText) {
     if (cjkRatio >= CJK_REVIEW)
       return { status: 'REVIEW', declared, detectedFamily: cjkFamily(det.counts), confidence: cjkRatio,
                note: `declared "${declared}" with ${pct(cjkRatio)} CJK; likely mismatch or untagged bilingual content` };
+    // Latin-vs-Latin: script counting can't tell en from fr/de/es/...; a
+    // function-word profile can. Flag only when a DIFFERENT latin language
+    // clearly leads (conservative — unknown/ambiguous falls through to PASS).
+    const lat = detectLatinLanguage(plainText);
+    if (lat.lang && lat.lang !== primary && LATIN_LANGS.has(primary) && (LATIN_LANGS.has(lat.lang) || lat.lang === 'vi')) {
+      const band = lat.confidence >= 0.10 ? 'FLAG' : 'REVIEW';
+      return { status: band, declared, detectedFamily: 'latin', detectedLang: lat.lang, confidence: lat.confidence,
+               note: `declared "${declared}" but the content reads as ${lat.lang} (function-word profile)` };
+    }
     return { status: 'PASS', declared, detectedFamily: 'latin', confidence: 1 - cjkRatio,
              note: 'latin/latin; specific European language not distinguishable by script' };
   }

@@ -11,7 +11,7 @@ import { fileURLToPath } from 'node:url';
 import { tmpdir } from 'node:os';
 import { execFileSync } from 'node:child_process';
 
-import { assessLang, extractText, detectContentLanguage, detectLangParts } from '../core/scripts/lang-detect.mjs';
+import { assessLang, extractText, detectContentLanguage, detectLangParts, detectLatinLanguage } from '../core/scripts/lang-detect.mjs';
 
 const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), '..');
 const SCANNER = resolve(ROOT, 'core/scripts/static-audit.mjs');
@@ -34,6 +34,32 @@ test('PASS: latin content on a latin-declared page', () => {
   assert.equal(assessLang('en', mix(0)).status, 'PASS');
   assert.equal(assessLang('fr', mix(0)).status, 'PASS');          // non-English latin
   assert.equal(assessLang('en', mix(0.10)).status, 'PASS');       // incidental CJK tolerated
+});
+
+// --- Latin-vs-Latin (2.3): function-word language ID closes the script blind spot ---
+const FR = 'Le site présente les services de notre entreprise. Nous proposons des solutions pour les petites et moyennes entreprises dans toute la région. Vous pouvez nous contacter par courriel ou par téléphone pour obtenir plus d\'informations sur nos produits et nos tarifs. Notre équipe est à votre disposition du lundi au vendredi et se fera un plaisir de répondre à vos questions.';
+const DE = 'Die Webseite stellt die Dienstleistungen unseres Unternehmens vor. Wir bieten Lösungen für kleine und mittlere Unternehmen in der ganzen Region an. Sie können uns per E-Mail oder Telefon kontaktieren, um weitere Informationen über unsere Produkte und Preise zu erhalten. Unser Team steht Ihnen von Montag bis Freitag zur Verfügung.';
+const EN = 'The website presents the services of our company. We offer solutions for small and medium businesses across the entire region. You can contact us by email or phone to get more information about our products and pricing. Our team is available from Monday to Friday and will be happy to answer all of your questions.';
+const VI = 'Trang web giới thiệu các dịch vụ của công ty chúng tôi. Chúng tôi cung cấp các giải pháp cho các doanh nghiệp vừa và nhỏ trên toàn khu vực. Bạn có thể liên hệ với chúng tôi qua email hoặc điện thoại để biết thêm thông tin về sản phẩm và giá cả của chúng tôi. Đội ngũ kỹ thuật của chúng tôi luôn sẵn sàng hỗ trợ bạn trong suốt quá trình sử dụng dịch vụ một cách tận tình và chu đáo nhất.';
+
+test('Latin-vs-Latin: en declared over French / German content FLAGs (3.1.1 blind spot closed)', () => {
+  const fr = assessLang('en', FR);
+  assert.equal(fr.status, 'FLAG');
+  assert.equal(fr.detectedLang, 'fr');
+  assert.equal(assessLang('en-US', DE).detectedLang, 'de');
+});
+test('Latin-vs-Latin: Vietnamese under en is caught by its diacritics', () => {
+  assert.equal(assessLang('en', VI).detectedLang, 'vi');
+});
+test('Latin-vs-Latin: correctly declared latin pages still PASS (precision held)', () => {
+  assert.equal(assessLang('en', EN).status, 'PASS');
+  assert.equal(assessLang('de', DE).status, 'PASS');
+  assert.equal(assessLang('fr', FR).status, 'PASS');
+});
+test('Latin-vs-Latin: short / ambiguous latin text is never FLAGged (conservative)', () => {
+  // too short to judge -> INSUFFICIENT (not a mismatch); the invariant is "never false-flag".
+  assert.ok(!['FLAG', 'REVIEW'].includes(assessLang('en', 'Lorem ipsum dolor sit amet consectetur adipiscing elit.').status));
+  assert.equal(detectLatinLanguage('Lorem ipsum dolor sit amet.').lang, null);
 });
 
 test('FLAG: substantial CJK on a latin-declared page (a real-world latin-declared case)', () => {
