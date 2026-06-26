@@ -1,26 +1,44 @@
 # Changelog
 
-## [2.3.0] — 2026-06-26
-
-### Features
-
-- structural strip raises prescriptive/tabindex precision (498d327)
-- detect Latin-vs-Latin 3.1.1 mismatches by function-word profile (d989314)
-
-### Bug Fixes
-
-- eliminate two held-out false positives (precision -> 1.00) (f865645)
-
-### Documentation
-
-- keep the curated 2.2.0 section (28d7c85)
-
-### CI
-
-- hard-gate the semantic held-out (P>=1.0); fix corpus cross-pollution (3927220)
-
 All notable changes to Beacon are documented here. Versions follow the plugin
 manifest (`.claude-plugin/plugin.json`); dates are release-prep dates.
+
+## [2.3.0] — 2026-06-26
+
+Held-out-driven detector precision/recall improvements; each fix is validated by
+the held-out case it targets, which then becomes a regression guard.
+
+### Improved
+
+- **aria-hidden-on-focusable** no longer flags an element already made inert with
+  `tabindex="-1"` (the canonical remediation): precision 0.67 → 1.00.
+- **3.3.8 authentication** strips HTML comments before scanning, so captcha markup
+  quoted in a comment is not treated as a live barrier: precision 0.88 → 1.00.
+- **3.1.1 language** now detects Latin-vs-Latin mismatches (English declared over
+  French / German / Spanish / Vietnamese, etc.) via a function-word profile,
+  closing the script-counting blind spot: recall 0.50 → 1.00, precision still 1.00.
+- **prescriptive-input-copy / positive-tabindex** gain a dependency-free structural
+  strip (HTML comments + `<code>`/`<pre>` blocks, plus a string-respecting JS
+  comment lexer), so they stop firing on copy/attributes quoted in comments or
+  example code while still matching real copy and user-facing string literals
+  (innerHTML, Lit templates): tabindex precision 0.50 → 0.78, prescriptive
+  0.50 → 0.71.
+
+### Changed
+
+- CI hard-gates the semantic held-out (`measure-semantic --min-precision 1.0
+  --min-recall 0.4`); `measure-detectors` stays report-only because its
+  FP/FN-ceiling corpora are a growing characterization set. Fixed a bug where
+  `measure-detectors` scored the language/auth corpora as ~30 spurious false
+  negatives.
+
+### Notes
+
+- The remaining false positives and negatives need a real parser or page
+  semantics, and are deliberately left so the detectors stay dependency-free:
+  whether a string literal is user-facing (innerHTML copy vs a debug/test string),
+  aria-hidden across a DOM tree, CSS auto-fill reflow, and obfuscated or
+  non-English source-level auth barriers.
 
 ## [2.2.0] — 2026-06-25
 
