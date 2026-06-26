@@ -15,11 +15,13 @@ jobs:
       # Hard gates: the full suite and the build/shipped-copy parity check.
       - run: node --test
       - run: node build.mjs --check
-      # Detector precision/recall, report-only for now: the seed corpus is a
-      # calibration set with documented 0.50 FP/FN modes, so an absolute
-      # --min-precision/--min-recall bar would fail day one. Turn it into a hard
-      # gate once a held-out corpus lands and the known modes are addressed.
+      # Regex-detector P/R — REPORT-ONLY. The FP/FN-ceiling corpora are a growing
+      # characterization set: adding lookalike cases lowers precision/recall by
+      # design, so a hard bar here would fail on legitimate corpus growth.
       - run: node tools/measure-detectors.mjs
       # Held-out validation for the 3.1.1 language + 3.3.8 auth detectors (the
-      # analyzer functions measure-detectors cannot score). Report-only.
-      - run: node tools/measure-semantic.mjs
+      # analyzer functions measure-detectors cannot score). HARD GATE: after the
+      # 2.3 precision fixes these never false-flag, so precision is locked at 1.0
+      # (any new false positive is a regression to fix, not a case to add) with a
+      # recall floor to catch a collapse.
+      - run: node tools/measure-semantic.mjs --min-precision 1.0 --min-recall 0.4

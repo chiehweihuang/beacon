@@ -50,10 +50,16 @@ export function measure(records, cases) {
   return { overall: withPR(total), perDetector, errors };
 }
 
+// The lang (3.1.1) and auth (3.3.8) detectors are analyzer functions, not
+// pattern-runtime records — their corpora are scored by tools/measure-semantic.mjs.
+// Exclude them here so the pattern-runtime measurement is not polluted with cases
+// no declarative record can fire on (they would all read as false negatives).
+const SEMANTIC_CASES = new Set(['holdout-lang.cases.json', 'holdout-auth.cases.json']);
+
 export function loadCorpus(dir) {
   const cases = [];
   for (const f of readdirSync(dir)) {
-    if (!f.endsWith('.cases.json')) continue;
+    if (!f.endsWith('.cases.json') || SEMANTIC_CASES.has(f)) continue;
     const arr = JSON.parse(readFileSync(join(dir, f), 'utf8'));
     cases.push(...arr);
   }
