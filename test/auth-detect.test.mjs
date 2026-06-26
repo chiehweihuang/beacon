@@ -30,6 +30,13 @@ test('regression: a real h-captcha class still flags after the word-boundary fix
     'a genuine h-captcha widget must still be detected');
 });
 
+// regression (2.3 held-out FP fix): captcha/widget markup quoted inside an HTML
+// comment is not a live barrier — detectAuthBarriers strips comments first.
+test('FP guard: captcha markup quoted in an HTML comment is not flagged', () => {
+  const html = '<!-- v4: dropped the old <img src="captcha.png" alt="captcha"> challenge --><form><input type="password" name="pw" autocomplete="current-password"></form>';
+  assert.deepEqual(detectAuthBarriers(html), [], 'comment-only captcha markup must stay silent');
+});
+
 // --- exemptions: not a 3.3.8 barrier -> INFO (no finding) ----------------
 test('reCAPTCHA v3 (render param) and invisible are INFO, not flagged', () => {
   assert.equal(one('<script src="https://www.google.com/recaptcha/api.js?render=K"></script>', 'auth-recaptcha-invisible').band, 'INFO');

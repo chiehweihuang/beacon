@@ -149,6 +149,6 @@
     "fileKind": "html",
     "content": "<!-- v4 auth: dropped the old <img src=\"/img/captcha.png\" alt=\"captcha\"> text challenge for passkeys; remove note after QA -->\n<form action=\"/login\" method=\"post\">\n  <label for=\"email\">Email</label>\n  <input id=\"email\" type=\"email\" name=\"email\" autocomplete=\"username\">\n  <label for=\"pw\">Password</label>\n  <input id=\"pw\" type=\"password\" name=\"password\" autocomplete=\"current-password\">\n  <button type=\"submit\">Sign in</button>\n</form>",
     "expect": [],
-    "note": "precision / FP: detector fires on content with no real barrier/mismatch. A realistic developer migration comment that still references the removed <img ...captcha...> markup;"
+    "note": "precision / TN guard (2.3 fix): was the held-out FP exposing comment scanning; detectAuthBarriers now strips HTML comments, so captcha markup quoted in a migration comment stays silent."
   }
 ]

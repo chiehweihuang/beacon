@@ -24,6 +24,10 @@ function indexOfMatch(text, re) {
 }
 
 export function detectAuthBarriers(text) {
+  // Strip HTML comments first: captcha/widget markup quoted inside a comment
+  // (e.g. a migration note `<!-- old <img ...captcha...> -->`) is not a live
+  // barrier. Replace with equal-length whitespace so finding offsets stay aligned.
+  text = String(text).replace(/<!--[\s\S]*?-->/g, (m) => ' '.repeat(m.length));
   const signals = [];
   const has = re => re.test(text);
 

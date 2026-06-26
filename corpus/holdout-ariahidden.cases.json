@@ -58,7 +58,7 @@
     "fileKind": "html",
     "content": "<a href=\"/dashboard\" aria-hidden=\"true\" tabindex=\"-1\">Skip duplicate link</a>",
     "expect": [],
-    "note": "anchor / FP-exposer: regex fires on non-flaggable text. Deque University / MDN aria-hidden guidance documents the exact anti-pattern of an aria-hidden anchor that is still in the tab order;"
+    "note": "anchor / TN guard (2.3 fix): was the held-out FP; aria-hidden + tabindex=-1 is the canonical remediation (focusable removed from the tab order), so the guard now excludes negative tabindex and stays silent."
   },
   {
     "id": "ho/ariahidden/anchor/2",

@@ -55,6 +55,16 @@ for (const c of CASES) {
   });
 }
 
+// regression (2.3 held-out FP fix): aria-hidden on an element already made inert
+// with tabindex="-1" is the canonical remediation, not a focus trap — stay silent.
+test('runtime · aria-hidden-on-focusable · silent when the focusable is tabindex="-1"', () => {
+  assert.ok(!firedIds('<a href="/x" aria-hidden="true" tabindex="-1">x</a>', 'html').has('web/aria-hidden-on-focusable'));
+});
+// the real trap (focusable still in the tab order) must still fire.
+test('runtime · aria-hidden-on-focusable · still fires on a focusable with no negative tabindex', () => {
+  assert.ok(firedIds('<button aria-hidden="true">x</button>', 'html').has('web/aria-hidden-on-focusable'));
+});
+
 test('fileKindForExt maps jsx/tsx/vue/svelte to html, scss to css, mjs to js', () => {
   assert.equal(fileKindForExt('jsx'), 'html');
   assert.equal(fileKindForExt('.tsx'), 'html');

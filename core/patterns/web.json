@@ -80,7 +80,7 @@
     "matcher": {
       "kind": "regex-guarded",
       "pattern": "aria-hidden\\s*=\\s*[\"']true[\"']",
-      "guard": [{ "mustContain": "tabindex|<(button|a|input|select|textarea)", "scope": "line" }]
+      "guard": [{ "mustContain": "tabindex|<(button|a|input|select|textarea)", "mustNotContain": "tabindex\\s*=\\s*[\"']?-", "scope": "line" }]
     },
     "message": { "flag": "Possible focus trap: a line with aria-hidden=\"true\" also contains a focusable element; hidden regions should not be focusable" },
     "fix": {
