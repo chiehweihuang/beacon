@@ -141,6 +141,27 @@ function snippetAt(text, index) {
   return lines.slice(Math.max(0, line - 2), Math.min(lines.length, line + 1)).join('\n').trim();
 }
 
+// Remove @media block bodies so a width scoped to a breakpoint (e.g. inside
+// @media (max-width:767px)) is not treated as an always-on fixed width. Regex
+// cannot balance braces, so scan them.
+function stripAtMedia(css) {
+  let out = '', i = 0;
+  for (;;) {
+    const at = css.indexOf('@media', i);
+    if (at === -1) return out + css.slice(i);
+    out += css.slice(i, at);
+    const open = css.indexOf('{', at);
+    if (open === -1) return out + css.slice(at);
+    let depth = 1, j = open + 1;
+    while (j < css.length && depth > 0) {
+      const c = css[j++];
+      if (c === '{') depth++;
+      else if (c === '}') depth--;
+    }
+    i = j; // drop the whole @media ... { ... }
+  }
+}
+
 function makeStats() {
   const stats = {};
   for (const id of CATEGORY_ORDER) stats[id] = { id, name: CATEGORY_NAMES[id], pass: 0, fail: 0, review: 0, score: 0, sev: { critical: 0, warning: 0, tip: 0 } };
@@ -659,16 +680,23 @@ function scanFile(file, root, stats, findings) {
       });
     } else if (/(animation|transition)\s*:/.test(text)) addCheck(stats, 'motion', 'pass');
 
-    if (/width\s*:\s*[4-9]\d{2,}px|min-width\s*:\s*[4-9]\d{2,}px/.test(text)) {
+    // Boundary-anchored so the `width:` tail of max-width:/min-width: is not
+    // matched: max-width is an upper bound (shrinks fine, never counts); min-width
+    // is a floor (still counts). Widths inside @media blocks are breakpoint-scoped,
+    // so drop them. Static cannot confirm real overflow (the element may be
+    // max-width:100% or in a constrained/flex container), so this is REVIEW, not a
+    // hard fail — the Tier-2 live audit owns the 320px scrollWidth check.
+    if (/(?:^|[;{\s])(?:min-)?width\s*:\s*[4-9]\d{2,}px/.test(stripAtMedia(text))) {
       addFinding(findings, stats, {
         key: 'large-fixed-width',
         category: 'responsive',
         severity: 'tip',
+        check: 'review',
         wcag: 'WCAG 2.2: 1.4.10 Reflow',
-        title: 'Large fixed width detected',
+        title: 'Possible large fixed width',
         affected_users: 'Mobile and zoom users',
         location: rel,
-        description: 'Large fixed widths may overflow narrow viewports.',
+        description: 'A large fixed width outside any @media block may overflow narrow viewports, but static analysis cannot confirm it (the element may use max-width:100% or sit in a constrained/flex container). Verify at 320px with a live audit.',
         fix: 'Use max-width, min(), clamp(), or container-relative sizing.',
       });
     }

@@ -193,3 +193,25 @@ test('AEO: directory scan checks site-level agent-readiness files', () => {
   assert.equal(presentKeys.has('sitemap-missing'), false, 'present sitemap.xml should not be flagged');
   assert.equal(presentKeys.has('llms-txt-missing'), false, 'present llms.txt should not be flagged');
 });
+
+const largeWidth = (html) => runScanner(html).findings.filter((f) => f.key === 'large-fixed-width');
+
+// 1.4.10 reflow FP fix: max-width is an upper bound (never a fixed-width problem)
+// and @media-scoped widths are breakpoint-conditional, so neither is flagged.
+test('large-fixed-width: max-width and @media-scoped width are not flagged', () => {
+  const hits = largeWidth(`<!DOCTYPE html><html lang="en"><head><title>t</title><style>
+    .wrap { max-width: 960px; margin: 0 auto; }
+    @media (max-width: 767px) { .col { width: 960px; } }
+  </style></head><body><main><h1>Hi</h1><p>content here</p></main></body></html>`);
+  assert.equal(hits.length, 0);
+});
+
+// but a real bare fixed width / min-width floor is still surfaced — as review
+// (severity stays 'tip', not upgraded to warning by the 1.4.10 matrix).
+test('large-fixed-width: real bare width / min-width is flagged as review', () => {
+  for (const decl of ['width: 960px', 'min-width: 842px']) {
+    const hits = largeWidth(`<!DOCTYPE html><html lang="en"><head><title>t</title><style>.x { ${decl}; }</style></head><body><main><h1>Hi</h1><p>content here</p></main></body></html>`);
+    assert.equal(hits.length, 1, `${decl} should flag`);
+    assert.equal(hits[0].severity, 'tip', `${decl} stays review-soft, not warning`);
+  }
+});
