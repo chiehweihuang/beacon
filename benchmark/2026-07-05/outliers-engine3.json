@@ -1,0 +1,102 @@
+[
+  {
+    "idx": 70,
+    "url": "https://discord.com",
+    "band": "spa",
+    "lh": 100,
+    "beacon": 49,
+    "cov": 53,
+    "gap": 59,
+    "dir": "beacon-low"
+  },
+  {
+    "idx": 9,
+    "url": "https://m3.material.io",
+    "band": "exemplar",
+    "lh": 100,
+    "beacon": 27,
+    "cov": 53,
+    "gap": 56,
+    "dir": "beacon-low"
+  },
+  {
+    "idx": 67,
+    "url": "https://trello.com",
+    "band": "spa",
+    "lh": 87,
+    "beacon": 94,
+    "cov": 66,
+    "gap": 50,
+    "dir": "beacon-high"
+  },
+  {
+    "idx": 31,
+    "url": "https://about.gitlab.com",
+    "band": "strong",
+    "lh": 100,
+    "beacon": 59,
+    "cov": 66,
+    "gap": 49,
+    "dir": "beacon-low"
+  },
+  {
+    "idx": 24,
+    "url": "https://web.dev",
+    "band": "strong",
+    "lh": 90,
+    "beacon": 100,
+    "cov": 61,
+    "gap": 48,
+    "dir": "beacon-high"
+  },
+  {
+    "idx": 84,
+    "url": "https://mailchimp.com",
+    "band": "builder",
+    "lh": 100,
+    "beacon": 68,
+    "cov": 66,
+    "gap": 44,
+    "dir": "beacon-low"
+  },
+  {
+    "idx": 29,
+    "url": "https://www.apple.com",
+    "band": "strong",
+    "lh": 92,
+    "beacon": 100,
+    "cov": 61,
+    "gap": 42,
+    "dir": "beacon-high"
+  },
+  {
+    "idx": 25,
+    "url": "https://developer.chrome.com",
+    "band": "strong",
+    "lh": 93,
+    "beacon": 100,
+    "cov": 61,
+    "gap": 39,
+    "dir": "beacon-high"
+  },
+  {
+    "idx": 44,
+    "url": "https://www.booking.com",
+    "band": "commercial",
+    "lh": 96,
+    "beacon": 46,
+    "cov": 66,
+    "gap": 38,
+    "dir": "beacon-low"
+  },
+  {
+    "idx": 49,
+    "url": "https://www.indeed.com",
+    "band": "commercial",
+    "lh": 97,
+    "beacon": 58,
+    "cov": 53,
+    "gap": 35,
+    "dir": "beacon-low"
+  }
+]

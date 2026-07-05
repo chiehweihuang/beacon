@@ -1,0 +1,126 @@
+{
+  "n_total": 88,
+  "n_paired": 71,
+  "spearman_all": 0.354,
+  "pearson_all": 0.348,
+  "cov>=60": {
+    "n": 51,
+    "spearman": 0.39
+  },
+  "cov40-59": {
+    "n": 18,
+    "spearman": 0.285
+  },
+  "spearman_equal_weights": 0.32,
+  "bands": {
+    "exemplar": {
+      "n": 16,
+      "lh_a11y_avg": 96,
+      "beacon_avg": 81,
+      "coverage_avg": 56
+    },
+    "strong": {
+      "n": 16,
+      "lh_a11y_avg": 95,
+      "beacon_avg": 80,
+      "coverage_avg": 62
+    },
+    "commercial": {
+      "n": 9,
+      "lh_a11y_avg": 92,
+      "beacon_avg": 61,
+      "coverage_avg": 56
+    },
+    "media": {
+      "n": 2,
+      "lh_a11y_avg": 92,
+      "beacon_avg": 72,
+      "coverage_avg": 60
+    },
+    "spa": {
+      "n": 14,
+      "lh_a11y_avg": 93,
+      "beacon_avg": 75,
+      "coverage_avg": 61
+    },
+    "builder": {
+      "n": 8,
+      "lh_a11y_avg": 91,
+      "beacon_avg": 72,
+      "coverage_avg": 64
+    },
+    "jp-tw": {
+      "n": 6,
+      "lh_a11y_avg": 83,
+      "beacon_avg": 67,
+      "coverage_avg": 65
+    }
+  },
+  "beacon_band_counts": {
+    "pass": 20,
+    "needs_work": 43,
+    "fail": 8
+  },
+  "capture_failures": [
+    {
+      "idx": 37,
+      "url": "https://www.homedepot.com",
+      "capture": "bot_protected"
+    },
+    {
+      "idx": 38,
+      "url": "https://www.lowes.com",
+      "capture": "bot_protected"
+    },
+    {
+      "idx": 41,
+      "url": "https://www.macys.com",
+      "capture": "bot_protected"
+    },
+    {
+      "idx": 59,
+      "url": "https://www.bloomberg.com",
+      "capture": "bot_protected"
+    },
+    {
+      "idx": 63,
+      "url": "https://medium.com",
+      "capture": "bot_protected"
+    },
+    {
+      "idx": 79,
+      "url": "https://www.coinbase.com",
+      "capture": "bot_protected"
+    },
+    {
+      "idx": 83,
+      "url": "https://www.godaddy.com",
+      "capture": "bot_protected"
+    },
+    {
+      "idx": 88,
+      "url": "https://www.adobe.com",
+      "capture": "failed"
+    },
+    {
+      "idx": 89,
+      "url": "https://www.salesforce.com",
+      "capture": "bot_protected"
+    },
+    {
+      "idx": 98,
+      "url": "https://www.taipei.gov.tw",
+      "capture": "failed"
+    },
+    {
+      "idx": 99,
+      "url": "https://www.mofa.go.jp",
+      "capture": "bot_protected"
+    },
+    {
+      "idx": null,
+      "url": "https://www.w3.org/WAI/",
+      "capture": "missing"
+    }
+  ]
+}

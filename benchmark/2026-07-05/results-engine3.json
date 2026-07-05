@@ -1,0 +1,6656 @@
+[
+  {
+    "idx": 0,
+    "url": "https://www.w3.org/WAI/",
+    "band": "exemplar",
+    "lh_ok": true,
+    "lh_a11y": 100,
+    "capture": "ok",
+    "beacon_overall": 90,
+    "coverage_percent": 61,
+    "confidence": "medium",
+    "life_safety": false,
+    "findings": 1,
+    "critical": 1,
+    "engine": "beacon-static-audit@3+ruleset.9bc03624c900",
+    "categories": {
+      "contrast": {
+        "state": "not-machine-checkable",
+        "score": null,
+        "pass": 0,
+        "fail": 0
+      },
+      "keyboard": {
+        "state": "scored",
+        "score": 55,
+        "pass": 2,
+        "fail": 1
+      },
+      "screenreader": {
+        "state": "scored",
+        "score": 100,
+        "pass": 87,
+        "fail": 0
+      },
+      "forms": {
+        "state": "scored",
+        "score": 100,
+        "pass": 1,
+        "fail": 0
+      },
+      "responsive": {
+        "state": "scored",
+        "score": 100,
+        "pass": 1,
+        "fail": 0
+      },
+      "touch": {
+        "state": "not-machine-checkable",
+        "score": null,
+        "pass": 0,
+        "fail": 0
+      },
+      "cognitive": {
+        "state": "not-machine-checkable",
+        "score": null,
+        "pass": 0,
+        "fail": 0
+      },
+      "motion": {
+        "state": "not-applicable",
+        "score": null,
+        "pass": 0,
+        "fail": 0
+      },
+      "media": {
+        "state": "not-machine-checkable",
+        "score": null,
+        "pass": 0,
+        "fail": 0
+      },
+      "agent": {
+        "state": "scored",
+        "score": 100,
+        "pass": 3,
+        "fail": 0
+      }
+    }
+  },
+  {
+    "idx": 1,
+    "url": "https://webaim.org",
+    "band": "exemplar",
+    "lh_ok": true,
+    "lh_a11y": 95,
+    "capture": "ok",
+    "beacon_overall": 70,
+    "coverage_percent": 48,
+    "confidence": "low",
+    "life_safety": false,
+    "findings": 6,
+    "critical": 2,
+    "engine": "beacon-static-audit@3+ruleset.9bc03624c900",
+    "categories": {
+      "contrast": {
+        "state": "not-machine-checkable",
+        "score": null,
+        "pass": 0,
+        "fail": 0
+      },
+      "keyboard": {
+        "state": "not-applicable",
+        "score": null,
+        "pass": 0,
+        "fail": 0
+      },
+      "screenreader": {
+        "state": "scored",
+        "score": 100,
+        "pass": 50,
+        "fail": 0
+      },
+      "forms": {
+        "state": "scored",
+        "score": 26,
+        "pass": 2,
+        "fail": 2
+      },
+      "responsive": {
+        "state": "scored",
+        "score": 100,
+        "pass": 1,
+        "fail": 0
+      },
+      "touch": {
+        "state": "not-machine-checkable",
+        "score": null,
+        "pass": 0,
+        "fail": 0
+      },
+      "cognitive": {
+        "state": "not-machine-checkable",
+        "score": null,
+        "pass": 0,
+        "fail": 0
+      },
+      "motion": {
+        "state": "not-applicable",
+        "score": null,
+        "pass": 0,
+        "fail": 0
+      },
+      "media": {
+        "state": "not-machine-checkable",
+        "score": null,
+        "pass": 0,
+        "fail": 0
+      },
+      "agent": {
+        "state": "scored",
+        "score": 0,
+        "pass": 0,
+        "fail": 3
+      }
+    }
+  },
+  {
+    "idx": 2,
+    "url": "https://www.a11yproject.com",
+    "band": "exemplar",
+    "lh_ok": true,
+    "lh_a11y": 100,
+    "capture": "ok",
+    "beacon_overall": 73,
+    "coverage_percent": 61,
+    "confidence": "medium",
+    "life_safety": false,
+    "findings": 6,
+    "critical": 3,
+    "engine": "beacon-static-audit@3+ruleset.9bc03624c900",
+    "categories": {
+      "contrast": {
+        "state": "not-machine-checkable",
+        "score": null,
+        "pass": 0,
+        "fail": 0
+      },
+      "keyboard": {
+        "state": "scored",
+        "score": 0,
+        "pass": 0,
+        "fail": 3
+      },
+      "screenreader": {
+        "state": "scored",
+        "score": 100,
+        "pass": 71,
+        "fail": 0
+      },
+      "forms": {
+        "state": "scored",
+        "score": 100,
+        "pass": 3,
+        "fail": 0
+      },
+      "responsive": {
+        "state": "scored",
+        "score": 100,
+        "pass": 1,
+        "fail": 0
+      },
+      "touch": {
+        "state": "not-machine-checkable",
+        "score": null,
+        "pass": 0,
+        "fail": 0
+      },
+      "cognitive": {
+        "state": "not-machine-checkable",
+        "score": null,
+        "pass": 0,
+        "fail": 0
+      },
+      "motion": {
+        "state": "not-applicable",
+        "score": null,
+        "pass": 0,
+        "fail": 0
+      },
+      "media": {
+        "state": "not-machine-checkable",
+        "score": null,
+        "pass": 0,
+        "fail": 0
+      },
+      "agent": {
+        "state": "scored",
+        "score": 31,
+        "pass": 1,
+        "fail": 2
+      }
+    }
+  },
+  {
+    "idx": 3,
+    "url": "https://design-system.service.gov.uk",
+    "band": "exemplar",
+    "lh_ok": true,
+    "lh_a11y": 100,
+    "capture": "ok",
+    "beacon_overall": 97,
+    "coverage_percent": 61,
+    "confidence": "medium",
+    "life_safety": false,
+    "findings": 3,
+    "critical": 0,
+    "engine": "beacon-static-audit@3+ruleset.9bc03624c900",
+    "categories": {
+      "contrast": {
+        "state": "not-machine-checkable",
+        "score": null,
+        "pass": 0,
+        "fail": 0
+      },
+      "keyboard": {
+        "state": "scored",
+        "score": 100,
+        "pass": 11,
+        "fail": 0
+      },
+      "screenreader": {
+        "state": "scored",
+        "score": 100,
+        "pass": 248,
+        "fail": 0
+      },
+      "forms": {
+        "state": "scored",
+        "score": 100,
+        "pass": 1,
+        "fail": 0
+      },
+      "responsive": {
+        "state": "scored",
+        "score": 100,
+        "pass": 1,
+        "fail": 0
+      },
+      "touch": {
+        "state": "not-machine-checkable",
+        "score": null,
+        "pass": 0,
+        "fail": 0
+      },
+      "cognitive": {
+        "state": "not-machine-checkable",
+        "score": null,
+        "pass": 0,
+        "fail": 0
+      },
+      "motion": {
+        "state": "not-applicable",
+        "score": null,
+        "pass": 0,
+        "fail": 0
+      },
+      "media": {
+        "state": "not-machine-checkable",
+        "score": null,
+        "pass": 0,
+        "fail": 0
+      },
+      "agent": {
+        "state": "scored",
+        "score": 66,
+        "pass": 2,
+        "fail": 1
+      }
+    }
+  },
+  {
+    "idx": 4,
+    "url": "https://designsystem.digital.gov",
+    "band": "exemplar",
+    "lh_ok": true,
+    "lh_a11y": 100,
+    "capture": "ok",
+    "beacon_overall": 91,
+    "coverage_percent": 61,
+    "confidence": "medium",
+    "life_safety": false,
+    "findings": 3,
+    "critical": 2,
+    "engine": "beacon-static-audit@3+ruleset.9bc03624c900",
+    "categories": {
+      "contrast": {
+        "state": "not-machine-checkable",
+        "score": null,
+        "pass": 0,
+        "fail": 0
+      },
+      "keyboard": {
+        "state": "scored",
+        "score": 58,
+        "pass": 9,
+        "fail": 2
+      },
+      "screenreader": {
+        "state": "scored",
+        "score": 100,
+        "pass": 171,
+        "fail": 0
+      },
+      "forms": {
+        "state": "scored",
+        "score": 100,
+        "pass": 1,
+        "fail": 0
+      },
+      "responsive": {
+        "state": "scored",
+        "score": 100,
+        "pass": 1,
+        "fail": 0
+      },
+      "touch": {
+        "state": "not-machine-checkable",
+        "score": null,
+        "pass": 0,
+        "fail": 0
+      },
+      "cognitive": {
+        "state": "not-machine-checkable",
+        "score": null,
+        "pass": 0,
+        "fail": 0
+      },
+      "motion": {
+        "state": "not-applicable",
+        "score": null,
+        "pass": 0,
+        "fail": 0
+      },
+      "media": {
+        "state": "not-machine-checkable",
+        "score": null,
+        "pass": 0,
+        "fail": 0
+      },
+      "agent": {
+        "state": "scored",
+        "score": 100,
+        "pass": 3,
+        "fail": 0
+      }
+    }
+  },
+  {
+    "idx": 5,
+    "url": "https://www.gov.uk",
+    "band": "exemplar",
+    "lh_ok": true,
+    "lh_a11y": 100,
+    "capture": "ok",
+    "beacon_overall": 97,
+    "coverage_percent": 61,
+    "confidence": "medium",
+    "life_safety": false,
+    "findings": 1,
+    "critical": 0,
+    "engine": "beacon-static-audit@3+ruleset.9bc03624c900",
+    "categories": {
+      "contrast": {
+        "state": "not-machine-checkable",
+        "score": null,
+        "pass": 0,
+        "fail": 0
+      },
+      "keyboard": {
+        "state": "scored",
+        "score": 100,
+        "pass": 13,
+        "fail": 0
+      },
+      "screenreader": {
+        "state": "scored",
+        "score": 100,
+        "pass": 115,
+        "fail": 0
+      },
+      "forms": {
+        "state": "scored",
+        "score": 100,
+        "pass": 3,
+        "fail": 0
+      },
+      "responsive": {
+        "state": "scored",
+        "score": 100,
+        "pass": 1,
+        "fail": 0
+      },
+      "touch": {
+        "state": "not-machine-checkable",
+        "score": null,
+        "pass": 0,
+        "fail": 0
+      },
+      "cognitive": {
+        "state": "not-machine-checkable",
+        "score": null,
+        "pass": 0,
+        "fail": 0
+      },
+      "motion": {
+        "state": "not-applicable",
+        "score": null,
+        "pass": 0,
+        "fail": 0
+      },
+      "media": {
+        "state": "not-machine-checkable",
+        "score": null,
+        "pass": 0,
+        "fail": 0
+      },
+      "agent": {
+        "state": "scored",
+        "score": 66,
+        "pass": 2,
+        "fail": 1
+      }
+    }
+  },
+  {
+    "idx": 6,
+    "url": "https://developer.mozilla.org",
+    "band": "exemplar",
+    "lh_ok": true,
+    "lh_a11y": 95,
+    "capture": "ok",
+    "beacon_overall": 92,
+    "coverage_percent": 48,
+    "confidence": "low",
+    "life_safety": false,
+    "findings": 2,
+    "critical": 1,
+    "engine": "beacon-static-audit@3+ruleset.9bc03624c900",
+    "categories": {
+      "contrast": {
+        "state": "not-machine-checkable",
+        "score": null,
+        "pass": 0,
+        "fail": 0
+      },
+      "keyboard": {
+        "state": "scored",
+        "score": 100,
+        "pass": 9,
+        "fail": 0
+      },
+      "screenreader": {
+        "state": "scored",
+        "score": 87,
+        "pass": 154,
+        "fail": 1
+      },
+      "forms": {
+        "state": "not-applicable",
+        "score": null,
+        "pass": 0,
+        "fail": 0
+      },
+      "responsive": {
+        "state": "scored",
+        "score": 100,
+        "pass": 1,
+        "fail": 0
+      },
+      "touch": {
+        "state": "not-machine-checkable",
+        "score": null,
+        "pass": 0,
+        "fail": 0
+      },
+      "cognitive": {
+        "state": "not-machine-checkable",
+        "score": null,
+        "pass": 0,
+        "fail": 0
+      },
+      "motion": {
+        "state": "not-applicable",
+        "score": null,
+        "pass": 0,
+        "fail": 0
+      },
+      "media": {
+        "state": "not-machine-checkable",
+        "score": null,
+        "pass": 0,
+        "fail": 0
+      },
+      "agent": {
+        "state": "scored",
+        "score": 66,
+        "pass": 2,
+        "fail": 1
+      }
+    }
+  },
+  {
+    "idx": 7,
+    "url": "https://carbondesignsystem.com",
+    "band": "exemplar",
+    "lh_ok": true,
+    "lh_a11y": 96,
+    "capture": "ok",
+    "beacon_overall": 91,
+    "coverage_percent": 66,
+    "confidence": "medium",
+    "life_safety": false,
+    "findings": 6,
+    "critical": 1,
+    "engine": "beacon-static-audit@3+ruleset.9bc03624c900",
+    "categories": {
+      "contrast": {
+        "state": "not-machine-checkable",
+        "score": null,
+        "pass": 0,
+        "fail": 0
+      },
+      "keyboard": {
+        "state": "scored",
+        "score": 100,
+        "pass": 21,
+        "fail": 0
+      },
+      "screenreader": {
+        "state": "scored",
+        "score": 87,
+        "pass": 179,
+        "fail": 1
+      },
+      "forms": {
+        "state": "scored",
+        "score": 100,
+        "pass": 1,
+        "fail": 0
+      },
+      "responsive": {
+        "state": "scored",
+        "score": 100,
+        "pass": 1,
+        "fail": 0
+      },
+      "touch": {
+        "state": "not-machine-checkable",
+        "score": null,
+        "pass": 0,
+        "fail": 0
+      },
+      "cognitive": {
+        "state": "not-machine-checkable",
+        "score": null,
+        "pass": 0,
+        "fail": 0
+      },
+      "motion": {
+        "state": "scored",
+        "score": 100,
+        "pass": 1,
+        "fail": 0
+      },
+      "media": {
+        "state": "not-machine-checkable",
+        "score": null,
+        "pass": 0,
+        "fail": 0
+      },
+      "agent": {
+        "state": "scored",
+        "score": 31,
+        "pass": 1,
+        "fail": 2
+      }
+    }
+  },
+  {
+    "idx": 8,
+    "url": "https://polaris.shopify.com",
+    "band": "exemplar",
+    "lh_ok": true,
+    "lh_a11y": 88,
+    "capture": "ok",
+    "beacon_overall": 64,
+    "coverage_percent": 53,
+    "confidence": "low",
+    "life_safety": false,
+    "findings": 7,
+    "critical": 4,
+    "engine": "beacon-static-audit@3+ruleset.9bc03624c900",
+    "categories": {
+      "contrast": {
+        "state": "not-machine-checkable",
+        "score": null,
+        "pass": 0,
+        "fail": 0
+      },
+      "keyboard": {
+        "state": "scored",
+        "score": 83,
+        "pass": 19,
+        "fail": 1
+      },
+      "screenreader": {
+        "state": "scored",
+        "score": 53,
+        "pass": 24,
+        "fail": 3
+      },
+      "forms": {
+        "state": "not-applicable",
+        "score": null,
+        "pass": 0,
+        "fail": 0
+      },
+      "responsive": {
+        "state": "scored",
+        "score": 100,
+        "pass": 1,
+        "fail": 0
+      },
+      "touch": {
+        "state": "not-machine-checkable",
+        "score": null,
+        "pass": 0,
+        "fail": 0
+      },
+      "cognitive": {
+        "state": "not-machine-checkable",
+        "score": null,
+        "pass": 0,
+        "fail": 0
+      },
+      "motion": {
+        "state": "scored",
+        "score": 0,
+        "pass": 0,
+        "fail": 1
+      },
+      "media": {
+        "state": "not-machine-checkable",
+        "score": null,
+        "pass": 0,
+        "fail": 0
+      },
+      "agent": {
+        "state": "scored",
+        "score": 31,
+        "pass": 1,
+        "fail": 2
+      }
+    }
+  },
+  {
+    "idx": 9,
+    "url": "https://m3.material.io",
+    "band": "exemplar",
+    "lh_ok": true,
+    "lh_a11y": 100,
+    "capture": "ok",
+    "beacon_overall": 27,
+    "coverage_percent": 53,
+    "confidence": "low",
+    "life_safety": false,
+    "findings": 18,
+    "critical": 14,
+    "engine": "beacon-static-audit@3+ruleset.9bc03624c900",
+    "categories": {
+      "contrast": {
+        "state": "not-machine-checkable",
+        "score": null,
+        "pass": 0,
+        "fail": 0
+      },
+      "keyboard": {
+        "state": "scored",
+        "score": 100,
+        "pass": 2,
+        "fail": 0
+      },
+      "screenreader": {
+        "state": "scored",
+        "score": 0,
+        "pass": 56,
+        "fail": 14
+      },
+      "forms": {
+        "state": "not-applicable",
+        "score": null,
+        "pass": 0,
+        "fail": 0
+      },
+      "responsive": {
+        "state": "scored",
+        "score": 0,
+        "pass": 0,
+        "fail": 1
+      },
+      "touch": {
+        "state": "not-machine-checkable",
+        "score": null,
+        "pass": 0,
+        "fail": 0
+      },
+      "cognitive": {
+        "state": "not-machine-checkable",
+        "score": null,
+        "pass": 0,
+        "fail": 0
+      },
+      "motion": {
+        "state": "scored",
+        "score": 0,
+        "pass": 0,
+        "fail": 1
+      },
+      "media": {
+        "state": "not-machine-checkable",
+        "score": null,
+        "pass": 0,
+        "fail": 0
+      },
+      "agent": {
+        "state": "scored",
+        "score": 31,
+        "pass": 1,
+        "fail": 2
+      }
+    }
+  },
+  {
+    "idx": 10,
+    "url": "https://primer.style",
+    "band": "exemplar",
+    "lh_ok": true,
+    "lh_a11y": 100,
+    "capture": "ok",
+    "beacon_overall": 93,
+    "coverage_percent": 48,
+    "confidence": "low",
+    "life_safety": false,
+    "findings": 2,
+    "critical": 0,
+    "engine": "beacon-static-audit@3+ruleset.9bc03624c900",
+    "categories": {
+      "contrast": {
+        "state": "not-machine-checkable",
+        "score": null,
+        "pass": 0,
+        "fail": 0
+      },
+      "keyboard": {
+        "state": "scored",
+        "score": 100,
+        "pass": 3,
+        "fail": 0
+      },
+      "screenreader": {
+        "state": "scored",
+        "score": 100,
+        "pass": 24,
+        "fail": 0
+      },
+      "forms": {
+        "state": "not-applicable",
+        "score": null,
+        "pass": 0,
+        "fail": 0
+      },
+      "responsive": {
+        "state": "scored",
+        "score": 100,
+        "pass": 1,
+        "fail": 0
+      },
+      "touch": {
+        "state": "not-machine-checkable",
+        "score": null,
+        "pass": 0,
+        "fail": 0
+      },
+      "cognitive": {
+        "state": "not-machine-checkable",
+        "score": null,
+        "pass": 0,
+        "fail": 0
+      },
+      "motion": {
+        "state": "not-applicable",
+        "score": null,
+        "pass": 0,
+        "fail": 0
+      },
+      "media": {
+        "state": "not-machine-checkable",
+        "score": null,
+        "pass": 0,
+        "fail": 0
+      },
+      "agent": {
+        "state": "scored",
+        "score": 31,
+        "pass": 1,
+        "fail": 2
+      }
+    }
+  },
+  {
+    "idx": 11,
+    "url": "https://atlassian.design",
+    "band": "exemplar",
+    "lh_ok": true,
+    "lh_a11y": 100,
+    "capture": "ok",
+    "beacon_overall": 91,
+    "coverage_percent": 53,
+    "confidence": "low",
+    "life_safety": false,
+    "findings": 4,
+    "critical": 0,
+    "engine": "beacon-static-audit@3+ruleset.9bc03624c900",
+    "categories": {
+      "contrast": {
+        "state": "not-machine-checkable",
+        "score": null,
+        "pass": 0,
+        "fail": 0
+      },
+      "keyboard": {
+        "state": "scored",
+        "score": 100,
+        "pass": 3,
+        "fail": 0
+      },
+      "screenreader": {
+        "state": "scored",
+        "score": 100,
+        "pass": 75,
+        "fail": 0
+      },
+      "forms": {
+        "state": "not-applicable",
+        "score": null,
+        "pass": 0,
+        "fail": 0
+      },
+      "responsive": {
+        "state": "scored",
+        "score": 100,
+        "pass": 1,
+        "fail": 0
+      },
+      "touch": {
+        "state": "not-machine-checkable",
+        "score": null,
+        "pass": 0,
+        "fail": 0
+      },
+      "cognitive": {
+        "state": "not-machine-checkable",
+        "score": null,
+        "pass": 0,
+        "fail": 0
+      },
+      "motion": {
+        "state": "scored",
+        "score": 100,
+        "pass": 1,
+        "fail": 0
+      },
+      "media": {
+        "state": "not-machine-checkable",
+        "score": null,
+        "pass": 0,
+        "fail": 0
+      },
+      "agent": {
+        "state": "scored",
+        "score": 0,
+        "pass": 0,
+        "fail": 3
+      }
+    }
+  },
+  {
+    "idx": 12,
+    "url": "https://www.lightningdesignsystem.com",
+    "band": "exemplar",
+    "lh_ok": true,
+    "lh_a11y": 91,
+    "capture": "ok",
+    "beacon_overall": 68,
+    "coverage_percent": 66,
+    "confidence": "medium",
+    "life_safety": false,
+    "findings": 7,
+    "critical": 2,
+    "engine": "beacon-static-audit@3+ruleset.9bc03624c900",
+    "categories": {
+      "contrast": {
+        "state": "not-machine-checkable",
+        "score": null,
+        "pass": 0,
+        "fail": 0
+      },
+      "keyboard": {
+        "state": "scored",
+        "score": 78,
+        "pass": 9,
+        "fail": 1
+      },
+      "screenreader": {
+        "state": "scored",
+        "score": 100,
+        "pass": 505,
+        "fail": 0
+      },
+      "forms": {
+        "state": "scored",
+        "score": 74,
+        "pass": 6,
+        "fail": 1
+      },
+      "responsive": {
+        "state": "scored",
+        "score": 45,
+        "pass": 1,
+        "fail": 1
+      },
+      "touch": {
+        "state": "not-machine-checkable",
+        "score": null,
+        "pass": 0,
+        "fail": 0
+      },
+      "cognitive": {
+        "state": "not-machine-checkable",
+        "score": null,
+        "pass": 0,
+        "fail": 0
+      },
+      "motion": {
+        "state": "scored",
+        "score": 0,
+        "pass": 0,
+        "fail": 1
+      },
+      "media": {
+        "state": "not-machine-checkable",
+        "score": null,
+        "pass": 0,
+        "fail": 0
+      },
+      "agent": {
+        "state": "scored",
+        "score": 31,
+        "pass": 1,
+        "fail": 2
+      }
+    }
+  },
+  {
+    "idx": 13,
+    "url": "https://design.va.gov",
+    "band": "exemplar",
+    "lh_ok": true,
+    "lh_a11y": 100,
+    "capture": "ok",
+    "beacon_overall": 97,
+    "coverage_percent": 61,
+    "confidence": "medium",
+    "life_safety": false,
+    "findings": 3,
+    "critical": 0,
+    "engine": "beacon-static-audit@3+ruleset.9bc03624c900",
+    "categories": {
+      "contrast": {
+        "state": "not-machine-checkable",
+        "score": null,
+        "pass": 0,
+        "fail": 0
+      },
+      "keyboard": {
+        "state": "scored",
+        "score": 100,
+        "pass": 12,
+        "fail": 0
+      },
+      "screenreader": {
+        "state": "scored",
+        "score": 100,
+        "pass": 320,
+        "fail": 0
+      },
+      "forms": {
+        "state": "scored",
+        "score": 100,
+        "pass": 2,
+        "fail": 0
+      },
+      "responsive": {
+        "state": "scored",
+        "score": 100,
+        "pass": 1,
+        "fail": 0
+      },
+      "touch": {
+        "state": "not-machine-checkable",
+        "score": null,
+        "pass": 0,
+        "fail": 0
+      },
+      "cognitive": {
+        "state": "not-machine-checkable",
+        "score": null,
+        "pass": 0,
+        "fail": 0
+      },
+      "motion": {
+        "state": "not-applicable",
+        "score": null,
+        "pass": 0,
+        "fail": 0
+      },
+      "media": {
+        "state": "not-machine-checkable",
+        "score": null,
+        "pass": 0,
+        "fail": 0
+      },
+      "agent": {
+        "state": "scored",
+        "score": 66,
+        "pass": 2,
+        "fail": 1
+      }
+    }
+  },
+  {
+    "idx": 14,
+    "url": "https://spectrum.adobe.com",
+    "band": "exemplar",
+    "lh_ok": true,
+    "lh_a11y": 86,
+    "capture": "ok",
+    "beacon_overall": 81,
+    "coverage_percent": 35,
+    "confidence": "low",
+    "life_safety": false,
+    "findings": 4,
+    "critical": 1,
+    "engine": "beacon-static-audit@3+ruleset.9bc03624c900",
+    "categories": {
+      "contrast": {
+        "state": "not-machine-checkable",
+        "score": null,
+        "pass": 0,
+        "fail": 0
+      },
+      "keyboard": {
+        "state": "not-applicable",
+        "score": null,
+        "pass": 0,
+        "fail": 0
+      },
+      "screenreader": {
+        "state": "scored",
+        "score": 83,
+        "pass": 20,
+        "fail": 1
+      },
+      "forms": {
+        "state": "not-applicable",
+        "score": null,
+        "pass": 0,
+        "fail": 0
+      },
+      "responsive": {
+        "state": "scored",
+        "score": 100,
+        "pass": 1,
+        "fail": 0
+      },
+      "touch": {
+        "state": "not-machine-checkable",
+        "score": null,
+        "pass": 0,
+        "fail": 0
+      },
+      "cognitive": {
+        "state": "not-machine-checkable",
+        "score": null,
+        "pass": 0,
+        "fail": 0
+      },
+      "motion": {
+        "state": "not-applicable",
+        "score": null,
+        "pass": 0,
+        "fail": 0
+      },
+      "media": {
+        "state": "not-machine-checkable",
+        "score": null,
+        "pass": 0,
+        "fail": 0
+      },
+      "agent": {
+        "state": "scored",
+        "score": 31,
+        "pass": 1,
+        "fail": 2
+      }
+    }
+  },
+  {
+    "idx": 15,
+    "url": "https://base.uber.com",
+    "band": "exemplar",
+    "lh_ok": true,
+    "lh_a11y": 91,
+    "capture": "ok",
+    "beacon_overall": 71,
+    "coverage_percent": 66,
+    "confidence": "medium",
+    "life_safety": false,
+    "findings": 5,
+    "critical": 1,
+    "engine": "beacon-static-audit@3+ruleset.9bc03624c900",
+    "categories": {
+      "contrast": {
+        "state": "not-machine-checkable",
+        "score": null,
+        "pass": 0,
+        "fail": 0
+      },
+      "keyboard": {
+        "state": "scored",
+        "score": 68,
+        "pass": 4,
+        "fail": 1
+      },
+      "screenreader": {
+        "state": "scored",
+        "score": 100,
+        "pass": 103,
+        "fail": 0
+      },
+      "forms": {
+        "state": "scored",
+        "score": 100,
+        "pass": 1,
+        "fail": 0
+      },
+      "responsive": {
+        "state": "scored",
+        "score": 45,
+        "pass": 1,
+        "fail": 1
+      },
+      "touch": {
+        "state": "not-machine-checkable",
+        "score": null,
+        "pass": 0,
+        "fail": 0
+      },
+      "cognitive": {
+        "state": "not-machine-checkable",
+        "score": null,
+        "pass": 0,
+        "fail": 0
+      },
+      "motion": {
+        "state": "scored",
+        "score": 0,
+        "pass": 0,
+        "fail": 1
+      },
+      "media": {
+        "state": "not-machine-checkable",
+        "score": null,
+        "pass": 0,
+        "fail": 0
+      },
+      "agent": {
+        "state": "scored",
+        "score": 31,
+        "pass": 1,
+        "fail": 2
+      }
+    }
+  },
+  {
+    "idx": 16,
+    "url": "https://www.bbc.com",
+    "band": "strong",
+    "lh_ok": true,
+    "lh_a11y": 95,
+    "capture": "ok",
+    "beacon_overall": 62,
+    "coverage_percent": 66,
+    "confidence": "medium",
+    "life_safety": false,
+    "findings": 63,
+    "critical": 61,
+    "engine": "beacon-static-audit@3+ruleset.9bc03624c900",
+    "categories": {
+      "contrast": {
+        "state": "not-machine-checkable",
+        "score": null,
+        "pass": 0,
+        "fail": 0
+      },
+      "keyboard": {
+        "state": "scored",
+        "score": 86,
+        "pass": 51,
+        "fail": 1
+      },
+      "screenreader": {
+        "state": "scored",
+        "score": 0,
+        "pass": 373,
+        "fail": 60
+      },
+      "forms": {
+        "state": "scored",
+        "score": 100,
+        "pass": 1,
+        "fail": 0
+      },
+      "responsive": {
+        "state": "scored",
+        "score": 100,
+        "pass": 1,
+        "fail": 0
+      },
+      "touch": {
+        "state": "not-machine-checkable",
+        "score": null,
+        "pass": 0,
+        "fail": 0
+      },
+      "cognitive": {
+        "state": "not-machine-checkable",
+        "score": null,
+        "pass": 0,
+        "fail": 0
+      },
+      "motion": {
+        "state": "scored",
+        "score": 0,
+        "pass": 0,
+        "fail": 1
+      },
+      "media": {
+        "state": "not-machine-checkable",
+        "score": null,
+        "pass": 0,
+        "fail": 0
+      },
+      "agent": {
+        "state": "scored",
+        "score": 100,
+        "pass": 3,
+        "fail": 0
+      }
+    }
+  },
+  {
+    "idx": 17,
+    "url": "https://www.nhs.uk",
+    "band": "strong",
+    "lh_ok": true,
+    "lh_a11y": 100,
+    "capture": "ok",
+    "beacon_overall": 92,
+    "coverage_percent": 61,
+    "confidence": "medium",
+    "life_safety": false,
+    "findings": 2,
+    "critical": 0,
+    "engine": "beacon-static-audit@3+ruleset.9bc03624c900",
+    "categories": {
+      "contrast": {
+        "state": "not-machine-checkable",
+        "score": null,
+        "pass": 0,
+        "fail": 0
+      },
+      "keyboard": {
+        "state": "scored",
+        "score": 75,
+        "pass": 4,
+        "fail": 1
+      },
+      "screenreader": {
+        "state": "scored",
+        "score": 100,
+        "pass": 55,
+        "fail": 0
+      },
+      "forms": {
+        "state": "scored",
+        "score": 100,
+        "pass": 1,
+        "fail": 0
+      },
+      "responsive": {
+        "state": "scored",
+        "score": 100,
+        "pass": 1,
+        "fail": 0
+      },
+      "touch": {
+        "state": "not-machine-checkable",
+        "score": null,
+        "pass": 0,
+        "fail": 0
+      },
+      "cognitive": {
+        "state": "not-machine-checkable",
+        "score": null,
+        "pass": 0,
+        "fail": 0
+      },
+      "motion": {
+        "state": "not-applicable",
+        "score": null,
+        "pass": 0,
+        "fail": 0
+      },
+      "media": {
+        "state": "not-machine-checkable",
+        "score": null,
+        "pass": 0,
+        "fail": 0
+      },
+      "agent": {
+        "state": "scored",
+        "score": 66,
+        "pass": 2,
+        "fail": 1
+      }
+    }
+  },
+  {
+    "idx": 18,
+    "url": "https://en.wikipedia.org",
+    "band": "strong",
+    "lh_ok": true,
+    "lh_a11y": 92,
+    "capture": "ok",
+    "beacon_overall": 57,
+    "coverage_percent": 66,
+    "confidence": "medium",
+    "life_safety": false,
+    "findings": 13,
+    "critical": 10,
+    "engine": "beacon-static-audit@3+ruleset.9bc03624c900",
+    "categories": {
+      "contrast": {
+        "state": "not-machine-checkable",
+        "score": null,
+        "pass": 0,
+        "fail": 0
+      },
+      "keyboard": {
+        "state": "scored",
+        "score": 100,
+        "pass": 36,
+        "fail": 0
+      },
+      "screenreader": {
+        "state": "scored",
+        "score": 0,
+        "pass": 684,
+        "fail": 9
+      },
+      "forms": {
+        "state": "scored",
+        "score": 85,
+        "pass": 37,
+        "fail": 1
+      },
+      "responsive": {
+        "state": "scored",
+        "score": 45,
+        "pass": 1,
+        "fail": 1
+      },
+      "touch": {
+        "state": "not-machine-checkable",
+        "score": null,
+        "pass": 0,
+        "fail": 0
+      },
+      "cognitive": {
+        "state": "not-machine-checkable",
+        "score": null,
+        "pass": 0,
+        "fail": 0
+      },
+      "motion": {
+        "state": "scored",
+        "score": 100,
+        "pass": 1,
+        "fail": 0
+      },
+      "media": {
+        "state": "not-machine-checkable",
+        "score": null,
+        "pass": 0,
+        "fail": 0
+      },
+      "agent": {
+        "state": "scored",
+        "score": 66,
+        "pass": 2,
+        "fail": 1
+      }
+    }
+  },
+  {
+    "idx": 19,
+    "url": "https://www.theguardian.com",
+    "band": "strong",
+    "lh_ok": true,
+    "lh_a11y": 93,
+    "capture": "ok",
+    "beacon_overall": 85,
+    "coverage_percent": 66,
+    "confidence": "medium",
+    "life_safety": false,
+    "findings": 6,
+    "critical": 1,
+    "engine": "beacon-static-audit@3+ruleset.9bc03624c900",
+    "categories": {
+      "contrast": {
+        "state": "not-machine-checkable",
+        "score": null,
+        "pass": 0,
+        "fail": 0
+      },
+      "keyboard": {
+        "state": "scored",
+        "score": 93,
+        "pass": 41,
+        "fail": 1
+      },
+      "screenreader": {
+        "state": "scored",
+        "score": 88,
+        "pass": 491,
+        "fail": 1
+      },
+      "forms": {
+        "state": "scored",
+        "score": 100,
+        "pass": 8,
+        "fail": 0
+      },
+      "responsive": {
+        "state": "scored",
+        "score": 100,
+        "pass": 1,
+        "fail": 0
+      },
+      "touch": {
+        "state": "not-machine-checkable",
+        "score": null,
+        "pass": 0,
+        "fail": 0
+      },
+      "cognitive": {
+        "state": "not-machine-checkable",
+        "score": null,
+        "pass": 0,
+        "fail": 0
+      },
+      "motion": {
+        "state": "scored",
+        "score": 0,
+        "pass": 0,
+        "fail": 1
+      },
+      "media": {
+        "state": "not-machine-checkable",
+        "score": null,
+        "pass": 0,
+        "fail": 0
+      },
+      "agent": {
+        "state": "scored",
+        "score": 66,
+        "pass": 2,
+        "fail": 1
+      }
+    }
+  },
+  {
+    "idx": 20,
+    "url": "https://github.com",
+    "band": "strong",
+    "lh_ok": true,
+    "lh_a11y": 97,
+    "capture": "ok",
+    "beacon_overall": 86,
+    "coverage_percent": 66,
+    "confidence": "medium",
+    "life_safety": false,
+    "findings": 4,
+    "critical": 1,
+    "engine": "beacon-static-audit@3+ruleset.9bc03624c900",
+    "categories": {
+      "contrast": {
+        "state": "not-machine-checkable",
+        "score": null,
+        "pass": 0,
+        "fail": 0
+      },
+      "keyboard": {
+        "state": "scored",
+        "score": 100,
+        "pass": 46,
+        "fail": 0
+      },
+      "screenreader": {
+        "state": "scored",
+        "score": 87,
+        "pass": 174,
+        "fail": 1
+      },
+      "forms": {
+        "state": "scored",
+        "score": 100,
+        "pass": 6,
+        "fail": 0
+      },
+      "responsive": {
+        "state": "scored",
+        "score": 100,
+        "pass": 1,
+        "fail": 0
+      },
+      "touch": {
+        "state": "not-machine-checkable",
+        "score": null,
+        "pass": 0,
+        "fail": 0
+      },
+      "cognitive": {
+        "state": "not-machine-checkable",
+        "score": null,
+        "pass": 0,
+        "fail": 0
+      },
+      "motion": {
+        "state": "scored",
+        "score": 0,
+        "pass": 0,
+        "fail": 1
+      },
+      "media": {
+        "state": "not-machine-checkable",
+        "score": null,
+        "pass": 0,
+        "fail": 0
+      },
+      "agent": {
+        "state": "scored",
+        "score": 66,
+        "pass": 2,
+        "fail": 1
+      }
+    }
+  },
+  {
+    "idx": 21,
+    "url": "https://stripe.com",
+    "band": "strong",
+    "lh_ok": true,
+    "lh_a11y": 100,
+    "capture": "ok",
+    "beacon_overall": 100,
+    "coverage_percent": 48,
+    "confidence": "low",
+    "life_safety": false,
+    "findings": 1,
+    "critical": 0,
+    "engine": "beacon-static-audit@3+ruleset.9bc03624c900",
+    "categories": {
+      "contrast": {
+        "state": "not-machine-checkable",
+        "score": null,
+        "pass": 0,
+        "fail": 0
+      },
+      "keyboard": {
+        "state": "scored",
+        "score": 100,
+        "pass": 29,
+        "fail": 0
+      },
+      "screenreader": {
+        "state": "scored",
+        "score": 100,
+        "pass": 214,
+        "fail": 0
+      },
+      "forms": {
+        "state": "not-applicable",
+        "score": null,
+        "pass": 0,
+        "fail": 0
+      },
+      "responsive": {
+        "state": "scored",
+        "score": 100,
+        "pass": 1,
+        "fail": 0
+      },
+      "touch": {
+        "state": "not-machine-checkable",
+        "score": null,
+        "pass": 0,
+        "fail": 0
+      },
+      "cognitive": {
+        "state": "not-machine-checkable",
+        "score": null,
+        "pass": 0,
+        "fail": 0
+      },
+      "motion": {
+        "state": "not-applicable",
+        "score": null,
+        "pass": 0,
+        "fail": 0
+      },
+      "media": {
+        "state": "not-machine-checkable",
+        "score": null,
+        "pass": 0,
+        "fail": 0
+      },
+      "agent": {
+        "state": "scored",
+        "score": 100,
+        "pass": 3,
+        "fail": 0
+      }
+    }
+  },
+  {
+    "idx": 22,
+    "url": "https://www.mozilla.org",
+    "band": "strong",
+    "lh_ok": true,
+    "lh_a11y": 100,
+    "capture": "ok",
+    "beacon_overall": 97,
+    "coverage_percent": 61,
+    "confidence": "medium",
+    "life_safety": false,
+    "findings": 3,
+    "critical": 0,
+    "engine": "beacon-static-audit@3+ruleset.9bc03624c900",
+    "categories": {
+      "contrast": {
+        "state": "not-machine-checkable",
+        "score": null,
+        "pass": 0,
+        "fail": 0
+      },
+      "keyboard": {
+        "state": "scored",
+        "score": 100,
+        "pass": 8,
+        "fail": 0
+      },
+      "screenreader": {
+        "state": "scored",
+        "score": 100,
+        "pass": 117,
+        "fail": 0
+      },
+      "forms": {
+        "state": "scored",
+        "score": 100,
+        "pass": 3,
+        "fail": 0
+      },
+      "responsive": {
+        "state": "scored",
+        "score": 100,
+        "pass": 1,
+        "fail": 0
+      },
+      "touch": {
+        "state": "not-machine-checkable",
+        "score": null,
+        "pass": 0,
+        "fail": 0
+      },
+      "cognitive": {
+        "state": "not-machine-checkable",
+        "score": null,
+        "pass": 0,
+        "fail": 0
+      },
+      "motion": {
+        "state": "not-applicable",
+        "score": null,
+        "pass": 0,
+        "fail": 0
+      },
+      "media": {
+        "state": "not-machine-checkable",
+        "score": null,
+        "pass": 0,
+        "fail": 0
+      },
+      "agent": {
+        "state": "scored",
+        "score": 66,
+        "pass": 2,
+        "fail": 1
+      }
+    }
+  },
+  {
+    "idx": 23,
+    "url": "https://www.cloudflare.com",
+    "band": "strong",
+    "lh_ok": true,
+    "lh_a11y": 96,
+    "capture": "ok",
+    "beacon_overall": 81,
+    "coverage_percent": 53,
+    "confidence": "low",
+    "life_safety": false,
+    "findings": 8,
+    "critical": 5,
+    "engine": "beacon-static-audit@3+ruleset.9bc03624c900",
+    "categories": {
+      "contrast": {
+        "state": "not-machine-checkable",
+        "score": null,
+        "pass": 0,
+        "fail": 0
+      },
+      "keyboard": {
+        "state": "scored",
+        "score": 40,
+        "pass": 30,
+        "fail": 4
+      },
+      "screenreader": {
+        "state": "scored",
+        "score": 87,
+        "pass": 138,
+        "fail": 1
+      },
+      "forms": {
+        "state": "not-applicable",
+        "score": null,
+        "pass": 0,
+        "fail": 0
+      },
+      "responsive": {
+        "state": "scored",
+        "score": 100,
+        "pass": 1,
+        "fail": 0
+      },
+      "touch": {
+        "state": "not-machine-checkable",
+        "score": null,
+        "pass": 0,
+        "fail": 0
+      },
+      "cognitive": {
+        "state": "not-machine-checkable",
+        "score": null,
+        "pass": 0,
+        "fail": 0
+      },
+      "motion": {
+        "state": "scored",
+        "score": 100,
+        "pass": 1,
+        "fail": 0
+      },
+      "media": {
+        "state": "not-machine-checkable",
+        "score": null,
+        "pass": 0,
+        "fail": 0
+      },
+      "agent": {
+        "state": "scored",
+        "score": 100,
+        "pass": 3,
+        "fail": 0
+      }
+    }
+  },
+  {
+    "idx": 24,
+    "url": "https://web.dev",
+    "band": "strong",
+    "lh_ok": true,
+    "lh_a11y": 90,
+    "capture": "ok",
+    "beacon_overall": 100,
+    "coverage_percent": 61,
+    "confidence": "medium",
+    "life_safety": false,
+    "findings": 6,
+    "critical": 0,
+    "engine": "beacon-static-audit@3+ruleset.9bc03624c900",
+    "categories": {
+      "contrast": {
+        "state": "not-machine-checkable",
+        "score": null,
+        "pass": 0,
+        "fail": 0
+      },
+      "keyboard": {
+        "state": "scored",
+        "score": 100,
+        "pass": 9,
+        "fail": 0
+      },
+      "screenreader": {
+        "state": "scored",
+        "score": 100,
+        "pass": 177,
+        "fail": 0
+      },
+      "forms": {
+        "state": "scored",
+        "score": 100,
+        "pass": 2,
+        "fail": 0
+      },
+      "responsive": {
+        "state": "scored",
+        "score": 100,
+        "pass": 1,
+        "fail": 0
+      },
+      "touch": {
+        "state": "not-machine-checkable",
+        "score": null,
+        "pass": 0,
+        "fail": 0
+      },
+      "cognitive": {
+        "state": "not-machine-checkable",
+        "score": null,
+        "pass": 0,
+        "fail": 0
+      },
+      "motion": {
+        "state": "not-applicable",
+        "score": null,
+        "pass": 0,
+        "fail": 0
+      },
+      "media": {
+        "state": "not-machine-checkable",
+        "score": null,
+        "pass": 0,
+        "fail": 0
+      },
+      "agent": {
+        "state": "scored",
+        "score": 100,
+        "pass": 3,
+        "fail": 0
+      }
+    }
+  },
+  {
+    "idx": 25,
+    "url": "https://developer.chrome.com",
+    "band": "strong",
+    "lh_ok": true,
+    "lh_a11y": 93,
+    "capture": "ok",
+    "beacon_overall": 100,
+    "coverage_percent": 61,
+    "confidence": "medium",
+    "life_safety": false,
+    "findings": 1,
+    "critical": 0,
+    "engine": "beacon-static-audit@3+ruleset.9bc03624c900",
+    "categories": {
+      "contrast": {
+        "state": "not-machine-checkable",
+        "score": null,
+        "pass": 0,
+        "fail": 0
+      },
+      "keyboard": {
+        "state": "scored",
+        "score": 100,
+        "pass": 9,
+        "fail": 0
+      },
+      "screenreader": {
+        "state": "scored",
+        "score": 100,
+        "pass": 194,
+        "fail": 0
+      },
+      "forms": {
+        "state": "scored",
+        "score": 100,
+        "pass": 2,
+        "fail": 0
+      },
+      "responsive": {
+        "state": "scored",
+        "score": 100,
+        "pass": 1,
+        "fail": 0
+      },
+      "touch": {
+        "state": "not-machine-checkable",
+        "score": null,
+        "pass": 0,
+        "fail": 0
+      },
+      "cognitive": {
+        "state": "not-machine-checkable",
+        "score": null,
+        "pass": 0,
+        "fail": 0
+      },
+      "motion": {
+        "state": "not-applicable",
+        "score": null,
+        "pass": 0,
+        "fail": 0
+      },
+      "media": {
+        "state": "not-machine-checkable",
+        "score": null,
+        "pass": 0,
+        "fail": 0
+      },
+      "agent": {
+        "state": "scored",
+        "score": 100,
+        "pass": 3,
+        "fail": 0
+      }
+    }
+  },
+  {
+    "idx": 26,
+    "url": "https://www.smashingmagazine.com",
+    "band": "strong",
+    "lh_ok": true,
+    "lh_a11y": 92,
+    "capture": "ok",
+    "beacon_overall": 55,
+    "coverage_percent": 66,
+    "confidence": "medium",
+    "life_safety": false,
+    "findings": 7,
+    "critical": 3,
+    "engine": "beacon-static-audit@3+ruleset.9bc03624c900",
+    "categories": {
+      "contrast": {
+        "state": "not-machine-checkable",
+        "score": null,
+        "pass": 0,
+        "fail": 0
+      },
+      "keyboard": {
+        "state": "scored",
+        "score": 45,
+        "pass": 1,
+        "fail": 1
+      },
+      "screenreader": {
+        "state": "scored",
+        "score": 75,
+        "pass": 208,
+        "fail": 2
+      },
+      "forms": {
+        "state": "scored",
+        "score": 63,
+        "pass": 3,
+        "fail": 1
+      },
+      "responsive": {
+        "state": "scored",
+        "score": 45,
+        "pass": 1,
+        "fail": 1
+      },
+      "touch": {
+        "state": "not-machine-checkable",
+        "score": null,
+        "pass": 0,
+        "fail": 0
+      },
+      "cognitive": {
+        "state": "not-machine-checkable",
+        "score": null,
+        "pass": 0,
+        "fail": 0
+      },
+      "motion": {
+        "state": "scored",
+        "score": 0,
+        "pass": 0,
+        "fail": 1
+      },
+      "media": {
+        "state": "not-machine-checkable",
+        "score": null,
+        "pass": 0,
+        "fail": 0
+      },
+      "agent": {
+        "state": "scored",
+        "score": 66,
+        "pass": 2,
+        "fail": 1
+      }
+    }
+  },
+  {
+    "idx": 27,
+    "url": "https://css-tricks.com",
+    "band": "strong",
+    "lh_ok": true,
+    "lh_a11y": 82,
+    "capture": "ok",
+    "beacon_overall": 66,
+    "coverage_percent": 66,
+    "confidence": "medium",
+    "life_safety": false,
+    "findings": 9,
+    "critical": 7,
+    "engine": "beacon-static-audit@3+ruleset.9bc03624c900",
+    "categories": {
+      "contrast": {
+        "state": "not-machine-checkable",
+        "score": null,
+        "pass": 0,
+        "fail": 0
+      },
+      "keyboard": {
+        "state": "scored",
+        "score": 100,
+        "pass": 6,
+        "fail": 0
+      },
+      "screenreader": {
+        "state": "scored",
+        "score": 14,
+        "pass": 275,
+        "fail": 7
+      },
+      "forms": {
+        "state": "scored",
+        "score": 100,
+        "pass": 3,
+        "fail": 0
+      },
+      "responsive": {
+        "state": "scored",
+        "score": 100,
+        "pass": 1,
+        "fail": 0
+      },
+      "touch": {
+        "state": "not-machine-checkable",
+        "score": null,
+        "pass": 0,
+        "fail": 0
+      },
+      "cognitive": {
+        "state": "not-machine-checkable",
+        "score": null,
+        "pass": 0,
+        "fail": 0
+      },
+      "motion": {
+        "state": "scored",
+        "score": 0,
+        "pass": 0,
+        "fail": 1
+      },
+      "media": {
+        "state": "not-machine-checkable",
+        "score": null,
+        "pass": 0,
+        "fail": 0
+      },
+      "agent": {
+        "state": "scored",
+        "score": 66,
+        "pass": 2,
+        "fail": 1
+      }
+    }
+  },
+  {
+    "idx": 28,
+    "url": "https://developers.google.com",
+    "band": "strong",
+    "lh_ok": true,
+    "lh_a11y": 97,
+    "capture": "ok",
+    "beacon_overall": 63,
+    "coverage_percent": 66,
+    "confidence": "medium",
+    "life_safety": false,
+    "findings": 18,
+    "critical": 8,
+    "engine": "beacon-static-audit@3+ruleset.9bc03624c900",
+    "categories": {
+      "contrast": {
+        "state": "not-machine-checkable",
+        "score": null,
+        "pass": 0,
+        "fail": 0
+      },
+      "keyboard": {
+        "state": "scored",
+        "score": 90,
+        "pass": 21,
+        "fail": 1
+      },
+      "screenreader": {
+        "state": "scored",
+        "score": 0,
+        "pass": 150,
+        "fail": 8
+      },
+      "forms": {
+        "state": "scored",
+        "score": 100,
+        "pass": 2,
+        "fail": 0
+      },
+      "responsive": {
+        "state": "scored",
+        "score": 100,
+        "pass": 1,
+        "fail": 0
+      },
+      "touch": {
+        "state": "not-machine-checkable",
+        "score": null,
+        "pass": 0,
+        "fail": 0
+      },
+      "cognitive": {
+        "state": "not-machine-checkable",
+        "score": null,
+        "pass": 0,
+        "fail": 0
+      },
+      "motion": {
+        "state": "scored",
+        "score": 0,
+        "pass": 0,
+        "fail": 1
+      },
+      "media": {
+        "state": "not-machine-checkable",
+        "score": null,
+        "pass": 0,
+        "fail": 0
+      },
+      "agent": {
+        "state": "scored",
+        "score": 100,
+        "pass": 3,
+        "fail": 0
+      }
+    }
+  },
+  {
+    "idx": 29,
+    "url": "https://www.apple.com",
+    "band": "strong",
+    "lh_ok": true,
+    "lh_a11y": 92,
+    "capture": "ok",
+    "beacon_overall": 100,
+    "coverage_percent": 61,
+    "confidence": "medium",
+    "life_safety": false,
+    "findings": 0,
+    "critical": 0,
+    "engine": "beacon-static-audit@3+ruleset.9bc03624c900",
+    "categories": {
+      "contrast": {
+        "state": "not-machine-checkable",
+        "score": null,
+        "pass": 0,
+        "fail": 0
+      },
+      "keyboard": {
+        "state": "scored",
+        "score": 100,
+        "pass": 28,
+        "fail": 0
+      },
+      "screenreader": {
+        "state": "scored",
+        "score": 100,
+        "pass": 426,
+        "fail": 0
+      },
+      "forms": {
+        "state": "scored",
+        "score": 100,
+        "pass": 1,
+        "fail": 0
+      },
+      "responsive": {
+        "state": "scored",
+        "score": 100,
+        "pass": 1,
+        "fail": 0
+      },
+      "touch": {
+        "state": "not-machine-checkable",
+        "score": null,
+        "pass": 0,
+        "fail": 0
+      },
+      "cognitive": {
+        "state": "not-machine-checkable",
+        "score": null,
+        "pass": 0,
+        "fail": 0
+      },
+      "motion": {
+        "state": "not-applicable",
+        "score": null,
+        "pass": 0,
+        "fail": 0
+      },
+      "media": {
+        "state": "not-machine-checkable",
+        "score": null,
+        "pass": 0,
+        "fail": 0
+      },
+      "agent": {
+        "state": "scored",
+        "score": 100,
+        "pass": 3,
+        "fail": 0
+      }
+    }
+  },
+  {
+    "idx": 30,
+    "url": "https://www.microsoft.com",
+    "band": "strong",
+    "lh_ok": true,
+    "lh_a11y": 100,
+    "capture": "ok",
+    "beacon_overall": 76,
+    "coverage_percent": 61,
+    "confidence": "medium",
+    "life_safety": false,
+    "findings": 2,
+    "critical": 1,
+    "engine": "beacon-static-audit@3+ruleset.9bc03624c900",
+    "categories": {
+      "contrast": {
+        "state": "not-machine-checkable",
+        "score": null,
+        "pass": 0,
+        "fail": 0
+      },
+      "keyboard": {
+        "state": "scored",
+        "score": 100,
+        "pass": 10,
+        "fail": 0
+      },
+      "screenreader": {
+        "state": "scored",
+        "score": 100,
+        "pass": 150,
+        "fail": 0
+      },
+      "forms": {
+        "state": "scored",
+        "score": 0,
+        "pass": 0,
+        "fail": 1
+      },
+      "responsive": {
+        "state": "scored",
+        "score": 100,
+        "pass": 1,
+        "fail": 0
+      },
+      "touch": {
+        "state": "not-machine-checkable",
+        "score": null,
+        "pass": 0,
+        "fail": 0
+      },
+      "cognitive": {
+        "state": "not-machine-checkable",
+        "score": null,
+        "pass": 0,
+        "fail": 0
+      },
+      "motion": {
+        "state": "not-applicable",
+        "score": null,
+        "pass": 0,
+        "fail": 0
+      },
+      "media": {
+        "state": "not-machine-checkable",
+        "score": null,
+        "pass": 0,
+        "fail": 0
+      },
+      "agent": {
+        "state": "scored",
+        "score": 66,
+        "pass": 2,
+        "fail": 1
+      }
+    }
+  },
+  {
+    "idx": 31,
+    "url": "https://about.gitlab.com",
+    "band": "strong",
+    "lh_ok": true,
+    "lh_a11y": 100,
+    "capture": "ok",
+    "beacon_overall": 59,
+    "coverage_percent": 66,
+    "confidence": "medium",
+    "life_safety": false,
+    "findings": 12,
+    "critical": 10,
+    "engine": "beacon-static-audit@3+ruleset.9bc03624c900",
+    "categories": {
+      "contrast": {
+        "state": "not-machine-checkable",
+        "score": null,
+        "pass": 0,
+        "fail": 0
+      },
+      "keyboard": {
+        "state": "scored",
+        "score": 100,
+        "pass": 35,
+        "fail": 0
+      },
+      "screenreader": {
+        "state": "scored",
+        "score": 0,
+        "pass": 224,
+        "fail": 9
+      },
+      "forms": {
+        "state": "scored",
+        "score": 79,
+        "pass": 10,
+        "fail": 1
+      },
+      "responsive": {
+        "state": "scored",
+        "score": 45,
+        "pass": 1,
+        "fail": 1
+      },
+      "touch": {
+        "state": "not-machine-checkable",
+        "score": null,
+        "pass": 0,
+        "fail": 0
+      },
+      "cognitive": {
+        "state": "not-machine-checkable",
+        "score": null,
+        "pass": 0,
+        "fail": 0
+      },
+      "motion": {
+        "state": "scored",
+        "score": 100,
+        "pass": 1,
+        "fail": 0
+      },
+      "media": {
+        "state": "not-machine-checkable",
+        "score": null,
+        "pass": 0,
+        "fail": 0
+      },
+      "agent": {
+        "state": "scored",
+        "score": 100,
+        "pass": 3,
+        "fail": 0
+      }
+    }
+  },
+  {
+    "idx": 32,
+    "url": "https://www.ebay.com",
+    "band": "commercial",
+    "lh_ok": true,
+    "lh_a11y": 87,
+    "capture": "ok",
+    "beacon_overall": 70,
+    "coverage_percent": 66,
+    "confidence": "medium",
+    "life_safety": false,
+    "findings": 13,
+    "critical": 11,
+    "engine": "beacon-static-audit@3+ruleset.9bc03624c900",
+    "categories": {
+      "contrast": {
+        "state": "not-machine-checkable",
+        "score": null,
+        "pass": 0,
+        "fail": 0
+      },
+      "keyboard": {
+        "state": "scored",
+        "score": 100,
+        "pass": 50,
+        "fail": 0
+      },
+      "screenreader": {
+        "state": "scored",
+        "score": 0,
+        "pass": 424,
+        "fail": 11
+      },
+      "forms": {
+        "state": "scored",
+        "score": 100,
+        "pass": 1,
+        "fail": 0
+      },
+      "responsive": {
+        "state": "scored",
+        "score": 100,
+        "pass": 1,
+        "fail": 0
+      },
+      "touch": {
+        "state": "not-machine-checkable",
+        "score": null,
+        "pass": 0,
+        "fail": 0
+      },
+      "cognitive": {
+        "state": "not-machine-checkable",
+        "score": null,
+        "pass": 0,
+        "fail": 0
+      },
+      "motion": {
+        "state": "scored",
+        "score": 100,
+        "pass": 1,
+        "fail": 0
+      },
+      "media": {
+        "state": "not-machine-checkable",
+        "score": null,
+        "pass": 0,
+        "fail": 0
+      },
+      "agent": {
+        "state": "scored",
+        "score": 66,
+        "pass": 2,
+        "fail": 1
+      }
+    }
+  },
+  {
+    "idx": 33,
+    "url": "https://www.etsy.com",
+    "band": "commercial",
+    "lh_ok": true,
+    "lh_a11y": null,
+    "capture": "ok",
+    "beacon_overall": 45,
+    "coverage_percent": 40,
+    "confidence": "low",
+    "life_safety": false,
+    "findings": 6,
+    "critical": 1,
+    "engine": "beacon-static-audit@3+ruleset.9bc03624c900",
+    "categories": {
+      "contrast": {
+        "state": "not-machine-checkable",
+        "score": null,
+        "pass": 0,
+        "fail": 0
+      },
+      "keyboard": {
+        "state": "not-applicable",
+        "score": null,
+        "pass": 0,
+        "fail": 0
+      },
+      "screenreader": {
+        "state": "scored",
+        "score": 33,
+        "pass": 2,
+        "fail": 2
+      },
+      "forms": {
+        "state": "not-applicable",
+        "score": null,
+        "pass": 0,
+        "fail": 0
+      },
+      "responsive": {
+        "state": "scored",
+        "score": 100,
+        "pass": 1,
+        "fail": 0
+      },
+      "touch": {
+        "state": "not-machine-checkable",
+        "score": null,
+        "pass": 0,
+        "fail": 0
+      },
+      "cognitive": {
+        "state": "not-machine-checkable",
+        "score": null,
+        "pass": 0,
+        "fail": 0
+      },
+      "motion": {
+        "state": "scored",
+        "score": 0,
+        "pass": 0,
+        "fail": 1
+      },
+      "media": {
+        "state": "not-machine-checkable",
+        "score": null,
+        "pass": 0,
+        "fail": 0
+      },
+      "agent": {
+        "state": "scored",
+        "score": 0,
+        "pass": 0,
+        "fail": 3
+      }
+    }
+  },
+  {
+    "idx": 34,
+    "url": "https://www.target.com",
+    "band": "commercial",
+    "lh_ok": true,
+    "lh_a11y": null,
+    "capture": "ok",
+    "beacon_overall": 58,
+    "coverage_percent": 66,
+    "confidence": "medium",
+    "life_safety": false,
+    "findings": 9,
+    "critical": 2,
+    "engine": "beacon-static-audit@3+ruleset.9bc03624c900",
+    "categories": {
+      "contrast": {
+        "state": "not-machine-checkable",
+        "score": null,
+        "pass": 0,
+        "fail": 0
+      },
+      "keyboard": {
+        "state": "scored",
+        "score": 74,
+        "pass": 21,
+        "fail": 2
+      },
+      "screenreader": {
+        "state": "scored",
+        "score": 87,
+        "pass": 104,
+        "fail": 1
+      },
+      "forms": {
+        "state": "scored",
+        "score": 100,
+        "pass": 3,
+        "fail": 0
+      },
+      "responsive": {
+        "state": "scored",
+        "score": 0,
+        "pass": 0,
+        "fail": 2
+      },
+      "touch": {
+        "state": "not-machine-checkable",
+        "score": null,
+        "pass": 0,
+        "fail": 0
+      },
+      "cognitive": {
+        "state": "not-machine-checkable",
+        "score": null,
+        "pass": 0,
+        "fail": 0
+      },
+      "motion": {
+        "state": "scored",
+        "score": 0,
+        "pass": 0,
+        "fail": 1
+      },
+      "media": {
+        "state": "not-machine-checkable",
+        "score": null,
+        "pass": 0,
+        "fail": 0
+      },
+      "agent": {
+        "state": "scored",
+        "score": 0,
+        "pass": 0,
+        "fail": 3
+      }
+    }
+  },
+  {
+    "idx": 35,
+    "url": "https://www.bestbuy.com",
+    "band": "commercial",
+    "lh_ok": true,
+    "lh_a11y": 85,
+    "capture": "ok",
+    "beacon_overall": 63,
+    "coverage_percent": 48,
+    "confidence": "low",
+    "life_safety": false,
+    "findings": 7,
+    "critical": 5,
+    "engine": "beacon-static-audit@3+ruleset.9bc03624c900",
+    "categories": {
+      "contrast": {
+        "state": "not-machine-checkable",
+        "score": null,
+        "pass": 0,
+        "fail": 0
+      },
+      "keyboard": {
+        "state": "scored",
+        "score": 100,
+        "pass": 3,
+        "fail": 0
+      },
+      "screenreader": {
+        "state": "scored",
+        "score": 21,
+        "pass": 21,
+        "fail": 5
+      },
+      "forms": {
+        "state": "not-applicable",
+        "score": null,
+        "pass": 0,
+        "fail": 0
+      },
+      "responsive": {
+        "state": "scored",
+        "score": 100,
+        "pass": 1,
+        "fail": 0
+      },
+      "touch": {
+        "state": "not-machine-checkable",
+        "score": null,
+        "pass": 0,
+        "fail": 0
+      },
+      "cognitive": {
+        "state": "not-machine-checkable",
+        "score": null,
+        "pass": 0,
+        "fail": 0
+      },
+      "motion": {
+        "state": "not-applicable",
+        "score": null,
+        "pass": 0,
+        "fail": 0
+      },
+      "media": {
+        "state": "not-machine-checkable",
+        "score": null,
+        "pass": 0,
+        "fail": 0
+      },
+      "agent": {
+        "state": "scored",
+        "score": 31,
+        "pass": 1,
+        "fail": 2
+      }
+    }
+  },
+  {
+    "idx": 36,
+    "url": "https://www.walmart.com",
+    "band": "commercial",
+    "lh_ok": true,
+    "lh_a11y": 100,
+    "capture": "ok",
+    "beacon_overall": 86,
+    "coverage_percent": 66,
+    "confidence": "medium",
+    "life_safety": false,
+    "findings": 3,
+    "critical": 1,
+    "engine": "beacon-static-audit@3+ruleset.9bc03624c900",
+    "categories": {
+      "contrast": {
+        "state": "not-machine-checkable",
+        "score": null,
+        "pass": 0,
+        "fail": 0
+      },
+      "keyboard": {
+        "state": "scored",
+        "score": 100,
+        "pass": 10,
+        "fail": 0
+      },
+      "screenreader": {
+        "state": "scored",
+        "score": 86,
+        "pass": 51,
+        "fail": 1
+      },
+      "forms": {
+        "state": "scored",
+        "score": 100,
+        "pass": 1,
+        "fail": 0
+      },
+      "responsive": {
+        "state": "scored",
+        "score": 100,
+        "pass": 1,
+        "fail": 0
+      },
+      "touch": {
+        "state": "not-machine-checkable",
+        "score": null,
+        "pass": 0,
+        "fail": 0
+      },
+      "cognitive": {
+        "state": "not-machine-checkable",
+        "score": null,
+        "pass": 0,
+        "fail": 0
+      },
+      "motion": {
+        "state": "scored",
+        "score": 0,
+        "pass": 0,
+        "fail": 1
+      },
+      "media": {
+        "state": "not-machine-checkable",
+        "score": null,
+        "pass": 0,
+        "fail": 0
+      },
+      "agent": {
+        "state": "scored",
+        "score": 66,
+        "pass": 2,
+        "fail": 1
+      }
+    }
+  },
+  {
+    "idx": 37,
+    "url": "https://www.homedepot.com",
+    "band": "commercial",
+    "lh_ok": true,
+    "lh_a11y": null,
+    "capture": "bot_protected",
+    "beacon_overall": 8,
+    "coverage_percent": 35,
+    "confidence": "low",
+    "life_safety": false,
+    "findings": 6,
+    "critical": 2,
+    "engine": "beacon-static-audit@3+ruleset.9bc03624c900",
+    "categories": {
+      "contrast": {
+        "state": "not-machine-checkable",
+        "score": null,
+        "pass": 0,
+        "fail": 0
+      },
+      "keyboard": {
+        "state": "not-applicable",
+        "score": null,
+        "pass": 0,
+        "fail": 0
+      },
+      "screenreader": {
+        "state": "scored",
+        "score": 16,
+        "pass": 2,
+        "fail": 3
+      },
+      "forms": {
+        "state": "not-applicable",
+        "score": null,
+        "pass": 0,
+        "fail": 0
+      },
+      "responsive": {
+        "state": "scored",
+        "score": 0,
+        "pass": 0,
+        "fail": 1
+      },
+      "touch": {
+        "state": "not-machine-checkable",
+        "score": null,
+        "pass": 0,
+        "fail": 0
+      },
+      "cognitive": {
+        "state": "not-machine-checkable",
+        "score": null,
+        "pass": 0,
+        "fail": 0
+      },
+      "motion": {
+        "state": "not-applicable",
+        "score": null,
+        "pass": 0,
+        "fail": 0
+      },
+      "media": {
+        "state": "not-machine-checkable",
+        "score": null,
+        "pass": 0,
+        "fail": 0
+      },
+      "agent": {
+        "state": "scored",
+        "score": 0,
+        "pass": 0,
+        "fail": 3
+      }
+    }
+  },
+  {
+    "idx": 38,
+    "url": "https://www.lowes.com",
+    "band": "commercial",
+    "lh_ok": true,
+    "lh_a11y": 88,
+    "capture": "bot_protected",
+    "beacon_overall": 8,
+    "coverage_percent": 35,
+    "confidence": "low",
+    "life_safety": false,
+    "findings": 6,
+    "critical": 2,
+    "engine": "beacon-static-audit@3+ruleset.9bc03624c900",
+    "categories": {
+      "contrast": {
+        "state": "not-machine-checkable",
+        "score": null,
+        "pass": 0,
+        "fail": 0
+      },
+      "keyboard": {
+        "state": "not-applicable",
+        "score": null,
+        "pass": 0,
+        "fail": 0
+      },
+      "screenreader": {
+        "state": "scored",
+        "score": 16,
+        "pass": 2,
+        "fail": 3
+      },
+      "forms": {
+        "state": "not-applicable",
+        "score": null,
+        "pass": 0,
+        "fail": 0
+      },
+      "responsive": {
+        "state": "scored",
+        "score": 0,
+        "pass": 0,
+        "fail": 1
+      },
+      "touch": {
+        "state": "not-machine-checkable",
+        "score": null,
+        "pass": 0,
+        "fail": 0
+      },
+      "cognitive": {
+        "state": "not-machine-checkable",
+        "score": null,
+        "pass": 0,
+        "fail": 0
+      },
+      "motion": {
+        "state": "not-applicable",
+        "score": null,
+        "pass": 0,
+        "fail": 0
+      },
+      "media": {
+        "state": "not-machine-checkable",
+        "score": null,
+        "pass": 0,
+        "fail": 0
+      },
+      "agent": {
+        "state": "scored",
+        "score": 0,
+        "pass": 0,
+        "fail": 3
+      }
+    }
+  },
+  {
+    "idx": 39,
+    "url": "https://www.wayfair.com",
+    "band": "commercial",
+    "lh_ok": true,
+    "lh_a11y": 90,
+    "capture": "ok",
+    "beacon_overall": 44,
+    "coverage_percent": 35,
+    "confidence": "low",
+    "life_safety": false,
+    "findings": 7,
+    "critical": 2,
+    "engine": "beacon-static-audit@3+ruleset.9bc03624c900",
+    "categories": {
+      "contrast": {
+        "state": "not-machine-checkable",
+        "score": null,
+        "pass": 0,
+        "fail": 0
+      },
+      "keyboard": {
+        "state": "not-applicable",
+        "score": null,
+        "pass": 0,
+        "fail": 0
+      },
+      "screenreader": {
+        "state": "scored",
+        "score": 11,
+        "pass": 2,
+        "fail": 3
+      },
+      "forms": {
+        "state": "not-machine-checkable",
+        "score": null,
+        "pass": 0,
+        "fail": 0
+      },
+      "responsive": {
+        "state": "scored",
+        "score": 100,
+        "pass": 1,
+        "fail": 0
+      },
+      "touch": {
+        "state": "not-machine-checkable",
+        "score": null,
+        "pass": 0,
+        "fail": 0
+      },
+      "cognitive": {
+        "state": "not-machine-checkable",
+        "score": null,
+        "pass": 0,
+        "fail": 0
+      },
+      "motion": {
+        "state": "not-applicable",
+        "score": null,
+        "pass": 0,
+        "fail": 0
+      },
+      "media": {
+        "state": "not-machine-checkable",
+        "score": null,
+        "pass": 0,
+        "fail": 0
+      },
+      "agent": {
+        "state": "scored",
+        "score": 31,
+        "pass": 1,
+        "fail": 2
+      }
+    }
+  },
+  {
+    "idx": 40,
+    "url": "https://www.chewy.com",
+    "band": "commercial",
+    "lh_ok": true,
+    "lh_a11y": null,
+    "capture": "ok",
+    "beacon_overall": 92,
+    "coverage_percent": 61,
+    "confidence": "medium",
+    "life_safety": false,
+    "findings": 3,
+    "critical": 0,
+    "engine": "beacon-static-audit@3+ruleset.9bc03624c900",
+    "categories": {
+      "contrast": {
+        "state": "not-machine-checkable",
+        "score": null,
+        "pass": 0,
+        "fail": 0
+      },
+      "keyboard": {
+        "state": "scored",
+        "score": 100,
+        "pass": 1,
+        "fail": 0
+      },
+      "screenreader": {
+        "state": "scored",
+        "score": 100,
+        "pass": 8,
+        "fail": 0
+      },
+      "forms": {
+        "state": "scored",
+        "score": 100,
+        "pass": 1,
+        "fail": 0
+      },
+      "responsive": {
+        "state": "scored",
+        "score": 100,
+        "pass": 1,
+        "fail": 0
+      },
+      "touch": {
+        "state": "not-machine-checkable",
+        "score": null,
+        "pass": 0,
+        "fail": 0
+      },
+      "cognitive": {
+        "state": "not-machine-checkable",
+        "score": null,
+        "pass": 0,
+        "fail": 0
+      },
+      "motion": {
+        "state": "not-applicable",
+        "score": null,
+        "pass": 0,
+        "fail": 0
+      },
+      "media": {
+        "state": "not-machine-checkable",
+        "score": null,
+        "pass": 0,
+        "fail": 0
+      },
+      "agent": {
+        "state": "scored",
+        "score": 0,
+        "pass": 0,
+        "fail": 3
+      }
+    }
+  },
+  {
+    "idx": 41,
+    "url": "https://www.macys.com",
+    "band": "commercial",
+    "lh_ok": true,
+    "lh_a11y": 89,
+    "capture": "bot_protected",
+    "beacon_overall": 69,
+    "coverage_percent": 40,
+    "confidence": "low",
+    "life_safety": false,
+    "findings": 5,
+    "critical": 1,
+    "engine": "beacon-static-audit@3+ruleset.9bc03624c900",
+    "categories": {
+      "contrast": {
+        "state": "not-machine-checkable",
+        "score": null,
+        "pass": 0,
+        "fail": 0
+      },
+      "keyboard": {
+        "state": "not-applicable",
+        "score": null,
+        "pass": 0,
+        "fail": 0
+      },
+      "screenreader": {
+        "state": "scored",
+        "score": 78,
+        "pass": 9,
+        "fail": 1
+      },
+      "forms": {
+        "state": "not-applicable",
+        "score": null,
+        "pass": 0,
+        "fail": 0
+      },
+      "responsive": {
+        "state": "scored",
+        "score": 100,
+        "pass": 1,
+        "fail": 0
+      },
+      "touch": {
+        "state": "not-machine-checkable",
+        "score": null,
+        "pass": 0,
+        "fail": 0
+      },
+      "cognitive": {
+        "state": "not-machine-checkable",
+        "score": null,
+        "pass": 0,
+        "fail": 0
+      },
+      "motion": {
+        "state": "scored",
+        "score": 0,
+        "pass": 0,
+        "fail": 1
+      },
+      "media": {
+        "state": "not-machine-checkable",
+        "score": null,
+        "pass": 0,
+        "fail": 0
+      },
+      "agent": {
+        "state": "scored",
+        "score": 31,
+        "pass": 1,
+        "fail": 2
+      }
+    }
+  },
+  {
+    "idx": 42,
+    "url": "https://www.nike.com",
+    "band": "commercial",
+    "lh_ok": true,
+    "lh_a11y": 90,
+    "capture": "ok",
+    "beacon_overall": 51,
+    "coverage_percent": 66,
+    "confidence": "medium",
+    "life_safety": false,
+    "findings": 14,
+    "critical": 10,
+    "engine": "beacon-static-audit@3+ruleset.9bc03624c900",
+    "categories": {
+      "contrast": {
+        "state": "not-machine-checkable",
+        "score": null,
+        "pass": 0,
+        "fail": 0
+      },
+      "keyboard": {
+        "state": "scored",
+        "score": 54,
+        "pass": 27,
+        "fail": 3
+      },
+      "screenreader": {
+        "state": "scored",
+        "score": 15,
+        "pass": 620,
+        "fail": 7
+      },
+      "forms": {
+        "state": "scored",
+        "score": 100,
+        "pass": 6,
+        "fail": 0
+      },
+      "responsive": {
+        "state": "scored",
+        "score": 23,
+        "pass": 1,
+        "fail": 2
+      },
+      "touch": {
+        "state": "not-machine-checkable",
+        "score": null,
+        "pass": 0,
+        "fail": 0
+      },
+      "cognitive": {
+        "state": "not-machine-checkable",
+        "score": null,
+        "pass": 0,
+        "fail": 0
+      },
+      "motion": {
+        "state": "scored",
+        "score": 100,
+        "pass": 1,
+        "fail": 0
+      },
+      "media": {
+        "state": "not-machine-checkable",
+        "score": null,
+        "pass": 0,
+        "fail": 0
+      },
+      "agent": {
+        "state": "scored",
+        "score": 66,
+        "pass": 2,
+        "fail": 1
+      }
+    }
+  },
+  {
+    "idx": 43,
+    "url": "https://www.ikea.com",
+    "band": "commercial",
+    "lh_ok": true,
+    "lh_a11y": 93,
+    "capture": "ok",
+    "beacon_overall": 86,
+    "coverage_percent": 66,
+    "confidence": "medium",
+    "life_safety": false,
+    "findings": 4,
+    "critical": 2,
+    "engine": "beacon-static-audit@3+ruleset.9bc03624c900",
+    "categories": {
+      "contrast": {
+        "state": "not-machine-checkable",
+        "score": null,
+        "pass": 0,
+        "fail": 0
+      },
+      "keyboard": {
+        "state": "scored",
+        "score": 100,
+        "pass": 20,
+        "fail": 0
+      },
+      "screenreader": {
+        "state": "scored",
+        "score": 75,
+        "pass": 212,
+        "fail": 2
+      },
+      "forms": {
+        "state": "scored",
+        "score": 100,
+        "pass": 3,
+        "fail": 0
+      },
+      "responsive": {
+        "state": "scored",
+        "score": 100,
+        "pass": 1,
+        "fail": 0
+      },
+      "touch": {
+        "state": "not-machine-checkable",
+        "score": null,
+        "pass": 0,
+        "fail": 0
+      },
+      "cognitive": {
+        "state": "not-machine-checkable",
+        "score": null,
+        "pass": 0,
+        "fail": 0
+      },
+      "motion": {
+        "state": "scored",
+        "score": 0,
+        "pass": 0,
+        "fail": 1
+      },
+      "media": {
+        "state": "not-machine-checkable",
+        "score": null,
+        "pass": 0,
+        "fail": 0
+      },
+      "agent": {
+        "state": "scored",
+        "score": 100,
+        "pass": 3,
+        "fail": 0
+      }
+    }
+  },
+  {
+    "idx": 44,
+    "url": "https://www.booking.com",
+    "band": "commercial",
+    "lh_ok": true,
+    "lh_a11y": 96,
+    "capture": "ok",
+    "beacon_overall": 46,
+    "coverage_percent": 66,
+    "confidence": "medium",
+    "life_safety": false,
+    "findings": 12,
+    "critical": 7,
+    "engine": "beacon-static-audit@3+ruleset.9bc03624c900",
+    "categories": {
+      "contrast": {
+        "state": "not-machine-checkable",
+        "score": null,
+        "pass": 0,
+        "fail": 0
+      },
+      "keyboard": {
+        "state": "scored",
+        "score": 100,
+        "pass": 50,
+        "fail": 0
+      },
+      "screenreader": {
+        "state": "scored",
+        "score": 14,
+        "pass": 367,
+        "fail": 7
+      },
+      "forms": {
+        "state": "scored",
+        "score": 100,
+        "pass": 2,
+        "fail": 0
+      },
+      "responsive": {
+        "state": "scored",
+        "score": 0,
+        "pass": 0,
+        "fail": 1
+      },
+      "touch": {
+        "state": "not-machine-checkable",
+        "score": null,
+        "pass": 0,
+        "fail": 0
+      },
+      "cognitive": {
+        "state": "not-machine-checkable",
+        "score": null,
+        "pass": 0,
+        "fail": 0
+      },
+      "motion": {
+        "state": "scored",
+        "score": 0,
+        "pass": 0,
+        "fail": 1
+      },
+      "media": {
+        "state": "not-machine-checkable",
+        "score": null,
+        "pass": 0,
+        "fail": 0
+      },
+      "agent": {
+        "state": "scored",
+        "score": 31,
+        "pass": 1,
+        "fail": 2
+      }
+    }
+  },
+  {
+    "idx": 47,
+    "url": "https://www.tripadvisor.com",
+    "band": "commercial",
+    "lh_ok": true,
+    "lh_a11y": 94,
+    "capture": "ok",
+    "beacon_overall": 45,
+    "coverage_percent": 40,
+    "confidence": "low",
+    "life_safety": false,
+    "findings": 6,
+    "critical": 1,
+    "engine": "beacon-static-audit@3+ruleset.9bc03624c900",
+    "categories": {
+      "contrast": {
+        "state": "not-machine-checkable",
+        "score": null,
+        "pass": 0,
+        "fail": 0
+      },
+      "keyboard": {
+        "state": "not-applicable",
+        "score": null,
+        "pass": 0,
+        "fail": 0
+      },
+      "screenreader": {
+        "state": "scored",
+        "score": 33,
+        "pass": 2,
+        "fail": 2
+      },
+      "forms": {
+        "state": "not-applicable",
+        "score": null,
+        "pass": 0,
+        "fail": 0
+      },
+      "responsive": {
+        "state": "scored",
+        "score": 100,
+        "pass": 1,
+        "fail": 0
+      },
+      "touch": {
+        "state": "not-machine-checkable",
+        "score": null,
+        "pass": 0,
+        "fail": 0
+      },
+      "cognitive": {
+        "state": "not-machine-checkable",
+        "score": null,
+        "pass": 0,
+        "fail": 0
+      },
+      "motion": {
+        "state": "scored",
+        "score": 0,
+        "pass": 0,
+        "fail": 1
+      },
+      "media": {
+        "state": "not-machine-checkable",
+        "score": null,
+        "pass": 0,
+        "fail": 0
+      },
+      "agent": {
+        "state": "scored",
+        "score": 0,
+        "pass": 0,
+        "fail": 3
+      }
+    }
+  },
+  {
+    "idx": 48,
+    "url": "https://www.yelp.com",
+    "band": "commercial",
+    "lh_ok": true,
+    "lh_a11y": null,
+    "capture": "ok",
+    "beacon_overall": 45,
+    "coverage_percent": 40,
+    "confidence": "low",
+    "life_safety": false,
+    "findings": 6,
+    "critical": 1,
+    "engine": "beacon-static-audit@3+ruleset.9bc03624c900",
+    "categories": {
+      "contrast": {
+        "state": "not-machine-checkable",
+        "score": null,
+        "pass": 0,
+        "fail": 0
+      },
+      "keyboard": {
+        "state": "not-applicable",
+        "score": null,
+        "pass": 0,
+        "fail": 0
+      },
+      "screenreader": {
+        "state": "scored",
+        "score": 33,
+        "pass": 2,
+        "fail": 2
+      },
+      "forms": {
+        "state": "not-applicable",
+        "score": null,
+        "pass": 0,
+        "fail": 0
+      },
+      "responsive": {
+        "state": "scored",
+        "score": 100,
+        "pass": 1,
+        "fail": 0
+      },
+      "touch": {
+        "state": "not-machine-checkable",
+        "score": null,
+        "pass": 0,
+        "fail": 0
+      },
+      "cognitive": {
+        "state": "not-machine-checkable",
+        "score": null,
+        "pass": 0,
+        "fail": 0
+      },
+      "motion": {
+        "state": "scored",
+        "score": 0,
+        "pass": 0,
+        "fail": 1
+      },
+      "media": {
+        "state": "not-machine-checkable",
+        "score": null,
+        "pass": 0,
+        "fail": 0
+      },
+      "agent": {
+        "state": "scored",
+        "score": 0,
+        "pass": 0,
+        "fail": 3
+      }
+    }
+  },
+  {
+    "idx": 49,
+    "url": "https://www.indeed.com",
+    "band": "commercial",
+    "lh_ok": true,
+    "lh_a11y": 97,
+    "capture": "ok",
+    "beacon_overall": 58,
+    "coverage_percent": 53,
+    "confidence": "low",
+    "life_safety": false,
+    "findings": 7,
+    "critical": 2,
+    "engine": "beacon-static-audit@3+ruleset.9bc03624c900",
+    "categories": {
+      "contrast": {
+        "state": "not-machine-checkable",
+        "score": null,
+        "pass": 0,
+        "fail": 0
+      },
+      "keyboard": {
+        "state": "scored",
+        "score": 100,
+        "pass": 2,
+        "fail": 0
+      },
+      "screenreader": {
+        "state": "scored",
+        "score": 68,
+        "pass": 24,
+        "fail": 2
+      },
+      "forms": {
+        "state": "not-applicable",
+        "score": null,
+        "pass": 0,
+        "fail": 0
+      },
+      "responsive": {
+        "state": "scored",
+        "score": 45,
+        "pass": 1,
+        "fail": 1
+      },
+      "touch": {
+        "state": "not-machine-checkable",
+        "score": null,
+        "pass": 0,
+        "fail": 0
+      },
+      "cognitive": {
+        "state": "not-machine-checkable",
+        "score": null,
+        "pass": 0,
+        "fail": 0
+      },
+      "motion": {
+        "state": "scored",
+        "score": 0,
+        "pass": 0,
+        "fail": 1
+      },
+      "media": {
+        "state": "not-machine-checkable",
+        "score": null,
+        "pass": 0,
+        "fail": 0
+      },
+      "agent": {
+        "state": "scored",
+        "score": 0,
+        "pass": 0,
+        "fail": 3
+      }
+    }
+  },
+  {
+    "idx": 55,
+    "url": "https://www.engadget.com",
+    "band": "media",
+    "lh_ok": true,
+    "lh_a11y": 89,
+    "capture": "ok",
+    "beacon_overall": 82,
+    "coverage_percent": 53,
+    "confidence": "low",
+    "life_safety": false,
+    "findings": 40,
+    "critical": 2,
+    "engine": "beacon-static-audit@3+ruleset.9bc03624c900",
+    "categories": {
+      "contrast": {
+        "state": "not-machine-checkable",
+        "score": null,
+        "pass": 0,
+        "fail": 0
+      },
+      "keyboard": {
+        "state": "not-applicable",
+        "score": null,
+        "pass": 0,
+        "fail": 0
+      },
+      "screenreader": {
+        "state": "scored",
+        "score": 75,
+        "pass": 325,
+        "fail": 2
+      },
+      "forms": {
+        "state": "scored",
+        "score": 100,
+        "pass": 8,
+        "fail": 0
+      },
+      "responsive": {
+        "state": "scored",
+        "score": 100,
+        "pass": 1,
+        "fail": 0
+      },
+      "touch": {
+        "state": "not-machine-checkable",
+        "score": null,
+        "pass": 0,
+        "fail": 0
+      },
+      "cognitive": {
+        "state": "not-machine-checkable",
+        "score": null,
+        "pass": 0,
+        "fail": 0
+      },
+      "motion": {
+        "state": "scored",
+        "score": 0,
+        "pass": 0,
+        "fail": 1
+      },
+      "media": {
+        "state": "not-machine-checkable",
+        "score": null,
+        "pass": 0,
+        "fail": 0
+      },
+      "agent": {
+        "state": "scored",
+        "score": 100,
+        "pass": 3,
+        "fail": 0
+      }
+    }
+  },
+  {
+    "idx": 59,
+    "url": "https://www.bloomberg.com",
+    "band": "media",
+    "lh_ok": true,
+    "lh_a11y": 95,
+    "capture": "bot_protected",
+    "beacon_overall": 74,
+    "coverage_percent": 35,
+    "confidence": "low",
+    "life_safety": false,
+    "findings": 5,
+    "critical": 1,
+    "engine": "beacon-static-audit@3+ruleset.9bc03624c900",
+    "categories": {
+      "contrast": {
+        "state": "not-machine-checkable",
+        "score": null,
+        "pass": 0,
+        "fail": 0
+      },
+      "keyboard": {
+        "state": "not-applicable",
+        "score": null,
+        "pass": 0,
+        "fail": 0
+      },
+      "screenreader": {
+        "state": "scored",
+        "score": 78,
+        "pass": 9,
+        "fail": 1
+      },
+      "forms": {
+        "state": "not-applicable",
+        "score": null,
+        "pass": 0,
+        "fail": 0
+      },
+      "responsive": {
+        "state": "scored",
+        "score": 100,
+        "pass": 1,
+        "fail": 0
+      },
+      "touch": {
+        "state": "not-machine-checkable",
+        "score": null,
+        "pass": 0,
+        "fail": 0
+      },
+      "cognitive": {
+        "state": "not-machine-checkable",
+        "score": null,
+        "pass": 0,
+        "fail": 0
+      },
+      "motion": {
+        "state": "not-applicable",
+        "score": null,
+        "pass": 0,
+        "fail": 0
+      },
+      "media": {
+        "state": "not-machine-checkable",
+        "score": null,
+        "pass": 0,
+        "fail": 0
+      },
+      "agent": {
+        "state": "scored",
+        "score": 0,
+        "pass": 0,
+        "fail": 3
+      }
+    }
+  },
+  {
+    "idx": 60,
+    "url": "https://www.reuters.com",
+    "band": "media",
+    "lh_ok": true,
+    "lh_a11y": null,
+    "capture": "ok",
+    "beacon_overall": 45,
+    "coverage_percent": 40,
+    "confidence": "low",
+    "life_safety": false,
+    "findings": 6,
+    "critical": 1,
+    "engine": "beacon-static-audit@3+ruleset.9bc03624c900",
+    "categories": {
+      "contrast": {
+        "state": "not-machine-checkable",
+        "score": null,
+        "pass": 0,
+        "fail": 0
+      },
+      "keyboard": {
+        "state": "not-applicable",
+        "score": null,
+        "pass": 0,
+        "fail": 0
+      },
+      "screenreader": {
+        "state": "scored",
+        "score": 33,
+        "pass": 2,
+        "fail": 2
+      },
+      "forms": {
+        "state": "not-applicable",
+        "score": null,
+        "pass": 0,
+        "fail": 0
+      },
+      "responsive": {
+        "state": "scored",
+        "score": 100,
+        "pass": 1,
+        "fail": 0
+      },
+      "touch": {
+        "state": "not-machine-checkable",
+        "score": null,
+        "pass": 0,
+        "fail": 0
+      },
+      "cognitive": {
+        "state": "not-machine-checkable",
+        "score": null,
+        "pass": 0,
+        "fail": 0
+      },
+      "motion": {
+        "state": "scored",
+        "score": 0,
+        "pass": 0,
+        "fail": 1
+      },
+      "media": {
+        "state": "not-machine-checkable",
+        "score": null,
+        "pass": 0,
+        "fail": 0
+      },
+      "agent": {
+        "state": "scored",
+        "score": 0,
+        "pass": 0,
+        "fail": 3
+      }
+    }
+  },
+  {
+    "idx": 62,
+    "url": "https://www.bbc.co.uk",
+    "band": "media",
+    "lh_ok": true,
+    "lh_a11y": 95,
+    "capture": "ok",
+    "beacon_overall": 62,
+    "coverage_percent": 66,
+    "confidence": "medium",
+    "life_safety": false,
+    "findings": 63,
+    "critical": 61,
+    "engine": "beacon-static-audit@3+ruleset.9bc03624c900",
+    "categories": {
+      "contrast": {
+        "state": "not-machine-checkable",
+        "score": null,
+        "pass": 0,
+        "fail": 0
+      },
+      "keyboard": {
+        "state": "scored",
+        "score": 86,
+        "pass": 51,
+        "fail": 1
+      },
+      "screenreader": {
+        "state": "scored",
+        "score": 0,
+        "pass": 373,
+        "fail": 60
+      },
+      "forms": {
+        "state": "scored",
+        "score": 100,
+        "pass": 1,
+        "fail": 0
+      },
+      "responsive": {
+        "state": "scored",
+        "score": 100,
+        "pass": 1,
+        "fail": 0
+      },
+      "touch": {
+        "state": "not-machine-checkable",
+        "score": null,
+        "pass": 0,
+        "fail": 0
+      },
+      "cognitive": {
+        "state": "not-machine-checkable",
+        "score": null,
+        "pass": 0,
+        "fail": 0
+      },
+      "motion": {
+        "state": "scored",
+        "score": 0,
+        "pass": 0,
+        "fail": 1
+      },
+      "media": {
+        "state": "not-machine-checkable",
+        "score": null,
+        "pass": 0,
+        "fail": 0
+      },
+      "agent": {
+        "state": "scored",
+        "score": 100,
+        "pass": 3,
+        "fail": 0
+      }
+    }
+  },
+  {
+    "idx": 63,
+    "url": "https://medium.com",
+    "band": "media",
+    "lh_ok": true,
+    "lh_a11y": 89,
+    "capture": "bot_protected",
+    "beacon_overall": 75,
+    "coverage_percent": 40,
+    "confidence": "low",
+    "life_safety": false,
+    "findings": 4,
+    "critical": 0,
+    "engine": "beacon-static-audit@3+ruleset.9bc03624c900",
+    "categories": {
+      "contrast": {
+        "state": "not-machine-checkable",
+        "score": null,
+        "pass": 0,
+        "fail": 0
+      },
+      "keyboard": {
+        "state": "not-applicable",
+        "score": null,
+        "pass": 0,
+        "fail": 0
+      },
+      "screenreader": {
+        "state": "scored",
+        "score": 100,
+        "pass": 7,
+        "fail": 0
+      },
+      "forms": {
+        "state": "not-applicable",
+        "score": null,
+        "pass": 0,
+        "fail": 0
+      },
+      "responsive": {
+        "state": "scored",
+        "score": 100,
+        "pass": 1,
+        "fail": 0
+      },
+      "touch": {
+        "state": "not-machine-checkable",
+        "score": null,
+        "pass": 0,
+        "fail": 0
+      },
+      "cognitive": {
+        "state": "not-machine-checkable",
+        "score": null,
+        "pass": 0,
+        "fail": 0
+      },
+      "motion": {
+        "state": "scored",
+        "score": 0,
+        "pass": 0,
+        "fail": 1
+      },
+      "media": {
+        "state": "not-machine-checkable",
+        "score": null,
+        "pass": 0,
+        "fail": 0
+      },
+      "agent": {
+        "state": "scored",
+        "score": 0,
+        "pass": 0,
+        "fail": 3
+      }
+    }
+  },
+  {
+    "idx": 64,
+    "url": "https://www.notion.so",
+    "band": "spa",
+    "lh_ok": true,
+    "lh_a11y": 90,
+    "capture": "ok",
+    "beacon_overall": 78,
+    "coverage_percent": 66,
+    "confidence": "medium",
+    "life_safety": false,
+    "findings": 6,
+    "critical": 3,
+    "engine": "beacon-static-audit@3+ruleset.9bc03624c900",
+    "categories": {
+      "contrast": {
+        "state": "not-machine-checkable",
+        "score": null,
+        "pass": 0,
+        "fail": 0
+      },
+      "keyboard": {
+        "state": "scored",
+        "score": 90,
+        "pass": 20,
+        "fail": 1
+      },
+      "screenreader": {
+        "state": "scored",
+        "score": 63,
+        "pass": 206,
+        "fail": 3
+      },
+      "forms": {
+        "state": "scored",
+        "score": 100,
+        "pass": 1,
+        "fail": 0
+      },
+      "responsive": {
+        "state": "scored",
+        "score": 100,
+        "pass": 1,
+        "fail": 0
+      },
+      "touch": {
+        "state": "not-machine-checkable",
+        "score": null,
+        "pass": 0,
+        "fail": 0
+      },
+      "cognitive": {
+        "state": "not-machine-checkable",
+        "score": null,
+        "pass": 0,
+        "fail": 0
+      },
+      "motion": {
+        "state": "scored",
+        "score": 0,
+        "pass": 0,
+        "fail": 1
+      },
+      "media": {
+        "state": "not-machine-checkable",
+        "score": null,
+        "pass": 0,
+        "fail": 0
+      },
+      "agent": {
+        "state": "scored",
+        "score": 66,
+        "pass": 2,
+        "fail": 1
+      }
+    }
+  },
+  {
+    "idx": 65,
+    "url": "https://www.figma.com",
+    "band": "spa",
+    "lh_ok": true,
+    "lh_a11y": 97,
+    "capture": "ok",
+    "beacon_overall": 100,
+    "coverage_percent": 53,
+    "confidence": "low",
+    "life_safety": false,
+    "findings": 0,
+    "critical": 0,
+    "engine": "beacon-static-audit@3+ruleset.9bc03624c900",
+    "categories": {
+      "contrast": {
+        "state": "not-machine-checkable",
+        "score": null,
+        "pass": 0,
+        "fail": 0
+      },
+      "keyboard": {
+        "state": "scored",
+        "score": 100,
+        "pass": 25,
+        "fail": 0
+      },
+      "screenreader": {
+        "state": "scored",
+        "score": 100,
+        "pass": 247,
+        "fail": 0
+      },
+      "forms": {
+        "state": "not-applicable",
+        "score": null,
+        "pass": 0,
+        "fail": 0
+      },
+      "responsive": {
+        "state": "scored",
+        "score": 100,
+        "pass": 1,
+        "fail": 0
+      },
+      "touch": {
+        "state": "not-machine-checkable",
+        "score": null,
+        "pass": 0,
+        "fail": 0
+      },
+      "cognitive": {
+        "state": "not-machine-checkable",
+        "score": null,
+        "pass": 0,
+        "fail": 0
+      },
+      "motion": {
+        "state": "scored",
+        "score": 100,
+        "pass": 1,
+        "fail": 0
+      },
+      "media": {
+        "state": "not-machine-checkable",
+        "score": null,
+        "pass": 0,
+        "fail": 0
+      },
+      "agent": {
+        "state": "scored",
+        "score": 100,
+        "pass": 3,
+        "fail": 0
+      }
+    }
+  },
+  {
+    "idx": 66,
+    "url": "https://www.canva.com",
+    "band": "spa",
+    "lh_ok": true,
+    "lh_a11y": 96,
+    "capture": "ok",
+    "beacon_overall": 85,
+    "coverage_percent": 53,
+    "confidence": "low",
+    "life_safety": false,
+    "findings": 3,
+    "critical": 1,
+    "engine": "beacon-static-audit@3+ruleset.9bc03624c900",
+    "categories": {
+      "contrast": {
+        "state": "not-machine-checkable",
+        "score": null,
+        "pass": 0,
+        "fail": 0
+      },
+      "keyboard": {
+        "state": "scored",
+        "score": 76,
+        "pass": 27,
+        "fail": 2
+      },
+      "screenreader": {
+        "state": "scored",
+        "score": 100,
+        "pass": 440,
+        "fail": 0
+      },
+      "forms": {
+        "state": "not-applicable",
+        "score": null,
+        "pass": 0,
+        "fail": 0
+      },
+      "responsive": {
+        "state": "scored",
+        "score": 100,
+        "pass": 1,
+        "fail": 0
+      },
+      "touch": {
+        "state": "not-machine-checkable",
+        "score": null,
+        "pass": 0,
+        "fail": 0
+      },
+      "cognitive": {
+        "state": "not-machine-checkable",
+        "score": null,
+        "pass": 0,
+        "fail": 0
+      },
+      "motion": {
+        "state": "scored",
+        "score": 0,
+        "pass": 0,
+        "fail": 1
+      },
+      "media": {
+        "state": "not-machine-checkable",
+        "score": null,
+        "pass": 0,
+        "fail": 0
+      },
+      "agent": {
+        "state": "scored",
+        "score": 100,
+        "pass": 3,
+        "fail": 0
+      }
+    }
+  },
+  {
+    "idx": 67,
+    "url": "https://trello.com",
+    "band": "spa",
+    "lh_ok": true,
+    "lh_a11y": 87,
+    "capture": "ok",
+    "beacon_overall": 94,
+    "coverage_percent": 66,
+    "confidence": "medium",
+    "life_safety": false,
+    "findings": 4,
+    "critical": 1,
+    "engine": "beacon-static-audit@3+ruleset.9bc03624c900",
+    "categories": {
+      "contrast": {
+        "state": "not-machine-checkable",
+        "score": null,
+        "pass": 0,
+        "fail": 0
+      },
+      "keyboard": {
+        "state": "scored",
+        "score": 100,
+        "pass": 51,
+        "fail": 0
+      },
+      "screenreader": {
+        "state": "scored",
+        "score": 87,
+        "pass": 113,
+        "fail": 1
+      },
+      "forms": {
+        "state": "scored",
+        "score": 100,
+        "pass": 10,
+        "fail": 0
+      },
+      "responsive": {
+        "state": "scored",
+        "score": 100,
+        "pass": 1,
+        "fail": 0
+      },
+      "touch": {
+        "state": "not-machine-checkable",
+        "score": null,
+        "pass": 0,
+        "fail": 0
+      },
+      "cognitive": {
+        "state": "not-machine-checkable",
+        "score": null,
+        "pass": 0,
+        "fail": 0
+      },
+      "motion": {
+        "state": "scored",
+        "score": 100,
+        "pass": 1,
+        "fail": 0
+      },
+      "media": {
+        "state": "not-machine-checkable",
+        "score": null,
+        "pass": 0,
+        "fail": 0
+      },
+      "agent": {
+        "state": "scored",
+        "score": 66,
+        "pass": 2,
+        "fail": 1
+      }
+    }
+  },
+  {
+    "idx": 69,
+    "url": "https://slack.com",
+    "band": "spa",
+    "lh_ok": true,
+    "lh_a11y": 94,
+    "capture": "ok",
+    "beacon_overall": 87,
+    "coverage_percent": 66,
+    "confidence": "medium",
+    "life_safety": false,
+    "findings": 8,
+    "critical": 1,
+    "engine": "beacon-static-audit@3+ruleset.9bc03624c900",
+    "categories": {
+      "contrast": {
+        "state": "not-machine-checkable",
+        "score": null,
+        "pass": 0,
+        "fail": 0
+      },
+      "keyboard": {
+        "state": "scored",
+        "score": 100,
+        "pass": 41,
+        "fail": 0
+      },
+      "screenreader": {
+        "state": "scored",
+        "score": 88,
+        "pass": 384,
+        "fail": 1
+      },
+      "forms": {
+        "state": "scored",
+        "score": 100,
+        "pass": 7,
+        "fail": 0
+      },
+      "responsive": {
+        "state": "scored",
+        "score": 100,
+        "pass": 1,
+        "fail": 0
+      },
+      "touch": {
+        "state": "not-machine-checkable",
+        "score": null,
+        "pass": 0,
+        "fail": 0
+      },
+      "cognitive": {
+        "state": "not-machine-checkable",
+        "score": null,
+        "pass": 0,
+        "fail": 0
+      },
+      "motion": {
+        "state": "scored",
+        "score": 0,
+        "pass": 0,
+        "fail": 1
+      },
+      "media": {
+        "state": "not-machine-checkable",
+        "score": null,
+        "pass": 0,
+        "fail": 0
+      },
+      "agent": {
+        "state": "scored",
+        "score": 66,
+        "pass": 2,
+        "fail": 1
+      }
+    }
+  },
+  {
+    "idx": 70,
+    "url": "https://discord.com",
+    "band": "spa",
+    "lh_ok": true,
+    "lh_a11y": 100,
+    "capture": "ok",
+    "beacon_overall": 49,
+    "coverage_percent": 53,
+    "confidence": "low",
+    "life_safety": false,
+    "findings": 9,
+    "critical": 6,
+    "engine": "beacon-static-audit@3+ruleset.9bc03624c900",
+    "categories": {
+      "contrast": {
+        "state": "not-machine-checkable",
+        "score": null,
+        "pass": 0,
+        "fail": 0
+      },
+      "keyboard": {
+        "state": "scored",
+        "score": 100,
+        "pass": 2,
+        "fail": 0
+      },
+      "screenreader": {
+        "state": "scored",
+        "score": 26,
+        "pass": 292,
+        "fail": 6
+      },
+      "forms": {
+        "state": "not-applicable",
+        "score": null,
+        "pass": 0,
+        "fail": 0
+      },
+      "responsive": {
+        "state": "scored",
+        "score": 0,
+        "pass": 0,
+        "fail": 1
+      },
+      "touch": {
+        "state": "not-machine-checkable",
+        "score": null,
+        "pass": 0,
+        "fail": 0
+      },
+      "cognitive": {
+        "state": "not-machine-checkable",
+        "score": null,
+        "pass": 0,
+        "fail": 0
+      },
+      "motion": {
+        "state": "scored",
+        "score": 100,
+        "pass": 1,
+        "fail": 0
+      },
+      "media": {
+        "state": "not-machine-checkable",
+        "score": null,
+        "pass": 0,
+        "fail": 0
+      },
+      "agent": {
+        "state": "scored",
+        "score": 66,
+        "pass": 2,
+        "fail": 1
+      }
+    }
+  },
+  {
+    "idx": 71,
+    "url": "https://www.dropbox.com",
+    "band": "spa",
+    "lh_ok": true,
+    "lh_a11y": 88,
+    "capture": "ok",
+    "beacon_overall": 68,
+    "coverage_percent": 53,
+    "confidence": "low",
+    "life_safety": false,
+    "findings": 4,
+    "critical": 1,
+    "engine": "beacon-static-audit@3+ruleset.9bc03624c900",
+    "categories": {
+      "contrast": {
+        "state": "not-machine-checkable",
+        "score": null,
+        "pass": 0,
+        "fail": 0
+      },
+      "keyboard": {
+        "state": "scored",
+        "score": 74,
+        "pass": 6,
+        "fail": 1
+      },
+      "screenreader": {
+        "state": "scored",
+        "score": 100,
+        "pass": 206,
+        "fail": 0
+      },
+      "forms": {
+        "state": "not-applicable",
+        "score": null,
+        "pass": 0,
+        "fail": 0
+      },
+      "responsive": {
+        "state": "scored",
+        "score": 0,
+        "pass": 0,
+        "fail": 1
+      },
+      "touch": {
+        "state": "not-machine-checkable",
+        "score": null,
+        "pass": 0,
+        "fail": 0
+      },
+      "cognitive": {
+        "state": "not-machine-checkable",
+        "score": null,
+        "pass": 0,
+        "fail": 0
+      },
+      "motion": {
+        "state": "scored",
+        "score": 100,
+        "pass": 1,
+        "fail": 0
+      },
+      "media": {
+        "state": "not-machine-checkable",
+        "score": null,
+        "pass": 0,
+        "fail": 0
+      },
+      "agent": {
+        "state": "scored",
+        "score": 66,
+        "pass": 2,
+        "fail": 1
+      }
+    }
+  },
+  {
+    "idx": 72,
+    "url": "https://www.spotify.com",
+    "band": "spa",
+    "lh_ok": true,
+    "lh_a11y": 95,
+    "capture": "ok",
+    "beacon_overall": 46,
+    "coverage_percent": 66,
+    "confidence": "medium",
+    "life_safety": false,
+    "findings": 116,
+    "critical": 111,
+    "engine": "beacon-static-audit@3+ruleset.9bc03624c900",
+    "categories": {
+      "contrast": {
+        "state": "not-machine-checkable",
+        "score": null,
+        "pass": 0,
+        "fail": 0
+      },
+      "keyboard": {
+        "state": "scored",
+        "score": 0,
+        "pass": 150,
+        "fail": 107
+      },
+      "screenreader": {
+        "state": "scored",
+        "score": 88,
+        "pass": 393,
+        "fail": 1
+      },
+      "forms": {
+        "state": "scored",
+        "score": 47,
+        "pass": 15,
+        "fail": 3
+      },
+      "responsive": {
+        "state": "scored",
+        "score": 45,
+        "pass": 1,
+        "fail": 1
+      },
+      "touch": {
+        "state": "not-machine-checkable",
+        "score": null,
+        "pass": 0,
+        "fail": 0
+      },
+      "cognitive": {
+        "state": "not-machine-checkable",
+        "score": null,
+        "pass": 0,
+        "fail": 0
+      },
+      "motion": {
+        "state": "scored",
+        "score": 0,
+        "pass": 0,
+        "fail": 1
+      },
+      "media": {
+        "state": "not-machine-checkable",
+        "score": null,
+        "pass": 0,
+        "fail": 0
+      },
+      "agent": {
+        "state": "scored",
+        "score": 66,
+        "pass": 2,
+        "fail": 1
+      }
+    }
+  },
+  {
+    "idx": 73,
+    "url": "https://www.netflix.com",
+    "band": "spa",
+    "lh_ok": true,
+    "lh_a11y": 87,
+    "capture": "ok",
+    "beacon_overall": 70,
+    "coverage_percent": 66,
+    "confidence": "medium",
+    "life_safety": false,
+    "findings": 9,
+    "critical": 3,
+    "engine": "beacon-static-audit@3+ruleset.9bc03624c900",
+    "categories": {
+      "contrast": {
+        "state": "not-machine-checkable",
+        "score": null,
+        "pass": 0,
+        "fail": 0
+      },
+      "keyboard": {
+        "state": "scored",
+        "score": 100,
+        "pass": 31,
+        "fail": 0
+      },
+      "screenreader": {
+        "state": "scored",
+        "score": 56,
+        "pass": 36,
+        "fail": 3
+      },
+      "forms": {
+        "state": "scored",
+        "score": 100,
+        "pass": 9,
+        "fail": 0
+      },
+      "responsive": {
+        "state": "scored",
+        "score": 45,
+        "pass": 1,
+        "fail": 1
+      },
+      "touch": {
+        "state": "not-machine-checkable",
+        "score": null,
+        "pass": 0,
+        "fail": 0
+      },
+      "cognitive": {
+        "state": "not-machine-checkable",
+        "score": null,
+        "pass": 0,
+        "fail": 0
+      },
+      "motion": {
+        "state": "scored",
+        "score": 100,
+        "pass": 1,
+        "fail": 0
+      },
+      "media": {
+        "state": "not-machine-checkable",
+        "score": null,
+        "pass": 0,
+        "fail": 0
+      },
+      "agent": {
+        "state": "scored",
+        "score": 0,
+        "pass": 0,
+        "fail": 3
+      }
+    }
+  },
+  {
+    "idx": 74,
+    "url": "https://www.twitch.tv",
+    "band": "spa",
+    "lh_ok": true,
+    "lh_a11y": 100,
+    "capture": "ok",
+    "beacon_overall": 71,
+    "coverage_percent": 66,
+    "confidence": "medium",
+    "life_safety": false,
+    "findings": 4,
+    "critical": 1,
+    "engine": "beacon-static-audit@3+ruleset.9bc03624c900",
+    "categories": {
+      "contrast": {
+        "state": "not-machine-checkable",
+        "score": null,
+        "pass": 0,
+        "fail": 0
+      },
+      "keyboard": {
+        "state": "scored",
+        "score": 100,
+        "pass": 25,
+        "fail": 0
+      },
+      "screenreader": {
+        "state": "scored",
+        "score": 87,
+        "pass": 112,
+        "fail": 1
+      },
+      "forms": {
+        "state": "scored",
+        "score": 100,
+        "pass": 3,
+        "fail": 0
+      },
+      "responsive": {
+        "state": "scored",
+        "score": 0,
+        "pass": 0,
+        "fail": 1
+      },
+      "touch": {
+        "state": "not-machine-checkable",
+        "score": null,
+        "pass": 0,
+        "fail": 0
+      },
+      "cognitive": {
+        "state": "not-machine-checkable",
+        "score": null,
+        "pass": 0,
+        "fail": 0
+      },
+      "motion": {
+        "state": "scored",
+        "score": 0,
+        "pass": 0,
+        "fail": 1
+      },
+      "media": {
+        "state": "not-machine-checkable",
+        "score": null,
+        "pass": 0,
+        "fail": 0
+      },
+      "agent": {
+        "state": "scored",
+        "score": 100,
+        "pass": 3,
+        "fail": 0
+      }
+    }
+  },
+  {
+    "idx": 75,
+    "url": "https://vercel.com",
+    "band": "spa",
+    "lh_ok": true,
+    "lh_a11y": 89,
+    "capture": "ok",
+    "beacon_overall": 86,
+    "coverage_percent": 61,
+    "confidence": "medium",
+    "life_safety": false,
+    "findings": 2,
+    "critical": 0,
+    "engine": "beacon-static-audit@3+ruleset.9bc03624c900",
+    "categories": {
+      "contrast": {
+        "state": "not-machine-checkable",
+        "score": null,
+        "pass": 0,
+        "fail": 0
+      },
+      "keyboard": {
+        "state": "scored",
+        "score": 100,
+        "pass": 10,
+        "fail": 0
+      },
+      "screenreader": {
+        "state": "scored",
+        "score": 100,
+        "pass": 184,
+        "fail": 0
+      },
+      "forms": {
+        "state": "scored",
+        "score": 100,
+        "pass": 3,
+        "fail": 0
+      },
+      "responsive": {
+        "state": "scored",
+        "score": 45,
+        "pass": 1,
+        "fail": 1
+      },
+      "touch": {
+        "state": "not-machine-checkable",
+        "score": null,
+        "pass": 0,
+        "fail": 0
+      },
+      "cognitive": {
+        "state": "not-machine-checkable",
+        "score": null,
+        "pass": 0,
+        "fail": 0
+      },
+      "motion": {
+        "state": "not-applicable",
+        "score": null,
+        "pass": 0,
+        "fail": 0
+      },
+      "media": {
+        "state": "not-machine-checkable",
+        "score": null,
+        "pass": 0,
+        "fail": 0
+      },
+      "agent": {
+        "state": "scored",
+        "score": 66,
+        "pass": 2,
+        "fail": 1
+      }
+    }
+  },
+  {
+    "idx": 76,
+    "url": "https://www.netlify.com",
+    "band": "spa",
+    "lh_ok": true,
+    "lh_a11y": 100,
+    "capture": "ok",
+    "beacon_overall": 92,
+    "coverage_percent": 66,
+    "confidence": "medium",
+    "life_safety": false,
+    "findings": 4,
+    "critical": 2,
+    "engine": "beacon-static-audit@3+ruleset.9bc03624c900",
+    "categories": {
+      "contrast": {
+        "state": "not-machine-checkable",
+        "score": null,
+        "pass": 0,
+        "fail": 0
+      },
+      "keyboard": {
+        "state": "scored",
+        "score": 100,
+        "pass": 42,
+        "fail": 0
+      },
+      "screenreader": {
+        "state": "scored",
+        "score": 100,
+        "pass": 161,
+        "fail": 0
+      },
+      "forms": {
+        "state": "scored",
+        "score": 59,
+        "pass": 10,
+        "fail": 2
+      },
+      "responsive": {
+        "state": "scored",
+        "score": 100,
+        "pass": 1,
+        "fail": 0
+      },
+      "touch": {
+        "state": "not-machine-checkable",
+        "score": null,
+        "pass": 0,
+        "fail": 0
+      },
+      "cognitive": {
+        "state": "not-machine-checkable",
+        "score": null,
+        "pass": 0,
+        "fail": 0
+      },
+      "motion": {
+        "state": "scored",
+        "score": 100,
+        "pass": 1,
+        "fail": 0
+      },
+      "media": {
+        "state": "not-machine-checkable",
+        "score": null,
+        "pass": 0,
+        "fail": 0
+      },
+      "agent": {
+        "state": "scored",
+        "score": 100,
+        "pass": 3,
+        "fail": 0
+      }
+    }
+  },
+  {
+    "idx": 77,
+    "url": "https://linear.app",
+    "band": "spa",
+    "lh_ok": true,
+    "lh_a11y": 86,
+    "capture": "ok",
+    "beacon_overall": 62,
+    "coverage_percent": 66,
+    "confidence": "medium",
+    "life_safety": false,
+    "findings": 9,
+    "critical": 8,
+    "engine": "beacon-static-audit@3+ruleset.9bc03624c900",
+    "categories": {
+      "contrast": {
+        "state": "not-machine-checkable",
+        "score": null,
+        "pass": 0,
+        "fail": 0
+      },
+      "keyboard": {
+        "state": "scored",
+        "score": 48,
+        "pass": 85,
+        "fail": 4
+      },
+      "screenreader": {
+        "state": "scored",
+        "score": 74,
+        "pass": 111,
+        "fail": 2
+      },
+      "forms": {
+        "state": "scored",
+        "score": 9,
+        "pass": 1,
+        "fail": 2
+      },
+      "responsive": {
+        "state": "scored",
+        "score": 100,
+        "pass": 1,
+        "fail": 0
+      },
+      "touch": {
+        "state": "not-machine-checkable",
+        "score": null,
+        "pass": 0,
+        "fail": 0
+      },
+      "cognitive": {
+        "state": "not-machine-checkable",
+        "score": null,
+        "pass": 0,
+        "fail": 0
+      },
+      "motion": {
+        "state": "scored",
+        "score": 100,
+        "pass": 1,
+        "fail": 0
+      },
+      "media": {
+        "state": "not-machine-checkable",
+        "score": null,
+        "pass": 0,
+        "fail": 0
+      },
+      "agent": {
+        "state": "scored",
+        "score": 66,
+        "pass": 2,
+        "fail": 1
+      }
+    }
+  },
+  {
+    "idx": 78,
+    "url": "https://www.airtable.com",
+    "band": "spa",
+    "lh_ok": true,
+    "lh_a11y": 88,
+    "capture": "ok",
+    "beacon_overall": 56,
+    "coverage_percent": 48,
+    "confidence": "low",
+    "life_safety": false,
+    "findings": 19,
+    "critical": 9,
+    "engine": "beacon-static-audit@3+ruleset.9bc03624c900",
+    "categories": {
+      "contrast": {
+        "state": "not-machine-checkable",
+        "score": null,
+        "pass": 0,
+        "fail": 0
+      },
+      "keyboard": {
+        "state": "scored",
+        "score": 2,
+        "pass": 26,
+        "fail": 7
+      },
+      "screenreader": {
+        "state": "scored",
+        "score": 63,
+        "pass": 234,
+        "fail": 3
+      },
+      "forms": {
+        "state": "not-applicable",
+        "score": null,
+        "pass": 0,
+        "fail": 0
+      },
+      "responsive": {
+        "state": "scored",
+        "score": 100,
+        "pass": 1,
+        "fail": 0
+      },
+      "touch": {
+        "state": "not-machine-checkable",
+        "score": null,
+        "pass": 0,
+        "fail": 0
+      },
+      "cognitive": {
+        "state": "not-machine-checkable",
+        "score": null,
+        "pass": 0,
+        "fail": 0
+      },
+      "motion": {
+        "state": "not-applicable",
+        "score": null,
+        "pass": 0,
+        "fail": 0
+      },
+      "media": {
+        "state": "not-machine-checkable",
+        "score": null,
+        "pass": 0,
+        "fail": 0
+      },
+      "agent": {
+        "state": "scored",
+        "score": 66,
+        "pass": 2,
+        "fail": 1
+      }
+    }
+  },
+  {
+    "idx": 79,
+    "url": "https://www.coinbase.com",
+    "band": "spa",
+    "lh_ok": true,
+    "lh_a11y": 91,
+    "capture": "bot_protected",
+    "beacon_overall": 75,
+    "coverage_percent": 40,
+    "confidence": "low",
+    "life_safety": false,
+    "findings": 4,
+    "critical": 0,
+    "engine": "beacon-static-audit@3+ruleset.9bc03624c900",
+    "categories": {
+      "contrast": {
+        "state": "not-machine-checkable",
+        "score": null,
+        "pass": 0,
+        "fail": 0
+      },
+      "keyboard": {
+        "state": "not-applicable",
+        "score": null,
+        "pass": 0,
+        "fail": 0
+      },
+      "screenreader": {
+        "state": "scored",
+        "score": 100,
+        "pass": 7,
+        "fail": 0
+      },
+      "forms": {
+        "state": "not-applicable",
+        "score": null,
+        "pass": 0,
+        "fail": 0
+      },
+      "responsive": {
+        "state": "scored",
+        "score": 100,
+        "pass": 1,
+        "fail": 0
+      },
+      "touch": {
+        "state": "not-machine-checkable",
+        "score": null,
+        "pass": 0,
+        "fail": 0
+      },
+      "cognitive": {
+        "state": "not-machine-checkable",
+        "score": null,
+        "pass": 0,
+        "fail": 0
+      },
+      "motion": {
+        "state": "scored",
+        "score": 0,
+        "pass": 0,
+        "fail": 1
+      },
+      "media": {
+        "state": "not-machine-checkable",
+        "score": null,
+        "pass": 0,
+        "fail": 0
+      },
+      "agent": {
+        "state": "scored",
+        "score": 0,
+        "pass": 0,
+        "fail": 3
+      }
+    }
+  },
+  {
+    "idx": 80,
+    "url": "https://www.squarespace.com",
+    "band": "builder",
+    "lh_ok": true,
+    "lh_a11y": 96,
+    "capture": "ok",
+    "beacon_overall": 75,
+    "coverage_percent": 61,
+    "confidence": "medium",
+    "life_safety": false,
+    "findings": 2,
+    "critical": 2,
+    "engine": "beacon-static-audit@3+ruleset.9bc03624c900",
+    "categories": {
+      "contrast": {
+        "state": "not-machine-checkable",
+        "score": null,
+        "pass": 0,
+        "fail": 0
+      },
+      "keyboard": {
+        "state": "scored",
+        "score": 100,
+        "pass": 104,
+        "fail": 0
+      },
+      "screenreader": {
+        "state": "scored",
+        "score": 88,
+        "pass": 538,
+        "fail": 1
+      },
+      "forms": {
+        "state": "scored",
+        "score": 0,
+        "pass": 0,
+        "fail": 1
+      },
+      "responsive": {
+        "state": "scored",
+        "score": 100,
+        "pass": 1,
+        "fail": 0
+      },
+      "touch": {
+        "state": "not-machine-checkable",
+        "score": null,
+        "pass": 0,
+        "fail": 0
+      },
+      "cognitive": {
+        "state": "not-machine-checkable",
+        "score": null,
+        "pass": 0,
+        "fail": 0
+      },
+      "motion": {
+        "state": "not-applicable",
+        "score": null,
+        "pass": 0,
+        "fail": 0
+      },
+      "media": {
+        "state": "not-machine-checkable",
+        "score": null,
+        "pass": 0,
+        "fail": 0
+      },
+      "agent": {
+        "state": "scored",
+        "score": 100,
+        "pass": 3,
+        "fail": 0
+      }
+    }
+  },
+  {
+    "idx": 81,
+    "url": "https://www.wix.com",
+    "band": "builder",
+    "lh_ok": true,
+    "lh_a11y": 100,
+    "capture": "ok",
+    "beacon_overall": 74,
+    "coverage_percent": 66,
+    "confidence": "medium",
+    "life_safety": false,
+    "findings": 7,
+    "critical": 5,
+    "engine": "beacon-static-audit@3+ruleset.9bc03624c900",
+    "categories": {
+      "contrast": {
+        "state": "not-machine-checkable",
+        "score": null,
+        "pass": 0,
+        "fail": 0
+      },
+      "keyboard": {
+        "state": "scored",
+        "score": 86,
+        "pass": 41,
+        "fail": 1
+      },
+      "screenreader": {
+        "state": "scored",
+        "score": 50,
+        "pass": 262,
+        "fail": 4
+      },
+      "forms": {
+        "state": "scored",
+        "score": 100,
+        "pass": 2,
+        "fail": 0
+      },
+      "responsive": {
+        "state": "scored",
+        "score": 45,
+        "pass": 1,
+        "fail": 1
+      },
+      "touch": {
+        "state": "not-machine-checkable",
+        "score": null,
+        "pass": 0,
+        "fail": 0
+      },
+      "cognitive": {
+        "state": "not-machine-checkable",
+        "score": null,
+        "pass": 0,
+        "fail": 0
+      },
+      "motion": {
+        "state": "scored",
+        "score": 100,
+        "pass": 1,
+        "fail": 0
+      },
+      "media": {
+        "state": "not-machine-checkable",
+        "score": null,
+        "pass": 0,
+        "fail": 0
+      },
+      "agent": {
+        "state": "scored",
+        "score": 100,
+        "pass": 3,
+        "fail": 0
+      }
+    }
+  },
+  {
+    "idx": 82,
+    "url": "https://wordpress.com",
+    "band": "builder",
+    "lh_ok": true,
+    "lh_a11y": 89,
+    "capture": "ok",
+    "beacon_overall": 80,
+    "coverage_percent": 66,
+    "confidence": "medium",
+    "life_safety": false,
+    "findings": 2,
+    "critical": 1,
+    "engine": "beacon-static-audit@3+ruleset.9bc03624c900",
+    "categories": {
+      "contrast": {
+        "state": "not-machine-checkable",
+        "score": null,
+        "pass": 0,
+        "fail": 0
+      },
+      "keyboard": {
+        "state": "scored",
+        "score": 100,
+        "pass": 7,
+        "fail": 0
+      },
+      "screenreader": {
+        "state": "scored",
+        "score": 100,
+        "pass": 242,
+        "fail": 0
+      },
+      "forms": {
+        "state": "scored",
+        "score": 0,
+        "pass": 0,
+        "fail": 1
+      },
+      "responsive": {
+        "state": "scored",
+        "score": 100,
+        "pass": 1,
+        "fail": 0
+      },
+      "touch": {
+        "state": "not-machine-checkable",
+        "score": null,
+        "pass": 0,
+        "fail": 0
+      },
+      "cognitive": {
+        "state": "not-machine-checkable",
+        "score": null,
+        "pass": 0,
+        "fail": 0
+      },
+      "motion": {
+        "state": "scored",
+        "score": 100,
+        "pass": 1,
+        "fail": 0
+      },
+      "media": {
+        "state": "not-machine-checkable",
+        "score": null,
+        "pass": 0,
+        "fail": 0
+      },
+      "agent": {
+        "state": "scored",
+        "score": 100,
+        "pass": 3,
+        "fail": 0
+      }
+    }
+  },
+  {
+    "idx": 83,
+    "url": "https://www.godaddy.com",
+    "band": "builder",
+    "lh_ok": true,
+    "lh_a11y": 82,
+    "capture": "bot_protected",
+    "beacon_overall": 8,
+    "coverage_percent": 35,
+    "confidence": "low",
+    "life_safety": false,
+    "findings": 6,
+    "critical": 2,
+    "engine": "beacon-static-audit@3+ruleset.9bc03624c900",
+    "categories": {
+      "contrast": {
+        "state": "not-machine-checkable",
+        "score": null,
+        "pass": 0,
+        "fail": 0
+      },
+      "keyboard": {
+        "state": "not-applicable",
+        "score": null,
+        "pass": 0,
+        "fail": 0
+      },
+      "screenreader": {
+        "state": "scored",
+        "score": 16,
+        "pass": 2,
+        "fail": 3
+      },
+      "forms": {
+        "state": "not-applicable",
+        "score": null,
+        "pass": 0,
+        "fail": 0
+      },
+      "responsive": {
+        "state": "scored",
+        "score": 0,
+        "pass": 0,
+        "fail": 1
+      },
+      "touch": {
+        "state": "not-machine-checkable",
+        "score": null,
+        "pass": 0,
+        "fail": 0
+      },
+      "cognitive": {
+        "state": "not-machine-checkable",
+        "score": null,
+        "pass": 0,
+        "fail": 0
+      },
+      "motion": {
+        "state": "not-applicable",
+        "score": null,
+        "pass": 0,
+        "fail": 0
+      },
+      "media": {
+        "state": "not-machine-checkable",
+        "score": null,
+        "pass": 0,
+        "fail": 0
+      },
+      "agent": {
+        "state": "scored",
+        "score": 0,
+        "pass": 0,
+        "fail": 3
+      }
+    }
+  },
+  {
+    "idx": 84,
+    "url": "https://mailchimp.com",
+    "band": "builder",
+    "lh_ok": true,
+    "lh_a11y": 100,
+    "capture": "ok",
+    "beacon_overall": 68,
+    "coverage_percent": 66,
+    "confidence": "medium",
+    "life_safety": false,
+    "findings": 6,
+    "critical": 1,
+    "engine": "beacon-static-audit@3+ruleset.9bc03624c900",
+    "categories": {
+      "contrast": {
+        "state": "not-machine-checkable",
+        "score": null,
+        "pass": 0,
+        "fail": 0
+      },
+      "keyboard": {
+        "state": "scored",
+        "score": 100,
+        "pass": 83,
+        "fail": 0
+      },
+      "screenreader": {
+        "state": "scored",
+        "score": 88,
+        "pass": 433,
+        "fail": 1
+      },
+      "forms": {
+        "state": "scored",
+        "score": 100,
+        "pass": 20,
+        "fail": 0
+      },
+      "responsive": {
+        "state": "scored",
+        "score": 0,
+        "pass": 0,
+        "fail": 1
+      },
+      "touch": {
+        "state": "not-machine-checkable",
+        "score": null,
+        "pass": 0,
+        "fail": 0
+      },
+      "cognitive": {
+        "state": "not-machine-checkable",
+        "score": null,
+        "pass": 0,
+        "fail": 0
+      },
+      "motion": {
+        "state": "scored",
+        "score": 0,
+        "pass": 0,
+        "fail": 1
+      },
+      "media": {
+        "state": "not-machine-checkable",
+        "score": null,
+        "pass": 0,
+        "fail": 0
+      },
+      "agent": {
+        "state": "scored",
+        "score": 66,
+        "pass": 2,
+        "fail": 1
+      }
+    }
+  },
+  {
+    "idx": 85,
+    "url": "https://www.hubspot.com",
+    "band": "builder",
+    "lh_ok": true,
+    "lh_a11y": 93,
+    "capture": "ok",
+    "beacon_overall": 69,
+    "coverage_percent": 53,
+    "confidence": "low",
+    "life_safety": false,
+    "findings": 13,
+    "critical": 8,
+    "engine": "beacon-static-audit@3+ruleset.9bc03624c900",
+    "categories": {
+      "contrast": {
+        "state": "not-machine-checkable",
+        "score": null,
+        "pass": 0,
+        "fail": 0
+      },
+      "keyboard": {
+        "state": "scored",
+        "score": 57,
+        "pass": 40,
+        "fail": 3
+      },
+      "screenreader": {
+        "state": "scored",
+        "score": 39,
+        "pass": 329,
+        "fail": 5
+      },
+      "forms": {
+        "state": "not-applicable",
+        "score": null,
+        "pass": 0,
+        "fail": 0
+      },
+      "responsive": {
+        "state": "scored",
+        "score": 100,
+        "pass": 1,
+        "fail": 0
+      },
+      "touch": {
+        "state": "not-machine-checkable",
+        "score": null,
+        "pass": 0,
+        "fail": 0
+      },
+      "cognitive": {
+        "state": "not-machine-checkable",
+        "score": null,
+        "pass": 0,
+        "fail": 0
+      },
+      "motion": {
+        "state": "scored",
+        "score": 100,
+        "pass": 1,
+        "fail": 0
+      },
+      "media": {
+        "state": "not-machine-checkable",
+        "score": null,
+        "pass": 0,
+        "fail": 0
+      },
+      "agent": {
+        "state": "scored",
+        "score": 100,
+        "pass": 3,
+        "fail": 0
+      }
+    }
+  },
+  {
+    "idx": 87,
+    "url": "https://zoom.us",
+    "band": "builder",
+    "lh_ok": true,
+    "lh_a11y": 73,
+    "capture": "ok",
+    "beacon_overall": 56,
+    "coverage_percent": 66,
+    "confidence": "medium",
+    "life_safety": false,
+    "findings": 28,
+    "critical": 12,
+    "engine": "beacon-static-audit@3+ruleset.9bc03624c900",
+    "categories": {
+      "contrast": {
+        "state": "not-machine-checkable",
+        "score": null,
+        "pass": 0,
+        "fail": 0
+      },
+      "keyboard": {
+        "state": "scored",
+        "score": 19,
+        "pass": 61,
+        "fail": 6
+      },
+      "screenreader": {
+        "state": "scored",
+        "score": 26,
+        "pass": 375,
+        "fail": 6
+      },
+      "forms": {
+        "state": "scored",
+        "score": 100,
+        "pass": 8,
+        "fail": 0
+      },
+      "responsive": {
+        "state": "scored",
+        "score": 100,
+        "pass": 1,
+        "fail": 0
+      },
+      "touch": {
+        "state": "not-machine-checkable",
+        "score": null,
+        "pass": 0,
+        "fail": 0
+      },
+      "cognitive": {
+        "state": "not-machine-checkable",
+        "score": null,
+        "pass": 0,
+        "fail": 0
+      },
+      "motion": {
+        "state": "scored",
+        "score": 0,
+        "pass": 0,
+        "fail": 1
+      },
+      "media": {
+        "state": "not-machine-checkable",
+        "score": null,
+        "pass": 0,
+        "fail": 0
+      },
+      "agent": {
+        "state": "scored",
+        "score": 100,
+        "pass": 3,
+        "fail": 0
+      }
+    }
+  },
+  {
+    "idx": 88,
+    "url": "https://www.adobe.com",
+    "band": "builder",
+    "lh_ok": true,
+    "lh_a11y": 96,
+    "capture": "failed",
+    "beacon_overall": null,
+    "coverage_percent": null,
+    "confidence": null,
+    "life_safety": null,
+    "findings": null,
+    "critical": null,
+    "engine": null,
+    "categories": {}
+  },
+  {
+    "idx": 89,
+    "url": "https://www.salesforce.com",
+    "band": "builder",
+    "lh_ok": true,
+    "lh_a11y": 100,
+    "capture": "bot_protected",
+    "beacon_overall": 8,
+    "coverage_percent": 35,
+    "confidence": "low",
+    "life_safety": false,
+    "findings": 6,
+    "critical": 2,
+    "engine": "beacon-static-audit@3+ruleset.9bc03624c900",
+    "categories": {
+      "contrast": {
+        "state": "not-machine-checkable",
+        "score": null,
+        "pass": 0,
+        "fail": 0
+      },
+      "keyboard": {
+        "state": "not-applicable",
+        "score": null,
+        "pass": 0,
+        "fail": 0
+      },
+      "screenreader": {
+        "state": "scored",
+        "score": 16,
+        "pass": 2,
+        "fail": 3
+      },
+      "forms": {
+        "state": "not-applicable",
+        "score": null,
+        "pass": 0,
+        "fail": 0
+      },
+      "responsive": {
+        "state": "scored",
+        "score": 0,
+        "pass": 0,
+        "fail": 1
+      },
+      "touch": {
+        "state": "not-machine-checkable",
+        "score": null,
+        "pass": 0,
+        "fail": 0
+      },
+      "cognitive": {
+        "state": "not-machine-checkable",
+        "score": null,
+        "pass": 0,
+        "fail": 0
+      },
+      "motion": {
+        "state": "not-applicable",
+        "score": null,
+        "pass": 0,
+        "fail": 0
+      },
+      "media": {
+        "state": "not-machine-checkable",
+        "score": null,
+        "pass": 0,
+        "fail": 0
+      },
+      "agent": {
+        "state": "scored",
+        "score": 0,
+        "pass": 0,
+        "fail": 3
+      }
+    }
+  },
+  {
+    "idx": 90,
+    "url": "https://www.ibm.com",
+    "band": "builder",
+    "lh_ok": true,
+    "lh_a11y": 79,
+    "capture": "ok",
+    "beacon_overall": 73,
+    "coverage_percent": 66,
+    "confidence": "medium",
+    "life_safety": false,
+    "findings": 13,
+    "critical": 12,
+    "engine": "beacon-static-audit@3+ruleset.9bc03624c900",
+    "categories": {
+      "contrast": {
+        "state": "not-machine-checkable",
+        "score": null,
+        "pass": 0,
+        "fail": 0
+      },
+      "keyboard": {
+        "state": "scored",
+        "score": 100,
+        "pass": 34,
+        "fail": 0
+      },
+      "screenreader": {
+        "state": "scored",
+        "score": 0,
+        "pass": 80,
+        "fail": 12
+      },
+      "forms": {
+        "state": "scored",
+        "score": 100,
+        "pass": 5,
+        "fail": 0
+      },
+      "responsive": {
+        "state": "scored",
+        "score": 100,
+        "pass": 1,
+        "fail": 0
+      },
+      "touch": {
+        "state": "not-machine-checkable",
+        "score": null,
+        "pass": 0,
+        "fail": 0
+      },
+      "cognitive": {
+        "state": "not-machine-checkable",
+        "score": null,
+        "pass": 0,
+        "fail": 0
+      },
+      "motion": {
+        "state": "scored",
+        "score": 100,
+        "pass": 1,
+        "fail": 0
+      },
+      "media": {
+        "state": "not-machine-checkable",
+        "score": null,
+        "pass": 0,
+        "fail": 0
+      },
+      "agent": {
+        "state": "scored",
+        "score": 100,
+        "pass": 3,
+        "fail": 0
+      }
+    }
+  },
+  {
+    "idx": 91,
+    "url": "https://www.atlassian.com",
+    "band": "builder",
+    "lh_ok": true,
+    "lh_a11y": 97,
+    "capture": "ok",
+    "beacon_overall": 77,
+    "coverage_percent": 66,
+    "confidence": "medium",
+    "life_safety": false,
+    "findings": 7,
+    "critical": 3,
+    "engine": "beacon-static-audit@3+ruleset.9bc03624c900",
+    "categories": {
+      "contrast": {
+        "state": "not-machine-checkable",
+        "score": null,
+        "pass": 0,
+        "fail": 0
+      },
+      "keyboard": {
+        "state": "scored",
+        "score": 100,
+        "pass": 52,
+        "fail": 0
+      },
+      "screenreader": {
+        "state": "scored",
+        "score": 63,
+        "pass": 434,
+        "fail": 3
+      },
+      "forms": {
+        "state": "scored",
+        "score": 100,
+        "pass": 9,
+        "fail": 0
+      },
+      "responsive": {
+        "state": "scored",
+        "score": 45,
+        "pass": 1,
+        "fail": 1
+      },
+      "touch": {
+        "state": "not-machine-checkable",
+        "score": null,
+        "pass": 0,
+        "fail": 0
+      },
+      "cognitive": {
+        "state": "not-machine-checkable",
+        "score": null,
+        "pass": 0,
+        "fail": 0
+      },
+      "motion": {
+        "state": "scored",
+        "score": 100,
+        "pass": 1,
+        "fail": 0
+      },
+      "media": {
+        "state": "not-machine-checkable",
+        "score": null,
+        "pass": 0,
+        "fail": 0
+      },
+      "agent": {
+        "state": "scored",
+        "score": 66,
+        "pass": 2,
+        "fail": 1
+      }
+    }
+  },
+  {
+    "idx": 92,
+    "url": "https://tokyotaiwanradar.com/ja",
+    "band": "jp-tw",
+    "lh_ok": true,
+    "lh_a11y": 96,
+    "capture": "ok",
+    "beacon_overall": 90,
+    "coverage_percent": 66,
+    "confidence": "medium",
+    "life_safety": false,
+    "findings": 2,
+    "critical": 1,
+    "engine": "beacon-static-audit@3+ruleset.9bc03624c900",
+    "categories": {
+      "contrast": {
+        "state": "not-machine-checkable",
+        "score": null,
+        "pass": 0,
+        "fail": 0
+      },
+      "keyboard": {
+        "state": "scored",
+        "score": 88,
+        "pass": 203,
+        "fail": 1
+      },
+      "screenreader": {
+        "state": "scored",
+        "score": 100,
+        "pass": 246,
+        "fail": 0
+      },
+      "forms": {
+        "state": "scored",
+        "score": 100,
+        "pass": 1,
+        "fail": 0
+      },
+      "responsive": {
+        "state": "scored",
+        "score": 100,
+        "pass": 1,
+        "fail": 0
+      },
+      "touch": {
+        "state": "not-machine-checkable",
+        "score": null,
+        "pass": 0,
+        "fail": 0
+      },
+      "cognitive": {
+        "state": "not-machine-checkable",
+        "score": null,
+        "pass": 0,
+        "fail": 0
+      },
+      "motion": {
+        "state": "scored",
+        "score": 0,
+        "pass": 0,
+        "fail": 1
+      },
+      "media": {
+        "state": "not-machine-checkable",
+        "score": null,
+        "pass": 0,
+        "fail": 0
+      },
+      "agent": {
+        "state": "scored",
+        "score": 100,
+        "pass": 3,
+        "fail": 0
+      }
+    }
+  },
+  {
+    "idx": 93,
+    "url": "https://www.jnto.go.jp",
+    "band": "jp-tw",
+    "lh_ok": true,
+    "lh_a11y": 87,
+    "capture": "ok",
+    "beacon_overall": 47,
+    "coverage_percent": 66,
+    "confidence": "medium",
+    "life_safety": false,
+    "findings": 55,
+    "critical": 52,
+    "engine": "beacon-static-audit@3+ruleset.9bc03624c900",
+    "categories": {
+      "contrast": {
+        "state": "not-machine-checkable",
+        "score": null,
+        "pass": 0,
+        "fail": 0
+      },
+      "keyboard": {
+        "state": "scored",
+        "score": 100,
+        "pass": 18,
+        "fail": 0
+      },
+      "screenreader": {
+        "state": "scored",
+        "score": 14,
+        "pass": 355,
+        "fail": 7
+      },
+      "forms": {
+        "state": "scored",
+        "score": 0,
+        "pass": 10,
+        "fail": 45
+      },
+      "responsive": {
+        "state": "scored",
+        "score": 100,
+        "pass": 1,
+        "fail": 0
+      },
+      "touch": {
+        "state": "not-machine-checkable",
+        "score": null,
+        "pass": 0,
+        "fail": 0
+      },
+      "cognitive": {
+        "state": "not-machine-checkable",
+        "score": null,
+        "pass": 0,
+        "fail": 0
+      },
+      "motion": {
+        "state": "scored",
+        "score": 0,
+        "pass": 0,
+        "fail": 1
+      },
+      "media": {
+        "state": "not-machine-checkable",
+        "score": null,
+        "pass": 0,
+        "fail": 0
+      },
+      "agent": {
+        "state": "scored",
+        "score": 66,
+        "pass": 2,
+        "fail": 1
+      }
+    }
+  },
+  {
+    "idx": 94,
+    "url": "https://www.japan.go.jp",
+    "band": "jp-tw",
+    "lh_ok": true,
+    "lh_a11y": 93,
+    "capture": "ok",
+    "beacon_overall": 97,
+    "coverage_percent": 61,
+    "confidence": "medium",
+    "life_safety": false,
+    "findings": 3,
+    "critical": 0,
+    "engine": "beacon-static-audit@3+ruleset.9bc03624c900",
+    "categories": {
+      "contrast": {
+        "state": "not-machine-checkable",
+        "score": null,
+        "pass": 0,
+        "fail": 0
+      },
+      "keyboard": {
+        "state": "scored",
+        "score": 100,
+        "pass": 41,
+        "fail": 0
+      },
+      "screenreader": {
+        "state": "scored",
+        "score": 100,
+        "pass": 284,
+        "fail": 0
+      },
+      "forms": {
+        "state": "scored",
+        "score": 100,
+        "pass": 14,
+        "fail": 0
+      },
+      "responsive": {
+        "state": "scored",
+        "score": 100,
+        "pass": 1,
+        "fail": 0
+      },
+      "touch": {
+        "state": "not-machine-checkable",
+        "score": null,
+        "pass": 0,
+        "fail": 0
+      },
+      "cognitive": {
+        "state": "not-machine-checkable",
+        "score": null,
+        "pass": 0,
+        "fail": 0
+      },
+      "motion": {
+        "state": "not-applicable",
+        "score": null,
+        "pass": 0,
+        "fail": 0
+      },
+      "media": {
+        "state": "not-machine-checkable",
+        "score": null,
+        "pass": 0,
+        "fail": 0
+      },
+      "agent": {
+        "state": "scored",
+        "score": 66,
+        "pass": 2,
+        "fail": 1
+      }
+    }
+  },
+  {
+    "idx": 95,
+    "url": "https://www.taiwan.net.tw",
+    "band": "jp-tw",
+    "lh_ok": true,
+    "lh_a11y": 82,
+    "capture": "ok",
+    "beacon_overall": 67,
+    "coverage_percent": 66,
+    "confidence": "medium",
+    "life_safety": false,
+    "findings": 8,
+    "critical": 3,
+    "engine": "beacon-static-audit@3+ruleset.9bc03624c900",
+    "categories": {
+      "contrast": {
+        "state": "not-machine-checkable",
+        "score": null,
+        "pass": 0,
+        "fail": 0
+      },
+      "keyboard": {
+        "state": "scored",
+        "score": 100,
+        "pass": 29,
+        "fail": 0
+      },
+      "screenreader": {
+        "state": "scored",
+        "score": 63,
+        "pass": 586,
+        "fail": 3
+      },
+      "forms": {
+        "state": "scored",
+        "score": 100,
+        "pass": 4,
+        "fail": 0
+      },
+      "responsive": {
+        "state": "scored",
+        "score": 45,
+        "pass": 1,
+        "fail": 1
+      },
+      "touch": {
+        "state": "not-machine-checkable",
+        "score": null,
+        "pass": 0,
+        "fail": 0
+      },
+      "cognitive": {
+        "state": "not-machine-checkable",
+        "score": null,
+        "pass": 0,
+        "fail": 0
+      },
+      "motion": {
+        "state": "scored",
+        "score": 0,
+        "pass": 0,
+        "fail": 1
+      },
+      "media": {
+        "state": "not-machine-checkable",
+        "score": null,
+        "pass": 0,
+        "fail": 0
+      },
+      "agent": {
+        "state": "scored",
+        "score": 31,
+        "pass": 1,
+        "fail": 2
+      }
+    }
+  },
+  {
+    "idx": 96,
+    "url": "https://www.kyoto.travel",
+    "band": "jp-tw",
+    "lh_ok": true,
+    "lh_a11y": 69,
+    "capture": "ok",
+    "beacon_overall": 58,
+    "coverage_percent": 66,
+    "confidence": "medium",
+    "life_safety": false,
+    "findings": 23,
+    "critical": 21,
+    "engine": "beacon-static-audit@3+ruleset.9bc03624c900",
+    "categories": {
+      "contrast": {
+        "state": "not-machine-checkable",
+        "score": null,
+        "pass": 0,
+        "fail": 0
+      },
+      "keyboard": {
+        "state": "scored",
+        "score": 64,
+        "pass": 38,
+        "fail": 3
+      },
+      "screenreader": {
+        "state": "scored",
+        "score": 0,
+        "pass": 329,
+        "fail": 19
+      },
+      "forms": {
+        "state": "scored",
+        "score": 100,
+        "pass": 1,
+        "fail": 0
+      },
+      "responsive": {
+        "state": "scored",
+        "score": 100,
+        "pass": 1,
+        "fail": 0
+      },
+      "touch": {
+        "state": "not-machine-checkable",
+        "score": null,
+        "pass": 0,
+        "fail": 0
+      },
+      "cognitive": {
+        "state": "not-machine-checkable",
+        "score": null,
+        "pass": 0,
+        "fail": 0
+      },
+      "motion": {
+        "state": "scored",
+        "score": 0,
+        "pass": 0,
+        "fail": 1
+      },
+      "media": {
+        "state": "not-machine-checkable",
+        "score": null,
+        "pass": 0,
+        "fail": 0
+      },
+      "agent": {
+        "state": "scored",
+        "score": 100,
+        "pass": 3,
+        "fail": 0
+      }
+    }
+  },
+  {
+    "idx": 97,
+    "url": "https://www.rakuten.co.jp",
+    "band": "jp-tw",
+    "lh_ok": true,
+    "lh_a11y": 70,
+    "capture": "ok",
+    "beacon_overall": 41,
+    "coverage_percent": 66,
+    "confidence": "medium",
+    "life_safety": false,
+    "findings": 332,
+    "critical": 328,
+    "engine": "beacon-static-audit@3+ruleset.9bc03624c900",
+    "categories": {
+      "contrast": {
+        "state": "not-machine-checkable",
+        "score": null,
+        "pass": 0,
+        "fail": 0
+      },
+      "keyboard": {
+        "state": "scored",
+        "score": 70,
+        "pass": 3,
+        "fail": 1
+      },
+      "screenreader": {
+        "state": "scored",
+        "score": 0,
+        "pass": 999,
+        "fail": 328
+      },
+      "forms": {
+        "state": "scored",
+        "score": 100,
+        "pass": 7,
+        "fail": 0
+      },
+      "responsive": {
+        "state": "scored",
+        "score": 0,
+        "pass": 0,
+        "fail": 1
+      },
+      "touch": {
+        "state": "not-machine-checkable",
+        "score": null,
+        "pass": 0,
+        "fail": 0
+      },
+      "cognitive": {
+        "state": "not-machine-checkable",
+        "score": null,
+        "pass": 0,
+        "fail": 0
+      },
+      "motion": {
+        "state": "scored",
+        "score": 0,
+        "pass": 0,
+        "fail": 1
+      },
+      "media": {
+        "state": "not-machine-checkable",
+        "score": null,
+        "pass": 0,
+        "fail": 0
+      },
+      "agent": {
+        "state": "scored",
+        "score": 100,
+        "pass": 3,
+        "fail": 0
+      }
+    }
+  },
+  {
+    "idx": 98,
+    "url": "https://www.taipei.gov.tw",
+    "band": "jp-tw",
+    "lh_ok": true,
+    "lh_a11y": null,
+    "capture": "failed",
+    "beacon_overall": null,
+    "coverage_percent": null,
+    "confidence": null,
+    "life_safety": null,
+    "findings": null,
+    "critical": null,
+    "engine": null,
+    "categories": {}
+  },
+  {
+    "idx": 99,
+    "url": "https://www.mofa.go.jp",
+    "band": "jp-tw",
+    "lh_ok": true,
+    "lh_a11y": 97,
+    "capture": "bot_protected",
+    "beacon_overall": 8,
+    "coverage_percent": 35,
+    "confidence": "low",
+    "life_safety": false,
+    "findings": 6,
+    "critical": 2,
+    "engine": "beacon-static-audit@3+ruleset.9bc03624c900",
+    "categories": {
+      "contrast": {
+        "state": "not-machine-checkable",
+        "score": null,
+        "pass": 0,
+        "fail": 0
+      },
+      "keyboard": {
+        "state": "not-applicable",
+        "score": null,
+        "pass": 0,
+        "fail": 0
+      },
+      "screenreader": {
+        "state": "scored",
+        "score": 16,
+        "pass": 2,
+        "fail": 3
+      },
+      "forms": {
+        "state": "not-applicable",
+        "score": null,
+        "pass": 0,
+        "fail": 0
+      },
+      "responsive": {
+        "state": "scored",
+        "score": 0,
+        "pass": 0,
+        "fail": 1
+      },
+      "touch": {
+        "state": "not-machine-checkable",
+        "score": null,
+        "pass": 0,
+        "fail": 0
+      },
+      "cognitive": {
+        "state": "not-machine-checkable",
+        "score": null,
+        "pass": 0,
+        "fail": 0
+      },
+      "motion": {
+        "state": "not-applicable",
+        "score": null,
+        "pass": 0,
+        "fail": 0
+      },
+      "media": {
+        "state": "not-machine-checkable",
+        "score": null,
+        "pass": 0,
+        "fail": 0
+      },
+      "agent": {
+        "state": "scored",
+        "score": 0,
+        "pass": 0,
+        "fail": 3
+      }
+    }
+  },
+  {
+    "idx": null,
+    "url": "https://www.w3.org/WAI/",
+    "band": "exemplar",
+    "lh_ok": true,
+    "lh_a11y": 100,
+    "capture": "missing",
+    "beacon_overall": 90,
+    "coverage_percent": 61,
+    "confidence": "medium",
+    "life_safety": false,
+    "findings": 1,
+    "critical": 1,
+    "engine": "beacon-static-audit@3+ruleset.9bc03624c900",
+    "categories": {
+      "contrast": {
+        "state": "not-machine-checkable",
+        "score": null,
+        "pass": 0,
+        "fail": 0
+      },
+      "keyboard": {
+        "state": "scored",
+        "score": 55,
+        "pass": 2,
+        "fail": 1
+      },
+      "screenreader": {
+        "state": "scored",
+        "score": 100,
+        "pass": 87,
+        "fail": 0
+      },
+      "forms": {
+        "state": "scored",
+        "score": 100,
+        "pass": 1,
+        "fail": 0
+      },
+      "responsive": {
+        "state": "scored",
+        "score": 100,
+        "pass": 1,
+        "fail": 0
+      },
+      "touch": {
+        "state": "not-machine-checkable",
+        "score": null,
+        "pass": 0,
+        "fail": 0
+      },
+      "cognitive": {
+        "state": "not-machine-checkable",
+        "score": null,
+        "pass": 0,
+        "fail": 0
+      },
+      "motion": {
+        "state": "not-applicable",
+        "score": null,
+        "pass": 0,
+        "fail": 0
+      },
+      "media": {
+        "state": "not-machine-checkable",
+        "score": null,
+        "pass": 0,
+        "fail": 0
+      },
+      "agent": {
+        "state": "scored",
+        "score": 100,
+        "pass": 3,
+        "fail": 0
+      }
+    }
+  }
+]
