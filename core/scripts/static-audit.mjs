@@ -68,20 +68,27 @@ const SCORE_BANDS = [
 const LIFE_SAFETY_CRITERIA = new Set(['2.3.1']);
 const LIFE_SAFETY_CAP = 49;
 
+// Repeated instances of ONE finding key are usually one root cause stamped out by a
+// template (benchmark 2026-07-05: 9x list-non-li-child from a single reused Vue nav
+// component floored a 96%-passing category to 0). The pass/fail base ratio already
+// reflects the repetition, so the severity penalty counts at most this many instances
+// per key per category.
+const SEV_REPEAT_CAP = 3;
+
 // P3: engine fingerprint. The reproducibility contract is "same page + same fingerprint
 // => identical machine layer". Bump DETECTOR_VERSION when detection/scoring LOGIC changes;
 // the ruleset hash auto-changes when the scoring CONTRACT (weights/matrix/formula) changes.
 // (axe / capture-recipe components are added when Tier-2 findings are merged with their own
 // engine provenance; the pure static engine here is axe-free, so claiming an axe version would
 // be dishonest.)
-const DETECTOR_VERSION = 'beacon-static-audit@3';
+const DETECTOR_VERSION = 'beacon-static-audit@4';
 
 function rulesetHash() {
   const payload = JSON.stringify({
     weights: CATEGORY_WEIGHTS,
     matrix: SEVERITY_MATRIX,
     bands: SCORE_BANDS,
-    formula: 'category=base-12crit-5warn-1tip; states=scored|not-machine-checkable|not-applicable; overall=weighted-over-scored; gate=life-safety-cap-49',
+    formula: 'category=base-12crit-5warn-1tip(cap3/key); states=scored|not-machine-checkable|not-applicable; overall=weighted-over-scored; gate=life-safety-cap-49',
   });
   return createHash('sha256').update(payload).digest('hex').slice(0, 12);
 }
@@ -209,7 +216,9 @@ function addFinding(findings, stats, f) {
   // Only confirmed violations (check:'fail') drive the severity penalty; unverifiable
   // (review) findings never reduce the score (inspect.md Step 4 three-state rule).
   if (check === 'fail') {
-    stats[rest.category].sev[severity] += 1;
+    const keyCounts = (stats[rest.category]._keyCounts ||= {});
+    const seen = keyCounts[rest.key || 'external-finding'] = (keyCounts[rest.key || 'external-finding'] || 0) + 1;
+    if (seen <= SEV_REPEAT_CAP) stats[rest.category].sev[severity] += 1;
     // A CONFIRMED critical on a life-safety criterion arms the overall-score gate.
     if (severity === 'critical') {
       for (const m of String(rest.wcag || '').matchAll(/\b([1-4]\.\d\.\d{1,2})\b/g)) {
@@ -392,7 +401,10 @@ function scanFile(file, root, stats, findings) {
       }
     }
 
-    for (const m of text.matchAll(/<img\b(?![^>]*\balt=)[^>]*>/gi)) {
+    // Images removed from the accessibility tree need no alt: aria-hidden,
+    // role=presentation/none, and inline display:none (tracking pixels, preloads) are
+    // exempt — benchmark 2026-07-05 found 20+ false criticals from these classes.
+    for (const m of text.matchAll(/<img\b(?![^>]*\balt=)(?![^>]*aria-hidden=["']true["'])(?![^>]*role=["'](?:presentation|none)["'])(?![^>]*style=["'][^"']*display\s*:\s*none)[^>]*>/gi)) {
       addFinding(findings, stats, {
         key: 'image-alt-missing',
         category: 'screenreader',
@@ -410,6 +422,26 @@ function scanFile(file, root, stats, findings) {
     // Whitespace-anchored so data-alt= is not counted; alt="" stays a pass (correct
     // decorative markup is evidence).
     for (const _ of text.matchAll(/<img\b[^>]*\salt\s*=/gi)) addCheck(stats, 'screenreader', 'pass');
+
+    // Frames need an accessible name (axe frame-title): statically detectable, and the
+    // 2026-07-05 benchmark showed Lighthouse catching real instances Beacon had no rule
+    // for. aria-hidden frames are out of the a11y tree and exempt.
+    for (const m of text.matchAll(/<iframe\b(?![^>]*\btitle\s*=)(?![^>]*aria-hidden=["']true["'])[^>]*>/gi)) {
+      addFinding(findings, stats, {
+        key: 'frame-title-missing',
+        category: 'screenreader',
+        severity: 'warning',
+        wcag: 'WCAG 2.2: 4.1.2 Name, Role, Value',
+        level: 'A',
+        title: 'Frame is missing a title',
+        affected_users: 'Screen-reader users navigating between frames',
+        location: `${rel}:${lineOf(text, m.index || 0)}`,
+        description: 'An <iframe> without a title gives screen-reader users no way to know what the frame contains before entering it.',
+        fix: 'Add title="..." describing the frame content.',
+        code_before: snippetAt(text, m.index || 0),
+      });
+    }
+    for (const _ of text.matchAll(/<iframe\b[^>]*\btitle\s*=["'][^"']/gi)) addCheck(stats, 'screenreader', 'pass');
 
     // List structure (axe "list"): a <ul>/<ol> whose first child is not <li>.
     // Conservative Tier-1 heuristic: inspect only the FIRST child after the open
@@ -439,7 +471,9 @@ function scanFile(file, root, stats, findings) {
     }
 
     let namelessButtons = 0;
-    for (const m of text.matchAll(/<button\b((?!aria-label|aria-labelledby)[^>])*>\s*(<[^>]+>\s*)*<\/button>/gi)) {
+    // Inner tag group must not swallow </button>: adjacent nameless buttons (icon rows)
+    // otherwise merge into one greedy match and get undercounted.
+    for (const m of text.matchAll(/<button\b((?!aria-label|aria-labelledby)[^>])*>\s*(<(?!\/?button\b)[^>]+>\s*)*<\/button>/gi)) {
       namelessButtons += 1;
       addFinding(findings, stats, {
         key: 'button-name-missing',
@@ -581,7 +615,10 @@ function scanFile(file, root, stats, findings) {
       });
     }
 
-    if (/\.html?$/.test(file) && !/<meta\s+name=["']viewport["'][^>]*>/i.test(text)) {
+    // Attribute-order agnostic: `content=` (or data-* from React Helmet) may precede
+    // `name=` — benchmark 2026-07-05 found 4 sites falsely flagged by a first-attribute
+    // anchored match.
+    if (/\.html?$/.test(file) && !/<meta\b[^>]*name=["']viewport["']/i.test(text)) {
       addFinding(findings, stats, {
         key: 'viewport-meta-missing',
         category: 'responsive',
@@ -623,7 +660,10 @@ function scanFile(file, root, stats, findings) {
     }
 
     if (/\.html?$/.test(file)) {
-      if (!/<meta\s+name=["']description["'][^>]*content=["'][^"']+["'][^>]*>/i.test(text)) {
+      // Find the tag regardless of attribute order, then require a non-empty content=
+      // anywhere inside it.
+      const descTag = (text.match(/<meta\b[^>]*name=["']description["'][^>]*>/i) || [null])[0];
+      if (!descTag || !/content=["'][^"']/i.test(descTag)) {
         addFinding(findings, stats, {
           key: 'meta-description-missing',
           category: 'agent',
@@ -639,7 +679,7 @@ function scanFile(file, root, stats, findings) {
         });
       } else addCheck(stats, 'agent', 'pass');
 
-      if (!/<link\s+rel=["']canonical["'][^>]*>/i.test(text)) {
+      if (!/<link\b[^>]*rel=["']canonical["']/i.test(text)) {
         addFinding(findings, stats, {
           key: 'canonical-missing',
           category: 'agent',

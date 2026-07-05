@@ -35,6 +35,28 @@ Scoring-semantics overhaul driven by the 2026-07-05 scoring-validity audit.
   for report colouring and docs; the stale 4-band interpretation table and the retired
   44-site narrative ranges were removed from inspect.md.
 
+### Fixed (validated on the committed 87-site benchmark, `benchmark/2026-07-05/`)
+
+Engine `beacon-static-audit@4`. Each false-positive class below was found by per-site
+adversarial diagnosis of Beacon-vs-Lighthouse rank outliers, verified against the raw
+markup, then fixed test-first. Re-running the identical snapshots moved Spearman rank
+correlation with Lighthouse a11y from **0.354 to 0.474** (n=71 pairs).
+
+- **Attribute-order sensitivity**: `viewport-meta-missing`, `meta-description-missing`,
+  and `canonical-missing` fired whenever `content=` / `href=` / `data-rh=` preceded
+  `name=` / `rel=` (React Helmet et al.). Four benchmark sites were falsely flagged; a
+  single phantom viewport fail zeroed the whole responsive category.
+- **`image-alt-missing`** now exempts images removed from the accessibility tree:
+  `aria-hidden="true"`, `role="presentation|none"`, inline `display:none` (tracking
+  pixels, preload stashes). One site carried 14 false criticals from this class alone.
+- **Adjacent nameless buttons** no longer merge into one greedy regex match (the inner
+  tag group swallowed `</button>`), so icon-button rows are counted per instance.
+- **Severity stacking cap**: the per-category severity penalty counts at most 3 instances
+  per finding key — 9 identical criticals stamped out by one reused nav template had
+  floored a 96%-passing category to 0. All instances still count in the pass/fail base.
+- **New detector `frame-title-missing`** (WCAG 4.1.2): statically detectable and
+  previously a silent gap that let iframe-heavy pages score 100.
+
 ## [2.3.0] — 2026-06-26
 
 Held-out-driven detector precision/recall improvements; each fix is validated by

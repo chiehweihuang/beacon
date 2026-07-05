@@ -178,6 +178,51 @@ test('pass evidence is positive: suppression heuristics and empty labels do not 
   assert.equal(cat(audit, 'forms').state, 'not-applicable', 'data-id is not label evidence');
 });
 
+// ---- detector FP classes found by the 2026-07-05 benchmark ------------------------
+
+test('attribute order does not matter: viewport/description/canonical found with content-first markup', () => {
+  const html = `<!DOCTYPE html><html lang="en"><head><title>t</title>
+<meta content="width=device-width, initial-scale=1" name="viewport">
+<meta content="Readable page summary." name="description">
+<link href="https://example.com/page" rel="canonical">
+</head><body><main><h1>x</h1><a href="/x">Home</a></main></body></html>`;
+  const { audit } = run({ html, args: ['--date', '2020-01-01'] });
+  for (const key of ['viewport-meta-missing', 'meta-description-missing', 'canonical-missing']) {
+    assert.equal(audit.findings.filter((f) => f.key === key).length, 0, `${key} must not fire when the tag exists with reordered attributes`);
+  }
+  assert.ok(cat(audit, 'responsive').score > 0, 'responsive must not be zeroed by a phantom viewport failure');
+});
+
+test('images excluded from the accessibility tree are not alt-text failures', () => {
+  const html = PAGE.replace('</main>', `
+<img aria-hidden="true" src="deco.png">
+<img role="presentation" src="deco2.png">
+<img style="border:none; display: none;" width="1" height="1" src="pixel.gif">
+</main>`);
+  const { audit } = run({ html, args: ['--date', '2020-01-01'] });
+  assert.equal(audit.findings.filter((f) => f.key === 'image-alt-missing').length, 0, 'aria-hidden / role=presentation / display:none images need no alt');
+});
+
+test('repeated instances of one finding key cap the severity penalty (template-stamped defects)', () => {
+  const named = Array.from({ length: 20 }, (_, i) => `<button>B${i}</button>`).join('');
+  const empty = Array.from({ length: 5 }, () => '<button></button>').join('');
+  const html = PAGE.replace('</main>', `${named}${empty}</main>`);
+  const { audit } = run({ html, args: ['--date', '2020-01-01'] });
+  const kb = cat(audit, 'keyboard');
+  assert.equal(kb.pass, 20);
+  assert.equal(kb.fail, 5, 'every instance still counts as a fail (base ratio unaffected)');
+  // base = 20/25*100 = 80; 4.1.2 matrix critical -12 each, capped at 3 repeats -> 80-36 = 44.
+  // Uncapped stacking would give 80-60 = 20.
+  assert.equal(kb.score, 44, 'severity penalty must cap at 3 per finding key');
+});
+
+test('iframes without titles are detected statically; titled iframes count as passes', () => {
+  const html = PAGE.replace('</main>', '<iframe src="/a.html"></iframe><iframe title="Map" src="/b.html"></iframe></main>');
+  const { audit } = run({ html, args: ['--date', '2020-01-01'] });
+  assert.equal(audit.findings.filter((f) => f.key === 'frame-title-missing').length, 1, 'untitled iframe must be flagged');
+  assert.ok(cat(audit, 'screenreader').fail >= 1, 'untitled iframe is a screenreader fail');
+});
+
 // ---- merge ingestion: fail / review / pass / malformed ---------------------------
 
 test('severity matrix is applied at the script (merged finding with no severity -> matrix)', () => {
