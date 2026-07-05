@@ -3,6 +3,38 @@
 All notable changes to Beacon are documented here. Versions follow the plugin
 manifest (`.claude-plugin/plugin.json`); dates are release-prep dates.
 
+## [Unreleased]
+
+Scoring-semantics overhaul driven by the 2026-07-05 scoring-validity audit.
+**Breaking: scores shift versus 2.3.0** (`DETECTOR_VERSION` → `beacon-static-audit@3`).
+
+### Changed
+
+- **Category states**: a category with no machine evidence now reports
+  `state: "not-machine-checkable"` (review-only) or `"not-applicable"` (no evidence) with
+  `score: null`. The former placeholder scores (constant 60 for review-only categories,
+  100 for empty ones) are gone — absence of evidence is no longer presented as a score.
+- **Overall score** is the weighted average over scored categories only, weights
+  renormalised; `summary.coverage_percent` reports the share of scoring weight actually
+  measured. This removes the old hidden ceiling of 86 that made the 90+ band unreachable.
+- **Report**: the category table column that rendered the score under a "Coverage" header
+  is now labelled Score; real weight coverage appears under the hero rings; unscored
+  categories render text state badges instead of score bars.
+- **Gradient restoration**: named buttons, labelled inputs, alt-carrying images, named
+  links, and keyboard-paired click handlers now count as passes, so keyboard and forms
+  scores are proportions instead of binary {100, 0}.
+- **Life-safety gate**: a confirmed critical on WCAG 2.3.1 caps the overall score at 49,
+  sets `summary.life_safety_flag`, and renders a dedicated report banner — category
+  weights can no longer dilute a seizure risk.
+- **Merge ingestion**: `--merge-findings` accepts `check: "pass"` for externally verified
+  passes (previously silently coerced to FAIL); unknown check values are skipped with a
+  warning instead of becoming fails.
+- **`confidence_level`** is derived from measured coverage (low / medium; the static
+  pipeline never claims high) instead of being hardcoded to `medium`.
+- **Score bands** are emitted in the artifact (`summary.score_bands`) as the single source
+  for report colouring and docs; the stale 4-band interpretation table and the retired
+  44-site narrative ranges were removed from inspect.md.
+
 ## [2.3.0] — 2026-06-26
 
 Held-out-driven detector precision/recall improvements; each fix is validated by

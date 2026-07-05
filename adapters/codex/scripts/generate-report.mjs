@@ -101,7 +101,12 @@ const I18N = {
     th_pass: '通過',
     th_fail: '待修',
     th_review: '待審',
-    th_coverage: '覆蓋率',
+    th_score: '分數',
+    state_not_machine_checkable: '需人工驗證',
+    state_not_applicable: '不適用',
+    coverage_line: '機測權重涵蓋',
+    coverage_note: '其餘部分需人工或即時審查',
+    score_na: '—',
     // Meta line
     meta_date: '日期',
     meta_scope: '範圍',
@@ -190,7 +195,12 @@ const I18N = {
     th_pass: 'Pass',
     th_fail: 'Adjust',
     th_review: 'Review',
-    th_coverage: 'Coverage',
+    th_score: 'Score',
+    state_not_machine_checkable: 'Needs human verification',
+    state_not_applicable: 'Not applicable',
+    coverage_line: 'Machine-measured weight coverage',
+    coverage_note: 'the rest needs human or live review',
+    score_na: 'n/a',
     meta_date: 'Date',
     meta_scope: 'Scope',
     meta_standard: 'Standard',
@@ -717,17 +727,29 @@ const reportCounts = {
 };
 
 
+// Score bands come from the audit artifact (summary.score_bands — static-audit.mjs is
+// the single source); the fallback mirrors it for pre-@3 artifacts. A null score means
+// "no machine evidence" and must never paint as a colour band.
+const SCORE_BANDS = audit.summary?.score_bands?.length ? audit.summary.score_bands : [
+  { min: 90, id: 'pass' },
+  { min: 50, id: 'needs-work' },
+  { min: 0, id: 'fail' },
+];
+const BAND_COLORS = { pass: 'var(--pass)', 'needs-work': 'var(--mid)', fail: 'var(--fail)' }; // --mid: dedicated clean amber for the rings (not the muddy text --warn)
+const BAND_LABEL_KEYS = { pass: 'verdict_pass', 'needs-work': 'verdict_needs_work', fail: 'verdict_fail' };
+
+function bandOf(score) {
+  return SCORE_BANDS.find(b => score >= b.min) || SCORE_BANDS[SCORE_BANDS.length - 1];
+}
+
 function scoreColor(score) {
-  if (score >= 90) return 'var(--pass)';
-  if (score >= 50) return 'var(--mid)';   // dedicated clean amber for the rings (not the muddy text --warn)
-  return 'var(--fail)';
+  if (score === null || score === undefined) return 'var(--text-muted)';
+  return BAND_COLORS[bandOf(score).id] || 'var(--fail)';
 }
 
 function scoreLabel(score) {
-  // Returns a bilingual span; choose key based on score band
-  if (score >= 90) return t('verdict_pass');
-  if (score >= 50) return t('verdict_needs_work');
-  return t('verdict_fail');
+  if (score === null || score === undefined) return t('score_na');
+  return t(BAND_LABEL_KEYS[bandOf(score).id] || 'verdict_fail');
 }
 
 function riskColor(level) {
@@ -756,11 +778,13 @@ function buildCategoryRows(categories, prevCategories) {
         <td class="num fail">${cat.fail} ${deltaArrow(cat.fail, prevFail)}</td>
         <td class="num review">${cat.review || 0}</td>
         <td>
+          ${cat.score === null || cat.score === undefined ? `
+          <span class="state-badge">${cat.state === 'not-applicable' ? t('state_not_applicable') : t('state_not_machine_checkable')}</span>` : `
           <div class="score-bar">
             <div class="score-fill" style="width:${cat.score}%;background:${scoreColor(cat.score)}"></div>
-            <span class="score-text">${cat.score}%</span>
+            <span class="score-text">${cat.score}</span>
           </div>
-          ${prevScore !== null ? `<div class="prev-score">${t('score_was_prefix')} ${prevScore}%</div>` : ''}
+          ${prevScore !== null && prevScore !== undefined ? `<div class="prev-score">${t('score_was_prefix')} ${prevScore}</div>` : ''}`}
         </td>
       </tr>`;
   }).join('');
@@ -853,6 +877,22 @@ function buildLegalRiskHTML(legal, findings) {
           </div>`).join('')}
       </div>
     </div>`;
+}
+
+// Life-safety gate notice — rendered before any score so a confirmed seizure risk is
+// impossible to miss. Text-first (not colour-only), bilingual, landmark for SR nav.
+function buildLifeSafetyBanner() {
+  return `
+    <section class="life-safety-banner" aria-label="Life-safety warning / 生命安全警示">
+      <div class="lang-zh" lang="zh-Hant">
+        <div class="banner-title">生命安全警示（WCAG 2.3.1 閃爍／癲癇風險）</div>
+        <p>本次審查含已確認的閃爍／癲癇風險發現。總分已強制封頂至紅色帶；請先處理此項，再解讀其他分數。詳見 Findings 分頁的 critical 項目。</p>
+      </div>
+      <div class="lang-en" lang="en">
+        <div class="banner-title">Life-safety warning (WCAG 2.3.1 flashing / seizure risk)</div>
+        <p>This audit contains a confirmed flashing / seizure-risk finding. The overall score is capped into the fail band; address this before reading any other score. See the critical items in the Findings tab.</p>
+      </div>
+    </section>`;
 }
 
 function buildContextBanner() {
@@ -1807,6 +1847,31 @@ const html = `<!DOCTYPE html>
   .comparison-stat .value { font-size: 1.5rem; font-weight: 700; }
   .comparison-stat .label { font-size: 0.8rem; color: var(--text-muted); }
 
+  /* Life-safety gate banner (rendered only when summary.life_safety_flag) */
+  .life-safety-banner {
+    background: var(--surface-2);
+    border: 2px solid var(--fail);
+    border-left: 8px solid var(--fail);
+    border-radius: 8px;
+    padding: 1.1rem 1.3rem;
+    margin: 1.5rem 0;
+    font-size: 0.95rem;
+    line-height: 1.7;
+  }
+  .life-safety-banner .banner-title { font-size: 1.1rem; font-weight: 700; color: var(--fail); }
+
+  /* Category state badge (score column when no machine evidence exists) */
+  .state-badge {
+    display: inline-block;
+    padding: 0.15rem 0.55rem;
+    border: 1px solid var(--text-muted);
+    border-radius: 999px;
+    font-size: 0.78rem;
+    color: var(--text-muted);
+    white-space: nowrap;
+  }
+  .coverage-line { text-align: center; color: var(--text-muted); margin: 0.25rem 0 1rem; font-size: 0.9rem; }
+
   /* Audit context banner (epistemic warning, always visible) */
   .audit-context-banner {
     background: var(--info-bg);
@@ -2040,19 +2105,20 @@ const html = `<!DOCTYPE html>
 ${previous ? `
 <div class="comparison-banner">
   <div class="comparison-stat">
-    <div class="value" style="color:${scoreColor(audit.summary.overall_score)}">${audit.summary.overall_score}</div>
+    <div class="value" style="color:${scoreColor(audit.summary.overall_score)}">${audit.summary.overall_score ?? '—'}</div>
     <div class="label">${t('cmp_current')}</div>
   </div>
   <div class="comparison-stat">
-    <div class="value" style="color:${scoreColor(previous.summary.overall_score)}">${previous.summary.overall_score}</div>
+    <div class="value" style="color:${scoreColor(previous.summary.overall_score)}">${previous.summary.overall_score ?? '—'}</div>
     <div class="label">${t('cmp_previous')}</div>
   </div>
+  ${audit.summary.overall_score != null && previous.summary.overall_score != null ? `
   <div class="comparison-stat">
     <div class="value" style="color:${audit.summary.overall_score > previous.summary.overall_score ? 'var(--pass)' : 'var(--fail)'}">
       ${audit.summary.overall_score > previous.summary.overall_score ? '+' : ''}${audit.summary.overall_score - previous.summary.overall_score}
     </div>
     <div class="label">${t('cmp_delta')}</div>
-  </div>
+  </div>` : ''}
   <div class="comparison-stat">
     <div class="value">${audit.summary.total_findings} / ${previous.summary.total_findings}</div>
     <div class="label">${t('cmp_issues')}</div>
@@ -2062,15 +2128,18 @@ ${previous ? `
 
 <!-- Audit context banner: always shown before scores, sets epistemic frame -->
 ${buildContextBanner()}
+${audit.summary.life_safety_flag ? buildLifeSafetyBanner() : ''}
 
-<!-- Score Rings -->
+<!-- Score Rings (scored categories only — unscored ones carry a state, not a number) -->
 <div class="score-ring-container">
   ${buildScoreRing(t('ring_overall'), audit.summary.overall_score, previous?.summary?.overall_score)}
-  ${audit.summary.categories.map(cat => {
+  ${audit.summary.categories.filter(cat => cat.score !== null && cat.score !== undefined).map(cat => {
     const prev = previous?.summary?.categories?.find(p => p.id === cat.id);
     return buildScoreRing(catName(cat), cat.score, prev?.score);
   }).join('')}
 </div>
+${audit.summary.coverage_percent !== undefined ? `
+<p class="coverage-line">${t('coverage_line')}: <strong>${audit.summary.coverage_percent}%</strong> · ${t('coverage_note')}</p>` : ''}
 
 <!-- Verdict -->
 <div style="text-align:center;margin:1.5rem 0">
@@ -2103,7 +2172,7 @@ ${buildContextBanner()}
         <th class="num">${t('th_pass')}</th>
         <th class="num">${t('th_fail')}</th>
         <th class="num">${t('th_review')}</th>
-        <th>${t('th_coverage')}</th>
+        <th>${t('th_score')}</th>
       </tr>
     </thead>
     <tbody>
@@ -2269,8 +2338,9 @@ console.log(`Report written to: ${outputPath}`);
 
 function buildScoreRing(label, score, prevScore) {
   const circumference = 2 * Math.PI * 40;
-  const offset = circumference * (1 - score / 100);
-  const color = scoreColor(score);
+  const value = score === null || score === undefined ? null : score;
+  const offset = circumference * (1 - (value ?? 0) / 100);
+  const color = scoreColor(value);
   const prevText = prevScore !== null && prevScore !== undefined
     ? `<div class="ring-prev">${t('ring_was')} ${prevScore}</div>`
     : '';
@@ -2282,7 +2352,7 @@ function buildScoreRing(label, score, prevScore) {
           stroke="${color}"
           stroke-dasharray="${circumference}"
           stroke-dashoffset="${offset}"/>
-        <text class="ring-text" x="50" y="55" text-anchor="middle">${score}</text>
+        <text class="ring-text" x="50" y="55" text-anchor="middle">${value ?? '—'}</text>
       </svg>
       <div class="ring-label">${label}</div>
       ${prevText}

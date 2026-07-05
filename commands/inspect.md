@@ -25,19 +25,18 @@ Conduct a structured accessibility audit that produces **quantitative scores** a
 3. **Before/After Comparison** — Load a previous audit JSON to show deltas
 4. **Jurisdiction Context** — Per-jurisdiction framing tied to the WCAG criteria found in the audit, without presenting mechanical warning counts as legal risk
 5. **Local Artifacts Only** — Beacon keeps audit artifacts local; detector updates come from maintainer-run offline work and plugin releases
-6. **Confidence Level** — Indicates how much of the page was auditable (CSR/SPA detection)
-7. **Unverifiable State** — Items that cannot be confirmed from static HTML are flagged, not penalized
+6. **Confidence Level** — Derived by the script from measured weight coverage, never hardcoded
+7. **Category States** — A category with no machine evidence reports a state (`not-machine-checkable` / `not-applicable`) with `score: null`, never a number; unverifiable items are flagged, not penalized
 8. **Pedagogical Demo Detection** — Intentionally bad examples in educational content are excluded from scoring
 
-## Scoring Calibration (from 44-site benchmark)
+## Scoring Calibration
 
-These reference ranges help calibrate scores:
-- **90-96**: Hand-crafted best-practice pages, top government design systems
-- **85-91**: Leading a11y-focused organizations (W3C WAI, WebAIM, GOV.UK)
-- **75-84**: Well-built public sites (BBC, NHS, government sites)
-- **55-74**: Average commercial sites, website builders
-- **20-40**: SPA shells (CSR-only), neglected sites
-- **15-20**: Intentionally inaccessible pages
+The former "44-site benchmark" narrative ranges are retired: the benchmark data was never
+committed to this repo, and the one large external comparison that exists (the 100-site
+Lighthouse baseline) contradicted those ranges. Do not quote per-band site archetypes.
+Score bands come from the engine (`summary.score_bands` in the artifact — see Scoring
+Interpretation below); publishing narrative ranges again requires a committed, reproducible
+benchmark against the current formula.
 
 ## Process
 
@@ -252,9 +251,11 @@ Before manual review, assess how much of the page content is available in the st
 |-------|---------|--------|
 | **HIGH** | >= 80% of content visible in static HTML | Normal scoring |
 | **MEDIUM** | 40-80% visible; some JS-rendered components | Score normally but flag unverifiable items |
-| **LOW** | < 40% visible; CSR shell | Score static HTML only. Append disclaimer: "This score reflects static HTML analysis only. A live browser audit is required for a meaningful assessment." Lower the overall score ceiling to 60 and mark the audit as `requires_live_audit: true` |
+| **LOW** | < 40% visible; CSR shell | Treat the static score as near-meaningless: state in the report narrative that "This score reflects static HTML analysis only. A live browser audit is required for a meaningful assessment." Do NOT edit any score — the script's coverage-derived `confidence_level` and the category states already express the limitation numerically. |
 
-Include `confidence_level` in the JSON output metadata.
+The script derives `confidence_level` from measured weight coverage and writes it to
+`metadata` itself. Your CSR assessment here decides whether to insist on a Tier-2 live
+audit before drawing conclusions — it does not change any number.
 
 ### Step 2c: Pedagogical Demo Detection
 
@@ -430,10 +431,15 @@ This category covers both assistive technology agents (screen readers) and AI ag
 | Verdict | Meaning | Score impact |
 |---------|---------|-------------|
 | `pass` | Evidence confirms compliance | +1 to category pass count |
-| `fail` | Evidence confirms violation | -1 to category pass count + finding |
+| `fail` | Evidence confirms violation | +1 to category fail count + finding |
 | `unverifiable` | Cannot confirm from static HTML (e.g., JS-rendered content, runtime behavior, actual contrast) | Excluded from both pass and fail counts. Does NOT reduce score. |
 
-This three-state system prevents penalizing CSR/SPA sites for things that simply cannot be verified from static HTML. It also reduces inter-auditor variance by eliminating the "probably fails" gray area.
+A category's evidence rolls up to a **state** in the artifact: `scored` (has pass/fail
+evidence), `not-machine-checkable` (review-only), or `not-applicable` (no evidence at all).
+Unscored categories carry `score: null` — absence of evidence is reported as a state, never
+as a number, and never as 100.
+
+This system prevents penalizing CSR/SPA sites for things that simply cannot be verified from static HTML. It also reduces inter-auditor variance by eliminating the "probably fails" gray area.
 
 **Category score formula:**
 
@@ -485,7 +491,8 @@ Severity classification rules:
 - 1.4.1 (use of color) is **critical** (Level A), not warning — even if subtle
 - 2.4.7 focus visibility is **warning** (Level AA), not critical — even when `outline: none` is confirmed
 
-Overall score is a weighted average:
+Overall score is a weighted average **over scored categories only**, with weights
+renormalised to the scored subset:
 | Category | Weight |
 |----------|--------|
 | Screen Reader | 18% |
@@ -498,6 +505,14 @@ Overall score is a weighted average:
 | Motion | 5% |
 | Media | 5% |
 | Agent | 5% |
+
+- Categories with `score: null` are **excluded** from the average; their weight moves
+  `summary.coverage_percent` (the share of scoring weight actually measured), never the score.
+- **Life-safety gate**: a confirmed critical on a life-safety criterion (2.3.1) caps the
+  overall score at 49 (fail band) and sets `summary.life_safety_flag` — a weighted average
+  must never dilute a seizure risk into an amber verdict.
+- `summary.score_bands` carries the band definitions (single source for the report and the
+  Scoring Interpretation table below).
 
 ### Step 5: Map Jurisdiction Context
 
@@ -522,8 +537,10 @@ severities (via the matrix), and the scores:
 ```bash
 # manual-findings.json: a JSON array (or {"findings":[...]}) of finding objects, each with at
 # minimum { "category": "<one of the 10 ids>", "wcag": "1.4.3", "title": "...", "location": "..." }.
-# Optional: "severity" (overridden by the matrix when the WCAG criterion is listed),
-# "fix", and "check": "review" for an unverifiable finding that must NOT lower the score.
+# Optional: "severity" (overridden by the matrix when the WCAG criterion is listed), "fix",
+# and "check": "review" for an unverifiable finding that must NOT lower the score, or
+# "check": "pass" for an externally VERIFIED pass — it counts as category evidence (raising
+# coverage), not as a finding. Unknown check values are skipped with a warning.
 node scripts/static-audit.mjs --scope "<scope>" \
   --merge-findings manual-findings.json \
   --output audit-results.json <file-or-dir>...
@@ -566,11 +583,18 @@ The script emits this shape (reference — do not author it by hand):
     "jurisdictions": ["US ADA", "Japan JIS"],
     "platform": "Web",
     "tool_version": "a11y-audit-v2.1",
-    "confidence_level": "high",
-    "requires_live_audit": false
+    "confidence_level": "medium",
+    "requires_live_audit": true
   },
   "summary": {
     "overall_score": 72,
+    "coverage_percent": 66,
+    "life_safety_flag": false,
+    "score_bands": [
+      { "min": 90, "id": "pass" },
+      { "min": 50, "id": "needs-work" },
+      { "min": 0, "id": "fail" }
+    ],
     "total_findings": 15,
     "critical": 3,
     "warnings": 7,
@@ -578,8 +602,9 @@ The script emits this shape (reference — do not author it by hand):
     "unverifiable": 4,
     "pedagogical_excluded": 0,
     "categories": [
-      { "id": "contrast", "name": "Color & Contrast", "score": 85, "pass": 5, "fail": 1, "unverifiable": 2 },
-      { "id": "keyboard", "name": "Keyboard Navigation", "score": 60, "pass": 4, "fail": 3, "unverifiable": 0 }
+      { "id": "contrast", "name": "Color & Contrast", "state": "scored", "score": 85, "pass": 5, "fail": 1, "review": 2 },
+      { "id": "keyboard", "name": "Keyboard Navigation", "state": "scored", "score": 60, "pass": 4, "fail": 3, "review": 0 },
+      { "id": "media", "name": "Media", "state": "not-machine-checkable", "score": null, "pass": 0, "fail": 0, "review": 1 }
     ]
   },
   "findings": [
@@ -769,12 +794,17 @@ Include the appropriate config in the audit report when CI/CD integration is req
 
 ## Scoring Interpretation
 
-| Score | Meaning |
-|-------|---------|
-| 90-100 | Excellent — minor improvements only |
-| 70-89 | Good — some issues need attention |
-| 50-69 | Needs work — significant barriers exist |
-| 0-49 | Poor — critical barriers blocking users |
+Bands are defined once in `static-audit.mjs` (`SCORE_BANDS`, emitted as
+`summary.score_bands`); this table mirrors them:
+
+| Score | Band | Meaning |
+|-------|------|---------|
+| 90-100 | pass | Meets the machine-checkable baseline at the measured coverage |
+| 50-89 | needs-work | Confirmed issues worth addressing |
+| 0-49 | fail | Substantial confirmed barriers, or the life-safety gate |
+
+Read every score together with `coverage_percent`: 100 at 35% coverage means "nothing wrong
+found in the measured 35%", not "accessible".
 
 ## References
 

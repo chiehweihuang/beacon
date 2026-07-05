@@ -54,19 +54,34 @@ const SEVERITY_MATRIX = {
   '4.1.2': 'critical',
 };
 
+// Score bands — the SINGLE source for report colouring and doc tables. Emitted with the
+// artifact (summary.score_bands) so generate-report.mjs and inspect.md cannot drift.
+const SCORE_BANDS = [
+  { min: 90, id: 'pass' },
+  { min: 50, id: 'needs-work' },
+  { min: 0, id: 'fail' },
+];
+
+// Life-safety criteria gate the OVERALL score: a weighted average must never dilute a
+// confirmed seizure risk (2.3.1) into an amber verdict. A confirmed critical on any of
+// these criteria caps the overall inside the fail band.
+const LIFE_SAFETY_CRITERIA = new Set(['2.3.1']);
+const LIFE_SAFETY_CAP = 49;
+
 // P3: engine fingerprint. The reproducibility contract is "same page + same fingerprint
 // => identical machine layer". Bump DETECTOR_VERSION when detection/scoring LOGIC changes;
 // the ruleset hash auto-changes when the scoring CONTRACT (weights/matrix/formula) changes.
 // (axe / capture-recipe components are added when Tier-2 findings are merged with their own
 // engine provenance; the pure static engine here is axe-free, so claiming an axe version would
 // be dishonest.)
-const DETECTOR_VERSION = 'beacon-static-audit@2';
+const DETECTOR_VERSION = 'beacon-static-audit@3';
 
 function rulesetHash() {
   const payload = JSON.stringify({
     weights: CATEGORY_WEIGHTS,
     matrix: SEVERITY_MATRIX,
-    formula: 'category=base-12crit-5warn-1tip; overall=weighted',
+    bands: SCORE_BANDS,
+    formula: 'category=base-12crit-5warn-1tip; states=scored|not-machine-checkable|not-applicable; overall=weighted-over-scored; gate=life-safety-cap-49',
   });
   return createHash('sha256').update(payload).digest('hex').slice(0, 12);
 }
@@ -193,7 +208,15 @@ function addFinding(findings, stats, f) {
   addCheck(stats, rest.category, check);
   // Only confirmed violations (check:'fail') drive the severity penalty; unverifiable
   // (review) findings never reduce the score (inspect.md Step 4 three-state rule).
-  if (check === 'fail') stats[rest.category].sev[severity] += 1;
+  if (check === 'fail') {
+    stats[rest.category].sev[severity] += 1;
+    // A CONFIRMED critical on a life-safety criterion arms the overall-score gate.
+    if (severity === 'critical') {
+      for (const m of String(rest.wcag || '').matchAll(/\b([1-4]\.\d\.\d{1,2})\b/g)) {
+        if (LIFE_SAFETY_CRITERIA.has(m[1])) stats._lifeSafety = true;
+      }
+    }
+  }
 }
 
 function isMarkup(ext) {
@@ -383,6 +406,10 @@ function scanFile(file, root, stats, findings) {
         code_before: snippetAt(text, m.index || 0),
       });
     }
+    // Images that DO carry alt are verified passes — they give the category its base.
+    // Whitespace-anchored so data-alt= is not counted; alt="" stays a pass (correct
+    // decorative markup is evidence).
+    for (const _ of text.matchAll(/<img\b[^>]*\salt\s*=/gi)) addCheck(stats, 'screenreader', 'pass');
 
     // List structure (axe "list"): a <ul>/<ol> whose first child is not <li>.
     // Conservative Tier-1 heuristic: inspect only the FIRST child after the open
@@ -411,7 +438,9 @@ function scanFile(file, root, stats, findings) {
       });
     }
 
+    let namelessButtons = 0;
     for (const m of text.matchAll(/<button\b((?!aria-label|aria-labelledby)[^>])*>\s*(<[^>]+>\s*)*<\/button>/gi)) {
+      namelessButtons += 1;
       addFinding(findings, stats, {
         key: 'button-name-missing',
         category: 'keyboard',
@@ -425,6 +454,12 @@ function scanFile(file, root, stats, findings) {
         code_before: snippetAt(text, m.index || 0),
       });
     }
+    // Buttons that DO have a name (text or a NON-EMPTY ARIA label) are verified keyboard
+    // passes. An empty aria-label="" escapes the nameless detector (suppression), but a
+    // suppressed fail is not a pass — exclude those from the count.
+    const emptyLabelButtons = (text.match(/<button\b[^>]*\saria-label(?:ledby)?\s*=\s*(?:""|'')[^>]*>/gi) || []).length;
+    const namedButtons = (text.match(/<button\b/gi) || []).length - namelessButtons - emptyLabelButtons;
+    for (let i = 0; i < Math.max(0, namedButtons); i++) addCheck(stats, 'keyboard', 'pass');
 
     // Link accessible-name. A link is "named" if it OR a descendant carries a
     // non-empty aria-label / aria-labelledby / title, OR it wraps ANY <img>
@@ -443,10 +478,12 @@ function scanFile(file, root, stats, findings) {
       const named =
         /\s(?:aria-label|aria-labelledby|title)\s*=\s*["'][^"']/.test(attrs) ||
         /\s(?:aria-label|aria-labelledby|title)\s*=\s*["'][^"']/.test(body) ||
-        /<img\b/i.test(body) || // wraps an image -> defer to the image-alt check
         (!!svgTitle && svgTitle[1].trim().length > 0) ||
         body.replace(/<[^>]*>/g, '').replace(/&[a-z#0-9]+;/gi, ' ').trim().length > 0;
-      if (named) continue;
+      if (named) { addCheck(stats, 'screenreader', 'pass'); continue; }
+      // Wrapping an image is a fail DEFERRAL (the image-alt check owns the verdict), not
+      // name evidence — no finding here, but no pass either.
+      if (/<img\b/i.test(body)) continue;
       addFinding(findings, stats, {
         key: 'link-name-missing',
         category: 'screenreader',
@@ -478,7 +515,9 @@ function scanFile(file, root, stats, findings) {
       });
     }
 
+    let unlabelledInputs = 0;
     for (const m of text.matchAll(/<input\b(?![^>]*(aria-label|aria-labelledby|id=|type=["']hidden["']))[^>]*>/gi)) {
+      unlabelledInputs += 1;
       addFinding(findings, stats, {
         key: 'input-label-missing',
         category: 'forms',
@@ -492,6 +531,12 @@ function scanFile(file, root, stats, findings) {
         code_before: snippetAt(text, m.index || 0),
       });
     }
+    // Non-hidden inputs that DO carry a real label hook are verified form passes. This is
+    // POSITIVE evidence (whitespace-anchored attribute with a non-empty value), deliberately
+    // decoupled from the fail regex above, whose `id=` substring suppression also matches
+    // data-id etc. — a suppressed fail is not a pass.
+    const labelledInputs = (text.match(/<input\b(?![^>]*type=["']hidden["'])(?=[^>]*\s(?:id|aria-label|aria-labelledby)\s*=\s*["'][^"'])[^>]*>/gi) || []).length;
+    for (let i = 0; i < labelledInputs; i++) addCheck(stats, 'forms', 'pass');
 
     // Authentication barriers (3.3.8): cognitive-function-test CAPTCHAs and
     // paste-blocked password fields that Lighthouse does not flag. INFO signals
@@ -745,7 +790,7 @@ function scanFile(file, root, stats, findings) {
           fix: 'Prefer a native button, or add Enter/Space keyboard support and focus management.',
           code_before: ctx,
         });
-      }
+      } else addCheck(stats, 'keyboard', 'pass');
     }
   }
 
@@ -825,14 +870,16 @@ function addSiteAgentReadinessFindings(inputPaths, files, root, stats, findings)
 
 // inspect.md Step 4 category formula (single source): base = pass/auditable, then a
 // severity penalty from confirmed-fail findings. unverifiable (review) is excluded from
-// both auditable and the penalty. Empty category falls back to a neutral 60/100.
+// both auditable and the penalty. A category with no pass/fail evidence gets a STATE,
+// never a number: review-only = not-machine-checkable, empty = not-applicable. Absence
+// of evidence must not read as a score.
 function scoreCategory(cat) {
   const auditable = cat.pass + cat.fail;
-  if (auditable === 0) return cat.review > 0 ? 60 : 100;
+  if (auditable === 0) return { state: cat.review > 0 ? 'not-machine-checkable' : 'not-applicable', score: null };
   const base = (cat.pass / auditable) * 100;
   const sev = cat.sev || { critical: 0, warning: 0, tip: 0 };
   const score = base - sev.critical * 12 - sev.warning * 5 - sev.tip * 1;
-  return Math.max(0, Math.min(100, Math.round(score)));
+  return { state: 'scored', score: Math.max(0, Math.min(100, Math.round(score))) };
 }
 
 function priorityFor(severity) {
@@ -867,6 +914,21 @@ function mergeExternalFindings(file, stats, findings) {
       console.error(`--merge-findings: skipped finding with invalid category: ${JSON.stringify(f).slice(0, 80)}`);
       continue;
     }
+    // check: absent -> confirmed fail (axe violations); pass/review/fail pass through;
+    // anything else is malformed input and is SKIPPED, never silently coerced to fail.
+    const check = f.check === undefined ? 'fail' : (['pass', 'review', 'fail'].includes(f.check) ? f.check : null);
+    if (check === null) {
+      skipped += 1;
+      console.error(`--merge-findings: skipped finding with unknown check "${f.check}": ${JSON.stringify(f).slice(0, 80)}`);
+      continue;
+    }
+    if (check === 'pass') {
+      // External verified passes are evidence, not findings — they raise the category
+      // base (and weight coverage) without entering the findings list.
+      addCheck(stats, f.category, 'pass');
+      merged += 1;
+      continue;
+    }
     const severity = ['critical', 'warning', 'tip'].includes(f.severity) ? f.severity : undefined;
     addFinding(findings, stats, {
       category: f.category,
@@ -877,7 +939,7 @@ function mergeExternalFindings(file, stats, findings) {
       location: f.location || '',
       fix: f.fix,
       source: f.source || 'merged',
-      check: f.check === 'review' ? 'review' : 'fail',
+      check,
     });
     merged += 1;
   }
@@ -921,11 +983,21 @@ function main() {
   const categories = CATEGORY_ORDER.map(id => {
     const cat = stats[id];
     // `sev` is internal scoring state — keep it out of the emitted artifact.
-    return { id: cat.id, name: cat.name, pass: cat.pass, fail: cat.fail, review: cat.review, score: scoreCategory(cat) };
+    const { state, score } = scoreCategory(cat);
+    return { id: cat.id, name: cat.name, pass: cat.pass, fail: cat.fail, review: cat.review, state, score };
   });
 
-  // Weighted average (inspect.md Step 4 weight table) — not a simple mean.
-  const overall = Math.round(categories.reduce((sum, cat) => sum + cat.score * (CATEGORY_WEIGHTS[cat.id] || 0), 0) / WEIGHT_SUM);
+  // Weighted average over SCORED categories only, weights renormalised (inspect.md
+  // Step 4). An unmeasured category moves COVERAGE, never the score.
+  const scoredCats = categories.filter(cat => cat.state === 'scored');
+  const scoredWeight = scoredCats.reduce((sum, cat) => sum + (CATEGORY_WEIGHTS[cat.id] || 0), 0);
+  const weightedScore = scoredWeight
+    ? Math.round(scoredCats.reduce((sum, cat) => sum + cat.score * (CATEGORY_WEIGHTS[cat.id] || 0), 0) / scoredWeight)
+    : null;
+  const coverage = Math.round((scoredWeight / WEIGHT_SUM) * 100);
+  const lifeSafety = stats._lifeSafety === true;
+  // Life-safety gate: a confirmed 2.3.1 critical caps the overall inside the fail band.
+  const overall = lifeSafety && weightedScore !== null ? Math.min(weightedScore, LIFE_SAFETY_CAP) : weightedScore;
   const critical = findings.filter(f => f.severity === 'critical').length;
   const warnings = findings.filter(f => f.severity === 'warning').length;
   const tips = findings.filter(f => f.severity === 'tip').length;
@@ -941,7 +1013,7 @@ function main() {
       platform: 'Web',
       tool_version: 'beacon codex static baseline',
       engine_fingerprint: engineFingerprint(),
-      confidence_level: 'medium',
+      confidence_level: coverage >= 60 ? 'medium' : 'low', // derived from measured weight; a static pipeline never claims high
       requires_live_audit: true,
       audit_tier: 'Tier 1 (static file scan only)',
       audit_methods: [
@@ -952,6 +1024,9 @@ function main() {
     },
     summary: {
       overall_score: overall,
+      coverage_percent: coverage,
+      life_safety_flag: lifeSafety,
+      score_bands: SCORE_BANDS,
       total_findings: findings.length,
       critical,
       warnings,
@@ -996,7 +1071,7 @@ function main() {
 
   writeFileSync(opts.output, JSON.stringify(audit, null, 2));
   console.log(`Wrote ${opts.output}`);
-  console.log(`Static baseline score: ${overall} (${findings.length} finding(s), ${critical} critical, ${warnings} warning, ${tips} tip)`);
+  console.log(`Static baseline score: ${overall ?? 'n/a'} at ${coverage}% weight coverage (${findings.length} finding(s), ${critical} critical, ${warnings} warning, ${tips} tip)${lifeSafety ? ' — LIFE-SAFETY GATE APPLIED' : ''}`);
 }
 
 main();

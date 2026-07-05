@@ -1,6 +1,8 @@
 // Beacon Phase A · static-audit scoring + verdict-ownership tests (P1).
-// Exercises the script as the SOLE author of audit-results.json: weighted overall,
-// severity-penalty category formula, the severity matrix, --merge-findings ingestion,
+// Exercises the script as the SOLE author of audit-results.json: category states
+// (scored / not-machine-checkable / not-applicable), renormalised weighted overall,
+// weight coverage, severity-penalty category formula, the severity matrix,
+// --merge-findings ingestion (fail / review / pass), the life-safety gate,
 // injectable date, and byte-identical reproducibility on an unchanged page.
 
 import { test } from 'node:test';
@@ -23,6 +25,19 @@ const PAGE = `<!DOCTYPE html><html lang="en"><head><title>t</title>
 <link rel="canonical" href="https://example.com/page">
 <script type="application/ld+json">{"@context":"https://schema.org","@type":"Article","headline":"x"}</script>
 </head><body><main><h1>x</h1><a href="/x">Home</a></main></body></html>`;
+
+// Everything Tier-1 can verify, verified: named button (keyboard pass), labelled
+// input (forms pass), animation with reduced-motion handling (motion pass).
+const RICH_PAGE = `<!DOCTYPE html><html lang="en"><head><title>t</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="description" content="Readable page summary.">
+<link rel="canonical" href="https://example.com/page">
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"Article","headline":"x"}</script>
+<style>.a{animation: spin 1s;} @media (prefers-reduced-motion: reduce){.a{animation: none;}}</style>
+</head><body><main><h1>x</h1><a href="/x">Home</a>
+<button>OK</button>
+<label for="n">Name</label><input id="n" type="text">
+</main></body></html>`;
 
 // Run the scanner; returns { audit, raw } where raw is the exact bytes written.
 function run({ html = PAGE, args = [], env = {} } = {}) {
@@ -48,13 +63,122 @@ function writeFindings(findings) {
   return { file, cleanup: () => rmSync(dir, { recursive: true, force: true }) };
 }
 
-test('overall is the WEIGHTED average of category scores, not a simple mean', () => {
+function cat(audit, id) {
+  return audit.summary.categories.find((c) => c.id === id);
+}
+
+// ---- category states ----------------------------------------------------------
+
+test('category states: scored / not-machine-checkable / not-applicable, score null when unscored', () => {
   const { audit } = run({ args: ['--date', '2020-01-01'] });
-  const cats = audit.summary.categories;
-  const weightSum = Object.values(WEIGHTS).reduce((a, b) => a + b, 0);
-  const expected = Math.round(cats.reduce((s, c) => s + c.score * (WEIGHTS[c.id] || 0), 0) / weightSum);
-  assert.equal(audit.summary.overall_score, expected, 'overall_score must equal the weighted average');
+  // Static evidence exists for these on PAGE:
+  for (const id of ['screenreader', 'responsive', 'agent']) {
+    assert.equal(cat(audit, id).state, 'scored', `${id} has pass evidence -> scored`);
+    assert.equal(typeof cat(audit, id).score, 'number');
+  }
+  // Static scanning cannot verify these at all (forced review, no pass/fail):
+  for (const id of ['contrast', 'touch', 'cognitive', 'media']) {
+    assert.equal(cat(audit, id).state, 'not-machine-checkable', `${id} is review-only -> not-machine-checkable`);
+    assert.equal(cat(audit, id).score, null, `${id} must NOT carry a numeric score`);
+  }
+  // No buttons/inputs/animation on PAGE -> nothing to check:
+  for (const id of ['keyboard', 'forms', 'motion']) {
+    assert.equal(cat(audit, id).state, 'not-applicable', `${id} has no evidence at all -> not-applicable`);
+    assert.equal(cat(audit, id).score, null, `${id} must NOT carry a numeric score`);
+  }
 });
+
+test('absence of evidence is not a score: no category reports 100 (or 60) without pass/fail evidence', () => {
+  const { audit } = run({ args: ['--date', '2020-01-01'] });
+  for (const c of audit.summary.categories) {
+    if (c.pass + c.fail === 0) assert.equal(c.score, null, `${c.id} has no auditable evidence, score must be null`);
+  }
+});
+
+// ---- overall: renormalised weighted average + coverage --------------------------
+
+test('overall is the weighted average of SCORED categories only, weights renormalised', () => {
+  const { audit } = run({ args: ['--date', '2020-01-01'] });
+  const scored = audit.summary.categories.filter((c) => c.state === 'scored');
+  const wsum = scored.reduce((s, c) => s + WEIGHTS[c.id], 0);
+  const expected = Math.round(scored.reduce((s, c) => s + c.score * WEIGHTS[c.id], 0) / wsum);
+  assert.equal(audit.summary.overall_score, expected, 'overall_score must renormalise over scored categories');
+});
+
+test('coverage_percent reports the scoring-weight share actually measured', () => {
+  const { audit } = run({ args: ['--date', '2020-01-01'] });
+  // PAGE: screenreader(18) + responsive(12) + agent(5) scored = 35% of weight.
+  assert.equal(audit.summary.coverage_percent, 35);
+});
+
+test('coverage and score are different numbers: unmeasured categories change coverage, not overall', () => {
+  const base = run({ args: ['--date', '2020-01-01'] }).audit;
+  const pass = writeFindings([{ category: 'contrast', check: 'pass', title: 'contrast verified externally' }]);
+  try {
+    const merged = run({ args: ['--date', '2020-01-01', '--merge-findings', pass.file] }).audit;
+    assert.ok(merged.summary.coverage_percent > base.summary.coverage_percent, 'verifying a new category raises coverage');
+    assert.equal(merged.summary.overall_score, base.summary.overall_score, 'a clean pass does not change a clean overall');
+  } finally { pass.cleanup(); }
+});
+
+test('the band top is reachable: fully verified page scores 100 at 100% coverage', () => {
+  const passes = writeFindings(['contrast', 'touch', 'cognitive', 'media'].map((category) => ({
+    category, check: 'pass', title: `${category} verified externally`,
+  })));
+  try {
+    const { audit } = run({ html: RICH_PAGE, args: ['--date', '2020-01-01', '--merge-findings', passes.file] });
+    for (const c of audit.summary.categories) assert.equal(c.state, 'scored', `${c.id} must be scored on the fully verified page`);
+    assert.equal(audit.summary.coverage_percent, 100);
+    assert.equal(audit.summary.overall_score, 100, 'a fully verified clean page must reach 100');
+    assert.ok(audit.summary.overall_score >= audit.summary.score_bands[0].min, 'top band must be reachable');
+  } finally { passes.cleanup(); }
+});
+
+// ---- gradient restoration (no more binary categories) ---------------------------
+
+test('forms has a gradient: mostly-labelled inputs score strictly between 0 and 100', () => {
+  const inputs = Array.from({ length: 5 }, (_, i) => `<label for="f${i}">L${i}</label><input id="f${i}" type="text">`).join('\n');
+  const html = PAGE.replace('</main>', `${inputs}\n<input type="text" name="unlabelled">\n</main>`);
+  const { audit } = run({ html, args: ['--date', '2020-01-01'] });
+  const forms = cat(audit, 'forms');
+  assert.equal(forms.state, 'scored');
+  assert.equal(forms.pass, 5, 'labelled inputs count as passes');
+  assert.equal(forms.fail, 1);
+  assert.ok(forms.score > 0 && forms.score < 100, `one bad input among five good must not zero the category (got ${forms.score})`);
+});
+
+test('keyboard has a gradient: named buttons count as passes', () => {
+  const html = PAGE.replace('</main>', '<button>Save</button><button>Send</button><button></button></main>');
+  const { audit } = run({ html, args: ['--date', '2020-01-01'] });
+  const kb = cat(audit, 'keyboard');
+  assert.equal(kb.state, 'scored');
+  assert.equal(kb.pass, 2, 'named buttons count as passes');
+  assert.equal(kb.fail, 1);
+  assert.ok(kb.score > 0 && kb.score < 100, `one nameless button among three must not zero the category (got ${kb.score})`);
+});
+
+test('pass evidence is positive: suppression heuristics and empty labels do not count as passes', () => {
+  const base = cat(run({ args: ['--date', '2020-01-01'] }).audit, 'screenreader').pass;
+  const html = PAGE.replace('</main>', `
+<a href="/img-link"><img src="x.png"></a>
+<img data-alt="not-an-alt" src="y.png">
+<button aria-label=""></button>
+<input data-id="tracker" type="text">
+</main>`);
+  const { audit } = run({ html, args: ['--date', '2020-01-01'] });
+  // Neither the img-wrapping link (fail deferral) nor the data-alt image may add a pass.
+  // Only the wrapped img is flagged: data-alt= also suppresses the FAIL detector (`\balt=`
+  // matches inside data-alt) — a pre-existing detector blind spot, out of scope here; the
+  // invariant under test is that a suppressed fail never becomes a pass.
+  assert.equal(cat(audit, 'screenreader').pass, base, 'img-wrap link and data-alt img must not add passes');
+  assert.equal(audit.findings.filter((f) => f.key === 'image-alt-missing').length, 1);
+  // Empty aria-label button escapes the nameless detector (suppression) but is NOT a pass.
+  assert.equal(cat(audit, 'keyboard').state, 'not-applicable', 'empty aria-label is not name evidence');
+  // data-id satisfies the fail regex's `id=` substring (known blind spot) but is NOT a pass.
+  assert.equal(cat(audit, 'forms').state, 'not-applicable', 'data-id is not label evidence');
+});
+
+// ---- merge ingestion: fail / review / pass / malformed ---------------------------
 
 test('severity matrix is applied at the script (merged finding with no severity -> matrix)', () => {
   // 1.1.1 is mandated critical by the matrix; merged finding omits severity entirely.
@@ -69,10 +193,8 @@ test('severity matrix is applied at the script (merged finding with no severity 
   } finally { cleanup(); }
 });
 
-// screenreader has scan passes (auditable > 0, base 100) so the severity penalty is
-// observable above the empty-category floor.
 test('severity penalty lowers the category score; more criticals lower it more', () => {
-  const base = run({ args: ['--date', '2020-01-01'] }).audit.summary.categories.find((c) => c.id === 'screenreader').score;
+  const base = cat(run({ args: ['--date', '2020-01-01'] }).audit, 'screenreader').score;
 
   const one = writeFindings([{ category: 'screenreader', severity: 'critical', wcag: '4.1.2', title: 'f1', check: 'fail' }]);
   const two = writeFindings([
@@ -80,20 +202,41 @@ test('severity penalty lowers the category score; more criticals lower it more',
     { category: 'screenreader', severity: 'critical', wcag: '4.1.2', title: 'f2', check: 'fail' },
   ]);
   try {
-    const s1 = run({ args: ['--date', '2020-01-01', '--merge-findings', one.file] }).audit.summary.categories.find((c) => c.id === 'screenreader').score;
-    const s2 = run({ args: ['--date', '2020-01-01', '--merge-findings', two.file] }).audit.summary.categories.find((c) => c.id === 'screenreader').score;
+    const s1 = cat(run({ args: ['--date', '2020-01-01', '--merge-findings', one.file] }).audit, 'screenreader').score;
+    const s2 = cat(run({ args: ['--date', '2020-01-01', '--merge-findings', two.file] }).audit, 'screenreader').score;
     assert.ok(s1 < base, `one critical should lower screenreader score (${s1} < ${base})`);
     assert.ok(s2 < s1, `two criticals should lower it further (${s2} < ${s1})`);
   } finally { one.cleanup(); two.cleanup(); }
 });
 
 test('unverifiable (review) merged finding does NOT reduce the score', () => {
-  const base = run({ args: ['--date', '2020-01-01'] }).audit.summary.categories.find((c) => c.id === 'screenreader').score;
+  const base = cat(run({ args: ['--date', '2020-01-01'] }).audit, 'screenreader').score;
   const rev = writeFindings([{ category: 'screenreader', severity: 'critical', wcag: '4.1.2', title: 'maybe', check: 'review' }]);
   try {
-    const s = run({ args: ['--date', '2020-01-01', '--merge-findings', rev.file] }).audit.summary.categories.find((c) => c.id === 'screenreader').score;
+    const s = cat(run({ args: ['--date', '2020-01-01', '--merge-findings', rev.file] }).audit, 'screenreader').score;
     assert.equal(s, base, 'review-level finding must not penalise the score (three-state rule)');
   } finally { rev.cleanup(); }
+});
+
+test('merged check:pass counts as a pass and does NOT create a finding', () => {
+  const { file, cleanup } = writeFindings([{ category: 'contrast', check: 'pass', title: 'contrast verified externally' }]);
+  try {
+    const { audit } = run({ args: ['--date', '2020-01-01', '--merge-findings', file] });
+    const contrast = cat(audit, 'contrast');
+    assert.equal(contrast.state, 'scored', 'an external pass makes the category scored');
+    assert.equal(contrast.pass, 1);
+    assert.equal(contrast.score, 100);
+    assert.equal(audit.findings.filter((f) => f.title === 'contrast verified externally').length, 0, 'passes are evidence, not findings');
+  } finally { cleanup(); }
+});
+
+test('merged finding with an unknown check value is skipped, never silently coerced to fail', () => {
+  const { file, cleanup } = writeFindings([{ category: 'forms', check: 'bogus', title: 'malformed entry' }]);
+  try {
+    const { audit } = run({ args: ['--date', '2020-01-01', '--merge-findings', file] });
+    assert.equal(audit.findings.filter((f) => f.title === 'malformed entry').length, 0, 'malformed check is dropped');
+    assert.equal(cat(audit, 'forms').state, 'not-applicable', 'a dropped entry must not create evidence');
+  } finally { cleanup(); }
 });
 
 test('--merge-findings validates input: invalid category is skipped, not crashed', () => {
@@ -107,6 +250,55 @@ test('--merge-findings validates input: invalid category is skipped, not crashed
     assert.equal(audit.findings.filter((f) => f.title === 'real one').length, 1, 'valid finding still merges');
   } finally { cleanup(); }
 });
+
+// ---- life-safety gate ------------------------------------------------------------
+
+test('a confirmed life-safety violation (2.3.1) caps the overall score into the fail band', () => {
+  const { file, cleanup } = writeFindings([
+    { category: 'motion', severity: 'critical', wcag: 'WCAG 2.2: 2.3.1 Three Flashes or Below Threshold', title: 'flashing content', check: 'fail' },
+  ]);
+  try {
+    const { audit } = run({ args: ['--date', '2020-01-01', '--merge-findings', file] });
+    assert.equal(audit.summary.life_safety_flag, true);
+    assert.ok(audit.summary.overall_score <= 49, `seizure risk must force the fail band, weights must not dilute it (got ${audit.summary.overall_score})`);
+  } finally { cleanup(); }
+});
+
+test('an unverified (review) 2.3.1 finding does NOT trip the life-safety gate', () => {
+  const { file, cleanup } = writeFindings([
+    { category: 'motion', severity: 'critical', wcag: '2.3.1', title: 'maybe flashing', check: 'review' },
+  ]);
+  try {
+    const { audit } = run({ args: ['--date', '2020-01-01', '--merge-findings', file] });
+    assert.equal(audit.summary.life_safety_flag, false);
+  } finally { cleanup(); }
+});
+
+// ---- bands + confidence -----------------------------------------------------------
+
+test('score bands are exported with the artifact (single source for report + docs)', () => {
+  const { audit } = run({ args: ['--date', '2020-01-01'] });
+  assert.deepEqual(audit.summary.score_bands, [
+    { min: 90, id: 'pass' },
+    { min: 50, id: 'needs-work' },
+    { min: 0, id: 'fail' },
+  ]);
+});
+
+test('confidence_level is derived from coverage, not hardcoded', () => {
+  const low = run({ args: ['--date', '2020-01-01'] }).audit;
+  assert.equal(low.metadata.confidence_level, 'low', '35% weight coverage -> low');
+
+  const passes = writeFindings(['contrast', 'touch', 'cognitive', 'media'].map((category) => ({
+    category, check: 'pass', title: `${category} ok`,
+  })));
+  try {
+    const full = run({ html: RICH_PAGE, args: ['--date', '2020-01-01', '--merge-findings', passes.file] }).audit;
+    assert.equal(full.metadata.confidence_level, 'medium', 'full coverage in a static pipeline caps at medium');
+  } finally { passes.cleanup(); }
+});
+
+// ---- provenance + reproducibility (unchanged contracts) ----------------------------
 
 test('date is injectable: --date wins, SOURCE_DATE_EPOCH is honoured', () => {
   assert.equal(run({ args: ['--date', '2019-07-04'] }).audit.metadata.date, '2019-07-04');

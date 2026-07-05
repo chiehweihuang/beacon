@@ -98,6 +98,8 @@ Use the score as a triage signal:
 | 50-89 | Some barriers or review items were found. Prioritize findings by affected users and severity. |
 | 0-49 | High-priority review recommended. The inspected evidence suggests substantial barriers. |
 
+Every score is paired with `coverage_percent`, the share of scoring weight actually measured. Categories without machine evidence report a state (`not-machine-checkable` / `not-applicable`) instead of a number, and a confirmed seizure-risk finding (WCAG 2.3.1) caps the overall score into the 0-49 band regardless of category weights.
+
 If a report says `requires_live_audit: true`, Beacon found signals that static evidence is not enough. That is common for client-rendered apps, hidden/conditional UI, runtime ARIA, computed contrast, and interactive behavior.
 
 `review` or `incomplete` items are not passes and not failures. They mean Beacon could not verify the condition from the available evidence.
