@@ -21,7 +21,8 @@ replacement: data, analysis, and the harness to reproduce it.
 | Engine | Spearman vs LH a11y (n=71) | Equal-weight Spearman | Notes |
 |---|---|---|---|
 | `beacon-static-audit@3` | 0.354 | 0.320 | first run, pre-fix |
-| `beacon-static-audit@4` | **0.474** | 0.415 | after FP fixes, identical snapshots |
+| `beacon-static-audit@4` | 0.474 | 0.415 | after FP fixes, identical snapshots |
+| `beacon-static-audit@5` | **0.488** | 0.395 | after ground-truth round 2 (`../2026-07-06-ground-truth/`) |
 
 The @3→@4 delta is pure detector/scoring fixes (attribute-order FPs, a11y-tree-exempt
 image FPs, adjacent-button undercount, per-key severity cap, frame-title detector) —

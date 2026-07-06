@@ -1,0 +1,735 @@
+[
+  {
+    "idx": 96,
+    "violations": [
+      {
+        "criterion": "image-alt",
+        "markup": "<img loading=\"lazy\" src=\"/wp-content/themes/kyototravel/assets/images/top/areas/kyoto_map_en_sp.webp\" class=\"md:hidden w-[82.1%] h-auto mx-auto relative z-10\"> <img loading=\"lazy\" src=\"/wp-content/themes/kyototravel/assets/images/top/areas/kyoto_map_en.webp\" class=\"hidden md:block w-[91.9%] ...\">",
+        "why": "Verified directly at snapshot lines 1572-1573: neither <img> has an alt attribute at all. No aria-hidden/role=presentation/inline display:none on any ancestor. Responsive image-swap pair (mobile-only vs desktop-only via Tailwind md:hidden/hidden md:block) - each is the sole visible rendition at its own target viewport, so each independently needs alt text.",
+        "count": 2,
+        "beacon": "flagged",
+        "lighthouse": "flagged"
+      },
+      {
+        "criterion": "image-alt",
+        "markup": "<img loading=\"lazy\" src=\"https://kyoto.travel/wp-content/themes/kyototravel/assets/images/shared/kyototravel.png\" class=\"w-[4.375rem] h-[5rem]\">",
+        "why": "Verified at line 1880: footer brand-block image has no alt attribute. Sits in the always-visible footer contact panel, no hidden ancestor. Adjacent \"Kyoto Travel\" text is a sibling, not a substitute for the img's own alt under 1.1.1.",
+        "count": 1,
+        "beacon": "flagged",
+        "lighthouse": "flagged"
+      },
+      {
+        "criterion": "image-alt",
+        "markup": "<a href=\"https://kyoto.us9.list-manage.com/subscribe...\" target=\"_blank\"><p ...><img loading=\"lazy\" src=\".../icons/envelope.svg\" class=\"w-[1.5rem] h-[1.25rem] mr-2\">\\nSubscribe to the Newsletter</p></a>",
+        "why": "Verified at line 1901: envelope icon has no alt attribute (should be alt=\"\" since decorative next to visible link text). Missing the attribute entirely is a 1.1.1 violation independent of the link's own accessible name from adjacent text.",
+        "count": 1,
+        "beacon": "flagged",
+        "lighthouse": "flagged"
+      },
+      {
+        "criterion": "link-name",
+        "markup": "<img src=\"/wp-content/themes/kyototravel/assets/images/top/kg_logo_en.webp\" alt=\"Kyoto Guidelines for sustainable tourism\" ...><a href=\"https://www.moral.kyokanko.or.jp/en/for-tourist\" target=\"_blank\" rel=\"noopener noreferrer\" class=\"absolute inset-0 z-20\"></a>",
+        "why": "Verified at line 471-472: the <a> is empty, no aria-label/title. The alt-bearing <img> is a preceding sibling, not a descendant, of the <a>, so it does not contribute to the link's accessible-name computation. Not aria-hidden; always-visible hero content.",
+        "count": 1,
+        "beacon": "flagged",
+        "lighthouse": "flagged"
+      },
+      {
+        "criterion": "link-name",
+        "markup": "<a id=\"read-1\" aria-labelledby=\"read-1 travel-inspiration-1\" href=\"...heatstroke-prevention/\">Read article...</a></div></div>\\n<a href=\"https://kyoto.travel/en/travel-inspiration/heatstroke-prevention/\"></a></li> (and 5 sibling cards)",
+        "why": "Verified at lines 1373/1393/1410/1433/1453/1473: each Travel Inspiration card has a properly named \"Read article\" link, then a second, entirely empty whole-card overlay <a> to the same href with no text/aria-label. Real, unnamed link, not aria-hidden.",
+        "count": 6,
+        "beacon": "flagged",
+        "lighthouse": "flagged"
+      },
+      {
+        "criterion": "link-name",
+        "markup": "<a href=\"https://www.hoteldedoctor24.com/?utm_source=kyokanko...\" target=\"_blank\"><img loading=\"lazy\" src=\".../300_247_m3.png\" alt=\"\"></a>",
+        "why": "Verified at line 1804: link contains only an img with alt=\"\" and no other text/aria-label, so it has no accessible name at all (2.4.4/4.1.2). Not hidden by any exclusion signal. CORRECTED lighthouse mapping: full-text search of the raw Lighthouse JSON returns zero matches for \"hoteldedoctor\" anywhere - this href does not appear in Lighthouse's link-name failing nodes at all, unlike its two structurally-identical siblings below. No responsive/hidden class distinguishes it from those siblings, so this is an unexplained gap in that Lighthouse run, not a legitimate render-state exclusion.",
+        "count": 1,
+        "beacon": "missed",
+        "lighthouse": "missed"
+      },
+      {
+        "criterion": "link-name",
+        "markup": "<a href=\"https://zen.vie.style/en/\" target=\"_blank\"><img ... alt=\"\"></a> ... <a href=\"http://www.nonomiya.com/eng.html\" target=\"_blank\"><img ... alt=\"\"></a>",
+        "why": "Verified at lines 1807/1810: same defect as the hoteldedoctor24 link (img alt=\"\" only, no other name source). These two DO appear in Lighthouse's raw link-name failing nodes (confirmed by direct extraction), unlike the hoteldedoctor24 sibling, which is why this is reported as a separate row from it.",
+        "count": 2,
+        "beacon": "missed",
+        "lighthouse": "flagged"
+      },
+      {
+        "criterion": "button-name",
+        "markup": "<button id=\"togglePlayPause\" class=\"slick-dots play-pause-btn invisible md:visible\" style=\"top: 116px !important;\"><svg>...</svg></button>",
+        "why": "Verified at line 447: no aria-label, no visible text, no SVG <title>. \"invisible md:visible\" is a Tailwind visibility toggle (visibility:hidden below md, visible md+). The snapshot's own inline consent script (window.matchMedia('(max-width:1023px)')) shows the \"not mobile\" branch fired at capture (cookie-banner shown, cookie-popup hidden), confirming a >=1024px capture where this button is actually visible - real violation.",
+        "count": 1,
+        "beacon": "flagged",
+        "lighthouse": "missed"
+      },
+      {
+        "criterion": "button-name",
+        "markup": "<button class=\"carousel-arrow prev inverted slick-arrow\"></button> / <button class=\"carousel-arrow next inverted slick-arrow\"></button> (ul#primary-tips \"Travel Tips\"); <button type=\"button\" class=\"slick-prev slick-arrow\"></button> / <button type=\"button\" class=\"slick-next slick-arrow\"></button> (div#perfect-trip-slider \"Plan Your Perfect Trip\")",
+        "why": "Confirmed via 4 distinct Lighthouse raw failing nodes (snippet+selector each). Confirmed ABSENT from the static snapshot: grep for \"carousel-arrow\" and bare \"slick-prev\"/\"slick-next\" returns zero matches in 96.html - only \"custom-slick-prev/next\" (a different pair of sliders) exist there, and those DO carry aria-label. ul#primary-tips in the static snapshot still has class \"my-slider grid ...\" with no slick-track wrapper at all (not yet Slick-initialized in this capture); div#perfect-trip-slider IS slick-initialized in the static snapshot but its arrow buttons are still absent there. Real, fixable defect visible only in Lighthouse's later/different live-DOM capture.",
+        "count": 4,
+        "beacon": "missed",
+        "lighthouse": "flagged"
+      },
+      {
+        "criterion": "heading-order",
+        "markup": "<h1 class=\"font-bold font-spectral md:text-2xl tracking-[0.0074em]\">Kyoto Travel</h1> (line 137) ... <h3 class=\"sr-only\">Weather in Kyoto</h3> (line 447)",
+        "why": "Independent full-page heading sweep (grep-extracted every <h1>-<h6>: 53 headings total - 1 h1 / 14 h2 / 32 h3 / 6 h4; corrects the draft's own restated methodology count of \"44 headings\", which was wrong) confirms exactly one forward skip in the entire document: h1(137)->h3(447), skipping h2. Every other transition changes by at most +1 level or decreases (always WCAG-conformant). The cookie-popup h2 (line 34) sits inside a div with inline style=\"display:none\" (verified directly), correctly excluded. Conclusion unchanged from the draft; only the stated heading total was wrong.",
+        "count": 1,
+        "beacon": "flagged",
+        "lighthouse": "flagged"
+      },
+      {
+        "criterion": "frame-title",
+        "markup": "<iframe data-lazyloaded=\"1\" src=\"about:blank\" data-src=\"https://www.facebook.com/plugins/page.php?...&tabs=timeline&width=250&height=725...\" width=\"250\" height=\"725\" ... class=\"block-on-consent\"></iframe> (line 517, desktop) and its width=300/height=400 mobile twin (line 518)",
+        "why": "Verified via direct line read: exactly 2 real <iframe> tags (lines 517, 518) plus 2 <noscript><iframe> fallback tags on those same two lines (grep for all <iframe occurrences in the file returns exactly 4, matching this 2+2 breakdown). Browsers don't parse <noscript> contents into real DOM when JS is enabled, so only the 2 real iframes count. Neither lacks a title for any exclusion reason - no aria-hidden, no inline display:none, and no CSS rule for \".block-on-consent\" exists anywhere in the file to support treating it as hidden by default.",
+        "count": 2,
+        "beacon": "flagged",
+        "lighthouse": "missed"
+      },
+      {
+        "criterion": "list-structure",
+        "markup": "Lighthouse raw failing node: <li class=\"md:mb-[40px] mb-4 group flex-1\" onclick=\"handleClickCard(event)\" style=\"width: 100%; display: inline-block;\">, selector div.slick-track > div#slick-slide30 > div > li.md:mb-[40px]",
+        "why": "NEW - added on adversarial review. Lighthouse's own `listitem` audit scores 0 with exactly this failing node (\"List item does not have a <ul>, <ol> parent element\"). This is the same ul#primary-tips \"Travel Tips\" widget as the button-name carousel-arrow violation above: at Lighthouse's live-DOM capture, Slick.js had initialized the list into a carousel, wrapping each <li> inside a <div class=\"slick-slide\"> wrapper, orphaning it from its <ul> parent (WCAG 1.3.1). Confirmed absent from Beacon's static snapshot: ul#primary-tips there still carries only class=\"my-slider grid grid-cols-1 ...\" with zero slick-track/slick-slide wrapper (not yet initialized in that capture), so no orphaned <li> exists in the file Beacon scanned. This directly contradicts the draft's own notes claim that list-structure was \"verified zero violations\" - that check covered only the static file and never cross-referenced Lighthouse's listitem audit.",
+        "count": 1,
+        "beacon": "missed",
+        "lighthouse": "flagged"
+      }
+    ],
+    "beacon_fp": [
+      "7x link-name-missing for carousel slide overlay anchors (daigoji-temple x3, hosenin-temple x2, fushimi-itinerary x2; snapshot lines 393/406/413/420/433/440/447) - RE-VERIFIED by tracing each anchor's enclosing div.slick-slide back to its opening tag: every one is aria-hidden=\"true\" at that ancestor (confirmed at lines 386,399,406,413,426,433,440). The one non-hidden slide in the carousel (index 0, Fukutoku-ji, aria-hidden=\"false\", line 393) has no overlay anchor at all. All 7 correctly excluded.",
+      "2x button-name-missing for #scroll-up-sp and #scroll-down-sp (lines 40/47) - RE-VERIFIED: both sit inside <div id=\"cookie-popup\" style=\"display:none;\"> (confirmed directly, line 33), an inline display:none ancestor in this snapshot. Correctly excluded.",
+      "2 of the 4 frame-title-missing findings are duplicate detections of the <noscript><iframe> fallback markup at lines 517/518 - RE-VERIFIED: a direct grep of every <iframe tag in the file returns exactly 4 (2 real + 2 noscript, one pair per line), confirming these are scanner double-counts of the 2 real iframes, not additional distinct violations."
+    ],
+    "lighthouse_fp": [
+      "button-name-missing for #scroll-up-sp/#scroll-down-sp: RE-VERIFIED - Lighthouse's raw failing node shows both buttons WITHOUT the \"hidden\" class present in the static snapshot, and Lighthouse's configSettings.screenEmulation confirms mobile:true, width:412 (i.e. it ran mobile emulation with no consent cookie). The page's own inline script (`isMobile=matchMedia('(max-width:1023px)'); if(isMobile){cookie-popup shown}else{cookie-banner shown}`, confirmed at line 60) explains the divergence: this reference snapshot was captured at a >=1024px viewport (cookie-banner shown, cookie-popup display:none) - a genuinely different, non-overlapping DOM state. Not a violation of this artifact, though a real mobile-only defect."
+    ],
+    "notes": "Re-verified every entry directly against C:/Code/personal/beacon-benchmark-100/run-2026-07-05/snapshots/96.html and the raw Lighthouse JSON (extracted per-audit failing nodes for button-name, link-name, image-alt, heading-order, frame-title, listitem via Python, not full-file reads). Changes made:\n\n1. SPLIT the \"Our Partners\" ad-link row (was one row, count=3, lighthouse:\"flagged\" applied uniformly). Full-text search of the raw Lighthouse JSON for \"hoteldedoctor\" returns zero hits anywhere - that link is simply not among Lighthouse's link-name failing nodes, while its two structurally-identical siblings (zen.vie.style, nonomiya.com) are. Unlike the map-image pair (where the non-flagged instance is legitimately display:none at Lighthouse's mobile viewport - a real CSS-driven exclusion), nothing distinguishes hoteldedoctor24's link from its siblings, so the original \"lighthouse:flagged\" claim was simply wrong for that one instance. Now two rows: hoteldedoctor24 (count 1, lighthouse:missed) and zen.vie.style+nonomiya.com (count 2, lighthouse:flagged).\n\n2. ADDED a new list-structure violation. Lighthouse's own `listitem` audit (score 0) flags a `<li>` under `div.slick-track > div#slick-slide30 > div` (not a direct `<ul>/<ol>` child) - this is ul#primary-tips (\"Travel Tips\") after Slick.js wraps its `<li>` children in `<div class=\"slick-slide\">` at runtime, the same live-DOM state that produces the already-included carousel-arrow button-name violation. The draft's notes claimed list-structure was \"verified zero violations,\" but that check only covered the static snapshot (where ul#primary-tips is still plain `class=\"my-slider grid ...\"`, not yet Slick-initialized) and never cross-referenced Lighthouse's listitem audit. Beacon: missed (confirmed, no such finding in beacon.json, and the static file has no orphaned `<li>` to find). Lighthouse: flagged.\n\n3. CORRECTED the heading-order entry's own stated methodology: an independent grep sweep of every `<h1>`-`<h6>` in the snapshot found 53 headings (1 h1/14 h2/32 h3/6 h4), not \"44\" as the draft claimed. The underlying conclusion is unchanged and re-confirmed: exactly one skip (h1 line 137 -> h3 line 447), no other misses in the full sweep.\n\n4. Everything else held up under direct re-verification: all image-alt/link-name/button-name/frame-title markup quotes matched the snapshot exactly at their cited lines; all 3 beacon_fp exclusions (carousel aria-hidden, cookie-popup display:none, noscript duplicates) were independently retraced to their ancestor tags and confirmed; the lighthouse_fp exclusion was confirmed via the raw JSON's configSettings.screenEmulation (mobile:true, width:412) plus the page's own inline consent-branching script (line 60). Frame-title's designated fewest-entries spot-sweep (grep for all `<iframe` tags, 4 total) and heading-order's spot-sweep (grep for all heading tags, 53 total) both independently confirm the draft's counts complete with no additional misses beyond the one list-structure item added above (which surfaced from cross-checking Lighthouse's raw audits generally, not from the two designated criteria).\n\nTotal verified real violations: 23 instances across 11 rows / 6 distinct criteria (image-alt x4, link-name x10, button-name x5, heading-order x1, frame-title x2, list-structure x1). Zero-violation claims re-verified directly and hold: html-lang (`<html lang=\"en\">`), document-title (present, descriptive), meta-viewport-zoom (no user-scalable/maximum-scale restriction), input-label (only 1 `<input>` on the page, has aria-label=\"search\")."
+  },
+  {
+    "idx": 97,
+    "violations": [
+      {
+        "criterion": "image-alt",
+        "markup": "<img src=\"https://tshop.r10s.jp/yamagoiida/cabinet/08906716/09064251/w_saba_mu2025_0004_2.jpg?fitin=95:95\">",
+        "why": "Content-conveying product thumbnail image with no alt attribute at all (not even alt=\"\"); not inside any hidden ancestor. Screen reader users get no identification of the product photo. WCAG 1.1.1.",
+        "count": 16,
+        "beacon": "flagged",
+        "lighthouse": "missed"
+      },
+      {
+        "criterion": "image-alt",
+        "markup": "<img src=\"//r.r10s.jp/com/img/home/201306/ranking/review_star10.gif\" class=\"rnkReviewStar\">",
+        "why": "Repeated star-rating icon conveys the review score graphically with no adjacent text equivalent and no alt attribute; visible, not hidden. WCAG 1.1.1.",
+        "count": 40,
+        "beacon": "flagged",
+        "lighthouse": "missed"
+      },
+      {
+        "criterion": "image-alt",
+        "markup": "<img class=\"rBrandListImg\" src=\"https://tshop.r10s.jp/burgaps/logo/logo1.jpg?fitin=200:200\" width=\"130\" height=\"130\">",
+        "why": "Brand shop logo (identifies the brand/shop name visually) missing alt; these 6 instances are the visible carousel frame copies (15 further copies of the same pattern sit in display:none 'liquidBanner-list' data slides and are correctly excluded). WCAG 1.1.1.",
+        "count": 6,
+        "beacon": "flagged",
+        "lighthouse": "missed"
+      },
+      {
+        "criterion": "image-alt",
+        "markup": "<img class=\"rMagazineListImg\" src=\"https://r.r10s.jp/evt/event/rmagazine/_cmn/inc/img/main/2026/top_0703_disney_pickup.jpg\">",
+        "why": "Editorial magazine-feature thumbnail conveying article topic, missing alt; visible (not inside display:none). WCAG 1.1.1.",
+        "count": 5,
+        "beacon": "flagged",
+        "lighthouse": "missed"
+      },
+      {
+        "criterion": "image-alt",
+        "markup": "<img src=\"https://r.r10s.jp/com/inc/home/20080930/beta/tz/img/ranking_tab/ranking_btn_realtime_on.gif\">",
+        "why": "CORRECTED COUNT (was 8, verified 7): ranking-category tab icon conveying the tab's label graphically, missing alt. Direct DOM count of visible instances = 7 (1 active 'realtime_on' state + 6 inactive '_off' states: all/furusatotax/health/drink/sweets/book). 67 further copies for other genre-tab states sit in display:none and are correctly excluded (not 68 as originally stated). WCAG 1.1.1.",
+        "count": 7,
+        "beacon": "flagged",
+        "lighthouse": "missed"
+      },
+      {
+        "criterion": "image-alt",
+        "markup": "<img src=\"https://r.r10s.jp/com/img/thumb/200309/event/servicelogo/servicelogo_travel.svg\" width=\"174\" height=\"30\">",
+        "why": "Rakuten-service logo icon (identifies which service the adjacent promo banner is for), missing alt; visible instance. WCAG 1.1.1.",
+        "count": 6,
+        "beacon": "flagged",
+        "lighthouse": "missed"
+      },
+      {
+        "criterion": "image-alt",
+        "markup": "<img src=\"https://r.r10s.jp/com/img/thumb/200309/event/202606_recommend/ich_grpcpn_rmb_20k.png\">",
+        "why": "Promotional coupon/campaign banner image conveying an offer, missing alt; visible instance. WCAG 1.1.1.",
+        "count": 6,
+        "beacon": "flagged",
+        "lighthouse": "missed"
+      },
+      {
+        "criterion": "image-alt",
+        "markup": "<img src=\"https://image.rakuten.co.jp/com/img/home/t.gif\" name=\"s_i_rakutendev\" style=\"position:absolute\" width=\"1\" height=\"1\">",
+        "why": "1x1 tracking pixel has no alt attribute and is only position:absolute (not display:none/aria-hidden), so it remains in the accessibility tree; technically non-conforming though practically inconsequential. WCAG 1.1.1.",
+        "count": 1,
+        "beacon": "flagged",
+        "lighthouse": "missed"
+      },
+      {
+        "criterion": "image-alt",
+        "markup": "<div class=\"rnkIcon\"><img src=\"https://r.r10s.jp/com/img/ranking/parts/standard/pc/icon_ranking.gif\"></div>",
+        "why": "NEW (was miscounted into ranking_tab's total in the draft): trophy/ranking icon in the 'リアルタイムランキング' title row has no alt attribute at all. Adjacent visible link text conveys the same meaning so the icon is arguably decorative, but per this task's strict standard (applied identically to the tracking pixel above) missing alt vs. alt=\"\" is still non-conforming. A second copy of the same image sits inside the display:none 'HasHistory' ranking variant and is correctly excluded (not counted). Beacon's raw findings actually include this exact line (verified at snapshot line 3284) but the draft's write-up folded it into the ranking_tab bucket instead of itemizing it. WCAG 1.1.1.",
+        "count": 1,
+        "beacon": "flagged",
+        "lighthouse": "missed"
+      },
+      {
+        "criterion": "link-name",
+        "markup": "<a class=\"prev-button\" href=\"#\"></a> / <a class=\"next-button\" href=\"#\"></a>",
+        "why": "Empty carousel navigation anchors: no text, no icon markup, no aria-label/title. Verified via full-page DOM sweep: 106 total prev/next-button anchors, 98 visible + 8 inside display:none carousels (exact match to Beacon's raw finding count). WCAG 4.1.2 / 2.4.4.",
+        "count": 98,
+        "beacon": "flagged",
+        "lighthouse": "missed"
+      },
+      {
+        "criterion": "link-name",
+        "markup": "<a class=\"logo--2UFRP\" href=\"https://www.rakuten.co.jp/?l-id=pc_header_logo\"><div alt-text=\"Logo\" class=\"logo--39sSh r-logo-big--4xwF5\"></div></a>",
+        "why": "Header logo link's only child is an empty <div> using a non-standard, non-ARIA \"alt-text\" attribute that contributes nothing to the accessible name; no aria-label/text/title anywhere. Verified present, visible. WCAG 4.1.2.",
+        "count": 1,
+        "beacon": "flagged",
+        "lighthouse": "missed"
+      },
+      {
+        "criterion": "link-name",
+        "markup": "<a href=\"#\"><span class=\"ri-prev-btn\"></span></a> / <a href=\"#\"><span class=\"ri-next-btn\"></span></a>",
+        "why": "Second, differently-named carousel prev/next control pair (楽天のサービス group banner), empty span with no text/icon-font-label/aria-label. Verified visible, 2 instances. WCAG 4.1.2.",
+        "count": 2,
+        "beacon": "flagged",
+        "lighthouse": "flagged"
+      },
+      {
+        "criterion": "link-name",
+        "markup": "<a href=\"https://cdn.rex.contents.rakuten.co.jp/webcx-redirect-module/1.3.0/index.html?...\" target=\"_top\" style=\"width: 100%; display: block;\"><p style=\"...background: url(...) center top no-repeat;\"></p></a>",
+        "why": "Header \"pitari\" banner link's only content is an empty <p> whose image is a CSS background-image (never exposed to the accessibility tree); no text/aria-label. Verified via the stable #mkdiv_header_pitari id present in both the snapshot and Lighthouse's raw item list (item 0 of 18 in the link-name audit). WCAG 4.1.2.",
+        "count": 1,
+        "beacon": "flagged",
+        "lighthouse": "flagged"
+      },
+      {
+        "criterion": "link-name",
+        "markup": "<a href=\"https://rd.rakuten.co.jp/rat/?R2=...event.rakuten.co.jp...\"><div class=\"r-slideshow-item-image\"><img alt=\"\" src=\"https://r.r10s.jp/com/img/UX...\"></div></a>",
+        "why": "Hero slideshow banner link: only content is an img with alt=\"\" (correctly decorative) and no other text/aria-label, so the link has zero accessible name. Verified via full-page sweep: 6 instances, all visible, all confirmed unnamed. WCAG 4.1.2.",
+        "count": 6,
+        "beacon": "missed",
+        "lighthouse": "missed"
+      },
+      {
+        "criterion": "link-name",
+        "markup": "<a class=\"rBrandListItem\" href=\"https://www.rakuten.co.jp/burgaps/?s-id=top_normal_brandshop_burgaps\"><img class=\"rBrandListImg\" src=\"...\" width=\"130\" height=\"130\"><span class=\"rBrandListNEW\"></span></a>",
+        "why": "Brand shop link's only content is an img missing alt entirely plus an empty decorative 'NEW' badge span; no accessible name. Verified: 21 total rBrandListItem links, 6 visible (in the rendered carousel frame) confirmed unnamed, 15 hidden (14 in the display:none data-source list + 1 template placeholder) correctly excluded. WCAG 4.1.2.",
+        "count": 6,
+        "beacon": "missed",
+        "lighthouse": "missed"
+      },
+      {
+        "criterion": "link-name",
+        "markup": "<a href=\"https://grp07.ias.rakuten.co.jp/redirect_rpp/?s=...&ap=s-id%3Dtop_normal_target_ads\"><img src=\"https://tshop.r10s.jp/tkhope/cabinet/.../lamp_ldds_r0.jpg?fitin=200:200\"></a>",
+        "why": "Targeted-ad redirect link wrapping a bare img with no alt attribute at all and no other text; no accessible name. Verified via full-page sweep: 8 instances, all visible, all confirmed unnamed (these are 8 of the same 16 bare product-thumbnail imgs counted under image-alt). WCAG 4.1.2.",
+        "count": 8,
+        "beacon": "missed",
+        "lighthouse": "missed"
+      },
+      {
+        "criterion": "link-name",
+        "markup": "<a href=\"https://grp10.ias.rakuten.co.jp/redirect/?seq=1&e=135&...\"><ul class=\"sizeFix\"><li class=\"itemImg\"><img src=\"...\" alt=\"\"></li><li class=\"itemDetail\"></li></ul></a>",
+        "why": "Recommendation-widget link: img correctly has alt=\"\" (decorative), but the sibling 'itemDetail' li that should carry the product name text is empty in the static markup, leaving the link with no accessible name. Verified precisely: of 53 total grp10 links, 17 use this 'sizeFix' template, and exactly 6 of those 17 have an empty itemDetail li (the other 11 have real product-name text and ARE properly named, confirming the count is not simply 'all sizeFix instances'). WCAG 4.1.2.",
+        "count": 6,
+        "beacon": "missed",
+        "lighthouse": "missed"
+      },
+      {
+        "criterion": "link-name",
+        "markup": "<a class=\"categoryMenu__sideBannerLink\" href=\"https://ac.ebis.ne.jp/tr_set.php?...\"><img class=\"categoryMenu__sideBannerImage\" src=\"...\" alt=\"\"></a>",
+        "why": "Sidebar ad banner link: img has alt=\"\" and there is no other text/aria-label, so the link (which navigates to a real advertiser page) has no accessible name. Verified, 2 instances, visible. WCAG 4.1.2.",
+        "count": 2,
+        "beacon": "missed",
+        "lighthouse": "missed"
+      },
+      {
+        "criterion": "link-name",
+        "markup": "<a href=\"https://event.rakuten.co.jp/guide/shipping/sustainable/?l-id=top_normal_government_redelivery\" style=\"display: block;...\"><img src=\"...ShippingSustainable.jpg\" width=\"\" height=\"\" alt=\"\" style=\"...\"></a>",
+        "why": "Redelivery-sustainability campaign banner link: img alt=\"\" and no other text/aria-label; no accessible name. Verified present, visible, exact markup confirmed. WCAG 4.1.2.",
+        "count": 1,
+        "beacon": "missed",
+        "lighthouse": "missed"
+      },
+      {
+        "criterion": "link-name",
+        "markup": "<a href=\"https://item.rakuten.co.jp/yamagoiida/10000077/?s-id=top_normal_rk_nonhist\"><img src=\"https://tshop.r10s.jp/yamagoiida/cabinet/08906716/09064251/w_saba_mu2025_0004_2.jpg?fitin=95:95\"></a>",
+        "why": "Ranking-list product link wrapping a bare img with no alt attribute and no other text; no accessible name (the product name text sits in a sibling <a>, not this one). Verified via full-page sweep: this pattern accounts for 8 of the 16 bare product-thumbnail imgs (the yamagoiida sample plus 7 different shops), all confirmed wrapped in a link with zero text content. WCAG 4.1.2.",
+        "count": 8,
+        "beacon": "missed",
+        "lighthouse": "missed"
+      },
+      {
+        "criterion": "link-name",
+        "markup": "<a href=\"https://rd.rakuten.co.jp/rat?R2=https%3A%2F%2Ffast-delivery-mart.rakuten.co.jp%2F&...\"><img src=\"...20251218_fmcg_340x140.jpg\" alt=\"\" width=\"200\" height=\"82\"></a>",
+        "why": "Sidebar service-promo banner link: img alt=\"\" and no other text/aria-label; no accessible name. Verified present, visible, 1 instance. WCAG 4.1.2.",
+        "count": 1,
+        "beacon": "missed",
+        "lighthouse": "missed"
+      },
+      {
+        "criterion": "list-structure",
+        "markup": "<ul class=\"categoryMenu__l1Container\">...15x <li>...</li>...<div class=\"genre-section__heading-wrap\"><h2>楽天のサービス</h2></div><ul class=\"categoryMenu__l1Container\">...(nested second list)...</ul></ul>",
+        "why": "The sidebar category-menu <ul> has a <div> (section heading wrapper) and an entire second <ul> as direct children alongside its <li> items - neither is <li>/<script>/<template> and the list has no role=list opt-out. Fully visible. Verified via a full-page structural sweep of all 269 <ul>/<ol> elements. WCAG 1.3.1.",
+        "count": 1,
+        "beacon": "missed",
+        "lighthouse": "missed"
+      },
+      {
+        "criterion": "list-structure",
+        "markup": "<section class=\"ri-side-section\"><h2>エコ・リユース</h2><li class=\"ri-side-link\">...EARTH MALL...</li><li class=\"ri-side-link\">...ラクマ...</li></section>",
+        "why": "NEW (found via independent list-structure spot-sweep, absent from the draft): unlike every sibling sidebar section (which wraps its <li> items in <ul class=\"ri-side-contents\">), the 'エコ・リユース' section's two <li> elements have NO enclosing <ul>/<ol>/<menu> at all - they sit as direct children of <section>. This is a distinct pattern from the categoryMenu entry above (missing wrapper entirely vs. wrong children types) and sits in a different part of the page. Fully visible, verified by checking parent of every <li> on the page (897 total, only these 2 lack a list ancestor). Beacon's list-non-li-child detector checks for wrong children INSIDE a list and would not catch an absent wrapper; Lighthouse's 'listitem' audit returned notApplicable (0 items) on this build. WCAG 1.3.1.",
+        "count": 2,
+        "beacon": "missed",
+        "lighthouse": "missed"
+      },
+      {
+        "criterion": "input-label",
+        "markup": "<input class=\"input-text--3BgYg\" type=\"search\" id=\"common-header-search-input\" placeholder=\"キーワード検索\" name=\"sitem\" value=\"\">",
+        "why": "Primary site search box has only a placeholder attribute; no <label for>, no aria-label, no aria-labelledby, no title. Per task rule, placeholder-only is a violation even though ARIA accessible-name computation lets placeholder serve as a fallback (why both tools pass it). Verified via a full-page sweep of all 19 form fields (12 hidden inputs, 1 search, 1 button, 5 checkboxes with proper <label for>) - this is the ONLY unlabeled field on the page. WCAG 1.3.1 / 3.3.2 / 4.1.2.",
+        "count": 1,
+        "beacon": "missed",
+        "lighthouse": "missed"
+      }
+    ],
+    "beacon_fp": [
+      "image-alt-missing: 125 of the 213 flagged <img> elements sit inside containers with inline style=\"display:none\" - out of the accessibility tree, not real violations. CORRECTED sub-breakdown (draft had minor arithmetic errors): rBrandListImg x15, ranking_tab icons x67 (not 68), rMagazineListImg x10, servicelogo svg x10, recommend/coupon banners x10, recoPop/lightbox icons x10 (not 11: apibtnl/apibtnr/loading_icon/btn_popup_close_frame variants), plus 3 singleton instances (not 1 'uncategorized'): an empty-src img, a hidden duplicate of the rnkIcon trophy graphic (its visible twin is now a separate real violation above), and a standalone Rmagazine 300x60 promo image. True visible count is 88 (verified unchanged).",
+      "link-name-missing: 8 of the 106 flagged prev-button/next-button links are inside display:none carousels - not real violations (verified exact: 106 total, 98 visible, 8 hidden). ADDITIONAL finding not in the draft: 1 more hidden link-name-missing finding exists outside the prev/next family - an empty <a id=\"rnkGenreInfoUrlHasHistory\"> inside the display:none 'HasHistory' ranking variant (snapshot line 4363) - also correctly excluded. Total excluded of Beacon's 111 link-name-missing findings is therefore 9, not 8; the 102 real ones are fully accounted for in the violations list (98+1+2+1).",
+      "frame-title-missing (the sole instance, <iframe ... style=\"display: none;\"> at snapshot line ~6933) - the iframe is never exposed to assistive tech, so a missing title is not a violation. Verified: the page's other iframe (a chat-widget frame) DOES have a title and sits inside an aria-hidden=\"true\" closed modal, also correctly out of scope.",
+      "list-non-li-child (the sole flagged instance, 'sdLiquidBanner-list') - the whole hidden wrapper is never reached by a screen reader; meanwhile Beacon completely missed TWO real list-structure violations on the page: the previously-documented categoryMenu__l1Container defect AND a newly-found orphan-<li> section (エコ・リユース sidebar) with no list wrapper at all.",
+      "viewport-meta-missing - true that the snapshot has zero viewport meta tags, but this is a different, out-of-scope pattern from the meta-viewport-zoom criterion (which requires a restrictive maximum-scale/user-scalable tag to be PRESENT, not absent). Verified via exhaustive tag search: 0 <meta name=\"viewport\"> tags exist."
+    ],
+    "lighthouse_fp": [
+      "image-alt failing node (a.link-wrapper--1G0sw > div.container--3tUHo > div.aspect-ratio-box--14W6l > img.image--aJFXw) - none of these CSS-module class names exist anywhere in the 97.html snapshot (verified via direct grep, 0 hits each); raw JSON fetchTime is 2026-06-07, roughly a month before the snapshot capture, so this reflects a different page build and can't be verified against ground truth.",
+      "meta-viewport failing node citing maximum-scale=1.0/user-scalable=no on a <meta name=\"viewport\"> tag - no such tag (or any viewport meta tag at all) exists anywhere in the snapshot; same stale-build issue as above.",
+      "17 of 18 link-name failing nodes (verified exact count: item 0 of 18 is the real #mkdiv_header_pitari match; items 1-17 reference link--3Wnxp, container--17oFq, container--G4ZgU, link-wrapper--1G0sw, spacer--3hYb9, free--3104i - all confirmed absent from the current snapshot via direct grep) are unverifiable against ground truth.",
+      "ADDITIONAL (not in draft): Lighthouse's separate 'aria-command-name' audit (score 0, 3 items: role=link/button divs in classes etsy-banner--1r0bv, close-button-container--1Nt3j, hamburger-container--3ZHwt) is also entirely unverifiable - none of these classes exist in the current snapshot. This doesn't change the button-name/link-name consensus: the current snapshot has exactly 1 role=button/link/menuitem element on the whole page and it is properly named."
+    ],
+    "notes": "Verified against actual files (not re-derived from the draft's prose). Method: parsed 97.html with BeautifulSoup/lxml, computed display:none/[hidden]/aria-hidden ancestor status programmatically for every relevant element, cross-checked against raw Beacon findings (97.json, 331 findings) and raw Lighthouse audit items (97-lh.json) by exact line/selector.\n\nCORRECTIONS MADE (all others in the draft verified accurate as-is):\n1. image-alt \"ranking_tab\" count corrected 8→7 (exact DOM count: 1 active + 6 inactive tab-state icons visible; 67 not 68 hidden copies).\n2. NEW image-alt entry added: a trophy/ranking icon (icon_ranking.gif, rnkIcon div) that Beacon's raw findings actually flag (verified exact line match) but the draft's write-up had folded into the ranking_tab count instead of itemizing separately - this exactly explains the 8-vs-7 discrepancy (88-total visible sum is unchanged and still reconciles exactly: 40+16+7+6+6+6+5+1+1=88).\n3. NEW list-structure entry added: 2 orphan <li> elements with NO <ul>/<ol>/<menu> wrapper at all in the sidebar 'エコ・リユース' section - found via an independent full-page sweep of all 897 <li> elements' parents (the two lowest-count criteria, list-structure and input-label, were the assigned spot-sweep targets). Distinct pattern from the already-documented categoryMenu nested-list defect (missing wrapper vs. wrong children). Both Beacon and Lighthouse miss it.\n4. input-label spot-swept across all 19 form fields on the page - confirmed the header search box is the ONLY unlabeled field; no other misses.\n5. All 12 link-name entries independently re-verified via a full-page programmatic sweep of all 856 visible <a href> elements checked for accessible name (text/aria-label/aria-labelledby/title/non-empty-alt-img) - total unnamed-visible = 140, matching the draft's total exactly, with every sub-pattern count (98/8/6/6/6/2/2/1/1/8/1/1) independently confirmed correct to the element.\n6. Zero-violation consensus (button-name, heading-order, html-lang, document-title, meta-viewport-zoom) independently re-verified via direct DOM checks: html lang=\\\"ja\\\" present; <title> present; 0 <meta name=\\\"viewport\\\"> tags anywhere; 0 heading-level skips among 177 visible headings; only 1 role=button/link/menuitem element on the whole page and it is properly named.\n7. beacon_fp and lighthouse_fp lists corrected for sub-count precision (see arrays) and one addition each (an undocumented hidden link-name false-positive; an undocumented stale Lighthouse aria-command-name audit).\n\nNet effect: 22→24 violations entries (2 new finds), all counts now individually verified against markup rather than carried forward from the draft's narrative."
+  },
+  {
+    "idx": 87,
+    "violations": [
+      {
+        "criterion": "image-alt",
+        "markup": "<img class=\"zdcm-module-footer-dropdown__svg\" src=\"https://st1.zoom.us/homepage/20260702-1234/primary/dist/assets/zoommedia/CaretDown.svg\">",
+        "why": "Decorative dropdown-caret <img> has no alt attribute at all (not even alt=\"\"), so the WCAG 1.1.1 decorative-image exception is never invoked; screen readers may announce the raw filename/URL. Verified at exactly 4 locations: 87.html:1812 and :1876 (desktop `.dropdowns` block, language + currency buttons) and :2091 and :2155 (mobile `.dropdowns-mobile` block, language + currency buttons). The enclosing <button> already carries visible text (\"English\"/\"US Dollar $\") so the button's own accessible name is fine; the img itself still fails 1.1.1 independently.",
+        "count": 4,
+        "beacon": "flagged",
+        "lighthouse": "flagged"
+      },
+      {
+        "criterion": "image-alt",
+        "markup": "<a id=\"ot-do-not-sell\" class=\"ot-sdk-show-settings\" style=\"cursor: pointer\"><img src=\"https://st1.zoom.us/homepage/20260702-1234/primary/dist/assets/images/privacyoptions.png\"> Your Privacy Choices</a>",
+        "why": "Decorative privacy icon at 87.html:2193 has no alt attribute, same 1.1.1 failure as above. Link text already names the link itself, but the img fails independently.",
+        "count": 1,
+        "beacon": "flagged",
+        "lighthouse": "flagged"
+      },
+      {
+        "criterion": "image-alt",
+        "markup": "<img src=\"https://st1.zoom.us/homepage/20260702-1234/primary/dist/assets/zoommedia/logo-zoom-white@2x.png\" alt=\"logo-zoom-white@2x.png\" class=\"zdcm-logo-white\" width=\"114\" height=\"26\">",
+        "why": "alt text is the file's own (or a stale/mismatched) filename, not a text alternative serving an equivalent purpose - WCAG failure technique F30. Verified at 4 locations: 87.html:417 (alt=\"logo-zoom-white@2x.png\"), :418 (paired blue logo, alt=\"logo-zoom@2x.png\"), :1749 (same white logo repeated in footer), and :567 (nav mega-menu promo image, alt=\"My Notes Ad@2x.webp\" - a stale filename that doesn't even match its own src \"my-notes-banner.webp\", making it a description of the wrong asset entirely). A 5th filename-alt image at :429 (ai-companion-icon.svg) is aria-hidden=\"true\" with its parent <button> already named \"AI\" via visible text, so it is correctly excluded (see beacon_fp).",
+        "count": 4,
+        "beacon": "flagged",
+        "lighthouse": "out-of-scope"
+      },
+      {
+        "criterion": "button-name",
+        "markup": "<button class=\"fdn-zdcm-feature-accordion__menu-item accordion__item-button js-accordion-trigger is-accordion-trigger is-selected is-expanded\" data-accordion=\"feature-accorodion-0\" aria-expanded=\"true\" aria-controls=\"content-feature-accorodion-0\" id=\"trigger-feature-accorodion-0\"></button>",
+        "why": "Button has zero text content, no aria-label/aria-labelledby, no title - a nameless interactive control (WCAG 4.1.2). Verified at exactly 5 locations, all identical empty-content shape: 87.html:1116, :1166, :1217, :1267, :1317 (one per feature-accordion tab panel).",
+        "count": 5,
+        "beacon": "flagged",
+        "lighthouse": "missed"
+      },
+      {
+        "criterion": "button-name",
+        "markup": "<button class=\"prev\" id=\"customPrev\"></button><button class=\"next\" id=\"customNext\"></button>",
+        "why": "Carousel prev/next controls at 87.html:1504-1505 with zero text content and no aria-label - no accessible name at all.",
+        "count": 2,
+        "beacon": "flagged",
+        "lighthouse": "missed"
+      },
+      {
+        "criterion": "button-name",
+        "markup": "<button class=\"fdn-logo-slide__control fdn-logo-slide__control--pause\" aria-label=\"\"></button>",
+        "why": "Explicit empty aria-label=\"\" at 87.html:1423 overrides any other name source in the accname computation, forcing the accessible name to the empty string despite the button being visible/interactive. Its sibling play button (87.html:1422) has the same empty aria-label but also carries hidden=\"\", removing it from the accessibility tree - correctly out of scope, not counted here.",
+        "count": 1,
+        "beacon": "missed",
+        "lighthouse": "flagged"
+      }
+    ],
+    "beacon_fp": [
+      "image-alt-missing at 87.html:57 quotes a JS template-literal string (`<img src=\"${privacyIcon}\" />`) inside a <script> block's source text, never parsed as a DOM element - verified the actual rendered privacy-choices markup is the separate static <a id=\"ot-do-not-sell\"> element at line 2193 (already reported above). Not an independently-countable violation.",
+      "quality-alt-filename at 87.html:429 (ai-companion-icon.svg) - verified this img carries aria-hidden=\"true\", excluding it from the accessibility tree; its parent <button> already has visible text \"AI\" as its name, so the filename-alt content is never exposed to assistive tech.",
+      "frame-title-missing at 87.html:2542 - verified the cited 1x1 helper iframe has inline style=\"...visibility:hidden\", removing it from the accessibility tree per CSS-AAM (same exclusion effect as display:none); not exposed to AT, so a missing title is moot.",
+      "frame-title-missing at 87.html:2571 - verified the cited iframe (cross-storage.html) has inline style=\"display: none\", explicitly out of the accessibility tree; not a real violation. (A 4th iframe on the page, the OneTrust text-resize iframe, already carries a title and is also aria-hidden, so it was never flagged.)"
+    ],
+    "lighthouse_fp": [
+      "link-name flagged node a.fdn-alert-banner (href=.../products/ai-assistant/, data-en-text=\"Explore ZoomMate\") does not exist in the audited 87.html snapshot - verified directly: the only fdn-alert-banner anchor present at line 880 has href=.../ai-note-taking/ and data-en-text=\"Explore My Notes\", with a visually-hidden span (line 881) plus multiple visible text spans (lines 885-889) giving it an unambiguous accessible name. Snapshot/timing mismatch (Lighthouse's own capture vs. this run's saved snapshot - the raw JSON's image-alt snippets also reference an older asset build path 20260602-1234 vs. this snapshot's 20260702-1234, corroborating a capture-time drift), not a reproducible violation on this page state."
+    ],
+    "notes": "Adversarial re-verification performed by direct inspection, not by trusting the draft: grepped/read every quoted markup instance in 87.html against its exact line number, parsed the full Beacon findings array (31 entries, confirmed via node/JSON) and the full Lighthouse audits object (raw 87-lh.json) rather than sampling. Result: every count, markup quote, and beacon/lighthouse flagged|missed|out-of-scope mapping in the draft reproduced exactly as claimed - zero corrections required. Specifically verified: (1) all 4 CaretDown instances (lines 1812/1876/2091/2155) and the privacy icon (2193) have no alt attribute; Lighthouse's raw image-alt items list shows exactly 3 hits (2 mobile-block CaretDown + 1 privacy icon), confirming the mobile-viewport-scoped subset explanation. (2) All 4 filename-alt images (417/418/567/1749) confirmed, plus confirmed the 5th candidate (429, ai-companion-icon.svg) is aria-hidden with a named parent button - correctly a beacon_fp, not a violation. (3) All 5 accordion-trigger buttons (1116/1166/1217/1267/1317) and both carousel buttons (1504/1505) confirmed empty with no accessible name; Lighthouse's button-name audit item list contains exactly ONE entry (the pause button only) - confirms both accordion and carousel groups were genuinely missed by Lighthouse, not undercounted by me. (4) Pause button's aria-label=\\\"\\\" confirmed at line 1423; sibling play button confirmed hidden=\\\"\\\" at line 1422 (correctly excluded). (5) Both frame-title beacon_fp iframes confirmed (visibility:hidden at 2542, display:none at 2571); independently confirmed a 4th iframe (line 62, GTM noscript fallback) is also non-issue (has a title AND is display:none). (6) The link-name lighthouse_fp confirmed by direct line-880 read - the live snapshot's fdn-alert-banner anchor has full visible text, unlike the stale node Lighthouse's JSON references.\\n\\nIndependent spot-sweep on the two zero-entry criteria (heading-order, list-structure), done fresh rather than trusting the draft's \\\"clean\\\" claim: heading-order - extracted all 14 heading tags in document order (h1 at 898, then h2/h2/h2/h2, then eight h3s, then a final h2) - no skipped levels going deeper anywhere, confirmed clean. list-structure - found 19 <ul> elements (0 <ol>), checked the immediate child of every one - all 19 have <li> as the first child with no stray text/div direct children, confirmed clean. No misses found in either.\\n\\nOne adjacent-but-out-of-scope finding surfaced while cross-checking Lighthouse's accessibility audits: label-content-name-mismatch (WCAG 2.5.3 Label in Name) fails on 3 <a class=\\\"fdn-zdcm-cards\\\"> cards whose aria-label truncates their visible text (e.g. aria-label=\\\"Zoom wins Emmy\\\" vs visible \\\"Zoom wins Emmy for Engineering, Science & Technology\\\"). These links DO have accessible names (unlike link-name failures, which require no name at all), so this doesn't fit the link-name criterion or any other criterion in this task's fixed enum - noted here for completeness but not added as a violation entry, since forcing it into \\\"link-name\\\" would misrepresent the failure type.\\n\\nInput-label arithmetic re-verified from scratch: 17 form controls total (9 type=hidden at lines 382-386/399-400/669/1734, 3 OneTrust checkboxes at line 2561 with aria-labelledby, 4 OneTrust filter-modal checkboxes at line 2571 with real <label for> elements reading the literal placeholder \\\"checkbox label\\\" - confirmed this is an unrendered template row (id=\\\"chkbox-id\\\", empty <ul id=\\\"ot-host-lst\\\">) that OneTrust populates with real vendor/category names via JS, not a missing-label defect - and 1 search input with aria-label at line 2565). 9+3+4+1=17, matches exactly."
+  },
+  {
+    "idx": 90,
+    "violations": [
+      {
+        "criterion": "link-name",
+        "markup": "<a href=\"https://www.ibm.com/jp-ja/campaign/ibm-and-ai?link=hpcg5jp\"></a><a href=\"https://www.ibm.com/jp-ja/campaign/ibm-and-ai?link=hpcg5jp\">特集ページ：Let's create smarter business </a>",
+        "why": "Verified at snapshot line 2493 (matches Beacon's code_before verbatim, including full-width colon which the draft had mistyped as half-width). First anchor is completely empty (no text, aria-label, aria-labelledby, title, or image) and carries no aria-hidden/display:none/hidden, so it sits in the a11y tree with no accessible name — a screen reader announces a bare duplicate 'link' immediately before the real one.",
+        "count": 1,
+        "beacon": "flagged",
+        "lighthouse": "missed"
+      },
+      {
+        "criterion": "link-name",
+        "markup": "<a slot=\"footer\" target=\"_self\" href=\"https://www.ibm.com/jp-ja/solutions/ai-models?lnk=hpfp6us\"><c4d-card-footer ... slot=\"footer\" href=\"...\"></c4d-card-footer></a>",
+        "why": "Confirmed 8 distinct instances (lines 2963/2999/3034/3069/3104/3139/3174/3209, lnk=hpfp2-9us) where <a slot=\"footer\"> wraps a c4d-card-footer with zero slotted content and no aria-label on the <a>. Independently swept every <a> wrapping c4d-card-footer on the page (24 total): the other 16 are the same 8 newsfeed items appearing twice (once visible, once in a display:none duplicate list), and every one of those DOES carry an explicit aria-label matching its headline text — corroborating that these 8 home-tile links are the sole outliers, not a component default. Count of 8 confirmed exhaustive.",
+        "count": 8,
+        "beacon": "flagged",
+        "lighthouse": "missed"
+      },
+      {
+        "criterion": "button-name",
+        "markup": "<div class=\"earth-language-icon\" part=\"earth-l0-icon\" role=\"button\" tabindex=\"0\" aria-haspopup=\"true\" aria-expanded=\"false\" aria-controls=\"countryDropdown\" style=\"display: block !important;\"><svg ... aria-hidden=\"true\" ...></svg><div id=\"countrySwitcher\">...</div></div>",
+        "why": "Verified at snapshot line 1018: role=button element whose only content is an aria-hidden SVG plus empty placeholder markup, no text/aria-label/aria-labelledby/title anywhere, forced visible via inline !important. Independent sweep of all 18 <button>/role=\"button\" elements on the page found no other unnamed control — including the Watson Assistant Chat header buttons whose aria-labelledby points to aria-hidden tooltip <span> siblings, which is a spec-valid pattern (aria-labelledby name computation ignores the referenced node's hidden state), so those are correctly NOT violations. Lighthouse's button-name audit also passed (0 items) despite this element's forced visibility — genuinely missed by both tools.",
+        "count": 1,
+        "beacon": "missed",
+        "lighthouse": "missed"
+      },
+      {
+        "criterion": "heading-order",
+        "markup": "<h1 class=\"leadspace-expanded__heading expressive-heading-05\" id=\"leadspaceSimpleTitle\">...</h1> ... <c4d-link-list-heading role=\"heading\" aria-level=\"4\" slot=\"heading\" data-autoid=\"c4d--link-list-heading\">最新情報</c4d-link-list-heading> ... <h5 class=\"expressive-heading-02\">お客様へのおすすめ</h5>",
+        "why": "Verified full heading sequence: h1 (line 1235) is immediately followed in document order by this visible (style=display:block), non-hidden level-4 ARIA heading (line 1533) — a 1->4 skip — and only then the h5 (line 1663), which is a valid +1 step once the level-4 heading is counted. A second identical '最新情報' heading exists at line 4710 but its ancestor <c4d-link-list> carries inline style=\"display: none\" (a hidden duplicate of the newsfeed widget) so it does not add to the count. Beacon's heading detector only scans native h1-h6 tags (misses ARIA role=heading) — missed. Lighthouse's 2 heading-order failures are the h5 (a real node, but a misattribution — see lighthouse_fp) and a differently-labeled node (see next entry) — neither is this node, so missed.",
+        "count": 1,
+        "beacon": "missed",
+        "lighthouse": "missed"
+      },
+      {
+        "criterion": "heading-order",
+        "markup": "<h2 part=\"h2\">洞察を深める</h2> ... <c4d-content-item-heading role=\"heading\" aria-level=\"4\" data-autoid=\"c4d--content-item__heading\" slot=\"heading\">IBMのレポート、ブログ</c4d-content-item-heading>",
+        "why": "Verified real in the current snapshot: this h2 (line 3811/3824, aria-level=2) is followed directly by this level-4 content-item-heading (line 3916) with no intervening h3, a genuine 2->4 skip; the section's other two content-item-headings are level-4 siblings (no further skip). CORRECTED from the draft: lighthouse changed from 'flagged' to 'missed'. Lighthouse's raw output has exactly 2 heading-order failures; the second one's nodeLabel is 'IBMについて' at a path nested under a SECOND c4d-cta-block (index 1) inside a different container (DIV[7]) than this section — but the current snapshot's thin-stat section contains only ONE c4d-cta-block, and none of its 3 content-item-headings ('IBMのレポート、ブログ' / 'IBMの学習プラットフォーム' / 'IBMのイノベーション') match the text 'IBMについて'. Under the default-skeptical stance, this specific quoted node cannot be confirmed as what Lighthouse flagged (most plausibly a different, personalization/content-refresh-drifted node per the same drift pattern already documented elsewhere), so the lighthouse claim is downgraded rather than assumed. Beacon: missed (confirmed — native-tag-only heading scanner, never evaluates aria-level).",
+        "count": 1,
+        "beacon": "missed",
+        "lighthouse": "missed"
+      },
+      {
+        "criterion": "list-structure",
+        "markup": "<c4d-legal-nav-cookie-preferences-placeholder data-autoid=\"c4d--privacy-cp\" id=\"teconsent\" data-mode=\"footer\" consent=\"undefined\" aria-label=\"Open Cookie Preferences Modal\" role=\"complementary\">...</c4d-legal-nav-cookie-preferences-placeholder> — slotted as the last child of <c4d-legal-nav> (snapshot line 4625), rendered inside the component's shadow <ul part=\"legal-nav-list\"> per Lighthouse's flagged selector nav.c4d--legal-nav > div.c4d--legal-nav__list > ul",
+        "why": "CORRECTED from the draft. Lighthouse's actual audit explanation for this node is 'List element has direct children that are not allowed: [role=complementary]' — not a general objection to non-<li> children. The draft's markup/reasoning was imprecise: it cited the four sibling <c4d-legal-nav-item role=\"listitem\"> elements (lines 4616-4622) as corroborating evidence, but those ARE valid list children (role=listitem satisfies the list-structure rule) and are irrelevant to the failure. The true and sole cause, confirmed in the light DOM at line 4625, is this one slotted TrustArc cookie-preferences placeholder carrying an explicit conflicting role=\"complementary\" — confirmed via the page's own runtime script (lines 4660-4689) which explicitly locates this exact element via slot.assignedNodes() to hide it on certain domains, proving it is the slotted child landing inside the shadow <ul>. Beacon cannot see this at all (shadow DOM; Beacon has no list-structure checker) — missed.",
+        "count": 1,
+        "beacon": "missed",
+        "lighthouse": "flagged"
+      }
+    ],
+    "beacon_fp": [
+      "heading-level-skipped @ snapshot line 1663 (h5 'お客様へのおすすめ'): verified correct as a false positive. A visible level-4 ARIA heading (c4d-link-list-heading, '最新情報', confirmed non-hidden at line 1533) sits between the h1 and this h5 in document order, so 4->5 is a valid one-level increment; the real skip is the level-4 heading itself (listed separately in violations). Beacon's heading scan only looks at native h1-h6 tags and misses ARIA role=heading elements.",
+      "frame-title-missing @ snapshot line 5861 (iframe id=\"db-sync\"): verified correct. Confirmed in the snapshot markup: the element has both aria-hidden=\"true\" and inline style=\"display: none\" — out of the accessibility tree, so a missing title here is not a violation."
+    ],
+    "lighthouse_fp": [
+      "heading-order failure node 'div#mbox-tg1-tg > div.cds--col > div > h5.expressive-heading-02' (same h5 as the Beacon claim above): verified against the raw Lighthouse JSON — this selector and nodeLabel ('お客様へのおすすめ') match exactly. Not a real skip in the current snapshot's document order once the preceding level-4 c4d-link-list-heading ('最新情報', a personalized sidebar newsfeed box) is accounted for. Lighthouse ran mobile (412px) on 2026-06-07, a month before this snapshot (2026-07-05); IBM's homepage sidebar/personalized content (Adobe Target mbox- boxes) plausibly differed at crawl time, causing Lighthouse to misidentify the h5 as the violator instead of the actual skip point."
+    ],
+    "notes": "Re-verified all 7 draft violations directly against the snapshot HTML, Beacon audit JSON, and raw Lighthouse JSON (never taking the draft's quotes on faith). Two corrections made, no violations added or removed:\n\n1. Heading-order entry for the c4d-content-item-heading ('IBMのレポート、ブログ') skip: changed lighthouse from 'flagged' to 'missed'. Lighthouse's raw JSON has only 2 heading-order failures; the second one's nodeLabel is 'IBMについて' at a DOM path nested under a second c4d-cta-block that doesn't exist in the current snapshot's single-cta-block thin-stat section, and no content-item-heading in this snapshot has that text. Could not verify Lighthouse literally flagged this quoted node, so downgraded rather than pattern-matched. The underlying violation (real 2->4 skip in the current snapshot) stays in the list, verified independently of Lighthouse.\n\n2. List-structure entry (footer legal-nav <ul>): corrected the markup/why. Pulled Lighthouse's actual failure explanation (\"List element has direct children that are not allowed: [role=complementary]\") instead of relying on the draft's inference. The real cause is one specific slotted TrustArc cookie-preferences element with role=\"complementary\" (confirmed in light DOM + the page's own hide-script that locates it via slot.assignedNodes()) — not \"children aren't <li> tags\" broadly, since the four sibling c4d-legal-nav-item role=\"listitem\" elements the draft cited as corroboration are actually valid list children and irrelevant to the failure.\n\nMinor fix: violation 1's quoted markup had a half-width colon where the snapshot has a full-width \"：\" — corrected for exactness.\n\nIndependent spot-sweeps performed (beyond re-verifying the drafted entries): (a) button-name — checked all 18 <button>/role=\"button\" elements on the page, confirmed only the earth-language-icon div lacks a name, and confirmed the Watson Assistant Chat buttons' aria-labelledby-to-aria-hidden-tooltip pattern is spec-valid, not a violation; (b) list-structure — checked all other <ul>/role=\"listitem\" groups (footer nav groups, masthead profile) for similar non-conforming children, found none; (c) frame-title — enumerated all 5 iframes on the page, confirmed exactly 1 is both title-less and unproven-hidden; (d) heading-order — traced the full heading sequence top to bottom (18 heading nodes) and confirmed exactly 2 real skip points (both already captured) plus one hidden duplicate (display:none) correctly excluded from the count; (e) the zero-entry criteria (image-alt, input-label, html-lang, document-title, meta-viewport-zoom) were independently re-swept via direct regex/DOM checks rather than trusting the draft's self-report — all confirmed clean. One correction to the notes' own supporting example: the draft cited img#db_lr_pixel_ad as \"lacking alt\" for the image-alt clean claim, but that img actually already has alt=\"\" (valid decorative); the real alt-less-but-hidden pixel is a different, unlabeled videoamp.com tracking img with inline display:none. Conclusion (image-alt clean) is unaffected.\n\nAlso re-confirmed the \"8\" card-footer link-name count is exhaustive: swept all 24 <a> elements wrapping c4d-card-footer site-wide — 16 (8 newsfeed items x2, one hidden duplicate) correctly carry aria-label, only the 8 home-tile links (hpfp2-9us) omit it, matching Beacon's count exactly.\n\nBoth beacon_fp and lighthouse_fp entries in the draft were independently re-verified against the actual markup/JSON and left unchanged (both hold up). [CORRECTION 2026-07-06: frame-title entry (video-modal-content iframe) removed. The iframe sits inside <div class=\"video-modal-overlay\" aria-hidden=\"true\">, outside the accessibility tree at rest, per this study's own judgement rules. Found mechanically by the engine@5 hidden-subtree walker. Removed entry had beacon=flagged, lighthouse=missed.]"
+  },
+  {
+    "idx": 95,
+    "violations": [
+      {
+        "criterion": "list-structure",
+        "markup": "<ul class=\"carousel slick-initialized slick-slider\" data-mainbanner=\"image\" style=\"\"><button class=\"slick-prev slick-arrow slick-disabled\" aria-label=\"Previous\" type=\"button\" aria-disabled=\"true\" title=\"Previous\" style=\"\">Previous</button><div class=\"slick-list draggable\">...<button class=\"slick-next slick-arrow\" aria-label=\"Next\" type=\"button\">Next</button></ul>",
+        "why": "This <ul> (selector div.main > div.banner > div.mainbanner > ul.carousel[data-mainbanner=image], snapshot line 1189) is visible (style=\"\", no aria-hidden/display:none on it or any ancestor div.main/div.banner/div.mainbanner) and has <button> and <div> as direct children before/around the <li> slides, violating the list/listitem structural requirement of WCAG 1.3.1 Info and Relationships.",
+        "count": 1,
+        "beacon": "flagged",
+        "lighthouse": "flagged"
+      },
+      {
+        "criterion": "meta-viewport-zoom",
+        "markup": "<meta name=\"viewport\" content=\"width=device-width, initial-scale=1, maximum-scale=1\">",
+        "why": "maximum-scale=1 disables pinch-zoom/scaling below the WCAG 1.4.4 Resize Text threshold (must allow at least 500% / maximum-scale>=5), blocking low-vision users from enlarging content. Only one viewport meta tag exists on the page (confirmed by full-page sweep).",
+        "count": 1,
+        "beacon": "flagged",
+        "lighthouse": "flagged"
+      }
+    ],
+    "beacon_fp": [
+      "list-non-li-child finding at 95.html:1156 (the <ul class=\"carousel\" data-mainbanner=\"video\" style=\"display: none;\"> with a direct <button> child) — this ul carries inline style=\"display: none\" on itself, so the whole subtree (including its non-li children) is outside the accessibility tree; not a real WCAG violation in the page's current state. Confirmed against markup at line 1156. Only its visible sibling (data-mainbanner=\"image\", line 1189) is a genuine violation."
+    ],
+    "lighthouse_fp": [],
+    "notes": "Verification method: independently re-derived every claim from raw sources rather than trusting the draft's prose. (1) Read audits/95.json in full — confirmed Beacon's 8 findings, confirmed it emitted list-non-li-child TWICE (line 1156 display:none video carousel, and line 1189 visible image carousel) and viewport-zoom-disabled once; confirmed the other 5 findings (main-landmark-missing, meta-description-missing, canonical-missing, motion-reduced-motion-missing, large-fixed-width) are legitimately outside the 10-criterion scope. (2) Extracted image-alt/link-name/button-name/frame-title/label/heading-order/html-has-lang/document-title/meta-viewport/list/listitem audits from raw/95-lh.json via node one-liners: list scored 0 with exactly 1 flagged node (selector div.main > div.banner > div.mainbanner > ul.carousel, boundingRect 412x276 = the visible one, confirming Lighthouse independently excluded the display:none duplicate), meta-viewport scored 0 (flagged), image-alt/link-name/button-name/html-has-lang/document-title all scored 1 (0 items), label/frame-title/heading-order returned notApplicable (consistent with only 1 heading total on the page — no order to check — and is not evidence of a missed violation since 0 relevant failing nodes exist either way). (3) Independently re-swept the raw snapshot HTML with fresh regex/tokenizer scripts (not reusing the draft's code): 245 <img>, all with alt attribute (0 missing); 29 <button> + 2 <input type=submit>, all with a computed name (aria-label/title/text/img-alt), 0 unnamed; a stack-based nested-tag <a href> scan found 339 links (draft said 268 — different counting method, but result is the same: 0 unnamed, so no correction needed since count isn't part of a zero-violation entry); 7 <iframe>, all titled; 2 relevant <input type=text>, both matched by <label for=\\\"txt_query\\\">; 0 <select>/<textarea>; 1 <h1> total and 0 role=heading; <html lang=\\\"en\\\">; non-empty <title>. (4) Mandatory spot-sweep for misses on the two criteria with the fewest tracked instances: swept ALL 46 <ul>/<ol> elements on the page (list-structure) — found 4 more <ul> candidates (NewsContent/SpotContent/EventContent/TripContent) but all are empty (<ul>...(whitespace only)...</ul>, no children at all, likely JS-populated at runtime) AND carry display:none, so no additional violation; swept for all <meta viewport> tags (meta-viewport-zoom) — confirmed exactly 1 exists on the page, count is complete. Both sweeps confirm the draft's counts were exhaustive, nothing missed. Net result: zero corrections. The draft's 2 violations, both tool mappings, and both FP-refutation entries all reproduce exactly against the markup and both tools' raw outputs."
+  },
+  {
+    "idx": 27,
+    "violations": [
+      {
+        "criterion": "image-alt",
+        "markup": "<img style=\"border-radius: 50%;\" src=\"https://secure.gravatar.com/avatar/b6c928ce1b901c34f86f3856b5a3bcefe9a4fb94698b9778fb3df5802d66e25d?s=80&d=retro&r=pg\">",
+        "why": "No alt attribute at all (not even alt=\"\") on an author-avatar <img>. Element is not aria-hidden, not role=presentation/none, not display:none — squarely in the accessibility tree, so AT falls back to announcing the raw gravatar URL. Same structural pattern (only the gravatar hash differs) repeats across 6 separate <img> nodes, one per article-card author-row. Directly re-verified at snapshot lines 735, 1022, 1073, 1124, 1175, 1226, inside article ids post-395894, post-395223, post-394890, post-394364, post-395567, post-395776 respectively. The draft's cited article IDs (post-395357/393536/395048/393441/392775/393178) and byte offsets do not correspond to any markup on this page — corrected here.",
+        "count": 6,
+        "beacon": "flagged",
+        "lighthouse": "flagged"
+      },
+      {
+        "criterion": "image-alt",
+        "markup": "<img src=\"https://consent.trustarc.com/get?name=css-tricks.com_cookie-notice.png\" style=\"width:auto;height:40px;\">",
+        "why": "TrustArc cookie-preferences icon <img> in the footer #teconsent widget (line 2421) has no alt attribute. The wrapping <a role=\"link\" aria-label=\"Cookie Preferences, opens a dedicated popup modal window\"> supplies the anchor's own accessible name, but image-alt is evaluated per <img> element independent of an ancestor's aria-label, and this img has no alt/aria-hidden/presentation role of its own, so it is a standalone violation. Verified accurate as drafted.",
+        "count": 1,
+        "beacon": "flagged",
+        "lighthouse": "flagged"
+      }
+    ],
+    "beacon_fp": [],
+    "lighthouse_fp": [],
+    "notes": "Re-verified every claim against the raw files rather than trusting the draft's prose. Core conclusion holds (image-alt is the only real violation on this page, 7 total instances, full Beacon/Lighthouse/manual triangulation), but corrected three inaccuracies found during adversarial re-check:\n\n1. FABRICATED SELECTORS (fixed): violation #1's \"why\" cited article IDs post-395357/393536/395048/393441/392775/393178 and byte offsets 50928/62028/64393/66850/69060/71521. None of those article IDs exist anywhere in the snapshot. Direct grep + Read confirmed the actual 6 no-alt gravatar <img> tags sit at lines 735/1022/1073/1124/1175/1226 inside article ids post-395894/post-395223/post-394890/post-394364/post-395567/post-395776. Byte offsets in the draft were also off by ~150-180 bytes from a line-based recount and are dropped in favor of verified line numbers. Count of 6 and the underlying violation itself were correct; only the specific locators were wrong.\n\n2. IMPRECISE DECORATIVE-IMG BREAKDOWN (fixed in this note): draft said \"the other 45 <img> elements carry alt=\\\"\\\"\". Independent script over all 52 <img> tags found 7 no-alt (violations, matches), 40 with alt=\"\" (truly decorative), and 5 with non-empty descriptive alt text (4 article-thumbnail alts + one \"ads via Carbon\" image) — i.e. 45 non-violating images split 40/5, not uniformly alt=\"\". Does not change the violation count or any beacon/lighthouse mapping.\n\n3. HEADING SEQUENCE MISCOUNT (descriptive only, no verdict change): draft's quoted heading-level sequence \"1→2→3(x8)→2(x9)→3(x8)→2→3(x13)→2→3(x11)→4→5→5→5\" has wrong repeat-counts in two spots. Independent extraction of all 57 heading tags gives the real sequence 1→2→3×7→2×9→3×8→2→3×13→2→3×9→4→5×3→2×3 (last three are the aria-hidden-overlay h2s, correctly excluded). Re-walking this corrected sequence confirms no step increases by more than 1 — heading-order: 0 violations stands, independently reconfirmed, Lighthouse heading-order audit score 1/0 items agrees.\n\nBeacon/Lighthouse mapping check: pulled Lighthouse's raw audit nodes directly — button-name and frame-title both scoreDisplayMode \"notApplicable\" (matches draft's \"out of scope, not a miss\" framing); label, document-title, html-has-lang, html-lang-valid, heading-order, list, listitem, meta-viewport, link-name all score 1 with 0 failing items; image-alt score 0 with exactly 7 failing items. All match the draft's per-criterion characterization. Beacon audit JSON independently confirms 7 image-alt-missing findings at the same 7 locations (6 gravatar lines + TrustArc line 2421) plus 2 out-of-scope findings (meta-description-missing, motion-reduced-motion-missing) correctly excluded from the 10-criterion scope. No beacon or Lighthouse false positives found — beacon_fp/lighthouse_fp stay empty.\n\nSpot-sweep (task-required, ran on the smallest-scope criteria plus adjacent single-element ones since 8 of 10 criteria tie at 0 draft entries): frame-title (1 iframe, has both a real title and display:none — confirmed out of scope) and meta-viewport-zoom (1 meta tag, content=\"width=device-width\", no zoom-blocking — confirmed 0 violations) fully reproduced; also freely re-checked html-lang (<html lang=\"en\">, valid) and document-title (non-empty <title>) since they were equally cheap. Went further than the minimum: wrote an accessible-name derivation script over all 261 anchors (link-name) — found 33 anchors with no visible text/aria-label/title, but every one of them carries aria-hidden=\"true\" on the anchor itself (CSS-Tricks almanac deep-link icons), so all correctly out of scope; 0 real link-name violations confirmed independently. Also manually verified all 16 <input> elements (email input has proper <label for=\"input_3_1\">, submit uses value=\"Subscribe\", 12 are type=\"hidden\" and out of scope, 1 search input sits inside the aria-hidden Jetpack overlay) and all 6 <button> elements (all confirmed inside the same aria-hidden=\"true\" search overlay div) — input-label and button-name 0-violation claims hold."
+  },
+  {
+    "idx": 67,
+    "violations": [
+      {
+        "criterion": "button-name",
+        "markup": "<button class=\"sc-bjxVRI jZamnX\"><div class=\"sc-eKrodz hOwyYj\"><span></span><span></span><span></span></div><span hidden=\"\">Navigation</span></button>",
+        "why": "Verified against snapshot (line 4945, inside <header data-open=\"false\">, div.navbar). This is the mobile-nav hamburger toggle, present in the accessibility tree (no display:none/hidden ancestor above it). Its only text node (\"Navigation\") sits inside a <span hidden=\"\">, which removes that span from the accessibility tree per the HTML hidden attribute, so it cannot contribute to the accname computation. The three icon spans are empty and there is no aria-label/aria-labelledby on the button itself. Accessible name resolves to empty string, violating WCAG 4.1.2 Name, Role, Value. Independently re-swept all 51 <button> elements on the page (grep + ancestor-hidden check): the only other borderline cases are 4 tab buttons with visible text (\"Features\"/\"Solutions\"/etc, fine), 3 Inbox/Boards/Planner card buttons whose accessible name comes from wrapped <h4>+<p> text (verbose but non-empty, fine), and one <button hidden=\"\" data-hidden=\"true\"> that is itself removed from the tree entirely (not reachable, not a 4.1.2 case). No other unnamed-and-reachable buttons found.",
+        "count": 1,
+        "beacon": "missed",
+        "lighthouse": "flagged"
+      },
+      {
+        "criterion": "heading-order",
+        "markup": "<h1>Capture, organize, and tackle your to-dos from anywhere.</h1> ... <h4>Inbox</h4>",
+        "why": "Full-document heading walk (36 heading elements parsed with ancestor hidden/display:none/aria-hidden tracking) confirms exactly one level-skip in the in-tree sequence: h1 (line 5208) is immediately followed by h4 \"Inbox\" (line 5209, plain, no hidden ancestor), jumping from level 1 to level 4 and skipping levels 2 and 3 — a genuine WCAG 1.3.1 violation. Correction to the draft's framing: the earlier nav content is NOT uniformly hidden as the draft implied. There are two copies of the same mega-menu heading set in the DOM — a first copy (h3 x6) that IS inside display:none and is correctly excluded, and a second copy (h2/h3 x7, e.g. line ~4993 onward) that has no hidden signal and IS genuinely in the accessibility tree, preceding the h1. This does not add a violation (h3→h1 is a level decrease, always permitted) and does not change the count, but the draft's parenthetical undersold what's actually visible before the hero. All other transitions in the full in-tree sequence (including the From-message-to-action / EMAIL MAGIC / Compare-plans blocks and the two cookie-modal headings) are same-level or decreasing, confirmed 0 additional skips.",
+        "count": 1,
+        "beacon": "flagged",
+        "lighthouse": "flagged"
+      }
+    ],
+    "beacon_fp": [
+      "frame-title-missing (Beacon location line 5223) targets `<iframe style=\"display: none;\"></iframe>` — confirmed via direct snapshot inspection this is the only one of the page's 4 iframes lacking a title, and it is display:none (out of the accessibility tree, unreachable by AT), so a missing title on it is not a WCAG 4.1.2 violation. Verified the other 3 iframes: 2x reCAPTCHA anchor both carry title=\"reCAPTCHA\", 1x onetrust-text-resize carries title=\"onetrust-text-resize\" (and is separately aria-hidden=\"true\"). Lighthouse's own frame-title audit is scoreDisplayMode:\"notApplicable\" (not simply score:1/pass as the draft's notes stated) — axe found no in-scope frame needing a title, consistent with this being a false positive rather than a missed real violation."
+    ],
+    "lighthouse_fp": [],
+    "notes": "Re-verified both violations line-by-line against the snapshot and both hold; no entries dropped, no counts changed (both remain count=1). Corrected two factual slips in the draft's supporting text, no change to the verdicts: (1) the draft said 5 images have alt=\\\"\\\" on decorative icons — direct enumeration of all 15 <img> tags shows only 3 have alt=\\\"\\\" (image-alt criterion still clean, 0 violations, just the wrong tally). (2) the draft said Lighthouse gives \\\"pass scores (1)\\\" on all 8 clean criteria — checked all 8 audit objects directly: 6 are score:1/binary (image-alt, link-name, list, listitem, html-has-lang, document-title, meta-viewport), but frame-title and label (input-label) are actually scoreDisplayMode:\\\"notApplicable\\\"/score:null, not a pass score. Practically equivalent (both mean \\\"no failing instances\\\"), but the draft's specific claim was wrong; corrected in the beacon_fp entry and noted here. Also refined the heading-order violation's rationale: confirmed via a full-document heading/hidden-ancestor walk that a second, non-hidden copy of the nav's h2/h3 mega-menu content genuinely precedes the h1 in the accessibility tree (only the first copy is display:none, contrary to the draft's implication that all earlier nav content was hidden) — this doesn't add a violation or change the count (h3→h1 is a permitted decrease) but is a more accurate account of the DOM. Verified the ot-hide/onetrust-pc-sdk exclusion the draft relied on: the applicable CSS rule is actually the compound selector `#onetrust-pc-sdk.ot-hide{display:none!important}` (self-match), not a generic `.ot-hide{...}` rule as the draft's phrasing suggested — conclusion (whole modal, including \\\"Manage Preferences\\\" h2 and its h4/h3 descendants, is out of the accessibility tree) still holds. Ran the required independent spot-sweep on both in-scope criteria (button-name: enumerated and hidden-checked all 51 <button> elements; heading-order: parsed all 36 heading elements site-wide with ancestor hidden-state tracking) — no additional instances of either violation type found beyond the one each already listed. Also independently re-confirmed the 8 clean criteria's supporting counts (15 img/0 missing alt, 94 a[href]/8 with empty text all covered by title or child-svg aria-label, 51 buttons, 10 input+2 textarea+1 select all labeled or out-of-scope via ot-hide ancestor, 3 ul/9 li no orphans, html lang=en, non-empty title, meta-viewport score 1) — all matched, 0 violations stands for each."
+  },
+  {
+    "idx": 8,
+    "violations": [
+      {
+        "criterion": "heading-order",
+        "markup": "<h1><span>Polaris</span> <span>Design System</span> <span>for React</span></h1><p>(Deprecated)</p></div></div><div class=\"HomePage_EntryPoints__pFF0h\"><a class=\"HomePage_EntryPoint__q8CCb\" href=\"/foundations\"><h3>Foundations</h3>",
+        "why": "Verified against full heading enumeration of the snapshot (grep for all <h1>-<h6>): document order is h1 (Hero) -> h3,h3,h3,h3 (entry points) -> h1 (interstitial modal title, id=modal-title). The only level-skip is the first h1->h3 transition (WCAG 1.3.1); the four h3 siblings are same-level, not additional skips, and the later h3->h1 transition is a decrease, which axe's heading-order rule does not flag. Lighthouse's heading-order audit independently confirms exactly one failing node (the first <h3>, labeled \"Foundations\"), corroborating count=1. The modal is not aria-hidden/display:none in the static markup so its second h1 is part of the accessible tree, but a second h1 is not itself a heading-order violation under this criterion's definition (skip detection only).",
+        "count": 1,
+        "beacon": "flagged",
+        "lighthouse": "flagged"
+      },
+      {
+        "criterion": "button-name",
+        "markup": "<button type=\"button\" style=\"margin-left: 0.5rem; position: relative; border-width: 2px; border-style: solid; border-color: white; border-radius: 9999px; height: 2rem; width: 2rem; overflow: hidden;\"><svg role=\"button\" viewBox=\"0 0 20 20\" aria-hidden=\"true\" fill=\"currentColor\" ...></svg></button>",
+        "why": "Confirmed via full enumeration of all 19 <button> tags in the snapshot: this is the only one with no accessible name. Its sole child is an svg with aria-hidden=\"true\" (with a conflicting/redundant role=\"button\" on the svg itself), which removes it from the accessible-name computation, leaving the outer <button> nameless (WCAG 4.1.2). Every other button on the page has either a real text node, an aria-label, or (for the emoji-only dark-mode toggle) a non-empty text-node accessible name from the 🌙 glyph — correctly excluded per the binary presence-only criterion. Lighthouse's button-name audit independently lists exactly this one failing node (selector div#dux-privacy > div > div > button), confirming count=1.",
+        "count": 1,
+        "beacon": "flagged",
+        "lighthouse": "flagged"
+      }
+    ],
+    "beacon_fp": [
+      "\"document-title-missing\" (critical, key document-title-missing) — refuted: snapshot 8.html contains `<title data-next-head=\"\">Shopify Polaris React</title>` in <head>, a valid non-empty title. Lighthouse's document-title audit independently scores 1 (pass, binary), and manual verification confirms a real title is present. Beacon's static scanner appears to have missed the Next.js-injected title tag. Confirmed as a genuine false positive on re-check."
+    ],
+    "lighthouse_fp": [],
+    "notes": "Adversarial re-verification: both draft violations reproduce exactly against the actual markup, no corrections needed to either entry, count, or beacon/lighthouse mapping.\n\n(1) heading-order: re-derived full heading list via grep across the whole snapshot (h1, h3, h3, h3, h3, h1 in document order) — confirms exactly one level-skip (h1->h3) and rules out any additional skip from the later h3->h1 transition (a decrease, not flagged by axe's heading-order rule). Lighthouse's own failing-node list for heading-order contains exactly 1 item (the \"Foundations\" h3), independently corroborating count=1.\n\n(2) button-name: enumerated all 19 <button> elements in the snapshot individually. Only the unlabeled cog-icon button in the cookie-consent widget (child svg has aria-hidden=\"true\", nested redundant role=\"button\" also aria-hidden) lacks an accessible name; every other button has either text content, an aria-label, or (dark-mode toggle) the 🌙 emoji as a valid non-empty text-node name. Lighthouse's button-name audit independently lists exactly 1 failing node at the same selector (div#dux-privacy > div > div > button), confirming count=1 and beacon+lighthouse both correctly flagged.\n\n(3) beacon_fp (document-title-missing): confirmed genuine false positive — Lighthouse document-title audit score=1 (pass) and the <title> tag is verifiably present and non-empty in the raw markup.\n\n(4) lighthouse_fp: no entries; nothing Lighthouse flagged was refuted.\n\nIndependent spot-sweep (two criteria with the fewest/zero draft entries, chosen for highest element-count/complexity and thus highest miss-risk): \n- link-name: re-counted via regex — 21 total <a href> elements (matches draft), each individually inspected; all carry real visible text >=3 chars (nav labels, entry-point headings, \"Skip to content\", \"Leave feedback\", \"Cookie Policy\", the CTA banner's <strong> text, and the logo link's \"Polaris React\" text + img alt). No icon-only or aria-hidden-text-only anchors found. Lighthouse link-name score=1 (pass, 0 failing items) confirms. No miss.\n- list-structure: re-counted via regex — exactly 1 <ul>, 12 <li>, 0 <ol>/<dl>/<dt>/<dd> anywhere in the snapshot; all 12 <li> are direct children of the single <ul> (nav sections), no orphaned <li> outside a list container. Lighthouse list/listitem audits both score notApplicable (no findings either way), consistent. No miss.\n\nAlso spot-checked (not part of the two-criteria sweep, but numeric claims re-verified per house rule against verifying specifics): Lighthouse accessibility category score = 0.88 (88), Beacon summary.overall_score = 64 — both match the notes' cited figures exactly.\n\nNo changes made to the draft inventory; all violations, fp lists, and criterion mappings held up under adversarial re-check."
+  },
+  {
+    "idx": 24,
+    "violations": [
+      {
+        "criterion": "frame-title",
+        "markup": "<devsite-iframe class=\"\" height=\"646px\" style=\"height: 646px;\"><iframe src=\"https://web.dev/frame/root_5dc10c89907e38bfc13e07a41a7d479305cf6b8feebf6ddc4ba7713fda2beacc.frame\" allow=\"clipboard-write https://web-dot-devsite-v2-prod-3p.appspot.com\" allowfullscreen=\"\" name=\"goog_1320894474\"></iframe></devsite-iframe>",
+        "why": "The iframe has no title attribute, aria-label, or aria-labelledby, and is not aria-hidden/hidden/display:none, so a screen-reader user tabbing to it gets no indication of frame content before entering it (WCAG 4.1.2). Verified: this is the ONLY <iframe> on the page (regex sweep found exactly 1), so count=1 is exhaustive, not a sample.",
+        "count": 1,
+        "beacon": "flagged",
+        "lighthouse": "flagged"
+      },
+      {
+        "criterion": "link-name",
+        "markup": "<a href=\"https://web.dev/explore/ai\">\\n  <picture>\\n    <img alt=\"\" src=\"https://web.dev/static/images/ai-feature.png\" ...>\\n  </picture>\\n</a>",
+        "why": "This exact href appears 4 times in the document (nav item with text, this image-only card link, a text-only card link, and a 'Learn more' button link) — only this specific occurrence (no track-type attrs, picture+img alt=\"\" as sole content) has zero name source: no sibling text, no aria-label/aria-labelledby/title. WCAG 4.1.2. Independently re-swept all 171 <a> elements with a fresh script (stripping aria-hidden subtrees, checking img alt / aria-label / title / visible text) and confirmed exactly 6 anchors matching this pattern: explore/ai, explore/how-to-optimize-inp, identity, learn/html, learn/css, learn/javascript — all inside figure.devsite-landing-row-item-image, matching Lighthouse's 6 corresponding link-name nodes exactly (selector, boundingRect, snippet all cross-checked).",
+        "count": 6,
+        "beacon": "missed",
+        "lighthouse": "flagged"
+      },
+      {
+        "criterion": "link-name",
+        "markup": "<a href=\"https://web.dev/html\">\\n  <div class=\"devsite-landing-row-item-icon-container\" ...>\\n    <div class=\"devsite-landing-row-item-icon material-icons\" aria-hidden=\"true\">image</div>\\n  </div>\\n</a>",
+        "why": "The only descendant text (material-icon ligature name) sits inside aria-hidden=\"true\", excluded from the accessibility tree, so the link has no visible text, aria-label, or title anywhere. WCAG 4.1.2. Independent sweep confirmed exactly 3 anchors matching this pattern (html/css/javascript, nodeLabels 'image'/'web'/'timer' in Lighthouse — those labels ARE the aria-hidden ligature text Lighthouse fell back to reporting, confirming the pattern), inside devsite-landing-row-item-description, distinct DOM path from the 6 picture-only links above.",
+        "count": 3,
+        "beacon": "missed",
+        "lighthouse": "flagged"
+      }
+    ],
+    "beacon_fp": [
+      "Beacon's 6x 'quality-link-generic' tip findings on the six \"Learn more\"/button-styled links (href=web.dev/explore/ai, web.dev/explore/how-to-optimize-inp, web.dev/identity, web.dev/html, web.dev/css, web.dev/javascript — corrected from the draft's miscounted 'four', it is six distinct hrefs, matching the 6 findings entries at snapshot lines 1618/1687/1756/1925/1989/2053) — these anchors have a clear, non-empty accessible name ('Learn more' text), so this is a subjective link-purpose-clarity tip (WCAG 2.4.4, severity=tip), not an accessible-name-missing violation. Correctly excluded from the link-name criterion; a different set of elements entirely from the 9 real empty-name links."
+    ],
+    "lighthouse_fp": [],
+    "notes": "Draft was already highly accurate; adversarial re-check found no wrong counts, no wrong beacon/lighthouse mappings, and no incorrectly-refuted real violations. Independently re-derived every quantitative claim from the raw files rather than trusting the draft's numbers:\n\n- frame-title: regex sweep of the snapshot found exactly 1 <iframe> on the page (none missed), matching Beacon's single critical finding and Lighthouse's single link-name-adjacent frame-title item at the same src/line. Kept as-is.\n- link-name: wrote an independent script parsing all <a> tags (171 total, matching draft's claim), stripping aria-hidden subtrees, and checking text/aria-label/aria-labelledby/title/img-alt for each — found exactly 9 empty-name anchors, split 6 (picture+img alt=&quot;&quot; only) + 3 (icon-container wrapped in aria-hidden=true only). This matches Lighthouse's link-name audit exactly: 9 items, same DOM selectors (figure.devsite-landing-row-item-image > a for the 6; devsite-landing-row-item-description > a with nodeLabel 'image'/'web'/'timer' for the 3). Beacon's findings array has zero link-name entries, confirming both are real misses. Kept as-is.\n- Traced each href in the draft's example markup through ALL its occurrences in the document (most hrefs like /html, /css, /identity appear 4-5 times in different link contexts — nav item, image card, text card, button) to confirm the SPECIFIC occurrence flagged is the empty-name one and not a sibling occurrence that has visible text. All correct.\n- Fixed one wording error in beacon_fp: draft said 'the four' Learn-more links but then listed 5 example hrefs and Beacon's own findings array has 6 quality-link-generic entries at 6 distinct hrefs — corrected to six.\n- Spot-verified the notes' other clean-page claims directly rather than trusting them: img alt (10 total, 0 missing, 8 empty, 2 meaningful — exact match), buttons (9 <button> all with text/aria-label name, plus 1 separate role=button span with aria-label, all named — draft's phrasing conflated these as one count but the underlying claim, all named, holds), lists (16 ul, 0 ol, 118 li — exact match), heading sequence (49 headings, h3-first with no h1, no skip between consecutive levels — exact match, consistent with Lighthouse heading-order pass), html lang=\"en\" valid, single non-empty <title>web.dev</title>, single viewport meta with no maximum-scale/user-scalable restriction (no zoom block). No hidden violations surfaced in any of these.\n- No changes made to the violations array's criteria, markup, counts, or beacon/lighthouse verdicts — all three entries and their exact counts (1, 6, 3) reproduce independently from the raw snapshot and Lighthouse JSON."
+  },
+  {
+    "idx": 29,
+    "violations": [],
+    "beacon_fp": [],
+    "lighthouse_fp": [],
+    "notes": "Adversarially re-verified the draft from scratch (independent regex/DOM sweep against run-2026-07-05/snapshots/29.html, not the prior sweep29.js) plus direct extraction from raw/29-lh.json and re-read of audits/29.json. No corrections were needed — every count and judgment call in the draft reproduced exactly.\n\nBeacon (audits/29.json): findings=[] confirmed, total_findings:0, audit_tier \"Tier 1 (static file scan only)\". contrast/touch/cognitive/media are state:\"not-machine-checkable\" (review:1 each, score:null) — correctly excluded from scope, not a suppressed fail.\n\nLighthouse (raw/29-lh.json, per-audit extraction): button-name/document-title/heading-order/html-has-lang/html-lang-valid/image-alt/link-name/list/listitem/meta-viewport all score:1 with details.items.length:0. frame-title and label score:null (not-applicable). Confirmed independently, matches draft.\n\nOwn DOM sweep (fresh node scripts, not reused from any prior session):\n- image-alt: 94 raw <img> tags, 45 inside <noscript> (dead weight, not rendered) => 49 rendered images. Of those, 0 missing the alt attribute; 40 alt=\"\" + 9 non-empty = 49. Traced all 40 empty-alt contexts by hand: every one sits either (a) inside an aria-hidden <picture> paired with a sibling <span class=\"visuallyhidden\"> naming the tile (e.g. iPad Air/Apple Watch/Trade In/Apple Card logo tiles), or (b) as a background/poster image nested inside a single <a>/<div> that already carries the full descriptive aria-label for that gallery card (F1/MLS/Silo/Cape Fear/etc. media-gallery items) — confirmed by walking the actual open-to-close span of one such <a> (tv-plus-gallery-formula 1) and verifying both the bg image and the two logo images sit inside it. All 40 are correctly decorative; 0 real violations.\n- link-name: 337 <a href> elements (regex count matches draft exactly). Accessible-name computation (aria-label > aria-labelledby > text-with-aria-hidden-descendants-stripped > alt > title) found only 9 with empty computed name — all 9 are `aria-hidden=\"true\" tabindex=\"-1\"` duplicate tile-links (macbook-air, iphone, ipad-air, macbook-pro, airpods-pro, apple-watch-series-11, ipad-pro, trade_in, apple-card), i.e. out of the a11y tree and not focusable. 0 real violations.\n- button-name: 28 <button> + 4 role=\"button\" = 32 (matches draft). All 32 resolved to a non-empty accessible name (aria-label or text content, e.g. the disabled footer accordion buttons carry \"Shop and Learn\" etc. as text; the language-switcher role=\"button\" div carries \"日本\" as text). 0 empty.\n- frame-title: 0 <iframe> elements — confirmed, genuinely out-of-scope not suppressed.\n- input-label: confirmed only 2 <input> total (1 type=hidden excluded, 1 aria-label=\"Search apple.com\"); also checked for select/textarea/contenteditable/role=textbox/role=combobox — 0 of each, so no other form controls exist to check.\n- heading-order: 55 headings, level sequence h1→(27×h2)→mixed h2/h3 runs, 0 forward skips greater than 1 level.\n- list-structure: 63 <ul>/<ol>, wrote a depth-tracking direct-children scanner (not text-based) — 0 lists with a non-li/script/template direct child or stray text.\n- html-lang: `<html ... xml:lang=\"en-US\" lang=\"en-US\" ...>` confirmed verbatim.\n- document-title: `<title>Apple</title>` confirmed verbatim.\n- meta-viewport-zoom: exactly one viewport meta tag, `content=\"width=device-width, initial-scale=1, viewport-fit=cover\"`, no user-scalable=no, no maximum-scale.\n\nConclusion: genuine true negative stands unchanged across all 10 in-scope criteria. No entries added to violations, beacon_fp, or lighthouse_fp — nothing in the draft was overturned."
+  },
+  {
+    "idx": 25,
+    "violations": [
+      {
+        "criterion": "link-name",
+        "markup": "<a href=\"https://developer.chrome.com/blog/chrome-at-io26\"><picture><img alt=\"\" src=\"...hero.png\" ...></picture></a> — same shape (anchor's ONLY descendant is a <picture><img alt=\"\"> with no text/aria-label anywhere in the anchor) confirmed at: io.google/2026 hero card (line ~1788), youtube/@ChromeDevs icon link (line 3338), linkedin/showcase/chrome-for-developers icon link (line 3404), twitter/ChromiumDev icon link (line 3470), and web.dev/baseline/ icon link (line 2682, <picture><img class=\"...icon\" alt=\"\" src=\".../icon-baseline.svg\">)",
+        "why": "Anchor's only descendant content is an <img alt=\"\"> (correctly decorative) with no aria-label/aria-labelledby/title/visible text anywhere in the anchor. alt=\"\" contributes nothing to the accessible-name computation, so the link itself has an empty accessible name (screen-reader/voice-control users hear only 'link'). All 6 confirmed live in the snapshot, none inside an aria-hidden/[hidden]/display:none ancestor. Each has a separate sibling <a> to the same href that DOES carry visible text (h3 title or a button label) elsewhere in the same row/list-item, but that does not name this icon-only anchor, which is independently reachable in tab order.",
+        "count": 6,
+        "beacon": "missed",
+        "lighthouse": "flagged"
+      },
+      {
+        "criterion": "link-name",
+        "markup": "<a href=\"https://developer.chrome.com/docs/ai\"><div class=\"devsite-landing-row-item-list-item-icon-container\"><div class=\"devsite-landing-row-item-list-item-icon material-icons\" aria-hidden=\"true\">auto_awesome</div></div></a> — repeats for docs/capabilities (widgets), docs/android (android), docs/extensions (extension), web.dev/articles/vitals (display_settings), docs/css-ui (toggle_on), docs/identity (badge), docs/payments (wallet), docs/devtools (build), developers.google.com/speed (construction), docs/puppeteer (data_object), docs/chromedriver (settings), blog/chrome-for-testing (science), web.dev/ (terminal)",
+        "why": "Anchor's only descendant is a material-icon ligature div marked aria-hidden=\"true\". aria-hidden text does not contribute to accessible-name computation, so the link has an empty accessible name even though the DOM literally contains a string like 'auto_awesome'. A duplicate sibling <a> later in the same list-item DOES carry visible text (e.g. \"AI\", \"Baseline\") to the same href, but that does not give this icon-only anchor a name of its own — both anchors are independently reachable stops in tab order, and a screen-reader user hits the silent one first.",
+        "count": 14,
+        "beacon": "missed",
+        "lighthouse": "flagged"
+      }
+    ],
+    "beacon_fp": [],
+    "lighthouse_fp": [],
+    "notes": "Re-verified every claim against the live snapshot, the Beacon audit JSON, and extracted Lighthouse link-name items rather than trusting the draft's prose.\n\nCORRECTION (markup/count, not a new violation): the draft's two link-name buckets were mis-split. web.dev/baseline/'s icon link (line 2682) actually uses <picture><img alt=\\\"\\\"> — the SAME shape as the hero-card/social-icon group — not the material-icon aria-hidden div described for bucket 2. Moved it: bucket 1 (picture>img alt=\\\"\\\") goes from 5 to 6 items (chrome-at-io26, io.google/2026, youtube, linkedin, twitter, web.dev/baseline); bucket 2 (material-icon aria-hidden div) goes from 15 to 14 items (web.dev/baseline removed). Total remains 20, an exact match against Lighthouse's link-name audit (score 0, 20 failing nodes) — confirmed by dumping every item's node snippet from raw/25-lh.json, not just trusting the count. Found this by an independent spot-sweep grepping the material-icon aria-hidden div class across all 15 originally-claimed hrefs — it only matched 14, which surfaced the outlier.\n\nBeacon/Lighthouse mappings unchanged and confirmed directly from source files: Beacon's audit JSON (run-2026-07-05/audits/25.json) has exactly 1 finding total (quality-link-generic, screenreader category, on the YouTube \\\"Learn more\\\" TEXT button — a different anchor than the icon-only one, and a 2.4.4 wording concern, not a 4.1.2 name-presence one), so Beacon genuinely missed both link-name buckets (screenreader pass=194/fail=0/review=1, matching that single unrelated tip). Lighthouse's link-name audit score=0 with exactly these 20 nodes, confirming \\\"flagged\\\" for both. beacon_fp/lighthouse_fp remain empty — no items were wrongly refuted; the excluded quality-link-generic tip is correctly out-of-scope (different criterion) rather than a link-name false positive.\n\nRan the required independent spot-sweep on two zero-entry criteria using a multiline-tag-safe tokenizer (the naive per-line regex used earlier missed a heading whose data-text attribute embedded a line break):\n- image-alt: 18 <img> total, all with an alt attribute (0 missing) — matches Lighthouse image-alt score=1/0 items.\n- input-label: exactly 2 <input> (0 <select>/<textarea>/<label>/<iframe> confirmed with the same tokenizer, correcting an earlier shell-escaping false-zero), both have aria-label (\\\"Search\\\", \\\"Type to filter\\\") — matches Lighthouse label score=1/0 items and Beacon forms pass=2/fail=0.\nBoth came back clean, no new violations.\n\nMinor factual correction to the underlying sweep (does not change any violation): the draft's notes claimed \\\"22 headings h2-h3 only\\\"; a multiline-safe token scan finds 23 (one <h2> tag's data-text attribute contains an embedded newline, causing simple line-based greps to undercount it). Heading sequence is still 2,3,3,2,3,3,3,3,2,3,3,2,3,3,3,3,2,3,3,3,3,3,3 — all single-step, no skips — so heading-order remains a genuine zero-violation match with Lighthouse's score=1.\n\nIndependently reconfirmed (tag-stack tokenizer, script/style/comment-aware): 0 orphan <li> outside ul/ol/menu, 0 non-li/script/template direct children of any <ul>/<ol> (20 <ul>, 0 <ol>, matching prior count) — list-structure stays clean. Also reconfirmed 180 <a>, 9 <button> + 1 role=\\\"button\\\" span (all named via text or aria-label), html lang=\\\"en\\\", <title>Chrome for Developers</title>, single non-zoom-blocking viewport meta, 0 <iframe> — all match the draft's clean-criteria claims and Lighthouse's corresponding passes/not-applicable results."
+  },
+  {
+    "idx": 43,
+    "violations": [
+      {
+        "criterion": "list-structure",
+        "markup": "<ul class=\"carousel-container svelte-1r6wbbs\" aria-live=\"polite\"><!--[--><astro-slot><li class=\"item item-0\" role=\"group\" aria-roledescription=\"slide\" aria-label=\"1 of 5\" data-astro-cid-w4ksoe6v=\"\">...all slides...</li></astro-slot></ul>",
+        "why": "Direct-child re-check via a stack-based scan of both <ul class=\"carousel-container\"> elements confirms a single <astro-slot> custom element (not <li>/<script>/<template>) wraps ALL slides as the ul's sole element child before/after two Astro hydration comment markers. This fails the WCAG 2.2 1.3.1 list content-model requirement and is exactly what Lighthouse's 'list' audit (score 0, 2 flagged nodes, selectors confirmed as 'div.carousel-wrapper > astro-island > div.carousel > ul.carousel-container' x2) and Beacon's 2x list-non-li-child findings independently detect. Verified both carousel instances (aria-label \"1 of 5\" and \"1 of 9\") and independently re-checked all other 6 <ul>/<ol> on the page (nav lists, carousel-controls, footer main-links/end-copy) have <li> as the sole element child (only comment nodes precede it) — no additional list-structure violations exist.",
+        "count": 2,
+        "beacon": "flagged",
+        "lighthouse": "flagged"
+      }
+    ],
+    "beacon_fp": [],
+    "lighthouse_fp": [],
+    "notes": "Draft's single violation entry and its \"clean\" verdict on the other 9 criteria both hold up under independent re-verification; only one factual correction was needed (below), no changes to counts, mappings, or fp lists.\n\nRe-verified against actual tool output: Beacon's findings[] array has exactly 4 entries — 2x \"list-non-li-child\" (critical), 1x \"motion-reduced-motion-missing\" (warning), 1x \"large-fixed-width\" (tip). Lighthouse's accessibility category has exactly 2 failed audits — \"list\" (score 0, 2 items, confirmed via detail.items[].node.selector as both carousel <ul>s) and \"target-size\" (touch, out of the 10-criterion scope, correctly not surfaced by the draft). All other in-scope Lighthouse audits (listitem, image-alt, link-name, button-name, heading-order, html-lang-valid, document-title, meta-viewport, label, frame-title, input-button-name, input-image-alt, definition-list, form-field-multiple-labels, label-content-name-mismatch) score 1 or notApplicable with 0 items. This matches the draft's mapping exactly: list-structure flagged/flagged, everything else clean, motion/large-fixed-width correctly out-of-scope.\n\nIndependent re-sweep (own regex/stack tokenizer, not reusing the draft's script):\n- list-structure (2 of 8 total <ul>/<ol>): re-confirmed both carousel <ul>s have <astro-slot> (wrapping all slides, closes right before </ul>) as sole element child; re-confirmed the other 6 lists are clean (<li> is the first element child in each, only comment markers precede it). Count of 2 stands exactly.\n- Ran the required 2-smallest-count spot-sweep on frame-title (0 <iframe>/<frame> tags anywhere in the 630KB snapshot — confirmed via direct grep, draft's \"not applicable\" stands) and input-label (3 <input> total, all carry non-empty aria-label; additionally discovered all 3 sit inside a `<div ... inert=\"\">` collapsed-accordion wrapper — inert removes them from the accessibility tree entirely, which is also why Lighthouse's \"label\" audit reports notApplicable rather than pass/fail. Draft's \"no violation\" conclusion was right, though it missed this inert detail).\n- Also independently full-swept (not just spot-checked) the two largest categories since the tooling was already built: link-name (169 <a>) and button-name (20 <button>), computing accessible names via a stack-based tag matcher that strips aria-hidden/role=presentation/[hidden] descendant text before checking for remaining text/aria-label/title — 0/169 and 0/20 unnamed, confirming the draft.\n- image-alt: re-counted 39 <img>, 0 missing the alt attribute, 9 empty alt=\"\" — verified all 9 individually: 5 are video-poster <img>s inside `aria-hidden=\"true\"` containers with sr-only \"Play video...\" text on the associated trigger button (decorative substitute, name lives elsewhere), 4 are role=\"presentation\" decorative pattern PNGs inside an aria-hidden=\"true\" copy-container. Matches draft.\n- html-lang (lang=\"en\"), document-title (\"Hej! Welcome to IKEA Global\"), meta-viewport-zoom (single tag, \"width=device-width, minimum-scale=1.0, initial-scale=1\", no user-scalable/maximum-scale block) — all re-confirmed byte-for-byte against the snapshot.\n- heading-order: re-walked all 8 headings (h1 + 7 h2) with an independent aria-hidden ancestry scan. CORRECTION to the draft: it claimed \"3 of the h2's are inside aria-hidden decorative copy-containers\" — the actual count is 4 (KUNGSCISSUS, ANNIKEN, FREDRIKA, TÅSTRUP, all inside `<div class=\"copy-container\" aria-hidden=\"true\">`), not 3. This does not change the verdict: the remaining in-tree headings are h1 -> h2 (Milan Design Week) -> h2 (Designer stories) -> h2 (cookie-banner title), still a valid non-skipping order. Corrected the count in this note; no new violation, no change to the schema's violations[] list.\n\nNo entries moved between violations/fp lists — draft's beacon_fp and lighthouse_fp were empty and stay empty; nothing was found that either tool wrongly flagged, and nothing in-scope was found that either tool missed."
+  },
+  {
+    "idx": 64,
+    "violations": [
+      {
+        "criterion": "list-structure",
+        "markup": "<ul aria-labelledby=\"company\" class=\"flex flex-col ... menuList_menuList__Tn7rd ...\"><li role=\"none\" id=\"company\" class=\"...menuList_heading__HgTG9\">Company</li><li class=\"inline-fit menuList_menuListItem___Rmlj\">...</li>...</ul> — same pattern repeats for aria-labelledby=\"download\", \"resources\", \"notionFor\" in the footer",
+        "why": "WCAG 1.3.1 Info and Relationships / 4.1.2: the <ul>'s implicit ARIA 'list' role requires every direct child to expose as listitem. role=\"none\" on the FIRST <li> in each footer nav list strips that child from list-item exposure, breaking the list's programmatic structure. Verified with a depth-aware tag parser: all direct children of these 4 <ul> are literally <li> tags (first has role=none, rest have no role, i.e. implicit listitem) — a role-based break, not a tag-based one. Independently re-derived via full-document stack-based ancestor tracking of aria-hidden state across all 20 ul/ol on the page: exactly 4 lists (company/download/resources/notionFor) have this role=none-first-li pattern AND sit outside any aria-hidden=true ancestor (i.e. are in the live a11y tree); 8 other lists with the identical pattern (mega-menu dropdown lists, generated ids like _R_n92pkt9bm_) are correctly exempt because every one of them sits inside an aria-hidden=\"true\" ancestor container at initial render, and 3 more lists have an explicit author role (tablist/list/listbox) so the plain-list rule doesn't apply. The 4 non-exempt lists exactly match Lighthouse's 4 flagged 'list' nodes 1:1 by aria-labelledby value — cross-validated against the real axe-core engine, not just this parser.",
+        "count": 4,
+        "beacon": "missed",
+        "lighthouse": "flagged"
+      }
+    ],
+    "beacon_fp": [
+      "document-title-missing: confirmed FP by reading both the markup and the engine. The page HAS a valid non-empty title: <title data-next-head=\"\">The AI workspace that works for you. | Notion</title> (verified present, non-empty text). Beacon's actual rule in core/scripts/static-audit.mjs line 343 is `!/<title>[^<]+<\\/title>/i.test(text)` — a bare-tag-only regex that cannot match a <title> with any attribute — so this is a confirmed regex bug producing a false positive, not a missing title.",
+      "frame-title-missing: confirmed FP. The only <iframe> on the page is <iframe name=\"__tcfapiLocator\" style=\"display: none;\"></iframe>, an inline display:none IAB-TCF consent-locator frame, never rendered or exposed to any AT — out of the accessibility tree, so a missing title is not a violation. Beacon's rule (static-audit.mjs line 429) excludes only `aria-hidden=\"true\"`, not inline display:none, so it over-flags this hidden technical frame. Confirmed by reading the rule source directly."
+    ],
+    "lighthouse_fp": [],
+    "notes": "Adversarial re-verification found the draft accurate as submitted — no entries dropped, corrected, or moved. What I independently re-derived (rather than trusting the draft's own methodology numbers):\n\n1. list-structure (the sole violation): rebuilt the DOM child-extraction and ancestor-aria-hidden tracking from scratch with a fresh depth-aware tag parser (not the draft's tool). Confirmed all 4 footer <ul> (company/download/resources/notionFor) have a literal <li role=\\\"none\\\"> as their first child with no non-li children anywhere. Went further than the draft by full-document stack-based aria-hidden ancestry tracking across all 20 ul/ol elements on the page: found 8 additional lists with the identical role=none-first-li pattern (mega-menu dropdowns, React-generated ids like _R_n92pkt9bm_) that are correctly exempt because they sit inside aria-hidden=\\\"true\\\" containers at initial render, plus 3 lists with explicit author roles (tablist/list/listbox) that the plain-list rule doesn't apply to. The 4 non-exempt lists match Lighthouse's 4 flagged nodes exactly by aria-labelledby value — real axe-core output cross-validates the static analysis. Count of 4 confirmed correct.\n\n2. beacon_fp entries: read the actual rule source in C:/Code/personal/beacon/core/scripts/static-audit.mjs (lines 343 and 429) to confirm the regex bugs verbatim rather than taking the draft's description on faith — both confirmed exact matches to the live code and live markup.\n\n3. Independent spot-sweep (task requirement) on the two criteria with the fewest confirmed violations (both tied at 0 in the draft, so I picked the two highest-volume/highest-risk categories on the page rather than the trivially-small ones like html-lang/input-label/meta-viewport, which are single-instance and low-value to re-sweep): \n   - image-alt: fresh regex sweep of all 71 <img> found only 2 without an alt attribute; both confirmed via direct markup inspection to be 1x1 style=\\\"display:none\\\" ad-tracking pixels (t.co/analytics.twitter.com adsct beacons) — exempt, 0 real violations.\n   - link-name: fresh accname-style sweep of all 134 <a href> (aria-label / aria-labelledby / stripped-of-aria-hidden visible text / img alt) found exactly one uncovered edge case the simple check first flagged: the Microsoft Store download badge link, which has no aria-label and only a decorative alt=\\\"\\\" image inside, but does carry a title=\\\"Download from Microsoft Store\\\" attribute. Per HTML-AAM accessible-name-computation fallback order, title is used as accessible name when aria-label/aria-labelledby/content are all absent — so this link is correctly named, not a violation. Confirms the draft's \\\"0 link-name violations\\\" claim, including catching and correctly resolving an edge case the draft's own methodology description didn't call out explicitly.\n\nSecondary sanity checks (cheap, done in passing): heading order (22 headings, sequence has no level skips — confirmed), 0 role=\\\"button\\\" elements / 20 <button> all otherwise consistent with notes, single <input> has aria-label, single viewport meta has no zoom-blocking, html lang=\\\"en-us\\\" valid. All consistent with the draft.\n\nNet result: no changes to the inventory. One real, twice-independently-verified violation (list-structure, count 4, correctly tagged beacon=missed/lighthouse=flagged), two verified beacon false positives (document-title-missing, frame-title-missing), zero lighthouse false positives."
+  },
+  {
+    "idx": 9,
+    "violations": [],
+    "beacon_fp": [],
+    "lighthouse_fp": [],
+    "notes": "Adversarial re-verification confirms the draft's zero-violations conclusion for all 10 in-scope criteria on https://m3.material.io (run-2026-07-05/snapshots/9.html). Every count was reproduced independently with different tooling than presumably used originally (Grep tool for spot counts, a custom stack-based tag tokenizer for nested list/heading structure — not just naive regex), and no discrepancies were found. No entries were added, dropped, or corrected.\n\nRe-verification detail per criterion:\n- image-alt: independently re-counted 14 <img> tags, confirmed every one carries aria-hidden=\"true\" (out of a11y tree, alt not required). Lighthouse image-alt = notApplicable (0 candidates). Beacon current-run audit has 0 image-alt findings.\n- link-name/button-name: rebuilt an accname-style extractor (aria-label wins over text, aria-hidden descendants stripped before computing text). Result: 52/52 <a href> named, 2/2 <button> named (one via visible text \"Get started\", one via aria-label=\"Pause Video\" which overrides the \"pause\" icon-ligature text), 4/4 role=\"button\" <a> named via aria-label (Develop/Foundations/Styles/Components) even though their icon-ligature text content (\"code Develop\" etc.) is also non-empty. Lighthouse link-name/button-name both score 1 with 0 failing nodes.\n- frame-title: re-grepped independently, exactly 1 <iframe> on the page (Google feedback-proxy widget), carrying both aria-hidden=\"true\" and inline style display:none — confirmed out of the a11y tree twice over. Lighthouse frame-title = notApplicable.\n- input-label: independently grepped for <input>, <select>, <textarea>, contenteditable, role=searchbox/textbox/combobox — 0 hits, confirming no form-control markup exists to violate this criterion. Lighthouse label audit = notApplicable, Beacon forms category = not-applicable.\n- heading-order: rebuilt the heading sequence directly (h1 x1 -> h2 x9 -> h3 x4); every level transition is +1 or flat, never skips. Lighthouse heading-order score 1, 0 failing nodes. (3 of the 9 h2 are empty text — a real but out-of-scope defect, empty heading rather than a level-skip.)\n- list-structure: built a proper nested-tag tree (not flat regex) to check each <ul>'s DIRECT children only. All 5 <ul> have child-tag sets of pure \"li\" (counts 5+5+2+3+4=19), matching the total <li> count exactly, so no orphaned <li> outside any list container. 0 <ol>. Lighthouse list/listitem audits both score 1, 0 failing nodes.\n- html-lang: `<html lang=\"en\">`, confirmed only one <html> tag on the page (no duplicate/conflicting declarations).\n- document-title: one <title> tag, non-empty, descriptive; confirmed no duplicate <title>.\n- meta-viewport-zoom: confirmed only one viewport meta tag exists (no conflicting duplicates), content=\"initial-scale=1, width=device-width\" — no user-scalable=no, no maximum-scale restriction. Lighthouse meta-viewport score 1.\n\nIndependent spot-sweep (task requirement 4) targeted the two criteria with the fewest markup instances on this page: frame-title (1 iframe candidate) and input-label (0 form-control candidates) — both reconfirmed via Grep as a second, independent tool alongside the primary tokenizer, with identical results.\n\nBeacon current-run audit (audits/9.json) has exactly one finding total: motion-reduced-motion-missing (category \"motion\", WCAG 2.3.3) — outside the 10 in-scope criteria, so it does not populate beacon_fp. Historical context cited in the draft (C:/Code/personal/beacon/benchmark/2026-07-05/diagnosis-summary.md, row 9) was itself verified: it does describe an older engine's 14 false-positive image-alt-missing criticals on these exact aria-hidden images, and that defect is confirmed absent from the current run — correctly excluded from beacon_fp since there is no live claim to refute.\n\nNo corrections were needed; the draft's conclusion holds under adversarial re-check with independent tooling."
+  },
+  {
+    "idx": 31,
+    "violations": [
+      {
+        "criterion": "list-structure",
+        "markup": "<ul class=\"navigation-dropdown-lists__list\" data-v-153c9f7a=\"\"><h3 class=\"slp-text-body2-bold navigation-dropdown-lists__column-title\" data-v-64ad2128=\"\" data-v-153c9f7a=\"\">Automation</h3><li class=\"navigation-dropdown-lists__item\" ...>...",
+        "why": "WCAG 1.3.1 Info and Relationships: a <ul> must contain only <li>/<script>/<template> as direct children. Re-verified with an independently written recursive tag-tree tokenizer (not regex, not reusing the draft's script): of 26 <ul>/<ol> elements in the snapshot, exactly 9 have an <h3> column-title heading as a direct child before their <li> items (one reused Vue nav mega-menu component instantiated 9x: h3 texts are 'Automation','Security','Measurement','GitLab for','Getting started','Discover','Connect', plus 2 with empty h3 text = 7 named + 2 empty, matching the draft exactly). Confirmed via direct CSS-rule lookup that the ancestor `.navigation__dropdown[data-v-7b732b26]` sets opacity:0;pointer-events:none;visibility:hidden at rest, and `.navigation__dropdown--open[data-v-7b732b26]` sets opacity:1;pointer-events:auto;visibility:visible — a CSS-class toggle, not inline style or aria-hidden. Per the visibility:hidden is not in the given display:none/aria-hidden safe-harbor list, this content is exposed to the accessibility tree once the menu opens (the normal, primary interaction with any header nav item), so the malformed list structure is a real defect encountered by any keyboard/screen-reader user who opens the menu.",
+        "count": 9,
+        "beacon": "flagged",
+        "lighthouse": "missed"
+      },
+      {
+        "criterion": "image-alt",
+        "markup": "<div class=\"homepage-quote-carousel__logo\" data-v-1000d561=\"\"><img data-nuxt-img=\"\" srcset=\"...ijo2yrrgsohimh0bjprn.png 1x, ...2x\" alt=\"\" loading=\"lazy\" src=\"...ijo2yrrgsohimh0bjprn.png\" data-v-1000d561=\"\"></div>",
+        "why": "WCAG 1.1.1 Non-text Content: alt=\"\" is only correct for decorative or text-redundant images. This is the customer-attribution logo in the homepage testimonial carousel ('Quote 1 of 5', only slide statically rendered) accompanying a quote from 'Daniel Costa Soares, Head of Software Automation and Support' — no company name appears anywhere in the card's visible text. Cross-referenced the image asset id (ijo2yrrgsohimh0bjprn) against its 3 other appearances on the page in a separate customer-logos strip, where the identical asset carries `alt=\"ericsson logo\"` and links to `/customers/ericsson/` — confirming this is genuinely the Ericsson logo and that its identity is real, non-redundant information the alt=\"\" strips from screen-reader users in this specific card (the properly-labeled instance elsewhere on the page does not rescue this one, since a screen-reader user tabbing through the testimonial carousel has no way to connect the two).",
+        "count": 1,
+        "beacon": "missed",
+        "lighthouse": "missed"
+      }
+    ],
+    "beacon_fp": [
+      "frame-title-missing (Beacon finding, snapshot line 375): re-verified — flagged iframe is `<iframe height=\"0\" width=\"0\" style=\"display: none; visibility: hidden;\">`, confirmed by direct extraction of all 3 <iframe> tags on the page: the other two carry title=\"onetrust-text-resize\" and title=\"Optimizely Internal Frame\" respectively. Inline display:none removes the untitled one from the accessibility tree entirely (no CSS-class-toggle 'becomes visible on interaction' mechanism found for this iframe, unlike the nav dropdown) — not a real 4.1.2 violation.",
+      "input-label-missing (Beacon finding, snapshot line 352): re-verified — flagged control is the nav search `<input value=\"\" type=\"text\" placeholder=\"Search\">`, confirmed to be a descendant (no intervening </section>) of `<section class=\"be-nav-search\" style=\"display:none;\" ...>`. Inline display:none puts it outside the accessibility tree at rest, consistent with Lighthouse's own 'label' audit independently returning scoreDisplayMode:'notApplicable'. Additionally swept all 11 <input> elements on the page (0 <select>/<textarea>): the 5 OneTrust cookie-category checkboxes resolve `aria-labelledby` to real non-empty header text ('Functionality Cookies', 'Performance and Analytics Cookies', etc.), 3 'select-all' checkboxes and 1 filter checkbox each have a proper `<label for=...>`, and the vendor-search input has `aria-label=\"Cookie list search\"` — no other input on the page lacks a label, so this stays a false positive with no compensating real miss found elsewhere."
+    ],
+    "lighthouse_fp": [],
+    "notes": "Verification method: wrote a fresh, independent recursive HTML tokenizer/tree-builder (not the draft's script) to re-derive every structural claim from raw markup, plus direct JSON extraction from the Beacon and Lighthouse files. Every check reproduced the draft's numbers exactly, so no violations, counts, or fp entries changed.\n\nRe-verified and matched: (1) list-structure — 26 total <ul>/<ol>, exactly 9 with an <h3> direct child (7 named + 2 empty column headers), CSS confirmed as a visibility:hidden/opacity:0/pointer-events:none → --open class toggle (not inline style, not aria-hidden), so the flaw is exposed on normal menu-open interaction; Beacon's 13 findings breakdown confirmed as {frame-title-missing:1, list-non-li-child:9, input-label-missing:1, fixed-minmax-overflow:1, large-fixed-width:1} (the last two are outside the 10-criterion schema, correctly excluded); Lighthouse 'list' audit scored 1/pass with 0 items (real miss). (2) image-alt — confirmed the sole alt=\\\"\\\" logo in the testimonial carousel is genuinely the Ericsson logo by cross-matching its Cloudinary asset id against 3 other on-page instances that DO carry alt=\\\"ericsson logo\\\"; of 50 total <img> tags, 5 have alt=\\\"\\\" and 4 of those are legitimately decorative/1px tracking pixels (bizible x2, LinkedIn Ads, cognitivlabs), leaving exactly 1 real defect — count of 1 confirmed. Beacon has no image-alt-shaped finding key at all (correctly 'missed', not 'out-of-scope', since alt-attribute presence checking is generally within a static scanner's remit — it just doesn't reason about decorative-vs-informative semantics). Lighthouse image-alt audit scored 1/pass, 0 items (real miss).\n\nIndependent spot-sweep (task requirement 4) on link-name and button-name (the two criteria with zero entries in the violations list): wrote a separate accessible-name computation (strips aria-hidden=true/[hidden]/inline display:none/visibility:hidden ancestors, resolves aria-label/aria-labelledby, folds in img alt) over all 190 <a> and 35 <button> elements — 0 came back nameless, matching the draft's claim with an independently-built check rather than trusting its number.\n\nAlso independently re-swept heading order (53 headings, identical sequence, 0 level-jumps >1), html lang (\\\"en-US\\\", valid), <title> (non-empty), and the single viewport meta (`width=device-width, initial-scale=1`, no maximum-scale/user-scalable=no → correctly no meta-viewport-zoom violation) — all clean, consistent with both tools' pass scores.\n\nOn the FP list: confirmed the frame-title and input-label FPs both rest on inline/computed display:none (not merely visibility:hidden), which the task's stated judgment rules place in the safe-harbor category unlike visibility:hidden — this is the same distinction that keeps the nav-dropdown list-structure entry classified as a real violation instead of also being waved off as hidden-at-rest. Checked for a compensating real miss under the input-label FP (a OneTrust cookie-preference modal hidden via a `.ot-hide{display:none!important}` global rule, structurally similar to the nav dropdown's open/close pattern) but its checkboxes are already properly labeled via aria-labelledby, so no violation hides there either.\n\nNo entries were added, removed, or recounted — the draft held up under independent re-derivation."
+  },
+  {
+    "idx": 70,
+    "violations": [
+      {
+        "criterion": "link-name",
+        "markup": "<a tabindex=\"0\" href=\"https://discord.com/servers\" class=\"nav_link_dropdown w-inline-block\"></a>",
+        "why": "Empty <a> element (no text, no aria-label/labelledby/title, no img alt/svg title child), tabindex=\"0\" so it is independently focusable, and it is a direct child of the visible <div class=\"nav_dd_trigger\" role=\"button\">...</div> nav dropdown trigger — no ancestor carries display:none, visibility:hidden, or aria-hidden=\"true\", so it is in the accessibility tree. Screen readers announce a bare 'link' with no destination context: WCAG 4.1.2 Name, Role, Value. Verified byte-for-byte at all 6 cited lines (898, 902, 906, 910, 914, 918; hrefs /servers, /safety, /ads/quests, support.discord.com/hc/, /blog, /developers), and independently re-derived via a full-page regex scan of all 136 <a> tags, which surfaced exactly these 6 plus one already-excluded burger-menu duplicate logo link (ancestor .nav_burger_list has style=\"opacity:0; display:none\", correctly out of the a11y tree).",
+        "count": 6,
+        "beacon": "flagged",
+        "lighthouse": "missed"
+      }
+    ],
+    "beacon_fp": [
+      "frame-title-missing at 70.html:1363 — confirmed via direct read: the sole <iframe> on the page carries inline style \"...visibility: hidden;\" (1x1px Cloudflare bot-challenge helper, data-gtm-yt-inspected-23). visibility:hidden removes it from the accessibility tree per computed-accessibility-tree exclusion rules, so its missing title is unreachable to AT users and not a WCAG 4.1.2 violation. Confirmed only 1 <iframe> exists on the page total (no other candidates)."
+    ],
+    "lighthouse_fp": [],
+    "notes": "Draft held up under adversarial re-check; no corrections made to violations, beacon_fp, or lighthouse_fp — all claims independently reproduced.\\n\\nWhat I re-verified:\\n1. link-name (the only violations[] entry): read all 6 cited line ranges (895-919) directly — markup matches the draft byte-for-byte, each <a tabindex=\\\"0\\\" href=\\\"...\\\" class=\\\"nav_link_dropdown w-inline-block\\\"></a> is empty with no accessible-name source, and traced the ancestor chain up to <div class=\\\"nav_dd_trigger w-dropdown-toggle\\\" role=\\\"button\\\" ...> confirming no display:none/visibility:hidden/aria-hidden anywhere in the chain — genuinely in the a11y tree. Ran an independent full-page regex sweep (136 <a> tags total) that surfaced exactly 7 empty-name candidates: the same 6, plus the burger-logo duplicate the draft already excluded (verified its ancestor .nav_burger_list carries style=\\\"opacity: 0; display: none;\\\" directly in the markup). Count of 6 confirmed correct, not 5 or 7.\\n2. Lighthouse mapping: re-extracted raw/70-lh.json audits programmatically — link-name score=1, scoreDisplayMode=binary, 0 failing items, confirming \\\"missed\\\" is correct (Lighthouse's own audit shows a pass despite 6 real violations existing in the markup, consistent with the degraded-capture note).\\n3. beacon_fp (frame-title-missing): confirmed the page has exactly 1 <iframe> total, and read its exact style attribute at line 1363 — visibility:hidden present, refuting the finding is correct.\\n4. Independent spot-sweep on the two lowest-entry criteria (heading-order, list-structure), done via a real regex parse rather than trusting the draft's prose: heading sequence extracted as 1,2×8,3×4 (h1 → eight h2 → four h3, no skipped levels) — clean, matches draft. All 3 <ul> elements confirmed role=\\\"list\\\" with <li> as the immediate next tag after each opening tag — clean, matches draft.\\n5. Spot-checked several other zero-violation criteria the draft claimed clean: input count=0 (matches, forms not-applicable), img total=171/missing-alt=0 (matches), button=2 + role=\\\"button\\\"=19 (matches), html lang=\\\"en\\\" (matches), non-empty <title> (matches), exactly 1 viewport meta with no zoom-blocking params (matches).\\n\\nNo criterion needed to move between flagged/missed/out-of-scope, no count corrections, no fp reclassifications. Draft inventory stands as final."
+  },
+  {
+    "idx": 84,
+    "violations": [],
+    "beacon_fp": [
+      "frame-title-missing (severity critical, run-2026-07-05\\snapshots\\84.html:5211): flagged element is `<iframe srcdoc=\"...UET/Bing tracking script...\" style=\"width: 0px !important; height: 0px !important; display: none !important;\">`. Independently re-read the exact byte range in 84.html: confirmed the iframe carries no `title` attribute AND its own inline style sets `display: none !important`, which removes it from the accessibility tree entirely (WCAG 4.1.2 / axe frame-title only applies to iframes exposed to the a11y tree). Independently re-extracted raw/84-lh.json's `frame-title` audit: `score: null, scoreDisplayMode: 'notApplicable'` -- Lighthouse found 0 qualifying iframes on this page, confirming the same conclusion via a live-rendered engine. The only other iframe (`ot-text-resize`, OneTrust) already has both `title=\"onetrust-text-resize\"` and `aria-hidden=\"true\"`. Verdict unchanged: real false positive, correctly excluded from violations."
+    ],
+    "lighthouse_fp": [],
+    "notes": "Re-verification method: wrote fresh, independent Node scripts (stack-based HTML tokenizers tracking ancestor `hidden`/`aria-hidden=\\\"true\\\"`/inline `display:none|visibility:hidden`, deliberately not reusing the draft's original scripts) plus direct re-reads of run-2026-07-05/snapshots/84.html and fresh extraction of the 10 relevant audit nodes from raw/84-lh.json.\n\nVerdict: draft's inventory is confirmed accurate. violations[] stays empty (0 entries) -- no drops, no additions, no count corrections needed to the violations list itself, because there was nothing in it to begin with and independent re-scanning did not surface anything that belongs there.\n\nPer-criterion independent re-checks performed (all 10, not just the 2 lowest-count ones, given the draft's claim was \"zero violations across every one of 10 criteria\" which warranted broader stress-testing):\n- frame-title (fewest non-trivial entries, 2 iframes): directly re-read line 5211 in the snapshot; confirmed inline `display:none!important` on the flagged iframe and re-extracted Lighthouse's raw audit node showing `notApplicable`. Beacon FP claim upheld.\n- input-label (2nd-fewest, 26 controls: 21 input + 5 select): independently re-grepped every `<input>`/`<select>`, found 5 with no inline `aria-label`, cross-checked each against a `<label for=\"...\">` lookup -- all 5 (radio pairs, contacts selects, language picker) have a matching label. 0 violations, matches draft.\n- button-name: independent script over all 83 `<button>` tags checking stripped-tag text content vs `aria-label`/`aria-labelledby` -- 0 buttons found with neither. Matches draft.\n- heading-order: independent stack-based sweep found 97 raw heading tags (draft said 92 -- minor tokenizer-boundary discrepancy, not substantive) and, after excluding tags under an inline-hidden/aria-hidden ancestor, found 35 exposed headings (draft's 92 vs my 35 gap is explained: my crude checker doesn't know about class-based CSS hiding like OneTrust's `.ot-hide`, so it left some class-hidden panels in the \"visible\" bucket -- an over-inclusion, not an under-inclusion). Walked the exposed sequence: 0 skip-level violations (h1->h2->h3...->h2->h3->h2->h3->h4->h3, no jump >1). Matches Lighthouse heading-order score=1.\n- link-name: independent parser over all `<a href>` tags (324 total, 320 with href -- draft said 317/313, same tokenizer-boundary variance as above) found 0 visible links with neither text, aria-label, nor a contained img[alt]. Matches draft.\n- image-alt: independent regex over all `<img>` tags found 131 total (draft said 106 -- again boundary variance) and exactly 1 missing the `alt` attribute outright: the Google Ads conversion-tracking pixel (`<img src=\"...googleadservices.com/pagead/conversion...\" style=\"...display: none;\">`). This one is inline `display:none`, same reasoning as the iframe FP -- out of the a11y tree, so not a real image-alt violation. This is the same element the draft's context note already flagged as \"never scored as a Beacon claim\" (Beacon didn't raise it, so it isn't a beacon_fp entry either -- there's no claim to refute). Matches Lighthouse image-alt score=1.\n- list-structure: independent stack-based child-tag check over every `<ul>`/`<ol>` found 56 ul + 1 ol (exact match to draft) with 0 non-li/script/template direct children. Matches draft.\n- html-lang / document-title / meta-viewport-zoom: direct regex re-extraction confirmed single `<html lang=\"en\">`, single real `<title>Email &amp; SMS Marketing Platform | Mailchimp</title>` (the other two `<title>` matches are SVG icon titles \"Back Button\"/\"Filter Button\", correctly not the document title), single `<meta name=\"viewport\" content=\"width=device-width, initial-scale=1\">` with no user-scalable/maximum-scale. Matches draft and Lighthouse (all score=1).\n\nLighthouse cross-check: re-extracted (not trusted from the draft) all 10 relevant audit nodes directly from raw/84-lh.json -- frame-title: notApplicable; image-alt, link-name, button-name, label, heading-order, list, html-has-lang, html-lang-valid, document-title, meta-viewport: all score 1, all 0 `details.items`. No Lighthouse false positives found -- lighthouse_fp stays empty.\n\nNet change from draft: none to the violations/beacon_fp/lighthouse_fp verdicts. The only correction worth flagging is that the draft's raw element counts (106 img / 92 headings / 317 links) are somewhat lower than my independent tokenizer's counts (131 / 97 / 324) -- almost certainly different tag-boundary/nesting handling between two independently-written parsers, not a sign either one missed a real violation, since both land on the same 0-violations conclusion per category."
+  },
+  {
+    "idx": 0,
+    "violations": [],
+    "beacon_fp": [
+      "button-name-missing at snapshot line 94 (`<button class=\"button button-icon button-nobg button-noborder\"><span><svg focusable=\"false\" aria-label=\"Submit Search\" class=\"icon-search \"><use xlink:href=\"/WAI/assets/images/icons.svg#icon-search\"></use></svg></span></button>`): confirmed FALSE POSITIVE, independently re-verified (not just accepted from the draft). Reproduced the exact button/svg/use markup in a fresh Playwright/Chromium session (data: URL, no cached state) and pulled a live accessibility-tree snapshot: result is `button \"Submit Search\": img \"Submit Search\"` — the svg's aria-label (no aria-hidden present) computes an implicit img role with accessible name 'Submit Search', which bubbles up via name-from-content to the button. This matches Lighthouse's own audit (button-name score 1, 0 failing nodes, verified directly in raw/0-lh.json line 2555-2576) on this exact page. Beacon is a static-regex tool that inspects only the button's own attributes/direct text and does not compute accessible-name-from-content through a nested svg, so it misses the label and reports the button as unnamed. Real defect: none."
+    ],
+    "lighthouse_fp": [],
+    "notes": "Re-ran the full adversarial pass independently rather than rubber-stamping the draft; conclusion is unchanged (0 real violations) but every claim was re-derived from the raw files, not carried over.\n\n(1) Violations: re-read the full 385-line snapshot end-to-end against all 10 criteria. Confirmed independently: html lang=\\\"en\\\" (valid BCP47); non-empty descriptive <title>; viewport meta has no user-scalable=no/maximum-scale; exactly 7 raw <img> tags exist in the file, but 1 (line 298) sits inside the HTML comment spanning lines 289-305 (verified the comment's exact open/close lines) so it is not in the DOM — the remaining 6 all have alt=\\\"\\\" and are genuinely decorative (icon glyphs beside visible link text, or thumbnails beside descriptive prose); all <a> elements resolve non-empty accessible names, including the two logo links named via nested <svg role=\\\"img\\\"><title>; all 3 <button> elements (menu/search-submit/hide-section) resolve accessible names; the 1 <iframe> has title=\\\"Video\\\" (non-empty, passes the presence-based check this criterion uses); the 1 <input> is double-labeled (wrapping <label> + aria-label=\\\"Search\\\"); heading order is h1->h2->h3x3->h2->h3x8->h2->h2->h2->h2->h2 (5 trailing h2 siblings, not 4 as the draft's prose said — a harmless miscount in the draft's descriptive summary, not a correctness error, since either count is a clean non-skipping sequence and the one h2 at line 293 is also inside that same HTML comment and correctly excluded); all 8 <ul> (0 <ol>) contain only <li> children, including two defensive role=\\\"list\\\" lists (correct Safari-bug workaround, not a violation). No misses found.\n\n(2) Beacon/Lighthouse mapping re-checked directly against raw/0-lh.json (not just the draft's summary): grepped and read the actual audit blocks for button-name, document-title, frame-title, heading-order, html-has-lang, html-lang-valid, image-alt, label, link-name, list/listitem, meta-viewport — all score 1 with empty failing-node arrays except \\\"label\\\" which is scoreDisplayMode notApplicable (immaterial, since the one input is independently confirmed labeled). No Lighthouse false negatives found on these 10 criteria.\n\n(3) FP lists re-checked: the single Beacon finding (button-name-missing) was independently re-verified via a live Playwright/Chromium accessibility snapshot (fresh data: URL reproduction of the exact markup, not reused from any prior run) — button resolves to accessible name \\\"Submit Search\\\", confirming it is a false positive rather than a violation Lighthouse missed. No entry needed to move back into violations. lighthouse_fp stays empty — nothing Lighthouse called clean was found to actually be broken.\n\n(4) Independent spot-sweep on the two lowest-count criteria (frame-title: 1 iframe; meta-viewport-zoom: 1 meta tag, both single-instance on this page) re-verified by direct re-read of snapshot lines 3 and 264: no maximum-scale/user-scalable=no on the viewport meta, and the iframe's title attribute is non-empty (\\\"Video\\\"). Also cross-checked html-lang and document-title (also single-instance) the same way. No misses surfaced.\n\nNet result: no changes to the draft's substantive conclusions — this page is a genuine clean exemplar for these 10 criteria, and the Lighthouse/Beacon score gap (100 vs 90) traces entirely to Beacon's one static-analysis false positive on nested-svg accessible-name computation, now empirically confirmed rather than merely asserted."
+  },
+  {
+    "idx": 13,
+    "violations": [],
+    "beacon_fp": [
+      "frame-title-missing (Beacon finding at snapshot line 46): confirmed the flagged <iframe src=\"https://www.googletagmanager.com/ns.html?id=GTM-T2ZTDXZ\" height=\"0\" width=\"0\" style=\"display:none;visibility:hidden\"> is the ONLY iframe on the page (verified via full-file grep) and sits inside <noscript>...</noscript> (lines 44-48). With scripting enabled, noscript content is parsed as raw text and never becomes a live DOM/AT node, and Lighthouse's own frame-title audit independently corroborates this: scoreDisplayMode=notApplicable (0 live iframe nodes found on the rendered page). The inline style=\"display:none;visibility:hidden\" independently satisfies the task's a11y-tree carve-out even in a hypothetical noscript-active state. Not a real violation. (Kept from draft, re-verified.)"
+    ],
+    "lighthouse_fp": [],
+    "notes": "Re-verification changed one thing: DROPPED the draft's sole violations[] entry (list-structure, div-in-ul mobile accordion, count 8). Markup claim was accurate — traced full tag nesting: <ul class=\\\"usa-accordion\\\"> opens line 129, closes line 2443 (one single ul), containing 8 <li> (accordion-button wrappers) interleaved with 8 <div id=\\\"nav-aN\\\" class=\\\"usa-accordion-content\\\"> as direct ul children, each div's own inner <ul class=\\\"usa-sidenav-list\\\"> closing before the next li (confirmed at all 8 boundaries, e.g. lines 902/907, 2202/2207, 2440/2443). So the structural defect genuinely exists in raw markup. BUT: the divs carry aria-hidden=\\\"true\\\" in their default/rendered state, and the task's own judgment rule (\\\"aria-hidden/presentation/display:none are out of the a11y tree\\\") is stated generally, not scoped to naming/alt as the draft argued to justify keeping the finding — I found no textual basis for that scoping in the instructions given. This is independently corroborated by real tool output: Lighthouse's axe-core-backed `list` and `listitem` audits both score 1 (pass, 0 failing nodes, checked via raw/13-lh.json) on the live rendered page, i.e. neither tool considers these hidden divs part of the exposed list structure at scan time — consistent with treating the collapsed accordion as the audited state, not a hypothesized expanded future state. Per \\\"entries are wrong until markup proves them,\\\" the draft's forward-looking \\\"will be exposed on expand\\\" argument doesn't prove a CURRENT violation, so this entry does not survive. Final violations[] is empty, matching the page's clean Lighthouse a11y=100 and Beacon 94/100 scores.\n\nIndependent spot-sweep (button-name, heading-order, plus input-label and link-name for extra coverage since all 9 non-list criteria sat at 0 draft entries): grepped all 12 <button> elements — every one has visible text or aria-label (including line 60's \\\"Here's how you know\\\" banner button, not explicitly quoted in the draft's notes but confirmed clean). Heading sequence re-walked directly (h1 line 2512 -> h2 -> h3/h3/h3 -> h2 -> h3x3 -> h2 -> h3x3 -> h2 -> h3x4), single h1, no level skips. Both 2 <input> elements carry aria-label=\\\"Search\\\". Regex-swept all 307 <a> tags for empty-anchor (`<a...></a>`) and icon-only-with-empty-alt patterns — zero matches, no missed link-name cases. No new violations surfaced.\n\nMinor correction to draft's own bookkeeping (does not change any verdict): the 9 <img> elements split 4-real/5-decorative (U.S. flag / Dot gov / Https / VA logo alt text = 4; system-hero, handbook, figma-logo, dev, developer-docs = 5 empty), not the draft's stated \\\"3 real / 4 decorative\\\" (7, undercounting by 2). image-alt remains a clean pass either way.\n\nAll other tool-mapping calls in the draft held up on re-check: Beacon's 2 quality-link-generic findings correctly stay out-of-scope (2.4.4 Link Purpose-in-context, not the 4.1.2 link-name/empty-accessible-name criterion this benchmark tracks); jsonld-missing correctly excluded (AEO, not one of the 10 criteria); html lang=\\\"en\\\", single <title>, single non-zoom-blocking viewport meta all directly confirmed in the raw file."
+  },
+  {
+    "idx": 17,
+    "violations": [],
+    "beacon_fp": [],
+    "lighthouse_fp": [],
+    "notes": "Adversarial re-verification confirms the draft: zero genuine violations across all 10 in-scope criteria for nhs.uk (17.html). No changes to the violations list, beacon_fp, or lighthouse_fp — draft stands as-is after independent re-derivation, not rubber-stamping.\n\nMethod: wrote a tag-balance extractor (handles nested tags correctly, unlike naive regex) and pulled every instance of the relevant elements directly from the snapshot, independent of the draft's prose claims.\n\nPer-criterion re-verification:\n- image-alt: 0 `<img>` (regex-confirmed). Lighthouse `image-alt` = notApplicable. No violation possible.\n- frame-title: 0 `<iframe>`/`<frame>` (regex-confirmed, both `<i?frame[\\s>]` variants). Lighthouse `frame-title` = notApplicable.\n- input-label: exactly 1 `<input>` (`#search-field`), matched by `<label class=\"nhsuk-u-visually-hidden\" for=\"search-field\">Search the NHS website</label>` — confirmed `for`/`id` pair is exact string match, not a placeholder-only case. Lighthouse `label` audit score=1, 0 failing items.\n- link-name (deepest sweep, 51 `<a>` elements, full extraction not sampling): every link has non-empty visible text or an aria-label. Caught and resolved a false trail here — 3 links (\"Find a pharmacy\", \"Find a dentist\", \"Find a GP\") looked aria-hidden on first pass, but tracing the actual markup showed `aria-hidden=\"true\"` sits on a nested decorative `<svg>` icon inside the anchor, not on the anchor or its text node — the visible link text is not aria-hidden. Confirmed no accessible-name violation. Lighthouse `link-name` score=1, 0 failing items.\n- button-name: all 4 `<button>` elements have accessible text (\"Accept analytics cookies\", \"Reject analytics cookies\", \"Search\", \"Browse\"/\"More\"). Re-confirmed the 4th sits inside `<li class=\"nhsuk-header__menu\" hidden=\"\">` — out of the a11y tree per judgment rules, moot either way. Lighthouse `button-name` score=1.\n- heading-order: full document-order list re-extracted independently (h2,h1,h2,h2,h2,h2,h3,h2,h3,h3,h3,h2,h2,h2,h2,h2,h2,h2). Every forward step increases by at most 1 level; no level is ever skipped. Matches draft. Lighthouse `heading-order` score=1.\n- list-structure (second deepest sweep, all 12 `<ul>` + a full-page `<li>`-accounting check): direct-children extraction confirms every `<ul>` has only `<li>` children (one empty, autocomplete listbox pending JS). Cross-check: summed direct `<li>` children across all 12 `<ul>` = 46, exactly matching the page's total `<li>` count — proves no orphaned `<li>` sitting outside a list container anywhere on the page. 0 `<dl>` on the page, so no dl/dt/dd angle either. Lighthouse `list`/`listitem` both score=1.\n- html-lang: single `<html lang=\"en\">`, valid. Lighthouse `html-has-lang` + `html-lang-valid` both score=1.\n- document-title: `<title>NHS website for England - NHS</title>`, non-empty. Lighthouse `document-title` score=1.\n- meta-viewport-zoom: `<meta name=\"viewport\" content=\"width=device-width, initial-scale=1, shrink-to-fit=no\">` — no `maximum-scale`, no `user-scalable=no`. Lighthouse `meta-viewport` audit exists (initially missed by name — it's `meta-viewport` not `viewport` — and scores 1, confirming non-blocking).\n\nBeacon audit (17.json) re-read in full: exactly 2 findings, `jsonld-missing` (AEO/agent category) and `focus-outline-removed` (keyboard/2.4.7). Neither maps to any of the 10 in-scope criteria — correctly excluded from beacon_fp as out-of-scope rather than false positives, per draft's original call.\n\nNet result: draft's zero-violation, zero-fp inventory is correct and reproducible from the raw markup and tool outputs independent of the draft's own reasoning."
+  }
+]

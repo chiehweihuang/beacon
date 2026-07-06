@@ -1,0 +1,84 @@
+# Ground-truth study — 2026-07-06 (20 sites, 10 structural criterion classes)
+
+Precision/recall for Beacon and Lighthouse against an **AI-triangulated,
+evidence-anchored violation inventory**. This is deliberately NOT labelled
+"human-audited ground truth": every entry is anchored to exact markup and survived an
+adversarial second pass, but the judge is still an automated pipeline. A prioritised
+human spot-check list is below; the inventory is data to be challenged, not an oracle.
+
+## Method
+
+- 20 sites from the 87-site benchmark, stratified by Lighthouse a11y 69–100 (8 low / 5
+  mid / 7 high), 8 of them carrying prior per-site diagnoses.
+- Scope: 10 structural classes — image-alt, link-name, button-name, frame-title,
+  input-label, heading-order, list-structure, html-lang, document-title,
+  meta-viewport-zoom. Contrast and target-size excluded (no measurement independent of
+  axe available).
+- Per site: candidates from Beacon findings ∪ Lighthouse raw failure nodes ∪ an
+  independent markup sweep; every candidate judged against WCAG semantics (aria-hidden /
+  role=presentation / display:none exemptions, alt="" decorative = correct,
+  placeholder ≠ label, hidden text ≠ accessible name); then a second agent adversarially
+  re-judged every entry and every tool mapping. 41 agents total.
+- Provenance note: Beacon (independent regex engine), Lighthouse (axe), and the agent
+  sweep are three genuinely different judges for structural classes; the correlated
+  blind spot is anything requiring rendered state or interaction (see critic.md).
+
+## Results (engine `beacon-static-audit@4`, pattern-level; 66 verified violation patterns, 350 instances)
+
+| Tool | Precision | Recall (patterns) | Recall (instances) | FP patterns |
+|---|---|---|---|---|
+| Beacon @4 | 0.600 | 0.591 | 0.743 | 26 |
+| Lighthouse | 0.811 | 0.462 | 0.225 | 7 |
+
+Read with the counting-unit caveat (critic.md): pattern-level treats a template stamped
+40× as one; instance-level weights by count. Lighthouse's instance recall collapses
+because its recorded runs missed high-count repeated patterns; Beacon's precision is
+dragged by FP classes that were subsequently fixed (below). Recall is **relative to the
+triangulated candidate pool for these 10 classes only** — never absolute WCAG recall.
+
+## Engine @5 verification (fixes driven by this study)
+
+The 26 Beacon FP patterns clustered into: hidden-subtree scoring (tracking iframes,
+preload images, collapsed carousels), attribute-bearing `<title>`, script-body template
+literals, descendant-labelled buttons. After fixing (commit for engine @5):
+
+- 14/15 unambiguous FP classes gone (remaining: an aria-heading bridging case on
+  ibm.com, out of this round's scope).
+- 39/39 true positives retained. One initial "loss" turned out to be an inventory
+  error the fix itself exposed: ibm.com's video-modal iframe sits inside an
+  `aria-hidden="true"` overlay — not a violation at rest by this study's own rules.
+  Corrected in `inventories.json` with an inline CORRECTION note (site 90 notes).
+- 18 previously-missed violation patterns now caught at key level (mostly the
+  all-`alt=""` link-name class) — candidates, not re-adjudicated.
+- 87-site Spearman vs Lighthouse: 0.474 → 0.488.
+
+@5 precision has NOT been fully re-adjudicated; bounded estimate ≥ 0.75 pending a
+re-mapping pass.
+
+## Human spot-check priorities (from critic.md, plus one from the @5 re-check)
+
+1. **rakuten.co.jp link-name delta**: engine @5 kept 44 of 106 link-name findings; the
+   inventory's own FP audit only identified 8 hidden ones. Either the walker masks more
+   than the agent saw (likely: cloned lazy carousels) or it over-masks. Highest-value
+   single check: sample 5 of the 62 eliminated links, confirm each really sits in a
+   hidden subtree.
+2. Criterion-mapping audit on entries touching 1.3.1 / 4.1.2 boundaries.
+3. One human pass on 3–4 sites for the correlated blind spots (reading order,
+   color-alone, post-submit errors, name-correctness) — these can NEVER enter this
+   inventory and cap its meaning.
+4. The two highest-count sites (rakuten, kyoto.travel): verify the instance→pattern
+   collapse.
+5. Single-source entries (backed by only one of the three judges).
+
+## Files
+
+| File | Content |
+|---|---|
+| `sites.json` | the 20 selected sites with band / LH / Beacon context |
+| `inventories.json` | per-site verified violations with per-tool flagged/missed mapping + FP lists (site 90 carries a correction note) |
+| `pr-analysis.json` | the P/R aggregation (pattern + instance level, per criterion) |
+| `critic.md` | method critic: shared blind spots, defensible claims, spot-check design |
+| `aggregate-gt.mjs` | P/R computation harness |
+
+Inputs referenced by the inventories (snapshots, per-site audit JSONs, raw Lighthouse
+files) live locally under `beacon-benchmark-100/`; engine fingerprints pin versions.

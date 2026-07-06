@@ -1,0 +1,162 @@
+[
+  {
+    "idx": 96,
+    "url": "https://www.kyoto.travel",
+    "band": "jp-tw",
+    "lh": 69,
+    "beacon": 55,
+    "cov": 66
+  },
+  {
+    "idx": 97,
+    "url": "https://www.rakuten.co.jp",
+    "band": "jp-tw",
+    "lh": 70,
+    "beacon": 41,
+    "cov": 66
+  },
+  {
+    "idx": 87,
+    "url": "https://zoom.us",
+    "band": "builder",
+    "lh": 73,
+    "beacon": 66,
+    "cov": 66
+  },
+  {
+    "idx": 90,
+    "url": "https://www.ibm.com",
+    "band": "builder",
+    "lh": 79,
+    "beacon": 73,
+    "cov": 66
+  },
+  {
+    "idx": 95,
+    "url": "https://www.taiwan.net.tw",
+    "band": "jp-tw",
+    "lh": 82,
+    "beacon": 67,
+    "cov": 66
+  },
+  {
+    "idx": 27,
+    "url": "https://css-tricks.com",
+    "band": "strong",
+    "lh": 82,
+    "beacon": 79,
+    "cov": 66
+  },
+  {
+    "idx": 67,
+    "url": "https://trello.com",
+    "band": "spa",
+    "lh": 87,
+    "beacon": 90,
+    "cov": 66
+  },
+  {
+    "idx": 8,
+    "url": "https://polaris.shopify.com",
+    "band": "exemplar",
+    "lh": 88,
+    "beacon": 64,
+    "cov": 53
+  },
+  {
+    "idx": 24,
+    "url": "https://web.dev",
+    "band": "strong",
+    "lh": 90,
+    "beacon": 96,
+    "cov": 61
+  },
+  {
+    "idx": 29,
+    "url": "https://www.apple.com",
+    "band": "strong",
+    "lh": 92,
+    "beacon": 100,
+    "cov": 61
+  },
+  {
+    "idx": 25,
+    "url": "https://developer.chrome.com",
+    "band": "strong",
+    "lh": 93,
+    "beacon": 100,
+    "cov": 61
+  },
+  {
+    "idx": 43,
+    "url": "https://www.ikea.com",
+    "band": "commercial",
+    "lh": 93,
+    "beacon": 86,
+    "cov": 66
+  },
+  {
+    "idx": 64,
+    "url": "https://www.notion.so",
+    "band": "spa",
+    "lh": 90,
+    "beacon": 81,
+    "cov": 66
+  },
+  {
+    "idx": 9,
+    "url": "https://m3.material.io",
+    "band": "exemplar",
+    "lh": 100,
+    "beacon": 91,
+    "cov": 53
+  },
+  {
+    "idx": 31,
+    "url": "https://about.gitlab.com",
+    "band": "strong",
+    "lh": 100,
+    "beacon": 72,
+    "cov": 66
+  },
+  {
+    "idx": 70,
+    "url": "https://discord.com",
+    "band": "spa",
+    "lh": 100,
+    "beacon": 83,
+    "cov": 53
+  },
+  {
+    "idx": 84,
+    "url": "https://mailchimp.com",
+    "band": "builder",
+    "lh": 100,
+    "beacon": 89,
+    "cov": 66
+  },
+  {
+    "idx": 0,
+    "url": "https://www.w3.org/WAI/",
+    "band": "exemplar",
+    "lh": 100,
+    "beacon": 90,
+    "cov": 61
+  },
+  {
+    "idx": 13,
+    "url": "https://design.va.gov",
+    "band": "exemplar",
+    "lh": 100,
+    "beacon": 94,
+    "cov": 61
+  },
+  {
+    "idx": 17,
+    "url": "https://www.nhs.uk",
+    "band": "strong",
+    "lh": 100,
+    "beacon": 92,
+    "cov": 61
+  }
+]
