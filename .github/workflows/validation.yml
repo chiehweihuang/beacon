@@ -1,0 +1,26 @@
+# Validation charter L0: the engine must behave identically on every OS and Node LTS.
+# Golden vectors + the full test suite run on the matrix; any platform-specific diff is
+# cross-machine nondeterminism (see VALIDATION.md).
+name: validation
+on:
+  push:
+    branches: ['**']
+  pull_request:
+
+jobs:
+  test:
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, windows-latest, macos-latest]
+        node: [20, 22]
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ matrix.node }}
+      - name: Generated copies match core
+        run: node build.mjs --check
+      - name: Full test suite (incl. golden vectors + scoring properties)
+        run: node --test

@@ -1,0 +1,628 @@
+{
+  "metadata": {
+    "date": "2020-01-01",
+    "scope": "golden",
+    "standard": "WCAG 2.2 AA static baseline",
+    "jurisdictions": [
+      "US ADA",
+      "EU EAA",
+      "Japan JIS",
+      "Taiwan",
+      "Canada ACA",
+      "Australia DDA"
+    ],
+    "platform": "Web",
+    "tool_version": "beacon codex static baseline",
+    "engine_fingerprint": "beacon-static-audit@6+ruleset.7b79d5151b72",
+    "confidence_level": "medium",
+    "requires_live_audit": true,
+    "audit_tier": "Tier 1 (static file scan only)",
+    "audit_methods": [
+      "Static scan of 1 UI-like file(s)",
+      "Pattern checks for semantic HTML, keyboard traps, labels, reflow, motion, AEO structure, and site-level agent-readiness files when a directory is scanned",
+      "Runtime behavior, contrast ratios, and screen-reader task completion were not fully verified"
+    ]
+  },
+  "summary": {
+    "overall_score": 9,
+    "coverage_percent": 61,
+    "life_safety_flag": false,
+    "score_bands": [
+      {
+        "min": 90,
+        "id": "pass"
+      },
+      {
+        "min": 50,
+        "id": "needs-work"
+      },
+      {
+        "min": 0,
+        "id": "fail"
+      }
+    ],
+    "total_findings": 17,
+    "critical": 13,
+    "warnings": 1,
+    "tips": 3,
+    "unverifiable": 4,
+    "categories": [
+      {
+        "id": "contrast",
+        "name": "Color & Contrast",
+        "pass": 0,
+        "fail": 0,
+        "review": 1,
+        "state": "not-machine-checkable",
+        "score": null
+      },
+      {
+        "id": "keyboard",
+        "name": "Keyboard Navigation",
+        "pass": 0,
+        "fail": 2,
+        "review": 0,
+        "state": "scored",
+        "score": 0
+      },
+      {
+        "id": "screenreader",
+        "name": "Screen Reader",
+        "pass": 2,
+        "fail": 11,
+        "review": 0,
+        "state": "scored",
+        "score": 0
+      },
+      {
+        "id": "forms",
+        "name": "Forms",
+        "pass": 0,
+        "fail": 1,
+        "review": 0,
+        "state": "scored",
+        "score": 0
+      },
+      {
+        "id": "responsive",
+        "name": "Responsive & Reflow",
+        "pass": 1,
+        "fail": 1,
+        "review": 0,
+        "state": "scored",
+        "score": 45
+      },
+      {
+        "id": "touch",
+        "name": "Touch & Targets",
+        "pass": 0,
+        "fail": 0,
+        "review": 1,
+        "state": "not-machine-checkable",
+        "score": null
+      },
+      {
+        "id": "cognitive",
+        "name": "Cognitive",
+        "pass": 0,
+        "fail": 0,
+        "review": 1,
+        "state": "not-machine-checkable",
+        "score": null
+      },
+      {
+        "id": "motion",
+        "name": "Motion & Animation",
+        "pass": 0,
+        "fail": 0,
+        "review": 0,
+        "state": "not-applicable",
+        "score": null
+      },
+      {
+        "id": "media",
+        "name": "Media",
+        "pass": 0,
+        "fail": 0,
+        "review": 1,
+        "state": "not-machine-checkable",
+        "score": null
+      },
+      {
+        "id": "agent",
+        "name": "Agent Operability & AEO",
+        "pass": 0,
+        "fail": 3,
+        "review": 0,
+        "state": "scored",
+        "score": 0
+      }
+    ]
+  },
+  "findings": [
+    {
+      "level": "AA",
+      "legal_exposure": "May affect ADA / EAA / JIS / Taiwan accessibility expectations depending on deployment context.",
+      "key": "html-lang-missing",
+      "category": "screenreader",
+      "severity": "critical",
+      "wcag": "WCAG 2.2: 3.1.1 Language of Page",
+      "title": "Page language is missing",
+      "affected_users": "Screen-reader users and translation users",
+      "location": "test/golden/dirty.html:1",
+      "description": "The HTML page does not declare a lang attribute, so assistive technology may choose the wrong pronunciation rules.",
+      "fix": "Add a language attribute such as <html lang=\"zh-Hant\"> or the correct document language.",
+      "code_before": "<html>",
+      "code_after": "<html lang=\"zh-Hant\">"
+    },
+    {
+      "level": "AA",
+      "legal_exposure": "May affect ADA / EAA / JIS / Taiwan accessibility expectations depending on deployment context.",
+      "key": "document-title-missing",
+      "category": "screenreader",
+      "severity": "critical",
+      "wcag": "WCAG 2.2: 2.4.2 Page Titled",
+      "title": "Document title is missing",
+      "affected_users": "Screen-reader users, keyboard users, and users with many tabs open",
+      "location": "test/golden/dirty.html",
+      "description": "A missing or empty title makes the page difficult to identify in browser and assistive technology contexts.",
+      "fix": "Add a concise, unique <title>."
+    },
+    {
+      "level": "AA",
+      "legal_exposure": "May affect ADA / EAA / JIS / Taiwan accessibility expectations depending on deployment context.",
+      "key": "main-landmark-missing",
+      "category": "screenreader",
+      "severity": "critical",
+      "wcag": "WCAG 2.2: 1.3.1 Info and Relationships",
+      "title": "Main landmark is not statically visible",
+      "affected_users": "Screen-reader and keyboard users navigating by landmarks",
+      "location": "test/golden/dirty.html",
+      "description": "No <main> or role=\"main\" was found in this static file.",
+      "fix": "Wrap primary page content in <main id=\"main-content\">."
+    },
+    {
+      "level": "AA",
+      "legal_exposure": "May affect ADA / EAA / JIS / Taiwan accessibility expectations depending on deployment context.",
+      "key": "heading-level-skipped",
+      "category": "screenreader",
+      "severity": "critical",
+      "wcag": "WCAG 2.2: 1.3.1 Info and Relationships",
+      "title": "Heading level is skipped",
+      "affected_users": "Screen-reader users navigating by heading",
+      "location": "test/golden/dirty.html:5",
+      "description": "Heading jumps from h1 to h4.",
+      "fix": "Use a continuous heading hierarchy or adjust the visual style without changing semantic level."
+    },
+    {
+      "level": "AA",
+      "legal_exposure": "May affect ADA / EAA / JIS / Taiwan accessibility expectations depending on deployment context.",
+      "key": "image-alt-missing",
+      "category": "screenreader",
+      "severity": "critical",
+      "wcag": "WCAG 2.2: 1.1.1 Non-text Content",
+      "title": "Image is missing alt text",
+      "affected_users": "Blind and low-vision users using screen readers",
+      "location": "test/golden/dirty.html:6",
+      "description": "An image without alt text is silent or announced poorly by assistive technology.",
+      "fix": "Add meaningful alt text, or alt=\"\" for purely decorative images.",
+      "code_before": "<h4>Skipped levels</h4>\n<img src=\"hero.png\">\n<img src=\"chart.png\">"
+    },
+    {
+      "level": "AA",
+      "legal_exposure": "May affect ADA / EAA / JIS / Taiwan accessibility expectations depending on deployment context.",
+      "key": "image-alt-missing",
+      "category": "screenreader",
+      "severity": "critical",
+      "wcag": "WCAG 2.2: 1.1.1 Non-text Content",
+      "title": "Image is missing alt text",
+      "affected_users": "Blind and low-vision users using screen readers",
+      "location": "test/golden/dirty.html:7",
+      "description": "An image without alt text is silent or announced poorly by assistive technology.",
+      "fix": "Add meaningful alt text, or alt=\"\" for purely decorative images.",
+      "code_before": "<img src=\"hero.png\">\n<img src=\"chart.png\">\n<a href=\"/dead\"></a>"
+    },
+    {
+      "level": "A",
+      "legal_exposure": "May affect ADA / EAA / JIS / Taiwan accessibility expectations depending on deployment context.",
+      "key": "frame-title-missing",
+      "category": "screenreader",
+      "severity": "critical",
+      "wcag": "WCAG 2.2: 4.1.2 Name, Role, Value",
+      "title": "Frame is missing a title",
+      "affected_users": "Screen-reader users navigating between frames",
+      "location": "test/golden/dirty.html:12",
+      "description": "An <iframe> without a title gives screen-reader users no way to know what the frame contains before entering it.",
+      "fix": "Add title=\"...\" describing the frame content.",
+      "code_before": "<input type=\"text\" name=\"q\" placeholder=\"Search\">\n<iframe src=\"/widget.html\"></iframe>\n<ul><div>not a list item</div></ul>"
+    },
+    {
+      "level": "A",
+      "legal_exposure": "May affect ADA / EAA / JIS / Taiwan accessibility expectations depending on deployment context.",
+      "key": "list-non-li-child",
+      "category": "screenreader",
+      "severity": "critical",
+      "wcag": "WCAG 2.2: 1.3.1 Info and Relationships",
+      "title": "List contains a non-list-item child",
+      "affected_users": "Screen-reader users navigating by list semantics",
+      "location": "test/golden/dirty.html:13",
+      "description": "A <ul>/<ol> has a direct child that is not <li>, <script>, or <template> (found <div>). Screen readers may not announce the list or its item count correctly.",
+      "fix": "Make <li> the only structural child; move wrapper elements inside an <li>, or use role=\"list\"/role=\"listitem\" if a non-standard structure is unavoidable.",
+      "code_before": "<iframe src=\"/widget.html\"></iframe>\n<ul><div>not a list item</div></ul>\n<span onclick=\"go()\">Go</span>"
+    },
+    {
+      "level": "AA",
+      "legal_exposure": "May affect ADA / EAA / JIS / Taiwan accessibility expectations depending on deployment context.",
+      "key": "button-name-missing",
+      "category": "keyboard",
+      "severity": "critical",
+      "wcag": "WCAG 2.2: 4.1.2 Name, Role, Value",
+      "title": "Button may not have an accessible name",
+      "affected_users": "Screen-reader and voice-control users",
+      "location": "test/golden/dirty.html:10",
+      "description": "A button with no visible text or accessible label is hard to understand or activate by name.",
+      "fix": "Add visible text, aria-label, or aria-labelledby.",
+      "code_before": "<a href=\"/icon\"><img alt=\"\" src=\"icon.png\"></a>\n<button></button>\n<input type=\"text\" name=\"q\" placeholder=\"Search\">"
+    },
+    {
+      "level": "A",
+      "legal_exposure": "May affect ADA / EAA / JIS / Taiwan accessibility expectations depending on deployment context.",
+      "key": "link-name-missing",
+      "category": "screenreader",
+      "severity": "critical",
+      "wcag": "WCAG 2.2: 4.1.2 Name, Role, Value",
+      "title": "Link may not have an accessible name",
+      "affected_users": "Screen-reader, voice-control, and keyboard users",
+      "location": "test/golden/dirty.html:8",
+      "description": "A link with no visible text, no aria-label/aria-labelledby/title (on it or a descendant), and no image alt or SVG title has no accessible name. Screen readers announce it as a bare \"link\".",
+      "fix": "Add visible link text, an aria-label/aria-labelledby/title, give a wrapped <img> meaningful alt text, or add an <svg><title>.",
+      "code_before": "<img src=\"chart.png\">\n<a href=\"/dead\"></a>\n<a href=\"/icon\"><img alt=\"\" src=\"icon.png\"></a>"
+    },
+    {
+      "level": "A",
+      "legal_exposure": "May affect ADA / EAA / JIS / Taiwan accessibility expectations depending on deployment context.",
+      "key": "link-name-missing",
+      "category": "screenreader",
+      "severity": "critical",
+      "wcag": "WCAG 2.2: 4.1.2 Name, Role, Value",
+      "title": "Link may not have an accessible name",
+      "affected_users": "Screen-reader, voice-control, and keyboard users",
+      "location": "test/golden/dirty.html:9",
+      "description": "A link with no visible text, no aria-label/aria-labelledby/title (on it or a descendant), and no image alt or SVG title has no accessible name. Screen readers announce it as a bare \"link\".",
+      "fix": "Add visible link text, an aria-label/aria-labelledby/title, give a wrapped <img> meaningful alt text, or add an <svg><title>.",
+      "code_before": "<a href=\"/dead\"></a>\n<a href=\"/icon\"><img alt=\"\" src=\"icon.png\"></a>\n<button></button>"
+    },
+    {
+      "level": "A",
+      "legal_exposure": "May affect ADA / EAA / JIS / Taiwan accessibility expectations depending on deployment context.",
+      "key": "clickable-non-button",
+      "category": "keyboard",
+      "severity": "critical",
+      "wcag": "WCAG 2.2: 2.1.1 Keyboard",
+      "title": "Clickable non-button element",
+      "affected_users": "Keyboard-only, switch-control, screen-reader, and voice-control users",
+      "location": "test/golden/dirty.html:14",
+      "description": "Clickable <div> or <span> elements are not keyboard-operable by default.",
+      "fix": "Use <button> for actions. If custom semantics are unavoidable, add role, tabindex, and Enter/Space handling.",
+      "code_before": "<ul><div>not a list item</div></ul>\n<span onclick=\"go()\">Go</span>\n<div style=\"display:none\"><img src=\"hidden-pixel.gif\"><iframe src=\"/tracker.html\"></iframe></div>"
+    },
+    {
+      "level": "AA",
+      "legal_exposure": "May affect ADA / EAA / JIS / Taiwan accessibility expectations depending on deployment context.",
+      "key": "input-label-missing",
+      "category": "forms",
+      "severity": "critical",
+      "wcag": "WCAG 2.2: 3.3.2 Labels or Instructions",
+      "title": "Input may be missing an accessible label",
+      "affected_users": "Screen-reader, voice-control, and cognitive disability users",
+      "location": "test/golden/dirty.html:11",
+      "description": "The input has no obvious id or ARIA label in static markup.",
+      "fix": "Pair it with a <label for=\"...\"> or use aria-labelledby when a visible label already exists.",
+      "code_before": "<button></button>\n<input type=\"text\" name=\"q\" placeholder=\"Search\">\n<iframe src=\"/widget.html\"></iframe>"
+    },
+    {
+      "level": "AA",
+      "legal_exposure": "May affect ADA / EAA / JIS / Taiwan accessibility expectations depending on deployment context.",
+      "key": "viewport-zoom-disabled",
+      "category": "responsive",
+      "severity": "warning",
+      "wcag": "WCAG 2.2: 1.4.4 Resize Text",
+      "title": "Viewport meta disables zoom",
+      "affected_users": "Low-vision users who pinch-zoom, and mobile users",
+      "location": "test/golden/dirty.html:2",
+      "description": "The viewport meta tag prevents zoom (user-scalable=no), so users cannot enlarge text.",
+      "fix": "Remove user-scalable=no and any maximum-scale below 5; use content=\"width=device-width, initial-scale=1\".",
+      "code_before": "<!DOCTYPE html><html><head><title></title>\n<meta name=\"viewport\" content=\"width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no\">\n</head><body><div id=\"content\">"
+    },
+    {
+      "level": "Review",
+      "legal_exposure": "Not a legal issue; affects search / answer-engine clarity.",
+      "key": "meta-description-missing",
+      "category": "agent",
+      "severity": "tip",
+      "wcag": "AEO structural hygiene",
+      "title": "Meta description is missing",
+      "affected_users": "Search and answer-engine users evaluating whether to open the result",
+      "location": "test/golden/dirty.html",
+      "description": "No meta description was found in the static HTML.",
+      "fix": "Add a concise page-specific meta description."
+    },
+    {
+      "level": "Review",
+      "legal_exposure": "Not a legal issue; affects search / answer-engine clarity.",
+      "key": "canonical-missing",
+      "category": "agent",
+      "severity": "tip",
+      "wcag": "AEO structural hygiene",
+      "title": "Canonical link is missing",
+      "affected_users": "Search and answer-engine users when duplicate URLs or variants exist",
+      "location": "test/golden/dirty.html",
+      "description": "No canonical URL was found in the static HTML, so crawlers may have to infer the preferred URL.",
+      "fix": "Add <link rel=\"canonical\" href=\"https://example.com/preferred-url\"> for indexable public pages."
+    },
+    {
+      "level": "Review",
+      "legal_exposure": "Not a legal issue; affects answer-engine and search clarity.",
+      "key": "jsonld-missing",
+      "category": "agent",
+      "severity": "tip",
+      "wcag": "AEO structural hygiene",
+      "title": "JSON-LD structured data is missing",
+      "affected_users": "Search and answer-engine users trying to identify the page entity and content type",
+      "location": "test/golden/dirty.html",
+      "description": "No JSON-LD structured data was found in the static HTML.",
+      "fix": "Add page-appropriate Schema.org JSON-LD, such as Organization, Article, FAQPage, Product, BreadcrumbList, or WebSite."
+    }
+  ],
+  "legal_risk": {
+    "assessment_mode": "wcag_criteria_context",
+    "narrative": "Technical WCAG criteria mapping only. This is not a legal opinion and is not derived from warning counts.",
+    "mapped_criteria": [
+      "1.1.1",
+      "1.3.1",
+      "1.4.4",
+      "2.1.1",
+      "2.4.2",
+      "3.1.1",
+      "3.3.2",
+      "4.1.2"
+    ],
+    "jurisdictions": [
+      {
+        "name": "US ADA",
+        "law": "ADA Title III / Section 508 context",
+        "detail": "Use the mapped WCAG criteria as technical evidence; legal exposure depends on business model, sector, and jurisdiction-specific facts.",
+        "criteria": [
+          "1.1.1",
+          "1.3.1",
+          "1.4.4",
+          "2.1.1",
+          "2.4.2",
+          "3.1.1",
+          "3.3.2",
+          "4.1.2"
+        ]
+      },
+      {
+        "name": "EU EAA",
+        "law": "European Accessibility Act",
+        "detail": "Use the mapped WCAG criteria as technical evidence for consumer digital-service accessibility planning.",
+        "criteria": [
+          "1.1.1",
+          "1.3.1",
+          "1.4.4",
+          "2.1.1",
+          "2.4.2",
+          "3.1.1",
+          "3.3.2",
+          "4.1.2"
+        ]
+      },
+      {
+        "name": "Japan JIS",
+        "law": "JIS X 8341-3 context",
+        "detail": "Use the mapped WCAG criteria as technical evidence; confirm procurement or sector requirements separately.",
+        "criteria": [
+          "1.1.1",
+          "1.3.1",
+          "1.4.4",
+          "2.1.1",
+          "2.4.2",
+          "3.1.1",
+          "3.3.2",
+          "4.1.2"
+        ]
+      },
+      {
+        "name": "Taiwan",
+        "law": "Taiwan accessibility context",
+        "detail": "Use the mapped WCAG criteria as technical evidence only; confirm current local program, certification, and seal requirements before making a compliance claim.",
+        "criteria": [
+          "1.1.1",
+          "1.3.1",
+          "1.4.4",
+          "2.1.1",
+          "2.4.2",
+          "3.1.1",
+          "3.3.2",
+          "4.1.2"
+        ]
+      },
+      {
+        "name": "Canada ACA",
+        "law": "Accessible Canada Act context",
+        "detail": "Use the mapped WCAG criteria as technical evidence; applicability depends on organization type and regulated context.",
+        "criteria": [
+          "1.1.1",
+          "1.3.1",
+          "1.4.4",
+          "2.1.1",
+          "2.4.2",
+          "3.1.1",
+          "3.3.2",
+          "4.1.2"
+        ]
+      },
+      {
+        "name": "Australia DDA",
+        "law": "Disability Discrimination Act context",
+        "detail": "Use the mapped WCAG criteria as technical evidence; legal assessment requires local context and counsel.",
+        "criteria": [
+          "1.1.1",
+          "1.3.1",
+          "1.4.4",
+          "2.1.1",
+          "2.4.2",
+          "3.1.1",
+          "3.3.2",
+          "4.1.2"
+        ]
+      }
+    ]
+  },
+  "remediation": [
+    {
+      "priority": "P0",
+      "key": "html-lang-missing",
+      "title": "Page language is missing",
+      "location": "test/golden/dirty.html:1",
+      "wcag": "WCAG 2.2: 3.1.1 Language of Page",
+      "fix": "Add a language attribute such as <html lang=\"zh-Hant\"> or the correct document language."
+    },
+    {
+      "priority": "P0",
+      "key": "document-title-missing",
+      "title": "Document title is missing",
+      "location": "test/golden/dirty.html",
+      "wcag": "WCAG 2.2: 2.4.2 Page Titled",
+      "fix": "Add a concise, unique <title>."
+    },
+    {
+      "priority": "P0",
+      "key": "main-landmark-missing",
+      "title": "Main landmark is not statically visible",
+      "location": "test/golden/dirty.html",
+      "wcag": "WCAG 2.2: 1.3.1 Info and Relationships",
+      "fix": "Wrap primary page content in <main id=\"main-content\">."
+    },
+    {
+      "priority": "P0",
+      "key": "heading-level-skipped",
+      "title": "Heading level is skipped",
+      "location": "test/golden/dirty.html:5",
+      "wcag": "WCAG 2.2: 1.3.1 Info and Relationships",
+      "fix": "Use a continuous heading hierarchy or adjust the visual style without changing semantic level."
+    },
+    {
+      "priority": "P0",
+      "key": "image-alt-missing",
+      "title": "Image is missing alt text",
+      "location": "test/golden/dirty.html:6",
+      "wcag": "WCAG 2.2: 1.1.1 Non-text Content",
+      "fix": "Add meaningful alt text, or alt=\"\" for purely decorative images."
+    },
+    {
+      "priority": "P0",
+      "key": "image-alt-missing",
+      "title": "Image is missing alt text",
+      "location": "test/golden/dirty.html:7",
+      "wcag": "WCAG 2.2: 1.1.1 Non-text Content",
+      "fix": "Add meaningful alt text, or alt=\"\" for purely decorative images."
+    },
+    {
+      "priority": "P0",
+      "key": "frame-title-missing",
+      "title": "Frame is missing a title",
+      "location": "test/golden/dirty.html:12",
+      "wcag": "WCAG 2.2: 4.1.2 Name, Role, Value",
+      "fix": "Add title=\"...\" describing the frame content."
+    },
+    {
+      "priority": "P0",
+      "key": "list-non-li-child",
+      "title": "List contains a non-list-item child",
+      "location": "test/golden/dirty.html:13",
+      "wcag": "WCAG 2.2: 1.3.1 Info and Relationships",
+      "fix": "Make <li> the only structural child; move wrapper elements inside an <li>, or use role=\"list\"/role=\"listitem\" if a non-standard structure is unavoidable."
+    },
+    {
+      "priority": "P0",
+      "key": "button-name-missing",
+      "title": "Button may not have an accessible name",
+      "location": "test/golden/dirty.html:10",
+      "wcag": "WCAG 2.2: 4.1.2 Name, Role, Value",
+      "fix": "Add visible text, aria-label, or aria-labelledby."
+    },
+    {
+      "priority": "P0",
+      "key": "link-name-missing",
+      "title": "Link may not have an accessible name",
+      "location": "test/golden/dirty.html:8",
+      "wcag": "WCAG 2.2: 4.1.2 Name, Role, Value",
+      "fix": "Add visible link text, an aria-label/aria-labelledby/title, give a wrapped <img> meaningful alt text, or add an <svg><title>."
+    },
+    {
+      "priority": "P0",
+      "key": "link-name-missing",
+      "title": "Link may not have an accessible name",
+      "location": "test/golden/dirty.html:9",
+      "wcag": "WCAG 2.2: 4.1.2 Name, Role, Value",
+      "fix": "Add visible link text, an aria-label/aria-labelledby/title, give a wrapped <img> meaningful alt text, or add an <svg><title>."
+    },
+    {
+      "priority": "P0",
+      "key": "clickable-non-button",
+      "title": "Clickable non-button element",
+      "location": "test/golden/dirty.html:14",
+      "wcag": "WCAG 2.2: 2.1.1 Keyboard",
+      "fix": "Use <button> for actions. If custom semantics are unavoidable, add role, tabindex, and Enter/Space handling."
+    },
+    {
+      "priority": "P0",
+      "key": "input-label-missing",
+      "title": "Input may be missing an accessible label",
+      "location": "test/golden/dirty.html:11",
+      "wcag": "WCAG 2.2: 3.3.2 Labels or Instructions",
+      "fix": "Pair it with a <label for=\"...\"> or use aria-labelledby when a visible label already exists."
+    },
+    {
+      "priority": "P1",
+      "key": "viewport-zoom-disabled",
+      "title": "Viewport meta disables zoom",
+      "location": "test/golden/dirty.html:2",
+      "wcag": "WCAG 2.2: 1.4.4 Resize Text",
+      "fix": "Remove user-scalable=no and any maximum-scale below 5; use content=\"width=device-width, initial-scale=1\"."
+    },
+    {
+      "priority": "P2",
+      "key": "meta-description-missing",
+      "title": "Meta description is missing",
+      "location": "test/golden/dirty.html",
+      "wcag": "AEO structural hygiene",
+      "fix": "Add a concise page-specific meta description."
+    },
+    {
+      "priority": "P2",
+      "key": "canonical-missing",
+      "title": "Canonical link is missing",
+      "location": "test/golden/dirty.html",
+      "wcag": "AEO structural hygiene",
+      "fix": "Add <link rel=\"canonical\" href=\"https://example.com/preferred-url\"> for indexable public pages."
+    },
+    {
+      "priority": "P2",
+      "key": "jsonld-missing",
+      "title": "JSON-LD structured data is missing",
+      "location": "test/golden/dirty.html",
+      "wcag": "AEO structural hygiene",
+      "fix": "Add page-appropriate Schema.org JSON-LD, such as Organization, Article, FAQPage, Product, BreadcrumbList, or WebSite."
+    }
+  ],
+  "testing_recommendations": [
+    "Run keyboard-only walkthrough of the primary flow.",
+    "Run a live browser audit with Playwright + axe-core when a page is available.",
+    "Check 320px reflow and 200% zoom manually.",
+    "Listen to the page with VoiceOver or NVDA for the core task.",
+    "Treat this static score as a regression baseline, not a completion certificate."
+  ]
+}

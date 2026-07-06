@@ -81,7 +81,7 @@ const SEV_REPEAT_CAP = 3;
 // (axe / capture-recipe components are added when Tier-2 findings are merged with their own
 // engine provenance; the pure static engine here is axe-free, so claiming an axe version would
 // be dishonest.)
-const DETECTOR_VERSION = 'beacon-static-audit@5';
+const DETECTOR_VERSION = 'beacon-static-audit@6';
 
 function rulesetHash() {
   const payload = JSON.stringify({
@@ -288,7 +288,7 @@ function isStyle(ext) {
 // PDFs are a separate accessibility surface and are binary — read as a Buffer
 // and route to the PDF probe (assessPdf) instead of the utf8 text detectors.
 function scanPdfFile(file, root, stats, findings) {
-  const rel = relative(root, file) || file;
+  const rel = (relative(root, file) || file).replace(/\\/g, '/');
   const result = assessPdf(readFileSync(file)); // no 'utf8' -> Buffer
   if (result.status === 'INSUFFICIENT') return;
   for (const f of result.findings) {
@@ -312,7 +312,9 @@ function scanPdfFile(file, root, stats, findings) {
 function scanFile(file, root, stats, findings) {
   if (PDF_PATTERN.test(file)) return scanPdfFile(file, root, stats, findings);
   const text = readFileSync(file, 'utf8');
-  const rel = relative(root, file) || file;
+  // Forward slashes on every OS: location fields must not differ between Windows and
+  // POSIX runs of the same input (cross-machine artifact stability).
+  const rel = (relative(root, file) || file).replace(/\\/g, '/');
   const ext = file.match(/\.(\w+)$/)?.[1]?.toLowerCase() || '';
   const markup = isMarkup(ext);
   const style = isStyle(ext);
@@ -621,7 +623,10 @@ function scanFile(file, root, stats, findings) {
     }
 
     let unlabelledInputs = 0;
-    for (const m of text.matchAll(/<input\b(?![^>]*(aria-label|aria-labelledby|id=|type=["']hidden["']))[^>]*>/gi)) {
+    // `\sid=` is whitespace-anchored: bare `id=` also matched inside data-reactid= /
+    // data-id= and silently suppressed real unlabelled inputs on React pages (caught by
+    // the L4 cross-stack fairness test).
+    for (const m of text.matchAll(/<input\b(?![^>]*(aria-label|aria-labelledby|\sid=|type=["']hidden["']))[^>]*>/gi)) {
       if (!visible(m.index || 0)) continue;
       unlabelledInputs += 1;
       addFinding(findings, stats, {
@@ -1084,7 +1089,9 @@ function loadLlmJudgment(file) {
 function main() {
   const opts = parseArgs(process.argv.slice(2));
   const root = process.cwd();
-  const files = [...new Set(opts.paths.flatMap(p => collect(p)))];
+  // Sorted so the artifact is machine-independent: readdirSync order differs across
+  // filesystems (NTFS vs ext4), and findings order follows scan order.
+  const files = [...new Set(opts.paths.flatMap(p => collect(p)))].sort();
   const stats = makeStats();
   const findings = [];
 

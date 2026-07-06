@@ -104,6 +104,10 @@ If a report says `requires_live_audit: true`, Beacon found signals that static e
 
 `review` or `incomplete` items are not passes and not failures. They mean Beacon could not verify the condition from the available evidence.
 
+How these numbers are kept honest — reliability, detector validity, score-semantics
+properties, external benchmarks, and fairness invariants — is specified and executable
+in [VALIDATION.md](VALIDATION.md); the measured data lives under [benchmark/](benchmark/).
+
 ## Inspection Categories
 
 | Category | What it checks |

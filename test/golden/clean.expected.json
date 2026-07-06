@@ -1,0 +1,194 @@
+{
+  "metadata": {
+    "date": "2020-01-01",
+    "scope": "golden",
+    "standard": "WCAG 2.2 AA static baseline",
+    "jurisdictions": [
+      "US ADA",
+      "EU EAA",
+      "Japan JIS",
+      "Taiwan",
+      "Canada ACA",
+      "Australia DDA"
+    ],
+    "platform": "Web",
+    "tool_version": "beacon codex static baseline",
+    "engine_fingerprint": "beacon-static-audit@6+ruleset.7b79d5151b72",
+    "confidence_level": "medium",
+    "requires_live_audit": true,
+    "audit_tier": "Tier 1 (static file scan only)",
+    "audit_methods": [
+      "Static scan of 1 UI-like file(s)",
+      "Pattern checks for semantic HTML, keyboard traps, labels, reflow, motion, AEO structure, and site-level agent-readiness files when a directory is scanned",
+      "Runtime behavior, contrast ratios, and screen-reader task completion were not fully verified"
+    ]
+  },
+  "summary": {
+    "overall_score": 100,
+    "coverage_percent": 66,
+    "life_safety_flag": false,
+    "score_bands": [
+      {
+        "min": 90,
+        "id": "pass"
+      },
+      {
+        "min": 50,
+        "id": "needs-work"
+      },
+      {
+        "min": 0,
+        "id": "fail"
+      }
+    ],
+    "total_findings": 0,
+    "critical": 0,
+    "warnings": 0,
+    "tips": 0,
+    "unverifiable": 4,
+    "categories": [
+      {
+        "id": "contrast",
+        "name": "Color & Contrast",
+        "pass": 0,
+        "fail": 0,
+        "review": 1,
+        "state": "not-machine-checkable",
+        "score": null
+      },
+      {
+        "id": "keyboard",
+        "name": "Keyboard Navigation",
+        "pass": 2,
+        "fail": 0,
+        "review": 0,
+        "state": "scored",
+        "score": 100
+      },
+      {
+        "id": "screenreader",
+        "name": "Screen Reader",
+        "pass": 9,
+        "fail": 0,
+        "review": 0,
+        "state": "scored",
+        "score": 100
+      },
+      {
+        "id": "forms",
+        "name": "Forms",
+        "pass": 1,
+        "fail": 0,
+        "review": 0,
+        "state": "scored",
+        "score": 100
+      },
+      {
+        "id": "responsive",
+        "name": "Responsive & Reflow",
+        "pass": 1,
+        "fail": 0,
+        "review": 0,
+        "state": "scored",
+        "score": 100
+      },
+      {
+        "id": "touch",
+        "name": "Touch & Targets",
+        "pass": 0,
+        "fail": 0,
+        "review": 1,
+        "state": "not-machine-checkable",
+        "score": null
+      },
+      {
+        "id": "cognitive",
+        "name": "Cognitive",
+        "pass": 0,
+        "fail": 0,
+        "review": 1,
+        "state": "not-machine-checkable",
+        "score": null
+      },
+      {
+        "id": "motion",
+        "name": "Motion & Animation",
+        "pass": 1,
+        "fail": 0,
+        "review": 0,
+        "state": "scored",
+        "score": 100
+      },
+      {
+        "id": "media",
+        "name": "Media",
+        "pass": 0,
+        "fail": 0,
+        "review": 1,
+        "state": "not-machine-checkable",
+        "score": null
+      },
+      {
+        "id": "agent",
+        "name": "Agent Operability & AEO",
+        "pass": 3,
+        "fail": 0,
+        "review": 0,
+        "state": "scored",
+        "score": 100
+      }
+    ]
+  },
+  "findings": [],
+  "legal_risk": {
+    "assessment_mode": "wcag_criteria_context",
+    "narrative": "Technical WCAG criteria mapping only. This is not a legal opinion and is not derived from warning counts.",
+    "mapped_criteria": [],
+    "jurisdictions": [
+      {
+        "name": "US ADA",
+        "law": "ADA Title III / Section 508 context",
+        "detail": "Use the mapped WCAG criteria as technical evidence; legal exposure depends on business model, sector, and jurisdiction-specific facts.",
+        "criteria": []
+      },
+      {
+        "name": "EU EAA",
+        "law": "European Accessibility Act",
+        "detail": "Use the mapped WCAG criteria as technical evidence for consumer digital-service accessibility planning.",
+        "criteria": []
+      },
+      {
+        "name": "Japan JIS",
+        "law": "JIS X 8341-3 context",
+        "detail": "Use the mapped WCAG criteria as technical evidence; confirm procurement or sector requirements separately.",
+        "criteria": []
+      },
+      {
+        "name": "Taiwan",
+        "law": "Taiwan accessibility context",
+        "detail": "Use the mapped WCAG criteria as technical evidence only; confirm current local program, certification, and seal requirements before making a compliance claim.",
+        "criteria": []
+      },
+      {
+        "name": "Canada ACA",
+        "law": "Accessible Canada Act context",
+        "detail": "Use the mapped WCAG criteria as technical evidence; applicability depends on organization type and regulated context.",
+        "criteria": []
+      },
+      {
+        "name": "Australia DDA",
+        "law": "Disability Discrimination Act context",
+        "detail": "Use the mapped WCAG criteria as technical evidence; legal assessment requires local context and counsel.",
+        "criteria": []
+      }
+    ]
+  },
+  "remediation": [],
+  "testing_recommendations": [
+    "Run keyboard-only walkthrough of the primary flow.",
+    "Run a live browser audit with Playwright + axe-core when a page is available.",
+    "Check 320px reflow and 200% zoom manually.",
+    "Listen to the page with VoiceOver or NVDA for the core task.",
+    "Treat this static score as a regression baseline, not a completion certificate."
+  ]
+}

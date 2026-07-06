@@ -83,6 +83,27 @@ Lighthouse a11y: 0.474 → 0.488.
 - **Hidden headings excluded from the outline sequence** (a `display:none` h2 no longer
   bridges an h1→h3 skip).
 
+### Added — validation charter (engine `beacon-static-audit@6`)
+
+`VALIDATION.md` makes the whole validity discipline executable and model-agnostic
+(written so any capable maintainer or LLM can run it without session context):
+
+- **Golden test vectors** (`test/golden/` + `test/golden-vectors.test.mjs`): committed
+  input → committed expected artifact; pins the reachable top (clean=100) and the fail
+  band (dirty=9, 13 criticals). Regenerate intentionally via `test/golden/regen.mjs`.
+- **Scoring property tests** (`test/scoring-properties.test.mjs`): monotonicity,
+  injection dose-response (self-ground-truthed), and cross-stack fairness — which
+  caught a real bug on first run: `data-reactid` contains the substring `id=` and
+  suppressed unlabelled-input findings on React pages only. Fixed (`\sid=` anchoring),
+  closing the documented data-id blind spot.
+- **Cross-machine determinism**: engine sorts its file list and normalises path
+  separators; new CI matrix (`.github/workflows/validation.yml`, 3 OS × 2 Node) fails
+  on any platform-dependent artifact diff.
+- **Drift comparator** (`tools/drift-compare.mjs`): score-delta distribution / band
+  flips between two benchmark runs — the instrument for the temporal-baseline and
+  two-machine experiments that will publish the score's error bar.
+- Benchmark rank correlation unchanged vs @5 (Spearman 0.488).
+
 ## [2.3.0] — 2026-06-26
 
 Held-out-driven detector precision/recall improvements; each fix is validated by

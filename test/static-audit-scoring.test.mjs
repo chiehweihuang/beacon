@@ -174,8 +174,10 @@ test('pass evidence is positive: suppression heuristics and empty labels do not 
   assert.equal(audit.findings.filter((f) => f.key === 'image-alt-missing').length, 1);
   // Empty aria-label button escapes the nameless detector (suppression) but is NOT a pass.
   assert.equal(cat(audit, 'keyboard').state, 'not-applicable', 'empty aria-label is not name evidence');
-  // data-id satisfies the fail regex's `id=` substring (known blind spot) but is NOT a pass.
-  assert.equal(cat(audit, 'forms').state, 'not-applicable', 'data-id is not label evidence');
+  // data-id is not label evidence: since the \sid= anchoring fix it no longer even
+  // suppresses the fail — the unlabelled input is caught outright.
+  assert.equal(cat(audit, 'forms').pass, 0, 'data-id must not count as a labelled-input pass');
+  assert.ok(cat(audit, 'forms').fail >= 1, 'the data-id input is a caught input-label violation');
 });
 
 // ---- detector FP classes found by the 2026-07-05 benchmark ------------------------
