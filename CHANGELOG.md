@@ -57,6 +57,32 @@ correlation with Lighthouse a11y from **0.354 to 0.474** (n=71 pairs).
 - **New detector `frame-title-missing`** (WCAG 4.1.2): statically detectable and
   previously a silent gap that let iframe-heavy pages score 100.
 
+### Fixed (round 2 — validated on the 2026-07-06 ground-truth study, `benchmark/2026-07-06-ground-truth/`)
+
+Engine `beacon-static-audit@5`. Driven by a 20-site evidence-anchored violation
+inventory (10 structural criterion classes, triangulated + adversarially verified).
+Against it: 14/15 unambiguous false-positive classes eliminated, 39/39 true positives
+retained, 18 previously-missed violation patterns now caught. Benchmark Spearman vs
+Lighthouse a11y: 0.474 → 0.488.
+
+- **Hidden-subtree masking** (`computeHiddenRanges`): elements inside inline
+  `display:none` / `visibility:hidden`, `aria-hidden="true"`, or `[hidden]` subtrees
+  produce no findings AND no passes across all markup detectors (img, iframe, link,
+  button, input, list, clickable, headings). The dominant ground-truth FP class —
+  hidden tracking iframes, preload images, collapsed carousels/menus — dies here
+  (rakuten.co.jp alone: 125 false image-alt criticals).
+- **`document-title-missing`** no longer fires on `<title data-next-head="">…</title>`
+  (attribute-bearing title tags; hit Next.js sites).
+- **img/iframe detectors respect script masking**: template literals inside `<script>`
+  bodies are not elements.
+- **Button accessible-name computation descends**: a child carrying a non-empty
+  `aria-label` (e.g. a labelled `<svg>`) names its button.
+- **Link wrapped-image alt semantics**: a wrapped `<img alt="text">` names the link
+  (pass); all-`alt=""` wrapped images leave the link nameless (now a caught violation —
+  previously silently deferred); images with no alt stay deferred to image-alt.
+- **Hidden headings excluded from the outline sequence** (a `display:none` h2 no longer
+  bridges an h1→h3 skip).
+
 ## [2.3.0] — 2026-06-26
 
 Held-out-driven detector precision/recall improvements; each fix is validated by

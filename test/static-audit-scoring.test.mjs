@@ -223,6 +223,62 @@ test('iframes without titles are detected statically; titled iframes count as pa
   assert.ok(cat(audit, 'screenreader').fail >= 1, 'untitled iframe is a screenreader fail');
 });
 
+// ---- detector FP classes found by the 2026-07-06 ground-truth study ----------------
+
+test('subtrees hidden from the accessibility tree produce no findings and no passes', () => {
+  const hiddenBlock = (style) => `
+<div ${style}>
+  <img src="pic.png">
+  <iframe src="/w.html"></iframe>
+  <button></button>
+  <a href="/dead"></a>
+  <ul><div>not-li</div></ul>
+  <img alt="hidden but labelled" src="ok.png">
+</div>`;
+  const html = PAGE.replace('</main>', `${hiddenBlock('style="display:none"')}${hiddenBlock('style="visibility: hidden;"')}${hiddenBlock('aria-hidden="true"')}${hiddenBlock('hidden')}</main>`);
+  const base = run({ args: ['--date', '2020-01-01'] }).audit;
+  const { audit } = run({ html, args: ['--date', '2020-01-01'] });
+  for (const key of ['image-alt-missing', 'frame-title-missing', 'button-name-missing', 'link-name-missing', 'list-non-li-child']) {
+    assert.equal(audit.findings.filter((f) => f.key === key).length, 0, `${key} must not fire inside hidden subtrees`);
+  }
+  assert.equal(cat(audit, 'screenreader').pass, cat(base, 'screenreader').pass, 'hidden elements are not pass evidence either');
+  assert.equal(cat(audit, 'keyboard').state, 'not-applicable', 'hidden buttons add no keyboard evidence');
+});
+
+test('a <title> tag with attributes still counts as a document title', () => {
+  const html = PAGE.replace('<title>t</title>', '<title data-next-head="">Shopify Polaris React</title>');
+  const { audit } = run({ html, args: ['--date', '2020-01-01'] });
+  assert.equal(audit.findings.filter((f) => f.key === 'document-title-missing').length, 0);
+});
+
+test('markup inside <script> bodies is not scanned for img/iframe findings', () => {
+  const html = PAGE.replace('</main>', `<script>const t = '<img src="' + p + '" />'; const u = '<iframe src="x">';</script></main>`);
+  const { audit } = run({ html, args: ['--date', '2020-01-01'] });
+  assert.equal(audit.findings.filter((f) => f.key === 'image-alt-missing' || f.key === 'frame-title-missing').length, 0, 'template literals in scripts are not real elements');
+});
+
+test('a button named by a descendant aria-label is named', () => {
+  const html = PAGE.replace('</main>', '<button class="icon"><svg focusable="false" aria-label="Submit search"></svg></button></main>');
+  const { audit } = run({ html, args: ['--date', '2020-01-01'] });
+  assert.equal(audit.findings.filter((f) => f.key === 'button-name-missing').length, 0);
+  assert.equal(cat(audit, 'keyboard').pass, 1, 'descendant-labelled button is a verified pass');
+});
+
+test('link accessible-name from wrapped images follows alt semantics', () => {
+  const html = PAGE.replace('</main>', `
+<a href="/named"><img alt="Company logo" src="l.png"></a>
+<a href="/decorative-only"><img alt="" src="d.png"></a>
+<a href="/no-alt"><img src="n.png"></a>
+</main>`);
+  const { audit } = run({ html, args: ['--date', '2020-01-01'] });
+  const linkFindings = audit.findings.filter((f) => f.key === 'link-name-missing');
+  assert.equal(linkFindings.length, 1, 'only the all-empty-alt link is a link-name violation');
+  assert.match(linkFindings[0].code_before || linkFindings[0].location, /decorative-only|snapshots|page/, 'the flagged link is the alt="" one');
+  // named-by-alt link counts as a screenreader pass; the alt-less-img link stays deferred
+  // to image-alt (one img finding), neither pass nor fail for link-name.
+  assert.equal(audit.findings.filter((f) => f.key === 'image-alt-missing').length, 1);
+});
+
 // ---- merge ingestion: fail / review / pass / malformed ---------------------------
 
 test('severity matrix is applied at the script (merged finding with no severity -> matrix)', () => {

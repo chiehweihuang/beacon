@@ -81,7 +81,7 @@ const SEV_REPEAT_CAP = 3;
 // (axe / capture-recipe components are added when Tier-2 findings are merged with their own
 // engine provenance; the pure static engine here is axe-free, so claiming an axe version would
 // be dishonest.)
-const DETECTOR_VERSION = 'beacon-static-audit@4';
+const DETECTOR_VERSION = 'beacon-static-audit@5';
 
 function rulesetHash() {
   const payload = JSON.stringify({
@@ -184,6 +184,55 @@ function stripAtMedia(css) {
   }
 }
 
+// Elements hidden from the accessibility tree (inline display:none / visibility:hidden,
+// aria-hidden="true", or the hidden attribute) take their whole subtree with them:
+// nothing inside is a violation OR pass evidence. 2026-07-06 ground-truth study: hidden
+// tracking iframes, preload images, and collapsed carousels were the dominant FP class.
+// Linear tag walk with an open-element stack; forgiving about malformed nesting.
+const VOID_TAGS = new Set(['area', 'base', 'br', 'col', 'embed', 'hr', 'img', 'input', 'link', 'meta', 'source', 'track', 'wbr']);
+
+function isHiddenAttrs(attrs) {
+  return /style\s*=\s*["'][^"']*(?:display\s*:\s*none|visibility\s*:\s*hidden)/i.test(attrs) ||
+    /\saria-hidden\s*=\s*["']true["']/i.test(attrs) ||
+    /\shidden(?=[\s=/]|$)/i.test(attrs);
+}
+
+function computeHiddenRanges(text) {
+  const ranges = [];
+  const stack = []; // open non-void elements: { tag, hidden }
+  let hiddenDepth = 0;
+  let hiddenStart = -1;
+  const re = /<(\/?)([a-zA-Z][\w-]*)((?:"[^"]*"|'[^']*'|[^>"'])*)>/g;
+  let m;
+  while ((m = re.exec(text))) {
+    const [full, close, rawTag, attrs] = m;
+    const tag = rawTag.toLowerCase();
+    if (tag === 'script' || tag === 'style') continue; // masked separately (inMasked)
+    if (close) {
+      for (let i = stack.length - 1; i >= 0; i--) {
+        if (stack[i].tag !== tag) continue;
+        for (const popped of stack.splice(i)) {
+          if (!popped.hidden) continue;
+          hiddenDepth -= 1;
+          if (hiddenDepth === 0) { ranges.push([hiddenStart, m.index + full.length]); hiddenStart = -1; }
+        }
+        break;
+      }
+      continue;
+    }
+    const hidden = isHiddenAttrs(attrs);
+    if (VOID_TAGS.has(tag) || attrs.endsWith('/')) {
+      // a hidden void/self-closing element hides only itself
+      if (hidden && hiddenDepth === 0) ranges.push([m.index, m.index + full.length]);
+      continue;
+    }
+    if (hidden) { hiddenDepth += 1; if (hiddenDepth === 1) hiddenStart = m.index; }
+    stack.push({ tag, hidden });
+  }
+  if (hiddenDepth > 0 && hiddenStart >= 0) ranges.push([hiddenStart, text.length]);
+  return ranges;
+}
+
 function makeStats() {
   const stats = {};
   for (const id of CATEGORY_ORDER) stats[id] = { id, name: CATEGORY_NAMES[id], pass: 0, fail: 0, review: 0, score: 0, sev: { critical: 0, warning: 0, tip: 0 } };
@@ -275,6 +324,11 @@ function scanFile(file, root, stats, findings) {
     // elements (e.g. a `"<ul><div>"` template string inside an inline script).
     const masked = [...text.matchAll(/<(script|style)\b[^>]*>[\s\S]*?<\/\1>/gi)].map(s => [s.index, s.index + s[0].length]);
     const inMasked = (i) => masked.some(([s, e]) => i >= s && i < e);
+    // Subtrees hidden from the accessibility tree: no findings, no passes (see
+    // computeHiddenRanges).
+    const hiddenRanges = computeHiddenRanges(text);
+    const inHidden = (i) => hiddenRanges.some(([s, e]) => i >= s && i < e);
+    const visible = (i) => !inMasked(i) && !inHidden(i);
 
     addCheck(stats, 'screenreader', /<html[^>]+lang=/.test(text) || !/\.html?$/.test(file) ? 'pass' : 'fail');
     if (/\.html?$/.test(file) && !/<html[^>]+lang=/.test(text)) {
@@ -340,7 +394,7 @@ function scanFile(file, root, stats, findings) {
       // function is retained for that redesign but is no longer wired into scoring.
     }
 
-    if (/\.html?$/.test(file) && !/<title>[^<]+<\/title>/i.test(text)) {
+    if (/\.html?$/.test(file) && !/<title\b[^>]*>[^<]+<\/title>/i.test(text)) {
       addFinding(findings, stats, {
         key: 'document-title-missing',
         category: 'screenreader',
@@ -368,7 +422,9 @@ function scanFile(file, root, stats, findings) {
       });
     } else addCheck(stats, 'screenreader', 'pass');
 
-    const headings = [...text.matchAll(/<h([1-6])\b/gi)].map(m => ({ level: Number(m[1]), index: m.index || 0 }));
+    // Hidden headings are not part of the AT-facing outline — exclude them from the
+    // level sequence (a display:none h2 must not bridge an h1->h3 skip).
+    const headings = [...text.matchAll(/<h([1-6])\b/gi)].filter(m => visible(m.index || 0)).map(m => ({ level: Number(m[1]), index: m.index || 0 }));
     if (headings.length === 0) {
       addFinding(findings, stats, {
         key: 'headings-missing',
@@ -405,6 +461,7 @@ function scanFile(file, root, stats, findings) {
     // role=presentation/none, and inline display:none (tracking pixels, preloads) are
     // exempt — benchmark 2026-07-05 found 20+ false criticals from these classes.
     for (const m of text.matchAll(/<img\b(?![^>]*\balt=)(?![^>]*aria-hidden=["']true["'])(?![^>]*role=["'](?:presentation|none)["'])(?![^>]*style=["'][^"']*display\s*:\s*none)[^>]*>/gi)) {
+      if (!visible(m.index || 0)) continue;
       addFinding(findings, stats, {
         key: 'image-alt-missing',
         category: 'screenreader',
@@ -421,12 +478,13 @@ function scanFile(file, root, stats, findings) {
     // Images that DO carry alt are verified passes — they give the category its base.
     // Whitespace-anchored so data-alt= is not counted; alt="" stays a pass (correct
     // decorative markup is evidence).
-    for (const _ of text.matchAll(/<img\b[^>]*\salt\s*=/gi)) addCheck(stats, 'screenreader', 'pass');
+    for (const m of text.matchAll(/<img\b[^>]*\salt\s*=/gi)) if (visible(m.index || 0)) addCheck(stats, 'screenreader', 'pass');
 
     // Frames need an accessible name (axe frame-title): statically detectable, and the
     // 2026-07-05 benchmark showed Lighthouse catching real instances Beacon had no rule
     // for. aria-hidden frames are out of the a11y tree and exempt.
     for (const m of text.matchAll(/<iframe\b(?![^>]*\btitle\s*=)(?![^>]*aria-hidden=["']true["'])[^>]*>/gi)) {
+      if (!visible(m.index || 0)) continue;
       addFinding(findings, stats, {
         key: 'frame-title-missing',
         category: 'screenreader',
@@ -441,7 +499,7 @@ function scanFile(file, root, stats, findings) {
         code_before: snippetAt(text, m.index || 0),
       });
     }
-    for (const _ of text.matchAll(/<iframe\b[^>]*\btitle\s*=["'][^"']/gi)) addCheck(stats, 'screenreader', 'pass');
+    for (const m of text.matchAll(/<iframe\b[^>]*\btitle\s*=["'][^"']/gi)) if (visible(m.index || 0)) addCheck(stats, 'screenreader', 'pass');
 
     // List structure (axe "list"): a <ul>/<ol> whose first child is not <li>.
     // Conservative Tier-1 heuristic: inspect only the FIRST child after the open
@@ -450,7 +508,7 @@ function scanFile(file, root, stats, findings) {
     // taken control of the semantics). Stray non-li children later in the list,
     // and visibility, are deferred to Tier-2 axe.
     for (const m of text.matchAll(/<(?:ul|ol)\b([^>]*)>\s*(?:<!--[\s\S]*?-->\s*)*<([a-zA-Z][\w-]*)/gi)) {
-      if (inMasked(m.index)) continue; // HTML-looking string inside <script>/<style>
+      if (!visible(m.index)) continue; // scripted string or hidden subtree
       if (/\brole\s*=/.test(m[1]) || /\saria-hidden\s*=\s*["']true/i.test(m[1])) continue; // author-controlled ARIA / hidden from a11y tree
       const lc = m[2].toLowerCase();
       if (lc === 'li' || lc === 'script' || lc === 'template') continue;
@@ -474,6 +532,11 @@ function scanFile(file, root, stats, findings) {
     // Inner tag group must not swallow </button>: adjacent nameless buttons (icon rows)
     // otherwise merge into one greedy match and get undercounted.
     for (const m of text.matchAll(/<button\b((?!aria-label|aria-labelledby)[^>])*>\s*(<(?!\/?button\b)[^>]+>\s*)*<\/button>/gi)) {
+      if (!visible(m.index || 0)) continue;
+      // A descendant carrying aria-label(ledby) names the button (accessible-name
+      // computation descends); the button's OWN attrs are already excluded above, so
+      // any aria-label inside the match comes from a child (e.g. a labelled <svg>).
+      if (/aria-label(?:ledby)?\s*=\s*["'][^"']/i.test(m[0])) continue;
       namelessButtons += 1;
       addFinding(findings, stats, {
         key: 'button-name-missing',
@@ -491,8 +554,9 @@ function scanFile(file, root, stats, findings) {
     // Buttons that DO have a name (text or a NON-EMPTY ARIA label) are verified keyboard
     // passes. An empty aria-label="" escapes the nameless detector (suppression), but a
     // suppressed fail is not a pass — exclude those from the count.
-    const emptyLabelButtons = (text.match(/<button\b[^>]*\saria-label(?:ledby)?\s*=\s*(?:""|'')[^>]*>/gi) || []).length;
-    const namedButtons = (text.match(/<button\b/gi) || []).length - namelessButtons - emptyLabelButtons;
+    const emptyLabelButtons = [...text.matchAll(/<button\b[^>]*\saria-label(?:ledby)?\s*=\s*(?:""|'')[^>]*>/gi)].filter(m => visible(m.index || 0)).length;
+    const visibleButtons = [...text.matchAll(/<button\b/gi)].filter(m => visible(m.index || 0)).length;
+    const namedButtons = visibleButtons - namelessButtons - emptyLabelButtons;
     for (let i = 0; i < Math.max(0, namedButtons); i++) addCheck(stats, 'keyboard', 'pass');
 
     // Link accessible-name. A link is "named" if it OR a descendant carries a
@@ -504,7 +568,7 @@ function scanFile(file, root, stats, findings) {
     // nameless links are over-reported vs axe — true of every static check here),
     // and skips matches inside <script>/<style>.
     for (const m of text.matchAll(/<a\b([^>]*)>([\s\S]*?)<\/a>/gi)) {
-      if (inMasked(m.index)) continue;
+      if (!visible(m.index)) continue;
       const attrs = m[1], body = m[2];
       if (!/\shref\s*=/.test(attrs)) continue; // anchor without href is not a link
       if (/\saria-hidden\s*=\s*["']true/i.test(attrs)) continue; // removed from the a11y tree
@@ -515,9 +579,15 @@ function scanFile(file, root, stats, findings) {
         (!!svgTitle && svgTitle[1].trim().length > 0) ||
         body.replace(/<[^>]*>/g, '').replace(/&[a-z#0-9]+;/gi, ' ').trim().length > 0;
       if (named) { addCheck(stats, 'screenreader', 'pass'); continue; }
-      // Wrapping an image is a fail DEFERRAL (the image-alt check owns the verdict), not
-      // name evidence — no finding here, but no pass either.
-      if (/<img\b/i.test(body)) continue;
+      // Wrapped images follow alt semantics: a NON-EMPTY alt names the link (pass); an
+      // image with NO alt attribute stays deferred to the image-alt check; images that
+      // ALL carry alt="" give the link no name at all -> real link-name violation.
+      const wrappedImgs = [...body.matchAll(/<img\b[^>]*>/gi)];
+      if (wrappedImgs.length) {
+        if (wrappedImgs.some(im => /\salt\s*=\s*["'][^"']/i.test(im[0]))) { addCheck(stats, 'screenreader', 'pass'); continue; }
+        if (wrappedImgs.some(im => !/\salt\s*=/i.test(im[0]))) continue;
+        // all wrapped images are alt="" -> fall through to the finding
+      }
       addFinding(findings, stats, {
         key: 'link-name-missing',
         category: 'screenreader',
@@ -534,6 +604,7 @@ function scanFile(file, root, stats, findings) {
     }
 
     for (const m of text.matchAll(/<(div|span)\b[^>]*(onClick|onclick)[^>]*>/g)) {
+      if (!visible(m.index || 0)) continue;
       addFinding(findings, stats, {
         key: 'clickable-non-button',
         category: 'keyboard',
@@ -551,6 +622,7 @@ function scanFile(file, root, stats, findings) {
 
     let unlabelledInputs = 0;
     for (const m of text.matchAll(/<input\b(?![^>]*(aria-label|aria-labelledby|id=|type=["']hidden["']))[^>]*>/gi)) {
+      if (!visible(m.index || 0)) continue;
       unlabelledInputs += 1;
       addFinding(findings, stats, {
         key: 'input-label-missing',
@@ -569,7 +641,7 @@ function scanFile(file, root, stats, findings) {
     // POSITIVE evidence (whitespace-anchored attribute with a non-empty value), deliberately
     // decoupled from the fail regex above, whose `id=` substring suppression also matches
     // data-id etc. — a suppressed fail is not a pass.
-    const labelledInputs = (text.match(/<input\b(?![^>]*type=["']hidden["'])(?=[^>]*\s(?:id|aria-label|aria-labelledby)\s*=\s*["'][^"'])[^>]*>/gi) || []).length;
+    const labelledInputs = [...text.matchAll(/<input\b(?![^>]*type=["']hidden["'])(?=[^>]*\s(?:id|aria-label|aria-labelledby)\s*=\s*["'][^"'])[^>]*>/gi)].filter(m => visible(m.index || 0)).length;
     for (let i = 0; i < labelledInputs; i++) addCheck(stats, 'forms', 'pass');
 
     // Authentication barriers (3.3.8): cognitive-function-test CAPTCHAs and
