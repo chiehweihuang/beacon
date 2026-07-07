@@ -54,8 +54,16 @@ variant, consent walls, A/B bucketing, lazy-load timing. Policy:
    Scores within the error bar of a band boundary (90, 50) are "at the boundary", not
    in either band. A 0–100 score without an error bar is false precision.
 
-Open: temporal baseline (7-day recapture of ~10 sites) and a two-machine same-hour
-experiment have not been run yet; the harness and comparator are ready.
+Measured 2026-07-07 — temporal baseline, 2-day window (2026-07-05 → 2026-07-07), same
+machine, 13-site subset stratified across all 7 bands (scores 40–100, 3 CJK sites),
+capture recipe pinned as above (`drift-capture.mjs` in the local benchmark workspace):
+median |Δscore| 0, **p95 |Δscore| 1, max 1** (rakuten −1), 0 band flips, 0 coverage
+shifts, 13/13 captures ok. Stated uncertainty for same-machine scores days apart:
+±1 point; scores within 1 point of a band boundary (90, 50) are "at the boundary".
+
+Open: a longer-window (7-day+) recapture and the two-machine same-hour experiment
+(yatagarasu-aw) have not been run yet; cross-machine scores still carry no published
+error bar.
 
 ## L1 — new-detector shipping protocol
 
@@ -157,13 +165,15 @@ Record in CHANGELOG: engine version, Spearman, and (when GT re-ran) P/R.
 | Ground-truth P/R, pattern-level (@4 baseline) | Beacon 0.600 / 0.591 · Lighthouse 0.811 / 0.462 |
 | Ground-truth recall, instance-level (@4) | Beacon 0.743 · Lighthouse 0.225 |
 | @5 re-verification | 14/15 FP classes eliminated, 39/39 TPs retained, 18 new catches |
-| Score error bar | NOT YET MEASURED — run the drift experiments before quoting scores across machines |
+| Score error bar, temporal (same machine, 2-day, n=13) | median 0 / p95 1 / max 1; 0 band flips |
+| Score error bar, cross-machine | NOT YET MEASURED — run the two-machine experiment before quoting scores across machines |
 
 ## Open items (highest leverage first)
 
 1. rakuten link-name adjudication (62 eliminated findings: walker right or over-masking) — decides GT trustworthiness for the @6 re-mapping.
 2. Full @6 GT re-mapping → official post-fix P/R.
-3. Temporal drift baseline + two-machine experiment → publish the error bar.
+3. Two-machine experiment (temporal baseline measured 2026-07-07: p95 |Δ| = 1; the
+   cross-machine bar is still open) → publish the full error bar.
 4. CJK FP-rate measurement (fairness).
 5. `role="heading" aria-level` in the outline sequence; class-based hiding needs the
    Tier-2 capture-annotation plan (stamp computed visibility + accessible names into
