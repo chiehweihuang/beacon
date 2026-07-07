@@ -1,40 +1,13 @@
 # Changelog
 
-## [3.0.0] — 2026-07-07
-
-### Features
-
-- **BREAKING** category states, renormalised overall, coverage, life-safety gate (c782ef6)
-
-### Bug Fixes
-
-- **BREAKING** wrapping-label FP class + phantom-range masking (engine @7) (5862432)
-- hidden-subtree masking + name-computation fixes (ground-truth round 2) (bda4d96)
-- kill benchmark-verified FP classes, cap severity stacking, add frame-title (3986f4b)
-- stop large-fixed-width reflow false positives (1.4.10) (b37ce53)
-
-### Documentation
-
-- engine @7 measured results + sync 8 README translations with scoring semantics (4aa7595)
-- CJK FP-rate study — jp-tw 0.214 vs Latin 0.017, driven by one non-language detector class (f43243c)
-- official @6 ground-truth re-mapping — P 0.979 / R 0.712, FP 26->1 (9af2e16)
-- temporal drift baseline measured — p95 |dScore| = 1 over 2 days (n=13) (8d811f4)
-- resolve rakuten link-name spot-check — walker correct, not over-masking (cc57656)
-- commit the 20-site ground-truth study + engine @5 results (671ef45)
-- commit the 87-site paired benchmark (engine @3 vs @4) (cfd8771)
-- curate the 2.3.0 section (16d0115)
-
-### Tests
-
-- executable charter — goldens, properties, CI matrix, drift tool (4f9f539)
-
 All notable changes to Beacon are documented here. Versions follow the plugin
 manifest (`.claude-plugin/plugin.json`); dates are release-prep dates.
 
-## [Unreleased]
+## [3.0.0] — 2026-07-07
 
-Scoring-semantics overhaul driven by the 2026-07-05 scoring-validity audit.
-**Breaking: scores shift versus 2.3.0** (`DETECTOR_VERSION` → `beacon-static-audit@3`).
+Scoring-semantics overhaul driven by the 2026-07-05 scoring-validity audit, hardened
+over three validation rounds (engine `beacon-static-audit@3` → `@7`).
+**Breaking: scores shift versus 2.3.0.**
 
 ### Changed
 
