@@ -1,0 +1,385 @@
+[
+  {
+    "idx": 95,
+    "verdict": {
+      "idx": 95,
+      "findings": [
+        {
+          "line": 1189,
+          "key": "list-non-li-child",
+          "verdict": "tp",
+          "why": "The <ul class=\"carousel\"> at line 1189 has direct children <button class=\"slick-prev\"> and <div class=\"slick-list draggable\">, neither of which is <li>/<script>/<template>. Genuine violation."
+        },
+        {
+          "line": 1,
+          "key": "viewport-zoom-disabled",
+          "verdict": "tp",
+          "why": "Line 1 viewport meta reads maximum-scale=1, which is below the 5.0 threshold and blocks pinch-zoom for low-vision users. Genuine violation."
+        }
+      ],
+      "fp_classes": []
+    },
+    "review": {
+      "idx": 95,
+      "ok": true,
+      "overrides": []
+    }
+  },
+  {
+    "idx": 92,
+    "verdict": {
+      "idx": 92,
+      "findings": [
+        {
+          "line": 8,
+          "key": "button-name-missing",
+          "verdict": "fp",
+          "why": "Enumerated all 47 <button> elements on snapshot line 8: every one has aria-label, aria-labelledby, title, or visible text content (e.g. aria-label=\"ログイン\"/\"保存\"/\"検索・絞り込み\", visible text \"イベントを開催する\"/\"リセット\"/\"すべて\"). None lack an accessible name."
+        }
+      ],
+      "fp_classes": [
+        "Engine flagged button-name-missing on a line containing dozens of buttons, but exhaustive enumeration shows every button on the cited line carries a valid accessible name (title/aria-label/aria-labelledby/visible text) — the underlying element the detector matched cannot be identified as unnamed; likely a miscount/mismatch against the wrong element on a heavily minified single-line SPA bundle."
+      ]
+    },
+    "review": {
+      "idx": 92,
+      "ok": true,
+      "overrides": []
+    }
+  },
+  {
+    "idx": 93,
+    "verdict": {
+      "idx": 93,
+      "findings": [
+        {
+          "line": 1113,
+          "key": "heading-level-skipped",
+          "verdict": "fp",
+          "why": "Flagged <h4 role=\"presentation\" id=\"ot-bnr-hdr-id-1\"> sits inside the OneTrust cookie banner. role=presentation strips heading semantics from the AT tree, so it cannot cause a real heading-order skip."
+        },
+        {
+          "line": 370,
+          "key": "link-name-missing",
+          "verdict": "tp",
+          "why": "Header logo <a href=\"/\"> wraps only <img alt=\"\"> (empty alt) with no text, aria-label, or title anywhere in the link. Genuinely nameless link."
+        },
+        {
+          "line": 683,
+          "key": "link-name-missing",
+          "verdict": "tp",
+          "why": "<a class=\"m-slider_link\"> is completely empty; slide title/image are sibling elements outside the anchor, not descendants. No CSS/aria hiding present. Genuine violation."
+        },
+        {
+          "line": 695,
+          "key": "link-name-missing",
+          "verdict": "tp",
+          "why": "Same carousel pattern: empty <a href=\"\">, no descendant text/img/aria-label. Slide content lives in sibling divs, not inside the link."
+        },
+        {
+          "line": 704,
+          "key": "link-name-missing",
+          "verdict": "tp",
+          "why": "Same carousel pattern: empty <a href=\"...jp/#page=1\">, no descendant name-giving content. Genuine missing accessible name."
+        },
+        {
+          "line": 713,
+          "key": "link-name-missing",
+          "verdict": "tp",
+          "why": "Same carousel pattern: empty <a href=\"https://mice.jnto.go.jp/\">, title text is a sibling div, not inside the anchor. Genuine violation."
+        },
+        {
+          "line": 725,
+          "key": "link-name-missing",
+          "verdict": "tp",
+          "why": "Same carousel pattern: empty <a href=\"...regional-support/\">, no descendant content names it. Genuine violation."
+        },
+        {
+          "line": 737,
+          "key": "link-name-missing",
+          "verdict": "tp",
+          "why": "Duplicate-prev slide's <a href=\"\"> is empty and has no aria-hidden/display:none/visibility:hidden on it or ancestors at rest, so it is in the AT tree with no name."
+        },
+        {
+          "line": 958,
+          "key": "link-name-missing",
+          "verdict": "tp",
+          "why": "<a class=\"img\"> wraps only <img alt=\"\">. The text-bearing <a class=\"title\"> is a separate sibling link, not a descendant, so this image-only link has no accessible name."
+        },
+        {
+          "line": 964,
+          "key": "link-name-missing",
+          "verdict": "tp",
+          "why": "Same pattern: <a class=\"img\"> wraps empty-alt image only; the real title text is on a sibling <a>, not inside this link. Genuine violation."
+        },
+        {
+          "line": 970,
+          "key": "link-name-missing",
+          "verdict": "tp",
+          "why": "Same pattern: <a class=\"img\"> wraps empty-alt image only; title text sits in a separate sibling anchor. Genuine violation."
+        },
+        {
+          "line": 976,
+          "key": "link-name-missing",
+          "verdict": "tp",
+          "why": "Same pattern: <a class=\"img\"> wraps empty-alt image only; title text sits in a separate sibling anchor. Genuine violation."
+        },
+        {
+          "line": 768,
+          "key": "input-label-missing",
+          "verdict": "fp",
+          "why": "Checkbox is a child of <label class=\"m-search_check\"> wrapping both the input and its <span>text</span> — a valid wrapping label. Engine missed it in this dense single-line filter block; all checkbox findings misattributed to line 768."
+        },
+        {
+          "line": 768,
+          "key": "input-label-missing",
+          "verdict": "fp",
+          "why": "Same wrapping-<label> checkbox pattern as the other 42 findings at this location; duplicate misattribution to line 768."
+        },
+        {
+          "line": 768,
+          "key": "input-label-missing",
+          "verdict": "fp",
+          "why": "Same wrapping-<label> checkbox pattern; every checkbox on this line is inside <label>...<span>text</span></label>."
+        },
+        {
+          "line": 768,
+          "key": "input-label-missing",
+          "verdict": "fp",
+          "why": "Same wrapping-<label> checkbox pattern; duplicate finding pointing at the same filter-form line."
+        },
+        {
+          "line": 768,
+          "key": "input-label-missing",
+          "verdict": "fp",
+          "why": "Same wrapping-<label> checkbox pattern; duplicate finding pointing at the same filter-form line."
+        },
+        {
+          "line": 768,
+          "key": "input-label-missing",
+          "verdict": "fp",
+          "why": "Same wrapping-<label> checkbox pattern; duplicate finding pointing at the same filter-form line."
+        },
+        {
+          "line": 768,
+          "key": "input-label-missing",
+          "verdict": "fp",
+          "why": "Same wrapping-<label> checkbox pattern; duplicate finding pointing at the same filter-form line."
+        },
+        {
+          "line": 768,
+          "key": "input-label-missing",
+          "verdict": "fp",
+          "why": "Same wrapping-<label> checkbox pattern; duplicate finding pointing at the same filter-form line."
+        },
+        {
+          "line": 768,
+          "key": "input-label-missing",
+          "verdict": "fp",
+          "why": "Same wrapping-<label> checkbox pattern; duplicate finding pointing at the same filter-form line."
+        },
+        {
+          "line": 768,
+          "key": "input-label-missing",
+          "verdict": "fp",
+          "why": "Same wrapping-<label> checkbox pattern; duplicate finding pointing at the same filter-form line."
+        },
+        {
+          "line": 768,
+          "key": "input-label-missing",
+          "verdict": "fp",
+          "why": "Same wrapping-<label> checkbox pattern; duplicate finding pointing at the same filter-form line."
+        },
+        {
+          "line": 768,
+          "key": "input-label-missing",
+          "verdict": "fp",
+          "why": "Same wrapping-<label> checkbox pattern; duplicate finding pointing at the same filter-form line."
+        },
+        {
+          "line": 768,
+          "key": "input-label-missing",
+          "verdict": "fp",
+          "why": "Same wrapping-<label> checkbox pattern; duplicate finding pointing at the same filter-form line."
+        },
+        {
+          "line": 768,
+          "key": "input-label-missing",
+          "verdict": "fp",
+          "why": "Same wrapping-<label> checkbox pattern; duplicate finding pointing at the same filter-form line."
+        },
+        {
+          "line": 768,
+          "key": "input-label-missing",
+          "verdict": "fp",
+          "why": "Same wrapping-<label> checkbox pattern; duplicate finding pointing at the same filter-form line."
+        },
+        {
+          "line": 768,
+          "key": "input-label-missing",
+          "verdict": "fp",
+          "why": "Same wrapping-<label> checkbox pattern; duplicate finding pointing at the same filter-form line."
+        },
+        {
+          "line": 768,
+          "key": "input-label-missing",
+          "verdict": "fp",
+          "why": "Same wrapping-<label> checkbox pattern; duplicate finding pointing at the same filter-form line."
+        },
+        {
+          "line": 768,
+          "key": "input-label-missing",
+          "verdict": "fp",
+          "why": "Same wrapping-<label> checkbox pattern; duplicate finding pointing at the same filter-form line."
+        },
+        {
+          "line": 768,
+          "key": "input-label-missing",
+          "verdict": "fp",
+          "why": "Same wrapping-<label> checkbox pattern; duplicate finding pointing at the same filter-form line."
+        },
+        {
+          "line": 768,
+          "key": "input-label-missing",
+          "verdict": "fp",
+          "why": "Same wrapping-<label> checkbox pattern; duplicate finding pointing at the same filter-form line."
+        },
+        {
+          "line": 768,
+          "key": "input-label-missing",
+          "verdict": "fp",
+          "why": "Same wrapping-<label> checkbox pattern; duplicate finding pointing at the same filter-form line."
+        },
+        {
+          "line": 768,
+          "key": "input-label-missing",
+          "verdict": "fp",
+          "why": "Same wrapping-<label> checkbox pattern; duplicate finding pointing at the same filter-form line."
+        },
+        {
+          "line": 768,
+          "key": "input-label-missing",
+          "verdict": "fp",
+          "why": "Same wrapping-<label> checkbox pattern; duplicate finding pointing at the same filter-form line."
+        },
+        {
+          "line": 768,
+          "key": "input-label-missing",
+          "verdict": "fp",
+          "why": "Same wrapping-<label> checkbox pattern; duplicate finding pointing at the same filter-form line."
+        },
+        {
+          "line": 768,
+          "key": "input-label-missing",
+          "verdict": "fp",
+          "why": "Same wrapping-<label> checkbox pattern; duplicate finding pointing at the same filter-form line."
+        },
+        {
+          "line": 768,
+          "key": "input-label-missing",
+          "verdict": "fp",
+          "why": "Same wrapping-<label> checkbox pattern; duplicate finding pointing at the same filter-form line."
+        },
+        {
+          "line": 768,
+          "key": "input-label-missing",
+          "verdict": "fp",
+          "why": "Same wrapping-<label> checkbox pattern; duplicate finding pointing at the same filter-form line."
+        },
+        {
+          "line": 768,
+          "key": "input-label-missing",
+          "verdict": "fp",
+          "why": "Same wrapping-<label> checkbox pattern; duplicate finding pointing at the same filter-form line."
+        },
+        {
+          "line": 768,
+          "key": "input-label-missing",
+          "verdict": "fp",
+          "why": "Same wrapping-<label> checkbox pattern; duplicate finding pointing at the same filter-form line."
+        },
+        {
+          "line": 768,
+          "key": "input-label-missing",
+          "verdict": "fp",
+          "why": "Same wrapping-<label> checkbox pattern; duplicate finding pointing at the same filter-form line."
+        },
+        {
+          "line": 768,
+          "key": "input-label-missing",
+          "verdict": "fp",
+          "why": "Same wrapping-<label> checkbox pattern; duplicate finding pointing at the same filter-form line."
+        },
+        {
+          "line": 768,
+          "key": "input-label-missing",
+          "verdict": "fp",
+          "why": "Same wrapping-<label> checkbox pattern; duplicate finding pointing at the same filter-form line."
+        },
+        {
+          "line": 768,
+          "key": "input-label-missing",
+          "verdict": "fp",
+          "why": "Same wrapping-<label> checkbox pattern; duplicate finding pointing at the same filter-form line."
+        },
+        {
+          "line": 768,
+          "key": "input-label-missing",
+          "verdict": "fp",
+          "why": "Same wrapping-<label> checkbox pattern; duplicate finding pointing at the same filter-form line."
+        },
+        {
+          "line": 768,
+          "key": "input-label-missing",
+          "verdict": "fp",
+          "why": "Same wrapping-<label> checkbox pattern; duplicate finding pointing at the same filter-form line."
+        },
+        {
+          "line": 768,
+          "key": "input-label-missing",
+          "verdict": "fp",
+          "why": "Same wrapping-<label> checkbox pattern; duplicate finding pointing at the same filter-form line."
+        },
+        {
+          "line": 768,
+          "key": "input-label-missing",
+          "verdict": "fp",
+          "why": "Same wrapping-<label> checkbox pattern; duplicate finding pointing at the same filter-form line."
+        },
+        {
+          "line": 768,
+          "key": "input-label-missing",
+          "verdict": "fp",
+          "why": "Same wrapping-<label> checkbox pattern; duplicate finding pointing at the same filter-form line."
+        },
+        {
+          "line": 768,
+          "key": "input-label-missing",
+          "verdict": "fp",
+          "why": "Same wrapping-<label> checkbox pattern; duplicate finding pointing at the same filter-form line."
+        },
+        {
+          "line": 768,
+          "key": "input-label-missing",
+          "verdict": "fp",
+          "why": "Same wrapping-<label> checkbox pattern; duplicate finding pointing at the same filter-form line."
+        },
+        {
+          "line": 768,
+          "key": "input-label-missing",
+          "verdict": "fp",
+          "why": "Same wrapping-<label> checkbox pattern; duplicate finding pointing at the same filter-form line."
+        }
+      ],
+      "fp_classes": [
+        "input-label-missing FP class: checkboxes inside the JNTO article-filter widget (line 768) are each correctly wrapped in <label class=\"m-search_check\">...<span>text</span></label>. The engine fails to detect wrapping <label> elements when many form controls sit packed on one very long/minified line, and additionally misattributes all 43 distinct checkbox findings to the same single location (line 768) instead of each control's real position.",
+        "heading-level-skipped FP class: the flagged h4 belongs to a third-party OneTrust cookie-consent banner and carries role=\"presentation\", which removes it from the accessibility-tree heading structure entirely. The engine's heading-order check does not account for role=presentation overriding native heading semantics."
+      ]
+    },
+    "review": {
+      "idx": 93,
+      "ok": true,
+      "overrides": []
+    }
+  }
+]

@@ -125,9 +125,13 @@ are RECORDED, never silently edited.
   (`data-reactid` contains `id=`, which suppressed unlabelled-input findings on React
   pages only).
 - CSR/SSR: thin static evidence lowers *coverage and confidence*, never the score.
-- Not yet measured: CJK-page FP rate vs Latin-page FP rate (the jp-tw band scores
-  lowest — real difference or detector bias is an open question), and scale fairness
-  (per-element counting dilutes single defects on huge pages).
+- CJK-page FP rate: measured 2026-07-07 (`benchmark/2026-07-07-cjk-fp/`) — jp-tw 0.214
+  vs Latin 0.017 instance-level, but 43/45 of the jp-tw FP mass is one
+  non-language-related detector class (wrapping-label blindness, also fires on Latin
+  sites; engine @7 fix). Residual jp-tw FP ≈ 0.01 — no evidence of CJK-text-semantics
+  bias. Re-measure after detector changes.
+- Not yet measured: scale fairness (per-element counting dilutes single defects on
+  huge pages).
 
 ## L5 — forbidden claims
 
@@ -170,11 +174,13 @@ Record in CHANGELOG: engine version, Spearman, and (when GT re-ran) P/R.
 
 ## Open items (highest leverage first)
 
-1. rakuten link-name adjudication (62 eliminated findings: walker right or over-masking) — decides GT trustworthiness for the @6 re-mapping.
-2. Full @6 GT re-mapping → official post-fix P/R.
+1. ~~rakuten link-name adjudication~~ RESOLVED 2026-07-07: walker correct (GT README).
+2. ~~Full @6 GT re-mapping~~ DONE 2026-07-07: P 0.979 / R 0.712 (GT README).
 3. Two-machine experiment (temporal baseline measured 2026-07-07: p95 |Δ| = 1; the
    cross-machine bar is still open) → publish the full error bar.
-4. CJK FP-rate measurement (fairness).
-5. `role="heading" aria-level` in the outline sequence; class-based hiding needs the
-   Tier-2 capture-annotation plan (stamp computed visibility + accessible names into
-   the snapshot; see `benchmark/2026-07-06-ground-truth/README.md` spot-check list).
+4. ~~CJK FP-rate measurement~~ DONE 2026-07-07 (`benchmark/2026-07-07-cjk-fp/`); its
+   product: fix the wrapping-label input-label FP class (engine @7, 46/57 wild FPs).
+5. `role="heading" aria-level` in the outline sequence (now the ONLY remaining GT FP
+   pattern); `role="presentation"` should strip headings from the outline; class-based
+   hiding needs the Tier-2 capture-annotation plan (stamp computed visibility +
+   accessible names into the snapshot; see the GT README spot-check list).
