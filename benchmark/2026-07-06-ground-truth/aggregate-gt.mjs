@@ -2,13 +2,26 @@
 // Input: inventories.json (array of per-site finals from the workflow).
 // Pattern-level = each distinct violation pattern counts once; instance-level = weighted
 // by `count`. FP lists are pattern-level (weight 1).
+//
+// Engine selection: default @4 (historical mapping: `beacon` / `beacon_fp` fields,
+// entries later added by the @6 re-map excluded so the published @4 numbers stay
+// reproducible). `--engine 6` reads the re-mapped `beacon_v6` / `beacon_fp_v6` fields,
+// includes `added:` entries, and writes pr-analysis-v6.json.
 
 import { readFileSync, writeFileSync } from 'node:fs';
 import { resolve, dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
 const DIR = resolve(dirname(fileURLToPath(import.meta.url)));
-const sites = JSON.parse(readFileSync(resolve(DIR, 'inventories.json'), 'utf8'));
+const ENGINE = process.argv.includes('--engine') ? process.argv[process.argv.indexOf('--engine') + 1] : '4';
+const BEACON_FIELD = ENGINE === '6' ? 'beacon_v6' : 'beacon';
+const FP_FIELD = ENGINE === '6' ? 'beacon_fp_v6' : 'beacon_fp';
+const OUT_FILE = ENGINE === '6' ? 'pr-analysis-v6.json' : 'pr-analysis.json';
+const allSites = JSON.parse(readFileSync(resolve(DIR, 'inventories.json'), 'utf8'));
+const sites = allSites.map((s) => ({
+  ...s,
+  violations: (s.violations || []).filter((v) => ENGINE === '6' || !v.added),
+}));
 
 const CRITERIA = ['image-alt', 'link-name', 'button-name', 'frame-title', 'input-label', 'heading-order', 'list-structure', 'html-lang', 'document-title', 'meta-viewport-zoom'];
 const TOOLS = ['beacon', 'lighthouse'];
@@ -20,18 +33,21 @@ function blank() {
 const per = {};
 for (const t of TOOLS) { per[t] = { total: blank() }; for (const c of CRITERIA) per[t][c] = blank(); }
 
+const statusOf = (v, t) => (t === 'beacon' ? v[BEACON_FIELD] : v[t]);
+
 for (const s of sites) {
   for (const v of s.violations || []) {
     const w = Math.max(1, v.count || 1);
     for (const t of TOOLS) {
       const cell = per[t][v.criterion] || (per[t][v.criterion] = blank());
       const tot = per[t].total;
-      if (v[t] === 'flagged') { cell.tp++; tot.tp++; cell.tp_w += w; tot.tp_w += w; }
-      else if (v[t] === 'missed') { cell.fn++; tot.fn++; cell.fn_w += w; tot.fn_w += w; }
+      const st = statusOf(v, t);
+      if (st === 'flagged') { cell.tp++; tot.tp++; cell.tp_w += w; tot.tp_w += w; }
+      else if (st === 'missed') { cell.fn++; tot.fn++; cell.fn_w += w; tot.fn_w += w; }
       else { cell.oos++; tot.oos++; cell.oos_w += w; tot.oos_w += w; }
     }
   }
-  per.beacon.total.fp += (s.beacon_fp || []).length;
+  per.beacon.total.fp += (s[FP_FIELD] || []).length;
   per.lighthouse.total.fp += (s.lighthouse_fp || []).length;
 }
 
@@ -55,16 +71,17 @@ for (const t of TOOLS) {
 }
 
 // Per-site table for the report.
+out.engine = ENGINE;
 out.per_site = sites.map((s) => ({
   idx: s.idx,
   violations: (s.violations || []).length,
-  beacon_tp: (s.violations || []).filter((v) => v.beacon === 'flagged').length,
-  beacon_missed: (s.violations || []).filter((v) => v.beacon === 'missed').length,
-  beacon_fp: (s.beacon_fp || []).length,
+  beacon_tp: (s.violations || []).filter((v) => statusOf(v, 'beacon') === 'flagged').length,
+  beacon_missed: (s.violations || []).filter((v) => statusOf(v, 'beacon') === 'missed').length,
+  beacon_fp: (s[FP_FIELD] || []).length,
   lh_tp: (s.violations || []).filter((v) => v.lighthouse === 'flagged').length,
   lh_missed: (s.violations || []).filter((v) => v.lighthouse === 'missed').length,
   lh_fp: (s.lighthouse_fp || []).length,
 }));
 
-writeFileSync(resolve(DIR, 'pr-analysis.json'), JSON.stringify(out, null, 2));
+writeFileSync(resolve(DIR, OUT_FILE), JSON.stringify(out, null, 2));
 console.log(JSON.stringify({ n_sites: out.n_sites, patterns: out.n_violation_patterns, instances: out.n_violation_instances, beacon: out.tools.beacon.total, lighthouse: out.tools.lighthouse.total }, null, 2));

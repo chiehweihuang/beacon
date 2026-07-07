@@ -104,6 +104,23 @@ Lighthouse a11y: 0.474 → 0.488.
   two-machine experiments that will publish the score's error bar.
 - Benchmark rank correlation unchanged vs @5 (Spearman 0.488).
 
+### Measured (2026-07-07 — validation results for engine @6)
+
+- **Official ground-truth P/R after the detector fixes** (full @6 re-mapping of the
+  20-site inventory; every residue finding adjudicated + adversarially re-verified):
+  precision 0.600 → **0.979**, pattern recall 0.591 → **0.712**, instance recall
+  0.743 → **0.826**; FP patterns 26 → **1** (the known aria-heading bridging gap on
+  ibm.com). Lighthouse on the same inventory: 0.811 / 0.462 / 0.225. Zero new
+  violations entered the pool, so the numbers are directly comparable to @4. See
+  `benchmark/2026-07-06-ground-truth/README.md`.
+- **Temporal score drift baseline** (2-day window, 13-site stratified subset, same
+  machine, pinned capture recipe): median |Δ| 0, p95 |Δ| 1, max 1, zero band flips —
+  the same-machine error bar is ±1 point (VALIDATION.md L0). Cross-machine bar still
+  unmeasured.
+- **rakuten link-name spot-check resolved**: the hidden-subtree walker is correct, not
+  over-masking — all 83 eliminated candidates sit in genuine inline-hidden subtrees
+  (72 cloned genre-tab carousel panels).
+
 ## [2.3.0] — 2026-06-26
 
 Held-out-driven detector precision/recall improvements; each fix is validated by

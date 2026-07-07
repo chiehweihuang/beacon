@@ -5,40 +5,40 @@
   "tools": {
     "beacon": {
       "total": {
-        "tp": 39,
-        "fn": 27,
+        "tp": 47,
+        "fn": 19,
         "oos": 0,
-        "fp": 26,
-        "tp_w": 260,
-        "fn_w": 90,
+        "fp": 1,
+        "tp_w": 289,
+        "fn_w": 61,
         "oos_w": 0,
-        "precision": 0.6,
-        "recall_in_scope": 0.591,
-        "recall_incl_out_of_scope": 0.591
+        "precision": 0.979,
+        "recall_in_scope": 0.712,
+        "recall_incl_out_of_scope": 0.712
       },
       "image-alt": {
-        "tp": 17,
-        "fn": 1,
+        "tp": 16,
+        "fn": 2,
         "oos": 0,
         "fp": 0,
-        "tp_w": 108,
-        "fn_w": 1,
+        "tp_w": 104,
+        "fn_w": 5,
         "oos_w": 0,
         "precision": 1,
-        "recall_in_scope": 0.944,
-        "recall_incl_out_of_scope": 0.944
+        "recall_in_scope": 0.889,
+        "recall_incl_out_of_scope": 0.889
       },
       "link-name": {
-        "tp": 9,
-        "fn": 14,
+        "tp": 18,
+        "fn": 5,
         "oos": 0,
         "fp": 0,
-        "tp_w": 124,
-        "fn_w": 70,
+        "tp_w": 157,
+        "fn_w": 37,
         "oos_w": 0,
         "precision": 1,
-        "recall_in_scope": 0.391,
-        "recall_incl_out_of_scope": 0.391
+        "recall_in_scope": 0.783,
+        "recall_incl_out_of_scope": 0.783
       },
       "button-name": {
         "tp": 4,
@@ -224,14 +224,14 @@
       }
     }
   },
-  "engine": "4",
+  "engine": "6",
   "per_site": [
     {
       "idx": 96,
       "violations": 12,
-      "beacon_tp": 8,
-      "beacon_missed": 4,
-      "beacon_fp": 3,
+      "beacon_tp": 10,
+      "beacon_missed": 2,
+      "beacon_fp": 0,
       "lh_tp": 9,
       "lh_missed": 3,
       "lh_fp": 1
@@ -239,9 +239,9 @@
     {
       "idx": 97,
       "violations": 24,
-      "beacon_tp": 13,
-      "beacon_missed": 11,
-      "beacon_fp": 5,
+      "beacon_tp": 18,
+      "beacon_missed": 6,
+      "beacon_fp": 0,
       "lh_tp": 2,
       "lh_missed": 22,
       "lh_fp": 4
@@ -249,9 +249,9 @@
     {
       "idx": 87,
       "violations": 6,
-      "beacon_tp": 5,
-      "beacon_missed": 1,
-      "beacon_fp": 4,
+      "beacon_tp": 4,
+      "beacon_missed": 2,
+      "beacon_fp": 0,
       "lh_tp": 3,
       "lh_missed": 2,
       "lh_fp": 1
@@ -259,9 +259,9 @@
     {
       "idx": 90,
       "violations": 6,
-      "beacon_tp": 2,
-      "beacon_missed": 4,
-      "beacon_fp": 2,
+      "beacon_tp": 1,
+      "beacon_missed": 5,
+      "beacon_fp": 1,
       "lh_tp": 1,
       "lh_missed": 5,
       "lh_fp": 1
@@ -271,7 +271,7 @@
       "violations": 2,
       "beacon_tp": 2,
       "beacon_missed": 0,
-      "beacon_fp": 1,
+      "beacon_fp": 0,
       "lh_tp": 2,
       "lh_missed": 0,
       "lh_fp": 0
@@ -291,7 +291,7 @@
       "violations": 2,
       "beacon_tp": 1,
       "beacon_missed": 1,
-      "beacon_fp": 1,
+      "beacon_fp": 0,
       "lh_tp": 2,
       "lh_missed": 0,
       "lh_fp": 0
@@ -301,7 +301,7 @@
       "violations": 2,
       "beacon_tp": 2,
       "beacon_missed": 0,
-      "beacon_fp": 1,
+      "beacon_fp": 0,
       "lh_tp": 2,
       "lh_missed": 0,
       "lh_fp": 0
@@ -309,9 +309,9 @@
     {
       "idx": 24,
       "violations": 3,
-      "beacon_tp": 1,
-      "beacon_missed": 2,
-      "beacon_fp": 1,
+      "beacon_tp": 3,
+      "beacon_missed": 0,
+      "beacon_fp": 0,
       "lh_tp": 3,
       "lh_missed": 0,
       "lh_fp": 0
@@ -329,8 +329,8 @@
     {
       "idx": 25,
       "violations": 2,
-      "beacon_tp": 0,
-      "beacon_missed": 2,
+      "beacon_tp": 1,
+      "beacon_missed": 1,
       "beacon_fp": 0,
       "lh_tp": 2,
       "lh_missed": 0,
@@ -351,7 +351,7 @@
       "violations": 1,
       "beacon_tp": 0,
       "beacon_missed": 1,
-      "beacon_fp": 2,
+      "beacon_fp": 0,
       "lh_tp": 1,
       "lh_missed": 0,
       "lh_fp": 0
@@ -371,7 +371,7 @@
       "violations": 2,
       "beacon_tp": 1,
       "beacon_missed": 1,
-      "beacon_fp": 2,
+      "beacon_fp": 0,
       "lh_tp": 0,
       "lh_missed": 2,
       "lh_fp": 0
@@ -381,7 +381,7 @@
       "violations": 1,
       "beacon_tp": 1,
       "beacon_missed": 0,
-      "beacon_fp": 1,
+      "beacon_fp": 0,
       "lh_tp": 0,
       "lh_missed": 1,
       "lh_fp": 0
@@ -391,7 +391,7 @@
       "violations": 0,
       "beacon_tp": 0,
       "beacon_missed": 0,
-      "beacon_fp": 1,
+      "beacon_fp": 0,
       "lh_tp": 0,
       "lh_missed": 0,
       "lh_fp": 0
@@ -401,7 +401,7 @@
       "violations": 0,
       "beacon_tp": 0,
       "beacon_missed": 0,
-      "beacon_fp": 1,
+      "beacon_fp": 0,
       "lh_tp": 0,
       "lh_missed": 0,
       "lh_fp": 0
@@ -411,7 +411,7 @@
       "violations": 0,
       "beacon_tp": 0,
       "beacon_missed": 0,
-      "beacon_fp": 1,
+      "beacon_fp": 0,
       "lh_tp": 0,
       "lh_missed": 0,
       "lh_fp": 0

@@ -52,8 +52,35 @@ literals, descendant-labelled buttons. After fixing (commit for engine @5):
   all-`alt=""` link-name class) — candidates, not re-adjudicated.
 - 87-site Spearman vs Lighthouse: 0.474 → 0.488.
 
-@5 precision has NOT been fully re-adjudicated; bounded estimate ≥ 0.75 pending a
-re-mapping pass.
+@5 precision was NOT fully re-adjudicated at the time; the full re-mapping below
+supersedes the bounded estimate (≥ 0.75) recorded here previously.
+
+## Engine @6 full re-mapping (2026-07-07) — official post-fix P/R
+
+Every inventory violation re-judged against the @6 audits and every unclaimed @6
+finding adjudicated. Method: mechanical matcher (anchor tokens + cited-line proximity;
+kept-sets reproduced the shipped audits exactly) auto-matched 42/66 violations; the 7
+sites with residue findings each got an adjudication agent plus an independent
+adversarial re-judge (all 7 verified, zero overrides); one matcher error was caught and
+corrected by session arbitration (site 90 notes: the aria-heading FP had been
+auto-claimed for a violation it does not detect). Aggregation: `aggregate-gt.mjs
+--engine 6` → `pr-analysis-v6.json` (`beacon_v6` / `beacon_fp_v6` fields; the @4 fields
+and numbers stay frozen and reproducible via the default run).
+
+| Tool | Precision | Recall (patterns) | Recall (instances) | FP patterns |
+|---|---|---|---|---|
+| Beacon @4 | 0.600 | 0.591 | 0.743 | 26 |
+| Beacon @6 | **0.979** | **0.712** | **0.826** | **1** |
+| Lighthouse (unchanged runs) | 0.811 | 0.462 | 0.225 | 7 |
+
+- All 65 residue findings were instances of already-inventoried patterns — zero new
+  violations entered the pool (recall denominators unchanged, so the numbers are
+  directly comparable to @4), and zero new FP classes appeared.
+- The single remaining FP pattern is the known aria-heading gap (ibm.com
+  `heading-level-skipped@1663`: an AT-visible `role="heading" aria-level="4"` element
+  bridges the sequence the engine reports as h1→h5).
+- Instance-level weights still use the @4-era `count` values (conservative; the
+  counting-unit caveat in critic.md applies unchanged).
 
 ## Human spot-check priorities (from critic.md, plus one from the @5 re-check)
 
