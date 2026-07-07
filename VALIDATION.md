@@ -161,14 +161,16 @@ node tools/measure-semantic.mjs --min-precision 1.0 --min-recall 0.4
 
 Record in CHANGELOG: engine version, Spearman, and (when GT re-ran) P/R.
 
-## Measured state (2026-07-06, engine `beacon-static-audit@6`)
+## Measured state (2026-07-07, engine `beacon-static-audit@7`)
 
 | Metric | Value |
 |---|---|
-| Spearman vs Lighthouse a11y (n=71) | 0.354 (@3) → 0.474 (@4) → 0.488 (@5/@6) |
-| Ground-truth P/R, pattern-level (@4 baseline) | Beacon 0.600 / 0.591 · Lighthouse 0.811 / 0.462 |
-| Ground-truth recall, instance-level (@4) | Beacon 0.743 · Lighthouse 0.225 |
+| Spearman vs Lighthouse a11y (n=71) | 0.354 (@3) → 0.474 (@4) → 0.488 (@5/@6) → 0.480 (@7) |
+| Ground-truth P/R, pattern-level | @4: 0.600 / 0.591 → @6: **0.979 / 0.712** (carries to @7: 47/47 TPs retained) · Lighthouse 0.811 / 0.462 |
+| Ground-truth recall, instance-level | @4: 0.743 → @6: **0.826** · Lighthouse 0.225 |
 | @5 re-verification | 14/15 FP classes eliminated, 39/39 TPs retained, 18 new catches |
+| @7 wild input-label FP elimination | 46/57 findings were wrapped-input FPs → 0; only jnto (+20) and spotify (+8) moved |
+| CJK fairness | jp-tw FP 0.214 → ~0.01 residual after @7; no CJK-text-semantics bias found |
 | Score error bar, temporal (same machine, 2-day, n=13) | median 0 / p95 1 / max 1; 0 band flips |
 | Score error bar, cross-machine | NOT YET MEASURED — run the two-machine experiment before quoting scores across machines |
 

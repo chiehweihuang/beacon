@@ -47,7 +47,21 @@ Tambahkan marketplace:
 }
 ```
 
-Plugin facts: `beacon`, version `2.0.10`, MIT, repository `chiehweihuang/beacon`.
+Plugin facts: `beacon`, version `3.0.0`, MIT, repository `chiehweihuang/beacon`.
+
+## Interpretasi Skor
+
+Gunakan skor sebagai sinyal triase:
+
+| Rentang skor | Arti |
+|---|---|
+| 90-100 | Baseline otomatis terlihat kuat. Tetap jalankan pemeriksaan keyboard, screen reader, zoom, dan real-user untuk alur penting. |
+| 50-89 | Ditemukan beberapa barrier atau item yang perlu ditinjau. Prioritaskan findings berdasarkan pengguna yang terdampak dan tingkat keparahan. |
+| 0-49 | Disarankan peninjauan prioritas tinggi. Bukti yang diperiksa menunjukkan barrier yang substansial. |
+
+Setiap skor disertai `coverage_percent`, yaitu porsi scoring weight yang benar-benar terukur. Kategori tanpa bukti mesin melaporkan status (`not-machine-checkable` / `not-applicable`) alih-alih angka, dan finding risiko kejang yang terkonfirmasi (WCAG 2.3.1) membatasi overall score ke band 0-49 terlepas dari bobot kategori.
+
+Bagaimana angka ini dijaga tetap jujur (reliability, validitas detector, sifat score-semantics, benchmark eksternal, dan fairness invariant) dijabarkan dan dapat dieksekusi di [VALIDATION.md](VALIDATION.md); data hasil pengukurannya ada di [benchmark/](benchmark/).
 
 ## Categories
 

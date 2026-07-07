@@ -47,7 +47,21 @@ Thêm marketplace:
 }
 ```
 
-Plugin facts: `beacon`, version `2.0.10`, MIT, repository `chiehweihuang/beacon`.
+Plugin facts: `beacon`, version `3.0.0`, MIT, repository `chiehweihuang/beacon`.
+
+## Diễn Giải Điểm Số
+
+Hãy dùng điểm số như một tín hiệu triage:
+
+| Dải điểm | Ý nghĩa |
+|---|---|
+| 90-100 | Baseline tự động trông tốt. Vẫn nên chạy kiểm tra keyboard, screen reader, zoom, và real-user cho các luồng quan trọng. |
+| 50-89 | Đã tìm thấy một số barrier hoặc mục cần review. Ưu tiên findings theo người dùng bị ảnh hưởng và mức độ nghiêm trọng. |
+| 0-49 | Khuyến nghị review ưu tiên cao. Bằng chứng đã kiểm tra cho thấy có barrier đáng kể. |
+
+Mỗi điểm số đi kèm `coverage_percent`, tức là phần scoring weight thực sự được đo. Category không có bằng chứng máy sẽ báo cáo trạng thái (`not-machine-checkable` / `not-applicable`) thay vì con số, và một finding về nguy cơ co giật đã xác nhận (WCAG 2.3.1) sẽ giới hạn overall score vào band 0-49 bất kể trọng số category.
+
+Cách các con số này được giữ trung thực (reliability, tính hợp lệ của detector, tính chất score-semantics, benchmark bên ngoài, và fairness invariant) được quy định và có thể thực thi trong [VALIDATION.md](VALIDATION.md); dữ liệu đo lường nằm trong [benchmark/](benchmark/).
 
 ## Categories
 

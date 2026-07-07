@@ -33,7 +33,8 @@ single-line wrapping-label group as the other 42 and are counted with their clas
    benchmark snapshots found 46 of the engine's 57 `input-label-missing` findings
    (81%) sit inside `<label>` ranges — including 3 on site 72 (spotify.com, Latin).
    This is a broken detector that happened to detonate on a jp-tw site, not language
-   bias. Fix scheduled as engine @7.
+   bias. Fixed in engine @7 (same session): jnto.go.jp +20 points, spotify.com +8,
+   every other benchmark site byte-stable.
 2. **Minified single-line misattribution** (1 instance, site 92): on a SPA bundle
    whose whole document is a handful of lines, the flagged `button-name-missing`
    cannot be tied to any actually-unnamed button (all 47 buttons on the cited line

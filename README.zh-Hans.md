@@ -45,7 +45,21 @@ Claude Code config 需要在 `extraKnownMarketplaces` 加入：
 }
 ```
 
-Plugin facts：`beacon`、version `2.0.10`、MIT、repository `chiehweihuang/beacon`。
+Plugin facts：`beacon`、version `3.0.0`、MIT、repository `chiehweihuang/beacon`。
+
+## 分数解读
+
+请把分数当作分诊信号使用：
+
+| 分数区间 | 含义 |
+|---|---|
+| 90-100 | 自动化基线检查表现良好，重要流程仍需人工做 keyboard、screen reader、zoom 与真实用户检查。 |
+| 50-89 | 发现了一些 barrier 或待复核项，请依受影响用户与严重程度排定 finding 优先级。 |
+| 0-49 | 建议优先复核，已检查的证据显示存在较严重的 barrier。 |
+
+每个分数都会附带 `coverage_percent`（实际测量到的 scoring weight 占比）。没有机器证据的类别会以状态（`not-machine-checkable` / `not-applicable`）取代数字，且一旦确认存在癫痫发作风险的 finding（WCAG 2.3.1），无论各类别权重如何，overall score 都会被限制在 0-49 区间。
+
+这些数字如何保持可信（可靠性、detector 有效性、score-semantics 性质、外部 benchmark、fairness invariant）已在 [VALIDATION.md](VALIDATION.md) 中规范并可执行；实测数据存放在 [benchmark/](benchmark/) 下。
 
 ## 检查类别
 

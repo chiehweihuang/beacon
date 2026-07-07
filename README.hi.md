@@ -47,7 +47,21 @@ Marketplace जोड़ें:
 }
 ```
 
-Plugin facts: `beacon`, version `2.0.10`, MIT, repository `chiehweihuang/beacon`.
+Plugin facts: `beacon`, version `3.0.0`, MIT, repository `chiehweihuang/beacon`.
+
+## स्कोर की व्याख्या
+
+स्कोर को triage signal के रूप में उपयोग करें:
+
+| स्कोर बैंड | अर्थ |
+|---|---|
+| 90-100 | Automated baseline मजबूत दिखता है। महत्वपूर्ण flows के लिए फिर भी keyboard, screen reader, zoom, और real-user checks चलाएं। |
+| 50-89 | कुछ barrier या review items पाए गए। प्रभावित users और severity के आधार पर findings को प्राथमिकता दें। |
+| 0-49 | High-priority review की सलाह दी जाती है। जांची गई evidence substantial barriers का संकेत देती है। |
+
+हर स्कोर के साथ `coverage_percent` जुड़ा होता है, यानी scoring weight का वह हिस्सा जो वास्तव में measure हुआ। Machine evidence के बिना categories संख्या के बजाय एक स्थिति (`not-machine-checkable` / `not-applicable`) रिपोर्ट करती हैं, और एक confirmed seizure-risk finding (WCAG 2.3.1) category weights की परवाह किए बिना overall score को 0-49 band में सीमित कर देती है।
+
+ये आंकड़े कैसे honest रखे जाते हैं (reliability, detector validity, score-semantics properties, external benchmarks, और fairness invariants), यह [VALIDATION.md](VALIDATION.md) में specify और executable रूप में दिया गया है; measured data [benchmark/](benchmark/) के तहत है।
 
 ## Categories
 

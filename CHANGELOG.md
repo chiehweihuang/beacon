@@ -104,6 +104,30 @@ Lighthouse a11y: 0.474 → 0.488.
   two-machine experiments that will publish the score's error bar.
 - Benchmark rank correlation unchanged vs @5 (Spearman 0.488).
 
+### Fixed (round 3 — engine `beacon-static-audit@7`, driven by the CJK FP study `benchmark/2026-07-07-cjk-fp/`)
+
+- **Wrapping-label recognition**: `input-label-missing` no longer flags inputs inside
+  `<label>…</label>` and credits them as forms passes. This killed 46 of the
+  detector's 57 findings across the 88-site benchmark (81% FP rate — the largest
+  remaining wild FP class, concentrated on jnto.go.jp ×43 and spotify.com ×3).
+- **Phantom-range masking (latent since @5)**: both range scanners
+  (`computeHiddenRanges`, new `computeLabelRanges`) previously tokenized raw text, so
+  a tag token inside a `<script>` template string or an HTML comment could open a
+  phantom range and silently swallow every downstream finding on the page. Tag tokens
+  inside script/style bodies and HTML comments are now invisible to the scanners, and
+  commented-out markup no longer yields findings or passes for any markup detector.
+  Known residual (documented in-code): `<!--` inside an attribute value still leaks;
+  needs a real lexer; not hit by any known benchmark page.
+- Gate: three-round adversarial review (two empirically-reproduced BLOCKs fixed, then
+  PASS), 12 new adversarial regression tests (322 total), goldens unchanged except the
+  engine fingerprint, semantic held-out gate green.
+- Effect on the 88-site benchmark: only the two FP-carrying sites moved (jnto +20,
+  spotify +8, one band flip fail→needs-work); all other 83 compared sites byte-stable.
+  Spearman vs Lighthouse 0.488 → 0.480 (n=71; within the ±1-point capture-noise floor,
+  and the fix is ground-truth-driven, not rank-driven). Ground-truth re-verify at @7:
+  47/47 flagged violations retained, the single known FP (aria-heading) unchanged —
+  the @6 P/R (0.979 / 0.712) carries to @7 on the ground-truth scope.
+
 ### Measured (2026-07-07 — validation results for engine @6)
 
 - **Official ground-truth P/R after the detector fixes** (full @6 re-mapping of the
