@@ -147,6 +147,14 @@ test('forms has a gradient: mostly-labelled inputs score strictly between 0 and 
   assert.ok(forms.score > 0 && forms.score < 100, `one bad input among five good must not zero the category (got ${forms.score})`);
 });
 
+test('forms: a wrapping <label> (no id/aria on the input) also counts as a pass', () => {
+  const html = PAGE.replace('</main>', '<label>Name <input type="text" name="n"></label></main>');
+  const { audit } = run({ html, args: ['--date', '2020-01-01'] });
+  const forms = cat(audit, 'forms');
+  assert.equal(forms.pass, 1, 'wrapping label is positive evidence, same as id/aria-*');
+  assert.equal(forms.fail, 0, 'the wrapped input must not also be a fail');
+});
+
 test('keyboard has a gradient: named buttons count as passes', () => {
   const html = PAGE.replace('</main>', '<button>Save</button><button>Send</button><button></button></main>');
   const { audit } = run({ html, args: ['--date', '2020-01-01'] });

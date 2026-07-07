@@ -81,7 +81,7 @@ const SEV_REPEAT_CAP = 3;
 // (axe / capture-recipe components are added when Tier-2 findings are merged with their own
 // engine provenance; the pure static engine here is axe-free, so claiming an axe version would
 // be dishonest.)
-const DETECTOR_VERSION = 'beacon-static-audit@6';
+const DETECTOR_VERSION = 'beacon-static-audit@7';
 
 function rulesetHash() {
   const payload = JSON.stringify({
@@ -197,7 +197,11 @@ function isHiddenAttrs(attrs) {
     /\shidden(?=[\s=/]|$)/i.test(attrs);
 }
 
-function computeHiddenRanges(text) {
+// `maskedRanges` (script/style bodies + HTML comments; see scanFile) hides tag tokens
+// that are not real elements — a JS string or a comment containing tag-shaped text must
+// not open/close a range. Defaults to none so other callers/tests are unaffected.
+function computeHiddenRanges(text, maskedRanges = []) {
+  const inMasked = (i) => maskedRanges.some(([s, e]) => i >= s && i < e);
   const ranges = [];
   const stack = []; // open non-void elements: { tag, hidden }
   let hiddenDepth = 0;
@@ -205,6 +209,7 @@ function computeHiddenRanges(text) {
   const re = /<(\/?)([a-zA-Z][\w-]*)((?:"[^"]*"|'[^']*'|[^>"'])*)>/g;
   let m;
   while ((m = re.exec(text))) {
+    if (inMasked(m.index)) continue;
     const [full, close, rawTag, attrs] = m;
     const tag = rawTag.toLowerCase();
     if (tag === 'script' || tag === 'style') continue; // masked separately (inMasked)
@@ -229,7 +234,47 @@ function computeHiddenRanges(text) {
     if (hidden) { hiddenDepth += 1; if (hiddenDepth === 1) hiddenStart = m.index; }
     stack.push({ tag, hidden });
   }
+  // KEEP: an unclosed inline-hidden element hides the rest of the document to EOF. This is
+  // not a bug — a real unclosed hidden element does swallow subsequent content in browsers
+  // too, and this tail rule shipped in @5/@6 and is ground-truth-validated (2026-07-06
+  // study). Do not "fix" this the way computeLabelRanges below was fixed: hidden-range
+  // credit (suppressing findings) staying conservative-to-EOF is the safe direction; label
+  // credit (suppressing findings AND adding passes) is not, so it stays bounded instead.
   if (hiddenDepth > 0 && hiddenStart >= 0) ranges.push([hiddenStart, text.length]);
+  return ranges;
+}
+
+// Character ranges of <label>...</label>. A wrapping label already gives its control an
+// accessible name (WCAG 1.3.1/4.1.2; VALIDATION.md L3), independent of a matching `for`.
+// 2026-07-07 88-site benchmark: 46/57 input-label-missing findings were wrapped inputs
+// (benchmark/2026-07-07-cjk-fp/README.md). Depth counter only (labels rarely nest) —
+// same linear-scan style + quote-aware attrs + maskedRanges as computeHiddenRanges (see
+// its comment above for why masking matters: a stray tag token in a script string or
+// comment must not open a phantom range).
+// ponytail: approximation — a wrapping label whose `for` targets a DIFFERENT control's id
+// still counts as labelling here; we don't cross-check `for` against the wrapped input's
+// id. Tier-1 ceiling, not worth a full DOM parse.
+// Positive credit must stay conservative (unlike the hidden-range tail rule above): a
+// self-closing <label/> wraps nothing, and an unclosed <label> does NOT credit the rest of
+// the page — a maybe-open label must never manufacture a pass or suppress a real fail.
+function computeLabelRanges(text, maskedRanges = []) {
+  const inMasked = (i) => maskedRanges.some(([s, e]) => i >= s && i < e);
+  const ranges = [];
+  let depth = 0;
+  let start = -1;
+  const re = /<(\/?)label\b((?:"[^"]*"|'[^']*'|[^>"'])*)>/gi;
+  let m;
+  while ((m = re.exec(text))) {
+    if (inMasked(m.index)) continue;
+    const [, close, attrs] = m;
+    if (close) {
+      if (depth > 0 && --depth === 0) { ranges.push([start, m.index + m[0].length]); start = -1; }
+      continue;
+    }
+    if (attrs.endsWith('/')) continue; // self-closing <label/> wraps nothing
+    if (depth === 0) start = m.index;
+    depth += 1;
+  }
   return ranges;
 }
 
@@ -321,14 +366,27 @@ function scanFile(file, root, stats, findings) {
   const jsLike = ['js', 'cjs', 'mjs', 'ts', 'jsx', 'tsx', 'vue', 'svelte'].includes(ext);
 
   if (markup) {
-    // Char ranges of <script>/<style> bodies. The structural detectors below skip
-    // matches inside them so HTML-looking strings in JS/CSS are not flagged as real
-    // elements (e.g. a `"<ul><div>"` template string inside an inline script).
-    const masked = [...text.matchAll(/<(script|style)\b[^>]*>[\s\S]*?<\/\1>/gi)].map(s => [s.index, s.index + s[0].length]);
+    // Char ranges of <script>/<style> bodies and HTML comments. The structural detectors
+    // below skip matches inside them so HTML-looking strings in JS/CSS, or markup left in
+    // a comment, are not flagged as real elements (e.g. a `"<ul><div>"` template string
+    // inside an inline script). Also fed into computeHiddenRanges/computeLabelRanges below
+    // (hakuso HIGH, 2026-07-07): those two do their OWN tag-token scan of the raw text, so
+    // without this a phantom token inside a script string or comment could open a range
+    // that never closes and silently swallows every later finding to EOF.
+    // scriptRanges computed FIRST, then comment matches starting inside a scriptRange are
+    // dropped (hakuso round 2, 2026-07-07): a `<!--` inside a JS string is not a real
+    // comment-open, and pairing it with the next REAL `-->` masked everything between.
+    // ponytail: a `<!--` inside an HTML ATTRIBUTE VALUE (e.g. `title="a <!-- b"`) still
+    // leaks the same way — needs a real attribute-aware lexer to fix; deferred, not hit by
+    // any known benchmark site.
+    const scriptRanges = [...text.matchAll(/<(script|style)\b[^>]*>[\s\S]*?<\/\1>/gi)].map(s => [s.index, s.index + s[0].length]);
+    const inScript = (i) => scriptRanges.some(([s, e]) => i >= s && i < e);
+    const commentRanges = [...text.matchAll(/<!--[\s\S]*?-->/g)].filter(m => !inScript(m.index)).map(s => [s.index, s.index + s[0].length]);
+    const masked = [...scriptRanges, ...commentRanges];
     const inMasked = (i) => masked.some(([s, e]) => i >= s && i < e);
     // Subtrees hidden from the accessibility tree: no findings, no passes (see
     // computeHiddenRanges).
-    const hiddenRanges = computeHiddenRanges(text);
+    const hiddenRanges = computeHiddenRanges(text, masked);
     const inHidden = (i) => hiddenRanges.some(([s, e]) => i >= s && i < e);
     const visible = (i) => !inMasked(i) && !inHidden(i);
 
@@ -623,11 +681,17 @@ function scanFile(file, root, stats, findings) {
     }
 
     let unlabelledInputs = 0;
+    let wrappedInputs = 0;
     // `\sid=` is whitespace-anchored: bare `id=` also matched inside data-reactid= /
     // data-id= and silently suppressed real unlabelled inputs on React pages (caught by
     // the L4 cross-stack fairness test).
+    // Only this detector consumes labelRanges — a wrapping <label> is positive evidence
+    // solely for the fail-side skip below, not a general-purpose range.
+    const labelRanges = computeLabelRanges(text, masked);
+    const inLabel = (i) => labelRanges.some(([s, e]) => i >= s && i < e);
     for (const m of text.matchAll(/<input\b(?![^>]*(aria-label|aria-labelledby|\sid=|type=["']hidden["']))[^>]*>/gi)) {
       if (!visible(m.index || 0)) continue;
+      if (inLabel(m.index || 0)) { wrappedInputs += 1; continue; }
       unlabelledInputs += 1;
       addFinding(findings, stats, {
         key: 'input-label-missing',
@@ -642,6 +706,11 @@ function scanFile(file, root, stats, findings) {
         code_before: snippetAt(text, m.index || 0),
       });
     }
+    // A wrapping <label> is positive evidence too (same gradient-restoration philosophy as
+    // labelledInputs below), counted separately from the id/aria-* regex so no input is
+    // double-counted: the fail-regex lookahead already excludes id/aria-* inputs from the
+    // skip path above, so wrappedInputs and labelledInputs cannot overlap.
+    for (let i = 0; i < wrappedInputs; i++) addCheck(stats, 'forms', 'pass');
     // Non-hidden inputs that DO carry a real label hook are verified form passes. This is
     // POSITIVE evidence (whitespace-anchored attribute with a non-empty value), deliberately
     // decoupled from the fail regex above, whose `id=` substring suppression also matches

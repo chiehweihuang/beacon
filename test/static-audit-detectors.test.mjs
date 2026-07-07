@@ -215,3 +215,118 @@ test('large-fixed-width: real bare width / min-width is flagged as review', () =
     assert.equal(hits[0].severity, 'tip', `${decl} stays review-soft, not warning`);
   }
 });
+
+const inputLabelFindings = (audit) => audit.findings.filter((f) => f.key === 'input-label-missing');
+
+test('input-label-missing: bare input with no id/aria/wrapping label is flagged', () => {
+  const audit = runScanner(`<!DOCTYPE html><html lang="en"><head><title>t</title>
+<meta name="viewport" content="width=device-width, initial-scale=1"></head><body><main>
+<input type="text" name="u">
+</main></body></html>`);
+  assert.equal(inputLabelFindings(audit).length, 1, 'bare input must still flag');
+});
+
+test('input-label-missing: input wrapped in <label>...</label> is not flagged', () => {
+  const audit = runScanner(`<!DOCTYPE html><html lang="en"><head><title>t</title>
+<meta name="viewport" content="width=device-width, initial-scale=1"></head><body><main>
+<label>Username <input type="text" name="u"></label>
+</main></body></html>`);
+  assert.equal(inputLabelFindings(audit).length, 0, 'a wrapping <label> already names the input, even with no id/aria and no matching for');
+});
+
+test('input-label-missing: input after a CLOSED label (not wrapped) is still flagged', () => {
+  const audit = runScanner(`<!DOCTYPE html><html lang="en"><head><title>t</title>
+<meta name="viewport" content="width=device-width, initial-scale=1"></head><body><main>
+<label for="u">Username</label>
+<input type="text" name="u2">
+</main></body></html>`);
+  assert.equal(inputLabelFindings(audit).length, 1, 'an input outside the label range (label already closed) must still flag');
+});
+
+// hakuso HIGH, 2026-07-07: a tag-shaped token inside a <script> string or an HTML comment
+// must not open a phantom range in computeHiddenRanges/computeLabelRanges — the old
+// unclosed-tail behavior would swallow every later finding on the page to EOF.
+const imageAltFindings = (audit) => audit.findings.filter((f) => f.key === 'image-alt-missing');
+
+test('input-label-missing: a <label>-shaped token inside a <script> string does not swallow later findings', () => {
+  const audit = runScanner(`<!DOCTYPE html><html lang="en"><head><title>t</title>
+<meta name="viewport" content="width=device-width, initial-scale=1"></head><body><main>
+<script>var s = "<label>";</script>
+<input type="text" name="u">
+</main></body></html>`);
+  assert.equal(inputLabelFindings(audit).length, 1, 'the fake <label> token lives inside a script string, not real markup');
+});
+
+test('input-label-missing: a <label>-shaped token inside an HTML comment does not swallow later findings', () => {
+  const audit = runScanner(`<!DOCTYPE html><html lang="en"><head><title>t</title>
+<meta name="viewport" content="width=device-width, initial-scale=1"></head><body><main>
+<!-- <label> -->
+<input type="text" name="u">
+</main></body></html>`);
+  assert.equal(inputLabelFindings(audit).length, 1, 'the fake <label> token lives inside a comment, not real markup');
+});
+
+test('input-label-missing: self-closing <label/> wraps nothing, does not swallow later findings', () => {
+  const audit = runScanner(`<!DOCTYPE html><html lang="en"><head><title>t</title>
+<meta name="viewport" content="width=device-width, initial-scale=1"></head><body><main>
+<label/>
+<input type="text" name="u">
+</main></body></html>`);
+  assert.equal(inputLabelFindings(audit).length, 1, 'self-closing <label/> has no content to wrap, so the next input is still bare');
+});
+
+test('input-label-missing: an unclosed <label> gives NO credit (conservative, does not suppress the fail)', () => {
+  const audit = runScanner(`<!DOCTYPE html><html lang="en"><head><title>t</title>
+<meta name="viewport" content="width=device-width, initial-scale=1"></head><body><main>
+<label>Username <input type="text" name="u">
+</main></body></html>`);
+  assert.equal(inputLabelFindings(audit).length, 1, 'an unclosed <label> must not manufacture a wrapping range to EOF');
+});
+
+test('input-label-missing + image-alt-missing: a script-string aria-hidden div does not swallow downstream findings', () => {
+  const audit = runScanner(`<!DOCTYPE html><html lang="en"><head><title>t</title>
+<meta name="viewport" content="width=device-width, initial-scale=1"></head><body><main>
+<script>var tpl = '<div aria-hidden="true">';</script>
+<img src="x.png">
+<input type="text" name="u">
+</main></body></html>`);
+  assert.equal(imageAltFindings(audit).length, 1, 'the alt-less image after the fake hidden div must still flag');
+  assert.equal(inputLabelFindings(audit).length, 1, 'the bare input after the fake hidden div must still flag');
+});
+
+test('input-label-missing + image-alt-missing: a commented-out aria-hidden div does not swallow downstream findings', () => {
+  const audit = runScanner(`<!DOCTYPE html><html lang="en"><head><title>t</title>
+<meta name="viewport" content="width=device-width, initial-scale=1"></head><body><main>
+<!-- <div aria-hidden="true"> -->
+<img src="x.png">
+<input type="text" name="u">
+</main></body></html>`);
+  assert.equal(imageAltFindings(audit).length, 1, 'the alt-less image after the fake hidden div must still flag');
+  assert.equal(inputLabelFindings(audit).length, 1, 'the bare input after the fake hidden div must still flag');
+});
+
+// hakuso round 2, 2026-07-07: an unbalanced `<!--` inside a <script> string is not a real
+// comment-open, but pairing it with the NEXT real `-->` outside the script masked
+// everything in between (including a real comment's worth of live markup).
+test('input-label-missing: an unbalanced <!-- inside a script does not pair with a later REAL comment and mask the input between them', () => {
+  const audit = runScanner(`<!DOCTYPE html><html lang="en"><head><title>t</title>
+<meta name="viewport" content="width=device-width, initial-scale=1"></head><body><main>
+<script>var x = "a <!-- b";</script>
+<input type="text" name="u1">
+<!-- real -->
+<input type="text" name="u2">
+</main></body></html>`);
+  assert.equal(inputLabelFindings(audit).length, 2, 'both inputs sit outside any real comment or script body and must both flag');
+});
+
+test('input-label-missing + image-alt-missing: an unbalanced <!-- inside a script does not mask an alt-less image before the next real comment', () => {
+  const audit = runScanner(`<!DOCTYPE html><html lang="en"><head><title>t</title>
+<meta name="viewport" content="width=device-width, initial-scale=1"></head><body><main>
+<script>var x = "a <!-- b";</script>
+<img src="x.png">
+<input type="text" name="u">
+<!-- real -->
+</main></body></html>`);
+  assert.equal(imageAltFindings(audit).length, 1, 'the alt-less image between the fake <!-- and the real comment must still flag');
+  assert.equal(inputLabelFindings(audit).length, 1, 'the bare input between the fake <!-- and the real comment must still flag');
+});
