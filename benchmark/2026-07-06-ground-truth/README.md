@@ -57,11 +57,22 @@ re-mapping pass.
 
 ## Human spot-check priorities (from critic.md, plus one from the @5 re-check)
 
-1. **rakuten.co.jp link-name delta**: engine @5 kept 44 of 106 link-name findings; the
-   inventory's own FP audit only identified 8 hidden ones. Either the walker masks more
-   than the agent saw (likely: cloned lazy carousels) or it over-masks. Highest-value
-   single check: sample 5 of the 62 eliminated links, confirm each really sits in a
-   hidden subtree.
+1. **rakuten.co.jp link-name delta** — RESOLVED 2026-07-07: walker correct, not
+   over-masking. Engine @5 kept 44 of 106 link-name findings; the inventory's own FP
+   audit had only identified 8 hidden ones. Adjudication (mechanical ancestor-chain
+   verification by a session AI, replicating `computeHiddenRanges` + the @6 naming
+   rules on the stored snapshot; kept-set reproduced the shipped 44 exactly): every
+   eliminated candidate (83 under @6 naming rules, a superset of the 62 under @4) sits
+   inside an inline-hidden subtree — 74 under `visibility:hidden`, 9 under
+   `display:none`, all with the hiding style literal on an ancestor div. Distribution:
+   72 are prev/next buttons in `rnkTabItemdiv_rnkDailyGenreLink_*` genre-tab carousel
+   panels (one clone per genre, only the active tab visible — the "cloned lazy
+   carousels" hypothesis), 11 in `display:none` browsing-history/template blocks, two
+   of which contain the literal un-instantiated placeholder `#GENRELINKEVENT#`. Five
+   spread samples eyeballed ancestor-by-ancestor; all genuine descendants of their
+   hiding roots. The visible active-tab siblings of the same buttons remain in the
+   kept 44, so the underlying defect class stays represented. Not an independent
+   human pass; raise here if one is still wanted.
 2. Criterion-mapping audit on entries touching 1.3.1 / 4.1.2 boundaries.
 3. One human pass on 3–4 sites for the correlated blind spots (reading order,
    color-alone, post-submit errors, name-correctness) — these can NEVER enter this
