@@ -4,6 +4,8 @@
 
 Accessibility + AEO inspection plugin for Claude Code.
 
+**Landing page & live sample reports**: [chiehweihuang.github.io/beacon](https://chiehweihuang.github.io/beacon/) ([繁體中文](https://chiehweihuang.github.io/beacon/zh-Hant.html)) — the page is styled freely and audited by its own engine (100/100, static tier, coverage stated in the report).
+
 Beacon is a fast accessibility baseline for agent-assisted UI work: static heuristics first, live audit support when available, and report language that explains what to fix and why. It is useful in the same part of the workflow where teams use Lighthouse, axe, Pa11y, or WAVE, but Beacon is tuned for agent coding sessions, jurisdiction-aware WCAG context, Answer Engine Optimization, and human-centered explanations.
 
 As of 2.1.0, `beacon:inspect` also folds in Lighthouse performance, best-practices, and SEO as supplementary signals and connects them back to accessibility through shared cross-cutting root causes — for example, an oversized DOM that slows style and layout, burdens screen-reader traversal, and hampers AI crawlability at the same time. These signals sit beside the accessibility score; they are not part of it.

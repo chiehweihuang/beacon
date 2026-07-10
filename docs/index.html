@@ -1,0 +1,202 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Beacon — accessibility + AEO inspection for AI coding agents</title>
+<meta name="description" content="Beacon is a Claude Code and Codex plugin that scores web accessibility (WCAG 2.2) and answer-engine readiness, anchors every finding to exact markup, and publishes the validation data behind its own numbers.">
+<link rel="canonical" href="https://chiehweihuang.github.io/beacon/">
+<link rel="alternate" hreflang="en" href="https://chiehweihuang.github.io/beacon/">
+<link rel="alternate" hreflang="zh-Hant" href="https://chiehweihuang.github.io/beacon/zh-Hant.html">
+<link rel="stylesheet" href="style.css">
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "SoftwareApplication",
+  "name": "Beacon",
+  "applicationCategory": "DeveloperApplication",
+  "operatingSystem": "Windows, macOS, Linux",
+  "softwareVersion": "3.0.0",
+  "description": "Accessibility (WCAG 2.2) and answer-engine-optimization inspection plugin for AI coding agents (Claude Code and Codex), with benchmark-validated scoring.",
+  "license": "https://opensource.org/licenses/MIT",
+  "url": "https://chiehweihuang.github.io/beacon/",
+  "downloadUrl": "https://github.com/chiehweihuang/beacon"
+}
+</script>
+</head>
+<body>
+<a class="skip-link" href="#main">Skip to main content</a>
+
+<header class="site">
+  <div class="wrap">
+    <a class="brand" href="./">
+      <svg width="22" height="22" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M12 2 3 21h18L12 2Zm0 5.2 5.4 11.3H6.6L12 7.2Z" fill="currentColor"/></svg>
+      Beacon
+    </a>
+    <nav class="site-nav" aria-label="Main">
+      <ul>
+        <li><a href="#commands">What it does</a></li>
+        <li><a href="#evidence">Evidence</a></li>
+        <li><a href="#reports">Reports</a></li>
+        <li><a href="#install">Install</a></li>
+        <li><a href="https://github.com/chiehweihuang/beacon">GitHub</a></li>
+      </ul>
+    </nav>
+    <div class="lang-switch">
+      <a href="zh-Hant.html" lang="zh-Hant" hreflang="zh-Hant">繁體中文</a>
+    </div>
+  </div>
+</header>
+
+<main id="main">
+
+  <section class="hero" aria-labelledby="hero-h">
+    <div class="wrap">
+      <h1 id="hero-h">Ship interfaces everyone can use — and prove it.</h1>
+      <p class="lede">Beacon is an accessibility + AEO inspection plugin for AI coding agents (Claude Code and Codex). It scores pages 0–100 across ten categories, anchors every finding to the exact markup that caused it, and publishes the benchmark data behind its own scoring.</p>
+      <p class="honesty">A high score means automated checks found fewer issues in the evidence available. It is a triage signal — not a compliance certificate, and never a substitute for testing with disabled users.</p>
+      <div class="cta-row">
+        <a class="btn btn-primary" href="#install">Get started</a>
+        <a class="btn btn-ghost" href="reports/landing-self-audit.html">See this page's own audit</a>
+      </div>
+    </div>
+  </section>
+
+  <section id="commands" aria-labelledby="commands-h">
+    <div class="wrap">
+      <h2 id="commands-h">One plugin, three moments</h2>
+      <p class="section-lede">Accessibility is cheapest before code exists and most expensive after launch. Beacon meets you at all three points.</p>
+      <div class="cards">
+        <div class="card">
+          <span class="when">Before you code</span>
+          <h3><code>beacon:guide</code></h3>
+          <p>Accessible patterns, contrast-safe palettes, typography and motion tokens, and design tradeoffs — while the UI is still a sketch.</p>
+        </div>
+        <div class="card">
+          <span class="when">While you code</span>
+          <h3><code>beacon:advisor</code></h3>
+          <p>A hook reviews every UI edit in real time and hands the agent a concrete checklist for the file it just touched.</p>
+        </div>
+        <div class="card">
+          <span class="when">After you code</span>
+          <h3><code>beacon:inspect</code></h3>
+          <p>A Lighthouse-style 0–100 report with exact-markup fixes, legal context for six jurisdictions, and before/after comparison across runs.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section id="evidence" aria-labelledby="evidence-h">
+    <div class="wrap">
+      <h2 id="evidence-h">Numbers that carry their own receipts</h2>
+      <p class="section-lede">Most tools ask you to trust their score. Beacon ships the validation charter and the measurements in the repository, so every claim below is reproducible from a checkout.</p>
+
+      <div class="table-wrap" role="region" aria-label="Measured precision and recall" tabindex="0">
+        <table>
+          <caption>20-site evidence-anchored ground truth, 10 structural WCAG classes (2026-07)</caption>
+          <thead>
+            <tr>
+              <th scope="col">Measured</th>
+              <th scope="col">Beacon 3.0</th>
+              <th scope="col">Lighthouse</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <th scope="row">Precision</th>
+              <td class="win">0.979</td>
+              <td>0.811</td>
+            </tr>
+            <tr>
+              <th scope="row">Recall — violation patterns</th>
+              <td class="win">0.712</td>
+              <td>0.462</td>
+            </tr>
+            <tr>
+              <th scope="row">Recall — violation instances</th>
+              <td class="win">0.826</td>
+              <td>0.225</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="stats">
+        <div class="stat"><span class="n">±1 point</span> <span class="d">measured score uncertainty — same machine, days apart (p95, 13-site recapture)</span></div>
+        <div class="stat"><span class="n">coverage %</span> <span class="d">every score states how much was actually measured; no evidence means a state, never a number</span></div>
+        <div class="stat"><span class="n">cap at 49</span> <span class="d">a confirmed seizure-risk finding (WCAG 2.3.1) caps the overall score, whatever the other categories say</span></div>
+      </div>
+
+      <p class="footnote">Lighthouse is a concurrent reference, not ground truth; recall is relative to the machine-checkable candidate pool. Method, judgement rules, adversarial re-verification, and raw inventories: <a href="https://github.com/chiehweihuang/beacon/blob/master/VALIDATION.md">VALIDATION.md</a> and <a href="https://github.com/chiehweihuang/beacon/tree/master/benchmark">benchmark/</a>.</p>
+    </div>
+  </section>
+
+  <section id="design" aria-labelledby="design-h">
+    <div class="wrap">
+      <h2 id="design-h">Will it fight your design?</h2>
+      <p class="section-lede">We classified all 885 findings the engine raised across an 88-site benchmark by their effect on the page's default appearance.</p>
+      <div class="stats">
+        <div class="stat"><span class="n">79%</span> <span class="d">change zero pixels — alt text, accessible names, label associations, heading levels, page language, structured data</span></div>
+        <div class="stat"><span class="n">11%</span> <span class="d">appear only in a state the user chose — keyboard focus, a narrow window, reduced motion</span></div>
+        <div class="stat"><span class="n">10%</span> <span class="d">change link wording or a CAPTCHA mechanism — copy decisions, not visual style</span></div>
+      </div>
+      <p>Most accessibility debt is invisible to people it doesn't block. Fixing it doesn't touch your aesthetic — and this page is the demonstration: it is styled freely, audited by the engine it advertises, and the report is one click away.</p>
+      <p><span class="badge">This page scores 100/100 (static tier, 35% of scoring weight measured) — read its audit below</span></p>
+    </div>
+  </section>
+
+  <section id="reports" aria-labelledby="reports-h">
+    <div class="wrap">
+      <h2 id="reports-h">See the reports</h2>
+      <p class="section-lede">Two live sample reports — one clean, one deliberately broken — plus the raw benchmark data for the skeptical. Scores here are static-tier results; every report states its measured coverage right beside the score.</p>
+      <div class="gallery">
+        <div class="shot">
+          <span class="score pass">100 · passes</span>
+          <h3>This page, audited</h3>
+          <p>What a clean report looks like: category rings, coverage, and the honesty banner above the score.</p>
+          <a href="reports/landing-self-audit.html">Open the self-audit report</a>
+        </div>
+        <div class="shot">
+          <span class="score fail">9 · fails</span>
+          <h3>A deliberately broken page</h3>
+          <p>The same report on a fixture riddled with violations — 17 findings, a stack of criticals, and the fail band in action.</p>
+          <a href="reports/broken-fixture.html">Open the broken-fixture report</a>
+        </div>
+        <div class="shot">
+          <span class="score">Raw data</span>
+          <h3>The validation studies</h3>
+          <p>An 87-site paired benchmark, a 20-site ground-truth study, and a CJK fairness measurement — committed, versioned, reproducible.</p>
+          <a href="https://github.com/chiehweihuang/beacon/tree/master/benchmark">Browse the benchmark directory</a>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section id="install" aria-labelledby="install-h">
+    <div class="wrap">
+      <h2 id="install-h">Install</h2>
+      <p class="section-lede">One command inside Claude Code, after registering the marketplace.</p>
+<pre><code>/plugin install beacon@beacon</code></pre>
+      <p>Add the marketplace to your Claude Code config first:</p>
+<pre><code>"extraKnownMarketplaces": {
+  "beacon": {
+    "source": { "source": "github", "repo": "chiehweihuang/beacon" }
+  }
+}</code></pre>
+      <p>Using Codex instead? The same engine ships as a Codex adapter — see <a href="https://github.com/chiehweihuang/beacon/blob/master/ADAPTERS.md">ADAPTERS.md</a>.</p>
+    </div>
+  </section>
+
+</main>
+
+<footer class="site">
+  <div class="wrap">
+    <span>MIT · v3.0.0</span>
+    <a href="https://github.com/chiehweihuang/beacon">github.com/chiehweihuang/beacon</a>
+    <a href="https://github.com/chiehweihuang/beacon/blob/master/VALIDATION.md">Validation charter</a>
+    <span>Built, styled, and audited with itself.</span>
+  </div>
+</footer>
+
+</body>
+</html>

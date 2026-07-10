@@ -1,0 +1,203 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Beacon——給 AI 編碼代理的無障礙＋答案引擎檢測</title>
+<meta name="description" content="Beacon 是 Claude Code 與 Codex 的檢測插件：依 WCAG 2.2 為網頁無障礙與答案引擎就緒度打分，每條問題都錨定到確切的原始碼，評分背後的驗證資料全部公開。">
+<link rel="canonical" href="https://chiehweihuang.github.io/beacon/zh-Hant.html">
+<link rel="alternate" hreflang="en" href="https://chiehweihuang.github.io/beacon/">
+<link rel="alternate" hreflang="zh-Hant" href="https://chiehweihuang.github.io/beacon/zh-Hant.html">
+<link rel="stylesheet" href="style.css">
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "SoftwareApplication",
+  "name": "Beacon",
+  "applicationCategory": "DeveloperApplication",
+  "operatingSystem": "Windows, macOS, Linux",
+  "softwareVersion": "3.0.0",
+  "inLanguage": "zh-Hant",
+  "description": "給 AI 編碼代理（Claude Code、Codex）的無障礙（WCAG 2.2）與答案引擎最佳化檢測插件，評分經基準驗證。",
+  "license": "https://opensource.org/licenses/MIT",
+  "url": "https://chiehweihuang.github.io/beacon/zh-Hant.html",
+  "downloadUrl": "https://github.com/chiehweihuang/beacon"
+}
+</script>
+</head>
+<body>
+<a class="skip-link" href="#main">跳到主要內容</a>
+
+<header class="site">
+  <div class="wrap">
+    <a class="brand" href="zh-Hant.html">
+      <svg width="22" height="22" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M12 2 3 21h18L12 2Zm0 5.2 5.4 11.3H6.6L12 7.2Z" fill="currentColor"/></svg>
+      Beacon
+    </a>
+    <nav class="site-nav" aria-label="主導覽">
+      <ul>
+        <li><a href="#commands">它做什麼</a></li>
+        <li><a href="#evidence">證據</a></li>
+        <li><a href="#reports">報告</a></li>
+        <li><a href="#install">安裝</a></li>
+        <li><a href="https://github.com/chiehweihuang/beacon">GitHub</a></li>
+      </ul>
+    </nav>
+    <div class="lang-switch">
+      <a href="./" lang="en" hreflang="en">English</a>
+    </div>
+  </div>
+</header>
+
+<main id="main">
+
+  <section class="hero" aria-labelledby="hero-h">
+    <div class="wrap">
+      <h1 id="hero-h">做出每個人都能用的介面，而且拿得出證明。</h1>
+      <p class="lede">Beacon 是給 AI 編碼代理（Claude Code、Codex）的無障礙（accessibility）＋答案引擎最佳化（AEO，讓 AI 搜尋引擎能正確讀懂並引用你的內容）檢測插件。它把頁面按十個類別打 0 到 100 分，每條問題都錨定到造成它的確切原始碼，評分方法背後的基準資料全部公開在版本庫裡。</p>
+      <p class="honesty">高分的意思是：自動化檢查在現有證據裡找到的問題較少。它是分診信號，不是合規證書，更不能取代與身心障礙使用者的實際測試。</p>
+      <div class="cta-row">
+        <a class="btn btn-primary" href="#install">開始使用</a>
+        <a class="btn btn-ghost" href="reports/landing-self-audit.html">看本頁自己的檢測報告</a>
+      </div>
+    </div>
+  </section>
+
+  <section id="commands" aria-labelledby="commands-h">
+    <div class="wrap">
+      <h2 id="commands-h">一個插件，三個時機</h2>
+      <p class="section-lede">無障礙在寫程式之前處理最便宜，上線之後處理最貴。Beacon 在三個時間點都接得上。</p>
+      <div class="cards">
+        <div class="card">
+          <span class="when">動工之前</span>
+          <h3><code>beacon:guide</code></h3>
+          <p>無障礙設計模式、對比安全的配色、字級與動態效果的預設值，還有取捨建議——在介面還是草圖的時候就給。</p>
+        </div>
+        <div class="card">
+          <span class="when">寫碼當下</span>
+          <h3><code>beacon:advisor</code></h3>
+          <p>掛鉤（hook）即時審每一次介面修改，把該檔案的具體檢查清單直接交給代理。</p>
+        </div>
+        <div class="card">
+          <span class="when">寫完之後</span>
+          <h3><code>beacon:inspect</code></h3>
+          <p>Lighthouse 風格的 0 到 100 分報告：修法錨定到原始碼、六個司法管轄區的法規脈絡、跨次執行的前後對照。</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section id="evidence" aria-labelledby="evidence-h">
+    <div class="wrap">
+      <h2 id="evidence-h">數字自帶收據</h2>
+      <p class="section-lede">多數工具要你信它的分數。Beacon 把驗證章程與量測資料放在版本庫裡，下面每一個主張都可以從一份 checkout 重跑出來。</p>
+
+      <div class="table-wrap" role="region" aria-label="精度與召回率量測" tabindex="0">
+        <table>
+          <caption>20 站證據錨定的人工驗證清單，10 個結構性 WCAG 類別（2026 年 7 月）</caption>
+          <thead>
+            <tr>
+              <th scope="col">量測項</th>
+              <th scope="col">Beacon 3.0</th>
+              <th scope="col">Lighthouse</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <th scope="row">精度（precision）</th>
+              <td class="win">0.979</td>
+              <td>0.811</td>
+            </tr>
+            <tr>
+              <th scope="row">召回率（recall）——問題模式</th>
+              <td class="win">0.712</td>
+              <td>0.462</td>
+            </tr>
+            <tr>
+              <th scope="row">召回率——逐實例</th>
+              <td class="win">0.826</td>
+              <td>0.225</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="stats">
+        <div class="stat"><span class="n">±1 分</span> <span class="d">實測的分數不確定度——同一台機器隔數日重測（13 站重抓的 95 百分位）</span></div>
+        <div class="stat"><span class="n">覆蓋率</span> <span class="d">每個分數都標明實際量到了多少；沒有證據的類別回報狀態，永遠不是數字</span></div>
+        <div class="stat"><span class="n">封頂 49</span> <span class="d">確認存在癲癇發作風險（WCAG 2.3.1）時，不管其他類別多好，總分直接封頂</span></div>
+      </div>
+
+      <p class="footnote">Lighthouse 是併行參照，不是標準答案；召回率相對於機器可檢的候選池。方法、判定規則、對抗式覆核與原始清單：<a href="https://github.com/chiehweihuang/beacon/blob/master/VALIDATION.md">VALIDATION.md</a>、<a href="https://github.com/chiehweihuang/beacon/tree/master/benchmark">benchmark/</a>。</p>
+    </div>
+  </section>
+
+  <section id="design" aria-labelledby="design-h">
+    <div class="wrap">
+      <h2 id="design-h">它會不會跟你的設計美感打架？</h2>
+      <p class="section-lede">我們把引擎在 88 站基準上抓出的全部 885 條問題，按「修復後對頁面預設外觀的影響」分了類。</p>
+      <div class="stats">
+        <div class="stat"><span class="n">79%</span> <span class="d">修完零像素變化——替代文字、無障礙名稱、標籤關聯、標題層級、頁面語言、結構化資料</span></div>
+        <div class="stat"><span class="n">11%</span> <span class="d">只在使用者自己選擇的狀態下出現——鍵盤焦點、縮窄視窗、減少動態</span></div>
+        <div class="stat"><span class="n">10%</span> <span class="d">改的是連結措辭或驗證機制——文案決定，不是視覺風格</span></div>
+      </div>
+      <p>大部分的無障礙欠債，對沒被它擋住的人是隱形的。修掉它不會動到你的美感——本頁就是示範：想怎麼設計就怎麼設計，然後用它宣傳的引擎檢測自己，報告一鍵可查。</p>
+      <p><span class="badge">本頁 100／100 分（靜態層，量測到 35% 評分權重）——報告在下方</span></p>
+    </div>
+  </section>
+
+  <section id="reports" aria-labelledby="reports-h">
+    <div class="wrap">
+      <h2 id="reports-h">直接看報告</h2>
+      <p class="section-lede">兩份現場示範報告——一份乾淨、一份故意弄壞——加上給懷疑者的原始基準資料。此處分數為靜態層結果；每份報告的分數旁都標明實際量測的覆蓋率。</p>
+      <div class="gallery">
+        <div class="shot">
+          <span class="score pass">100 分 · 通過</span>
+          <h3>本頁的檢測報告</h3>
+          <p>乾淨的報告長這樣：類別分數環、覆蓋率、分數上方的誠實聲明。</p>
+          <a href="reports/landing-self-audit.html">打開自我檢測報告</a>
+        </div>
+        <div class="shot">
+          <span class="score fail">9 分 · 不通過</span>
+          <h3>一頁故意弄壞的網頁</h3>
+          <p>同一套報告跑在塞滿違規的測試頁上——17 條問題、成串的嚴重級違規、不及格分數帶實際的樣子。</p>
+          <a href="reports/broken-fixture.html">打開壞頁示範報告</a>
+        </div>
+        <div class="shot">
+          <span class="score">原始資料</span>
+          <h3>驗證研究</h3>
+          <p>87 站配對基準、20 站人工驗證清單、CJK 公平性量測——全部提交入庫、有版本、可重跑。</p>
+          <a href="https://github.com/chiehweihuang/beacon/tree/master/benchmark">瀏覽 benchmark 目錄</a>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section id="install" aria-labelledby="install-h">
+    <div class="wrap">
+      <h2 id="install-h">安裝</h2>
+      <p class="section-lede">先註冊插件市集，之後在 Claude Code 裡一行指令。</p>
+<pre><code>/plugin install beacon@beacon</code></pre>
+      <p>先把市集加進 Claude Code 設定：</p>
+<pre><code>"extraKnownMarketplaces": {
+  "beacon": {
+    "source": { "source": "github", "repo": "chiehweihuang/beacon" }
+  }
+}</code></pre>
+      <p>用 Codex？同一顆引擎有 Codex 轉接器——見 <a href="https://github.com/chiehweihuang/beacon/blob/master/ADAPTERS.md">ADAPTERS.md</a>。</p>
+    </div>
+  </section>
+
+</main>
+
+<footer class="site">
+  <div class="wrap">
+    <span>MIT · v3.0.0</span>
+    <a href="https://github.com/chiehweihuang/beacon">github.com/chiehweihuang/beacon</a>
+    <a href="https://github.com/chiehweihuang/beacon/blob/master/VALIDATION.md">驗證章程</a>
+    <span>用自己的藥，治自己的頁。</span>
+  </div>
+</footer>
+
+</body>
+</html>

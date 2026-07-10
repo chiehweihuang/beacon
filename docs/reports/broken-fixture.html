@@ -1,0 +1,2252 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Accessibility Audit Report — beacon-golden-fixture</title>
+<style>
+  /* Beacon Eval Design System v0.1 token mapping. Light is the default; auto mode can follow OS preference. */
+  :root {
+    --bg: #ffffff;
+    --surface: #ffffff;
+    --surface-2: #f1f5f9;
+    --text: #0f172a;
+    --text-muted: #475569;
+    --text-soft: #64748b;
+    --border: #cbd5e1;
+    --border-soft: #e2e8f0;
+    --accent: #1a5cb0;
+    --accent-hover: #0e3d7a;
+    --accent-bg: #eff6ff;
+    --accent-text: #ffffff;
+    --pass: #15803d;
+    --pass-bg: #dcfce7;
+    --warn: #92400e;
+    --warn-bg: #fef3c7;
+    --mid: #d97706;
+    --fail: #b91c1c;
+    --fail-bg: #fee2e2;
+    --tip: #1a5cb0;
+    --tip-bg: #eff6ff;
+    --info: #334155;
+    --info-bg: #f1f5f9;
+    --info-border: #1a5cb0;
+    --font: 'Inter', 'Noto Sans TC', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    --font-mono: 'JetBrains Mono', 'Cascadia Code', Consolas, monospace;
+    --shadow: 0 1px 3px rgba(0,0,0,0.08), 0 1px 2px rgba(0,0,0,0.04);
+    color-scheme: light;
+  }
+
+  /* Respect OS preference in auto mode. */
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --bg: #111116;
+      --surface: #1e1e28;
+      --surface-2: #1c1c24;
+      --text: #ededf0;
+      --text-muted: #b8b8c0;
+      --text-soft: #88889a;
+      --border: #38383f;
+      --border-soft: #2a2a32;
+      --accent: #6aadff;
+      --accent-hover: #9eceff;
+      --accent-bg: #1a2e45;
+      --accent-text: #0a0a10;
+      --pass: #7ee89a;
+      --pass-bg: #0e2e16;
+      --warn: #ffd97d;
+      --warn-bg: #2a1f00;
+      --fail: #ff8a8a;
+      --fail-bg: #2e0e0e;
+      --tip: #6aadff;
+      --tip-bg: #1a2e45;
+      --info: #ffd97d;
+      --info-bg: #2a200a;
+      --info-border: #ffd97d;
+      --shadow: 0 1px 3px rgba(0,0,0,0.5), 0 1px 2px rgba(0,0,0,0.3);
+      color-scheme: dark;
+    }
+  }
+
+  /* User-explicit override via toolbar button (wins over media query) */
+  :root[data-theme="light"] {
+    --bg: #ffffff;
+    --surface: #ffffff;
+    --surface-2: #f1f5f9;
+    --text: #0f172a;
+    --text-muted: #475569;
+    --text-soft: #64748b;
+    --border: #cbd5e1;
+    --border-soft: #e2e8f0;
+    --accent: #1a5cb0;
+    --accent-hover: #0e3d7a;
+    --accent-bg: #eff6ff;
+    --accent-text: #ffffff;
+    --pass: #15803d;
+    --pass-bg: #dcfce7;
+    --warn: #92400e;
+    --warn-bg: #fef3c7;
+    --mid: #d97706;
+    --fail: #b91c1c;
+    --fail-bg: #fee2e2;
+    --tip: #1a5cb0;
+    --tip-bg: #eff6ff;
+    --info: #334155;
+    --info-bg: #f1f5f9;
+    --info-border: #1a5cb0;
+    --shadow: 0 1px 3px rgba(0,0,0,0.08), 0 1px 2px rgba(0,0,0,0.04);
+    color-scheme: light;
+  }
+  :root[data-theme="dark"] {
+    --bg: #0f172a;
+    --surface: #1e293b;
+    --surface-2: #182338;
+    --text: #e8edf4;
+    --text-muted: #b8c2d0;
+    --text-soft: #8b97a8;
+    --border: #334155;
+    --border-soft: #273449;
+    --accent: #6aadff;
+    --accent-hover: #9eceff;
+    --accent-bg: #1a2e45;
+    --accent-text: #0a0a10;
+    --pass: #5ee08a;
+    --pass-bg: #0f2e1c;
+    --warn: #fcd34d;
+    --warn-bg: #2b2410;
+    --mid: #fbbf24;
+    --fail: #ff8a8a;
+    --fail-bg: #2e1414;
+    --tip: #6aadff;
+    --tip-bg: #1a2e45;
+    --info: #93c5fd;
+    --info-bg: #16263f;
+    --info-border: #6aadff;
+    --shadow: 0 1px 3px rgba(0,0,0,0.5), 0 1px 2px rgba(0,0,0,0.3);
+    color-scheme: dark;
+  }
+
+  /* Language switching: hide inactive language. Default ZH; switched by toolbar. */
+  body[data-active-lang="zh"] .lang-en,
+  body:not([data-active-lang]) .lang-en { display: none; }
+  body[data-active-lang="en"] .lang-zh { display: none; }
+
+  /* Report toolbar (lang + theme switch) */
+  .report-toolbar {
+    position: sticky;
+    top: 0;
+    z-index: 50;
+    display: flex;
+    gap: 0.5rem;
+    justify-content: flex-end;
+    padding: 0.5rem 0;
+    margin: -2rem -2rem 1rem;
+    padding: 0.6rem 2rem;
+    background: var(--bg);
+    border-bottom: 1px solid var(--border);
+    backdrop-filter: blur(8px);
+  }
+  .toolbar-group {
+    display: inline-flex;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 2px;
+    box-shadow: var(--shadow);
+  }
+  .toolbar-group button {
+    background: transparent;
+    border: 0;
+    color: var(--text-muted);
+    padding: 6px 12px;
+    border-radius: 6px;
+    font: inherit;
+    font-size: 0.85rem;
+    cursor: pointer;
+    line-height: 1.2;
+    transition: background 0.15s, color 0.15s;
+  }
+  .toolbar-group button:hover { color: var(--text); }
+  .toolbar-group button[aria-pressed="true"] {
+    background: var(--accent);
+    color: var(--accent-text);
+  }
+  .toolbar-group button:focus-visible {
+    outline: 2px solid var(--accent);
+    outline-offset: 2px;
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    font-family: var(--font);
+    font-size: clamp(1rem, 0.95rem + 0.3vw, 1.125rem);
+    background: var(--bg);
+    color: var(--text);
+    line-height: 1.6;
+    padding: 2rem;
+    max-width: 1200px;
+    margin: 0 auto;
+    -webkit-font-smoothing: antialiased;
+  }
+  h1 { font-size: clamp(1.6rem, 1.3rem + 1.5vw, 2.2rem); margin-bottom: 0.5rem; }
+  h2 { font-size: clamp(1.25rem, 1.1rem + 0.8vw, 1.5rem); margin: 2rem 0 1rem; border-bottom: 1px solid var(--border); padding-bottom: 0.5rem; }
+  h3 { font-size: clamp(1.05rem, 1rem + 0.3vw, 1.2rem); margin: 1.5rem 0 0.5rem; }
+  .meta { color: var(--text-muted); font-size: 0.9rem; margin-bottom: 2rem; }
+  .meta span { margin-right: 1.5rem; }
+
+  /* Score Ring */
+  .score-ring-container {
+    display: flex;
+    gap: 2rem;
+    flex-wrap: wrap;
+    margin: 1.5rem 0;
+  }
+  .score-ring {
+    text-align: center;
+    min-width: 120px;
+  }
+  .score-ring svg { width: 100px; height: 100px; }
+  .score-ring .ring-bg { fill: none; stroke: var(--border); stroke-width: 8; }
+  .score-ring .ring-fg { fill: none; stroke-width: 8; stroke-linecap: round;
+    transform: rotate(-90deg); transform-origin: 50% 50%;
+    transition: stroke-dashoffset 1s ease; }
+  .score-ring .ring-text { font-size: 22px; font-weight: 700; fill: var(--text); }
+  .score-ring .ring-label { font-size: 0.8rem; color: var(--text-muted); margin-top: 0.3rem; }
+  .score-ring .ring-prev { font-size: 0.75rem; color: var(--text-muted); }
+
+  /* Summary Table */
+  .summary-table { width: 100%; border-collapse: collapse; margin: 1rem 0; }
+  .summary-table th { text-align: left; padding: 0.6rem; border-bottom: 2px solid var(--border);
+    color: var(--text-muted); font-size: 0.85rem; text-transform: uppercase; letter-spacing: 0.05em; }
+  .summary-table td { padding: 0.6rem; border-bottom: 1px solid var(--border); }
+  .summary-table .num { text-align: center; font-variant-numeric: tabular-nums; }
+  .category-cell { display: grid; gap: 0.25rem; }
+  .category-desc { color: var(--text-muted); font-size: 0.8rem; line-height: 1.45; max-width: 48rem; }
+  .summary-table .pass { color: var(--pass); }
+  .summary-table .fail { color: var(--fail); }
+  .category-row { cursor: pointer; }
+  .category-row:hover { background: var(--surface-2); }
+
+  .score-bar { height: 20px; background: var(--surface-2); border-radius: 10px; position: relative; overflow: hidden; min-width: 100px; }
+  .score-fill { height: 100%; border-radius: 10px; transition: width 0.8s ease; }
+  .score-text { position: absolute; right: 6px; top: 2px; line-height: 16px; font-size: 0.75rem; font-weight: 600; color: var(--text); background: var(--surface); padding: 0 4px; border-radius: 6px; }
+  .prev-score { font-size: 0.7rem; color: var(--text-muted); margin-top: 2px; }
+
+  .delta { font-size: 0.75rem; margin-left: 4px; }
+  .delta.positive { color: var(--pass); }
+  .delta.negative { color: var(--fail); }
+  .delta.neutral { color: var(--text-muted); }
+
+  /* Findings */
+  .finding { background: var(--surface); border-radius: 8px; margin: 0.8rem 0; padding: 1rem;
+    border-left: 4px solid var(--border); }
+  .finding.critical { border-left-color: var(--fail); }
+  .finding.warning { border-left-color: var(--warn); }
+  .finding.tip { border-left-color: var(--tip); }
+  .finding-header { display: flex; gap: 0.5rem; align-items: center; flex-wrap: wrap; }
+  .severity-icon { font-size: 1.1rem; }
+  .wcag-tag, .level-tag { font-size: 0.75rem; padding: 2px 6px; border-radius: 4px;
+    background: var(--surface-2); color: var(--accent); }
+  .finding-body { margin-top: 0.8rem; font-size: 0.9rem; }
+  .finding-body p { margin: 0.3rem 0; }
+  .fix { background: var(--pass-bg); padding: 0.5rem; border-radius: 4px; margin-top: 0.5rem; }
+  .legal { background: var(--fail-bg); padding: 0.5rem; border-radius: 4px; margin-top: 0.5rem; }
+  .learn-more { display: flex; gap: 0.5rem; flex-wrap: wrap; align-items: center; }
+  .learn-more a,
+  .axe-outcome-list a {
+    color: var(--accent);
+    text-decoration: underline;
+    text-underline-offset: 2px;
+  }
+  .affected-elements {
+    margin: 0.8rem 0;
+    padding: 0.8rem;
+    background: var(--surface-2);
+    border-radius: 6px;
+  }
+  .affected-elements h4 {
+    margin: 0 0 0.6rem;
+    color: var(--text);
+    font-size: 0.95rem;
+  }
+  .affected-elements .count { color: var(--text-muted); font-weight: 500; }
+  .affected-elements ol { margin-left: 1.2rem; }
+  .affected-elements li { margin: 0.8rem 0; }
+  .dom-snippet pre,
+  .node-reason pre {
+    margin-top: 0.3rem;
+    padding: 0.55rem;
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    background: var(--bg);
+    color: var(--text);
+    overflow-x: auto;
+    white-space: pre-wrap;
+    font-family: var(--font-mono);
+    font-size: 0.78rem;
+  }
+
+  .code-compare { display: grid; grid-template-columns: 1fr 1fr; gap: 0.5rem; margin-top: 0.5rem; }
+  .code-label { font-size: 0.75rem; color: var(--text-muted); margin-bottom: 0.2rem; text-transform: uppercase; }
+  .code-before pre, .code-after pre { background: var(--bg); padding: 0.5rem; border-radius: 4px;
+    overflow-x: auto; font-size: 0.8rem; font-family: var(--font-mono); }
+  .code-before pre { border: 1px solid var(--fail); }
+  .code-after pre { border: 1px solid var(--pass); }
+
+  /* Jurisdiction context */
+  .risk-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 1rem; margin: 1rem 0; }
+  .risk-card { background: var(--surface); padding: 1rem; border-radius: 8px; border-left: 4px solid var(--accent); }
+  .risk-header { display: flex; justify-content: space-between; align-items: center; }
+  .risk-badge { color: white; padding: 2px 8px; border-radius: 4px; font-size: 0.75rem; font-weight: 600; }
+  .context-badge { color: var(--accent); background: var(--accent-bg); padding: 2px 8px; border-radius: 4px; font-size: 0.75rem; font-weight: 700; }
+  .deadline { color: var(--warn); font-weight: 600; }
+  .risk-score { font-variant-numeric: tabular-nums; }
+  .overall-risk { text-align: center; padding: 0.8rem; border-radius: 8px; color: white;
+    font-size: 1.1rem; font-weight: 700; }
+  .risk-summary { margin-top: 1rem; }
+  .legal-context-note {
+    background: var(--info-bg);
+    border: 1px solid var(--info-border);
+    border-left: 6px solid var(--info-border);
+    border-radius: 8px;
+    padding: 0.9rem 1rem;
+    margin: 0.8rem 0 1rem;
+  }
+  .criteria-map {
+    color: var(--text-muted);
+    font-size: 0.86rem;
+  }
+
+  /* Tabs */
+  .tabs {
+    display: flex;
+    gap: 0;
+    border-bottom: 2px solid var(--border);
+    margin: 2rem 0 1rem;
+    flex-wrap: wrap;
+  }
+  .tab {
+    appearance: none;
+    background: transparent;
+    border: 0;
+    font: inherit;
+    text-align: left;
+    padding: 0.65rem 1.2rem;
+    cursor: pointer;
+    color: var(--text-muted);
+    border-bottom: 2px solid transparent;
+    margin-bottom: -2px;
+    border-radius: 6px 6px 0 0;
+    position: relative;
+    user-select: none;
+    transition:
+      color 0.18s ease,
+      background-color 0.18s ease,
+      transform 0.18s ease,
+      box-shadow 0.18s ease;
+  }
+  /* Animated underline that grows from center on hover */
+  .tab::after {
+    content: '';
+    position: absolute;
+    left: 50%;
+    right: 50%;
+    bottom: -2px;
+    height: 2px;
+    background: var(--accent);
+    opacity: 0;
+    transition: left 0.22s ease, right 0.22s ease, opacity 0.18s ease;
+    pointer-events: none;
+    border-radius: 2px;
+  }
+  .tab:hover {
+    color: var(--text);
+    background-color: var(--surface-2);
+    transform: translateY(-1px);
+    box-shadow: inset 0 0 0 1.5px var(--accent);
+  }
+  .tab:hover::after {
+    left: 12%;
+    right: 12%;
+    opacity: 0.55;
+  }
+  .tab:focus-visible {
+    outline: 2px solid var(--accent);
+    outline-offset: -2px;
+  }
+  .tab.active {
+    color: var(--accent);
+    border-bottom-color: var(--accent);
+    background-color: transparent;
+    transform: none;
+    box-shadow: none;
+    font-weight: 600;
+  }
+  .tab.active::after {
+    left: 0;
+    right: 0;
+    opacity: 1;
+  }
+  /* Respect users with motion sensitivity (our own report's a11y dog-food) */
+  @media (prefers-reduced-motion: reduce) {
+    .tab, .tab::after { transition: color 0.01s; }
+    .tab:hover { transform: none; }
+  }
+  .tab-content { display: none; }
+  .tab-content.active { display: block; }
+
+  /* Remediation */
+  .priority-section { margin: 1rem 0; }
+  .priority-tag { display: inline-block; padding: 2px 8px; border-radius: 4px;
+    font-size: 0.75rem; font-weight: 600; color: white; }
+  .priority-tag.p0 { background: var(--fail); }
+  .priority-tag.p1 { background: var(--warn); }
+  .priority-tag.p2 { background: var(--tip); }
+  .remediation-item { display: flex; gap: 0.5rem; align-items: baseline; padding: 0.3rem 0; }
+  .effort-tag { font-size: 0.75rem; color: var(--text-muted); }
+
+  .empty { color: var(--text-muted); font-style: italic; }
+
+  /* Category detail sections */
+  .category-detail { display: none; margin: 1rem 0 2rem; padding: 1rem;
+    background: var(--surface); border-radius: 8px; }
+  .category-detail.open { display: block; }
+
+  @media (max-width: 720px) {
+    body { padding: 1rem; }
+    .report-toolbar {
+      margin: -1rem -1rem 1rem;
+      padding: 0.5rem 1rem;
+      justify-content: flex-start;
+      flex-wrap: wrap;
+    }
+    .comparison-banner,
+    .score-ring-container {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 0.8rem;
+    }
+    .summary-table {
+      display: block;
+      overflow-x: auto;
+      white-space: nowrap;
+    }
+    .code-compare {
+      grid-template-columns: 1fr;
+    }
+    .axe-outcome-list li {
+      display: block;
+    }
+    .rule-id,
+    .rule-criteria {
+      display: block;
+      margin-top: 0.15rem;
+    }
+  }
+
+  /* Print */
+  @media print {
+    body { background: white; color: #333; }
+    .score-ring .ring-text { fill: #333; }
+    .finding { break-inside: avoid; }
+  }
+
+  /* Comparison banner */
+  .comparison-banner {
+    background: var(--surface-2);
+    border: 1px solid var(--accent);
+    border-radius: 8px;
+    padding: 1rem;
+    margin: 1rem 0;
+    display: flex;
+    justify-content: space-around;
+    text-align: center;
+  }
+  .comparison-stat { }
+  .comparison-stat .value { font-size: 1.5rem; font-weight: 700; }
+  .comparison-stat .label { font-size: 0.8rem; color: var(--text-muted); }
+
+  /* Life-safety gate banner (rendered only when summary.life_safety_flag) */
+  .life-safety-banner {
+    background: var(--surface-2);
+    border: 2px solid var(--fail);
+    border-left: 8px solid var(--fail);
+    border-radius: 8px;
+    padding: 1.1rem 1.3rem;
+    margin: 1.5rem 0;
+    font-size: 0.95rem;
+    line-height: 1.7;
+  }
+  .life-safety-banner .banner-title { font-size: 1.1rem; font-weight: 700; color: var(--fail); }
+
+  /* Category state badge (score column when no machine evidence exists) */
+  .state-badge {
+    display: inline-block;
+    padding: 0.15rem 0.55rem;
+    border: 1px solid var(--text-muted);
+    border-radius: 999px;
+    font-size: 0.78rem;
+    color: var(--text-muted);
+    white-space: nowrap;
+  }
+  .coverage-line { text-align: center; color: var(--text-muted); margin: 0.25rem 0 1rem; font-size: 0.9rem; }
+
+  /* Audit context banner (epistemic warning, always visible) */
+  .audit-context-banner {
+    background: var(--info-bg);
+    border: 1px solid var(--info-border);
+    border-left: 6px solid var(--info-border);
+    border-radius: 8px;
+    padding: 1.1rem 1.3rem;
+    margin: 1.5rem 0;
+    font-size: 0.92rem;
+    line-height: 1.7;
+  }
+  .audit-context-banner .banner-title {
+    font-size: 1.05rem;
+    font-weight: 700;
+    color: var(--info);
+    margin-bottom: 0.5rem;
+    letter-spacing: 0.01em;
+  }
+  .audit-context-banner p { margin-bottom: 0.5rem; }
+  .audit-context-banner p:last-child { margin-bottom: 0; }
+  .audit-context-banner .banner-cta {
+    color: var(--text-muted);
+    font-size: 0.88rem;
+    border-top: 1px dashed var(--info-border);
+    padding-top: 0.5rem;
+    margin-top: 0.5rem;
+  }
+  .audit-context-banner strong { color: var(--text); }
+  .audit-context-banner em { font-style: italic; color: var(--info); }
+
+  /* AEO sub-score disclaimer — scoped to the Agent/AEO category detail */
+  .aeo-disclaimer {
+    background: var(--accent-bg);
+    border: 1px solid var(--accent);
+    border-left: 6px solid var(--accent);
+    border-radius: 8px;
+    padding: 0.9rem 1.1rem;
+    margin: 0 0 1rem;
+    font-size: 0.88rem;
+    line-height: 1.65;
+  }
+  .aeo-disclaimer-title {
+    font-size: 0.98rem;
+    font-weight: 700;
+    color: var(--accent);
+    margin-bottom: 0.4rem;
+  }
+  .aeo-disclaimer p { margin-bottom: 0.45rem; }
+  .aeo-disclaimer p:last-child { margin-bottom: 0; }
+  .aeo-disclaimer-cta {
+    color: var(--text-muted);
+    font-size: 0.84rem;
+    border-top: 1px dashed rgba(79,195,247,0.3);
+    padding-top: 0.45rem;
+    margin-top: 0.45rem;
+  }
+  .aeo-disclaimer strong { color: var(--text); }
+
+  /* Methodology & Limits tab */
+  .methodology-panel { font-size: 0.92rem; line-height: 1.7; }
+  .methodology-panel h2 { margin-top: 0; }
+  .methodology-panel h3 {
+    margin-top: 1.8rem;
+    color: var(--accent);
+    border-bottom: 1px solid var(--border);
+    padding-bottom: 0.3rem;
+  }
+  .methodology-panel .meta-note {
+    color: var(--text-muted);
+    font-size: 0.85rem;
+    background: var(--surface);
+    padding: 0.5rem 0.8rem;
+    border-radius: 6px;
+    margin: 0.5rem 0 1rem;
+  }
+  .methodology-panel .section-intro {
+    color: var(--text-muted);
+    font-size: 0.88rem;
+    margin: 0.3rem 0 0.6rem;
+  }
+  .methodology-panel ul, .methodology-panel ol {
+    margin: 0.4rem 0 0.8rem 1.4rem;
+  }
+  .methodology-panel li { margin: 0.35rem 0; }
+  .methodology-panel code {
+    background: var(--surface-2);
+    padding: 1px 5px;
+    border-radius: 3px;
+    font-size: 0.85em;
+  }
+  .capability-list li::marker { color: var(--pass); }
+  .limitation-list li::marker { color: var(--warn); }
+  .workflow-list li::marker { color: var(--accent); font-weight: 700; }
+  .usage-list li::marker { color: var(--text-muted); }
+
+  .methods-details {
+    background: var(--surface);
+    border-radius: 6px;
+    padding: 0.6rem 0.9rem;
+    margin: 0.5rem 0 1rem;
+    border-left: 3px solid var(--accent);
+  }
+  .methods-details summary {
+    cursor: pointer;
+    color: var(--text-muted);
+    font-size: 0.9rem;
+  }
+  .methods-list {
+    margin-top: 0.5rem;
+    font-size: 0.85rem;
+    color: var(--text-muted);
+  }
+  .live-audit-note {
+    background: var(--warn-bg);
+    border: 1px solid var(--warn);
+    border-left: 6px solid var(--warn);
+    border-radius: 8px;
+    padding: 0.8rem 1rem;
+    margin: 0.8rem 0 1rem;
+    color: var(--text);
+  }
+  .manual-checks,
+  .axe-evidence {
+    margin: 1.2rem 0;
+  }
+  .manual-check-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+    gap: 0.8rem;
+    margin-top: 0.8rem;
+  }
+  .manual-check-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 0.9rem;
+  }
+  .manual-check-card h4 {
+    margin: 0.2rem 0 0.45rem;
+    font-size: 0.98rem;
+  }
+  .manual-check-card p {
+    margin: 0.35rem 0;
+    font-size: 0.86rem;
+  }
+  .manual-check-meta {
+    color: var(--text-soft);
+    font-size: 0.74rem;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+  }
+  .axe-outcome-list {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 0.65rem 0.85rem;
+    margin: 0.6rem 0;
+  }
+  .axe-outcome-list summary {
+    cursor: pointer;
+    font-weight: 700;
+    color: var(--text);
+  }
+  .axe-outcome-list ul {
+    margin-top: 0.6rem;
+  }
+  .axe-outcome-list li {
+    display: grid;
+    grid-template-columns: minmax(12rem, 1fr) auto auto;
+    gap: 0.5rem;
+    align-items: baseline;
+    padding: 0.45rem 0;
+    border-top: 1px solid var(--border-soft);
+  }
+  .rule-id,
+  .rule-criteria {
+    color: var(--text-muted);
+    font-size: 0.78rem;
+  }
+
+  .traps-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 0.8rem 0;
+    font-size: 0.9rem;
+  }
+  .traps-table th {
+    text-align: left;
+    padding: 0.6rem 0.8rem;
+    background: var(--surface-2);
+    color: var(--accent);
+    font-weight: 600;
+    border-bottom: 1px solid var(--border);
+  }
+  .traps-table td {
+    padding: 0.6rem 0.8rem;
+    border-bottom: 1px solid var(--border);
+    vertical-align: top;
+  }
+  .traps-table tr:hover td { background: rgba(255,255,255,0.02); }
+  .traps-table td:first-child {
+    color: var(--text-muted);
+    font-style: italic;
+    width: 38%;
+  }
+</style>
+</head>
+<body>
+
+<div class="report-toolbar" role="toolbar" aria-label="Report preferences">
+  <div class="toolbar-group" role="group" aria-label="Language / 語言">
+    <button type="button" data-lang-btn="zh" aria-pressed="true">中文</button>
+    <button type="button" data-lang-btn="en" aria-pressed="false">EN</button>
+  </div>
+  <div class="toolbar-group" role="group" aria-label="Theme / 主題">
+    <button type="button" data-theme-btn="light" aria-pressed="false" title="Light mode">&#9728;</button>
+    <button type="button" data-theme-btn="dark" aria-pressed="false" title="Dark mode">&#9790;</button>
+    <button type="button" data-theme-btn="auto" aria-pressed="true" title="Follow system / 跟隨系統">A</button>
+  </div>
+</div>
+
+<main id="main-content">
+<h1>Accessibility Audit Report</h1>
+<div class="meta">
+  <span><span class="lang-zh" lang="zh-Hant">日期</span><span class="lang-en" lang="en">Date</span>: 2026-07-10</span>
+  <span><span class="lang-zh" lang="zh-Hant">範圍</span><span class="lang-en" lang="en">Scope</span>: beacon-golden-fixture</span>
+  <span><span class="lang-zh" lang="zh-Hant">標準</span><span class="lang-en" lang="en">Standard</span>: WCAG 2.2 AA static baseline</span>
+  <span><span class="lang-zh" lang="zh-Hant">審查者</span><span class="lang-en" lang="en">Auditor</span>: Claude Code (a11y-audit)</span>
+</div>
+
+
+
+<!-- Audit context banner: always shown before scores, sets epistemic frame -->
+
+    <div class="audit-context-banner" role="note" aria-label="Audit limitations notice">
+      <div class="lang-zh" lang="zh-Hant">
+        <div class="banner-title">&#9888; 閱讀分數前的脈絡說明</div>
+        <p>
+          這是一份<strong>AI 輔助的自動化基線審查</strong>。依目前的業界資料（包含 axe-core 團隊自己的說明），自動化工具大約能涵蓋
+          <strong>30&ndash;40% 的 WCAG 項目</strong>。其餘 60&ndash;70%&mdash;例如認知負荷、真實螢幕閱讀器任務達成率、
+          動態互動品質、瀏覽器深色模式覆寫下的效能體驗、以及標籤文字是否<em>真的易懂</em>&mdash;
+          較適合透過<strong>與障礙使用者一同測試</strong>來確認，不能交給 AI 單獨判定。
+        </p>
+        <p class="banner-cta">
+          較高的分數，本身還不足以充分代表網站完全可達。可一併參閱 <strong>Methodology &amp; Limits</strong> 分頁，
+          了解本審查擅長與不擅長的範疇、以及建議的工作流程。Beacon 產生的 audit artifacts 會留在本機，除非你明確分享；detector 的進步來自維護者離線迭代與 plugin 更新。
+        </p>
+      </div>
+      <div class="lang-en" lang="en">
+        <div class="banner-title">&#9888; Context Before Reading the Score</div>
+        <p>
+          This is an <strong>AI-assisted automated baseline audit</strong>. Based on current industry data
+          (including statements from the axe-core team itself), automated tools cover roughly
+          <strong>30&ndash;40% of WCAG criteria</strong>. The remaining 60&ndash;70% &mdash; cognitive load,
+          real screen-reader task completion, dynamic interaction quality, performance experience
+          under user-agent dark-mode overrides, whether labels are actually <em>understandable</em>
+          &mdash; are better confirmed through <strong>testing alongside disabled users</strong>, not by AI alone.
+        </p>
+        <p class="banner-cta">
+          A high score, on its own, does not yet fully demonstrate accessibility. You can pair this
+          report with the <strong>Methodology &amp; Limits</strong> tab to see what this audit
+          is well-suited and less-suited for, plus the recommended workflow. Beacon keeps audit
+          artifacts local unless you explicitly share them; detector improvements come from
+          maintainer-run offline iteration and plugin updates.
+        </p>
+      </div>
+    </div>
+
+
+<!-- Score Rings (scored categories only — unscored ones carry a state, not a number) -->
+<div class="score-ring-container">
+  
+    <div class="score-ring">
+      <svg viewBox="0 0 100 100">
+        <circle class="ring-bg" cx="50" cy="50" r="40"/>
+        <circle class="ring-fg" cx="50" cy="50" r="40"
+          stroke="var(--fail)"
+          stroke-dasharray="251.32741228718345"
+          stroke-dashoffset="228.70794518133695"/>
+        <text class="ring-text" x="50" y="55" text-anchor="middle">9</text>
+      </svg>
+      <div class="ring-label"><span class="lang-zh" lang="zh-Hant">總分</span><span class="lang-en" lang="en">Overall</span></div>
+      
+    </div>
+  
+    <div class="score-ring">
+      <svg viewBox="0 0 100 100">
+        <circle class="ring-bg" cx="50" cy="50" r="40"/>
+        <circle class="ring-fg" cx="50" cy="50" r="40"
+          stroke="var(--fail)"
+          stroke-dasharray="251.32741228718345"
+          stroke-dashoffset="251.32741228718345"/>
+        <text class="ring-text" x="50" y="55" text-anchor="middle">0</text>
+      </svg>
+      <div class="ring-label"><span class="lang-zh" lang="zh-Hant">鍵盤導覽</span><span class="lang-en" lang="en">Keyboard Navigation</span></div>
+      
+    </div>
+    <div class="score-ring">
+      <svg viewBox="0 0 100 100">
+        <circle class="ring-bg" cx="50" cy="50" r="40"/>
+        <circle class="ring-fg" cx="50" cy="50" r="40"
+          stroke="var(--fail)"
+          stroke-dasharray="251.32741228718345"
+          stroke-dashoffset="251.32741228718345"/>
+        <text class="ring-text" x="50" y="55" text-anchor="middle">0</text>
+      </svg>
+      <div class="ring-label"><span class="lang-zh" lang="zh-Hant">螢幕閱讀器</span><span class="lang-en" lang="en">Screen Reader</span></div>
+      
+    </div>
+    <div class="score-ring">
+      <svg viewBox="0 0 100 100">
+        <circle class="ring-bg" cx="50" cy="50" r="40"/>
+        <circle class="ring-fg" cx="50" cy="50" r="40"
+          stroke="var(--fail)"
+          stroke-dasharray="251.32741228718345"
+          stroke-dashoffset="251.32741228718345"/>
+        <text class="ring-text" x="50" y="55" text-anchor="middle">0</text>
+      </svg>
+      <div class="ring-label"><span class="lang-zh" lang="zh-Hant">表單</span><span class="lang-en" lang="en">Forms</span></div>
+      
+    </div>
+    <div class="score-ring">
+      <svg viewBox="0 0 100 100">
+        <circle class="ring-bg" cx="50" cy="50" r="40"/>
+        <circle class="ring-fg" cx="50" cy="50" r="40"
+          stroke="var(--fail)"
+          stroke-dasharray="251.32741228718345"
+          stroke-dashoffset="138.2300767579509"/>
+        <text class="ring-text" x="50" y="55" text-anchor="middle">45</text>
+      </svg>
+      <div class="ring-label"><span class="lang-zh" lang="zh-Hant">響應式與回流</span><span class="lang-en" lang="en">Responsive & Reflow</span></div>
+      
+    </div>
+    <div class="score-ring">
+      <svg viewBox="0 0 100 100">
+        <circle class="ring-bg" cx="50" cy="50" r="40"/>
+        <circle class="ring-fg" cx="50" cy="50" r="40"
+          stroke="var(--fail)"
+          stroke-dasharray="251.32741228718345"
+          stroke-dashoffset="251.32741228718345"/>
+        <text class="ring-text" x="50" y="55" text-anchor="middle">0</text>
+      </svg>
+      <div class="ring-label"><span class="lang-zh" lang="zh-Hant">代理可操作性與 AEO</span><span class="lang-en" lang="en">Agent Operability & AEO</span></div>
+      
+    </div>
+</div>
+
+<p class="coverage-line"><span class="lang-zh" lang="zh-Hant">機測權重涵蓋</span><span class="lang-en" lang="en">Machine-measured weight coverage</span>: <strong>61%</strong> · <span class="lang-zh" lang="zh-Hant">其餘部分需人工或即時審查</span><span class="lang-en" lang="en">the rest needs human or live review</span></p>
+
+<!-- Verdict -->
+<div style="text-align:center;margin:1.5rem 0">
+  <span style="font-size:1.3rem;font-weight:700;color:var(--fail)">
+    <span class="lang-zh" lang="zh-Hant">建議優先檢視</span><span class="lang-en" lang="en">Priority review recommended</span>
+  </span>
+  <span style="color:var(--text-muted);margin-left:0.5rem">
+    17 <span class="lang-zh" lang="zh-Hant">個發現項目</span><span class="lang-en" lang="en">observations</span>
+    (13 <span class="lang-zh" lang="zh-Hant">影響較大</span><span class="lang-en" lang="en">higher priority</span>, 1 <span class="lang-zh" lang="zh-Hant">建議留意</span><span class="lang-en" lang="en">to note</span>, 3 <span class="lang-zh" lang="zh-Hant">參考建議</span><span class="lang-en" lang="en">suggestions</span>)
+  </span>
+</div>
+
+<!-- Tabs -->
+<div class="tabs" role="tablist" aria-label="Report sections">
+  <button type="button" role="tab" class="tab active" data-tab-btn="overview" aria-selected="true" aria-controls="tab-overview"><span class="lang-zh" lang="zh-Hant">總覽</span><span class="lang-en" lang="en">Overview</span></button>
+  <button type="button" role="tab" class="tab" data-tab-btn="findings" aria-selected="false" aria-controls="tab-findings"><span class="lang-zh" lang="zh-Hant">發現項</span><span class="lang-en" lang="en">Findings</span></button>
+  <button type="button" role="tab" class="tab" data-tab-btn="legal" aria-selected="false" aria-controls="tab-legal"><span class="lang-zh" lang="zh-Hant">法域脈絡</span><span class="lang-en" lang="en">Jurisdiction Context</span></button>
+  <button type="button" role="tab" class="tab" data-tab-btn="methodology" aria-selected="false" aria-controls="tab-methodology"><span class="lang-zh" lang="zh-Hant">方法論與限制</span><span class="lang-en" lang="en">Methodology & Limits</span></button>
+  <button type="button" role="tab" class="tab" data-tab-btn="remediation" aria-selected="false" aria-controls="tab-remediation"><span class="lang-zh" lang="zh-Hant">修復計畫</span><span class="lang-en" lang="en">Remediation</span></button>
+  
+</div>
+
+<!-- Overview Tab -->
+<div id="tab-overview" class="tab-content active" role="tabpanel">
+  <h2><span class="lang-zh" lang="zh-Hant">分類摘要</span><span class="lang-en" lang="en">Category Summary</span></h2>
+  <table class="summary-table">
+    <thead>
+      <tr>
+        <th><span class="lang-zh" lang="zh-Hant">分類</span><span class="lang-en" lang="en">Category</span></th>
+        <th class="num"><span class="lang-zh" lang="zh-Hant">通過</span><span class="lang-en" lang="en">Pass</span></th>
+        <th class="num"><span class="lang-zh" lang="zh-Hant">待修</span><span class="lang-en" lang="en">Adjust</span></th>
+        <th class="num"><span class="lang-zh" lang="zh-Hant">待審</span><span class="lang-en" lang="en">Review</span></th>
+        <th><span class="lang-zh" lang="zh-Hant">分數</span><span class="lang-en" lang="en">Score</span></th>
+      </tr>
+    </thead>
+    <tbody>
+      
+      <tr class="category-row" data-category="contrast" tabindex="0" role="button" aria-expanded="false" aria-controls="detail-contrast">
+        <td class="cat-name"><div class="category-cell"><strong><span class="lang-zh" lang="zh-Hant">色彩與對比</span><span class="lang-en" lang="en">Color & Contrast</span></strong><span class="category-desc"><span class="lang-zh" lang="zh-Hant">文字與 UI 對比、只靠顏色傳達資訊、深色模式與狀態對比。</span><span class="lang-en" lang="en">Text and UI contrast ratios, color-only information, dark mode, and contrast-sensitive states.</span></span></div></td>
+        <td class="num pass">0 </td>
+        <td class="num fail">0 </td>
+        <td class="num review">1</td>
+        <td>
+          
+          <span class="state-badge"><span class="lang-zh" lang="zh-Hant">需人工驗證</span><span class="lang-en" lang="en">Needs human verification</span></span>
+        </td>
+      </tr>
+      <tr class="category-row" data-category="keyboard" tabindex="0" role="button" aria-expanded="false" aria-controls="detail-keyboard">
+        <td class="cat-name"><div class="category-cell"><strong><span class="lang-zh" lang="zh-Hant">鍵盤導覽</span><span class="lang-en" lang="en">Keyboard Navigation</span></strong><span class="category-desc"><span class="lang-zh" lang="zh-Hant">Tab order、focus indicator、keyboard trap、skip link，以及指標互動的鍵盤替代。</span><span class="lang-en" lang="en">Tab order, focus indicators, keyboard traps, skip links, and keyboard alternatives for pointer interactions.</span></span></div></td>
+        <td class="num pass">0 </td>
+        <td class="num fail">2 </td>
+        <td class="num review">0</td>
+        <td>
+          
+          <div class="score-bar">
+            <div class="score-fill" style="width:0%;background:var(--fail)"></div>
+            <span class="score-text">0</span>
+          </div>
+          
+        </td>
+      </tr>
+      <tr class="category-row" data-category="screenreader" tabindex="0" role="button" aria-expanded="false" aria-controls="detail-screenreader">
+        <td class="cat-name"><div class="category-cell"><strong><span class="lang-zh" lang="zh-Hant">螢幕閱讀器</span><span class="lang-en" lang="en">Screen Reader</span></strong><span class="category-desc"><span class="lang-zh" lang="zh-Hant">Landmark、heading、alt text、name、role、ARIA、頁面語言與語意結構。</span><span class="lang-en" lang="en">Landmarks, heading structure, alt text, names, roles, ARIA, page language, and semantic structure.</span></span></div></td>
+        <td class="num pass">2 </td>
+        <td class="num fail">11 </td>
+        <td class="num review">0</td>
+        <td>
+          
+          <div class="score-bar">
+            <div class="score-fill" style="width:0%;background:var(--fail)"></div>
+            <span class="score-text">0</span>
+          </div>
+          
+        </td>
+      </tr>
+      <tr class="category-row" data-category="forms" tabindex="0" role="button" aria-expanded="false" aria-controls="detail-forms">
+        <td class="cat-name"><div class="category-cell"><strong><span class="lang-zh" lang="zh-Hant">表單</span><span class="lang-en" lang="en">Forms</span></strong><span class="category-desc"><span class="lang-zh" lang="zh-Hant">Label、說明、錯誤訊息、autocomplete、required field 與 validation 行為。</span><span class="lang-en" lang="en">Labels, instructions, error messages, autocomplete, required fields, and validation behavior.</span></span></div></td>
+        <td class="num pass">0 </td>
+        <td class="num fail">1 </td>
+        <td class="num review">0</td>
+        <td>
+          
+          <div class="score-bar">
+            <div class="score-fill" style="width:0%;background:var(--fail)"></div>
+            <span class="score-text">0</span>
+          </div>
+          
+        </td>
+      </tr>
+      <tr class="category-row" data-category="responsive" tabindex="0" role="button" aria-expanded="false" aria-controls="detail-responsive">
+        <td class="cat-name"><div class="category-cell"><strong><span class="lang-zh" lang="zh-Hant">響應式與回流</span><span class="lang-en" lang="en">Responsive & Reflow</span></strong><span class="category-desc"><span class="lang-zh" lang="zh-Hant">320px reflow、zoom、viewport、fixed width、fluid typography 與 layout overflow。</span><span class="lang-en" lang="en">320px reflow, zoom, viewport settings, fixed widths, fluid typography, and layout overflow.</span></span></div></td>
+        <td class="num pass">1 </td>
+        <td class="num fail">1 </td>
+        <td class="num review">0</td>
+        <td>
+          
+          <div class="score-bar">
+            <div class="score-fill" style="width:45%;background:var(--fail)"></div>
+            <span class="score-text">45</span>
+          </div>
+          
+        </td>
+      </tr>
+      <tr class="category-row" data-category="touch" tabindex="0" role="button" aria-expanded="false" aria-controls="detail-touch">
+        <td class="cat-name"><div class="category-cell"><strong><span class="lang-zh" lang="zh-Hant">觸控與目標尺寸</span><span class="lang-en" lang="en">Touch & Targets</span></strong><span class="category-desc"><span class="lang-zh" lang="zh-Hant">目標尺寸、間距、drag 替代、pointer gesture 與 orientation 假設。</span><span class="lang-en" lang="en">Target size, spacing, drag alternatives, pointer gestures, and orientation assumptions.</span></span></div></td>
+        <td class="num pass">0 </td>
+        <td class="num fail">0 </td>
+        <td class="num review">1</td>
+        <td>
+          
+          <span class="state-badge"><span class="lang-zh" lang="zh-Hant">需人工驗證</span><span class="lang-en" lang="en">Needs human verification</span></span>
+        </td>
+      </tr>
+      <tr class="category-row" data-category="cognitive" tabindex="0" role="button" aria-expanded="false" aria-controls="detail-cognitive">
+        <td class="cat-name"><div class="category-cell"><strong><span class="lang-zh" lang="zh-Hant">認知</span><span class="lang-en" lang="en">Cognitive</span></strong><span class="category-desc"><span class="lang-zh" lang="zh-Hant">一致導覽、help mechanism、易懂標籤、可預期流程與 dark pattern。</span><span class="lang-en" lang="en">Consistent navigation, help mechanisms, readable labels, predictable flows, and dark patterns.</span></span></div></td>
+        <td class="num pass">0 </td>
+        <td class="num fail">0 </td>
+        <td class="num review">1</td>
+        <td>
+          
+          <span class="state-badge"><span class="lang-zh" lang="zh-Hant">需人工驗證</span><span class="lang-en" lang="en">Needs human verification</span></span>
+        </td>
+      </tr>
+      <tr class="category-row" data-category="motion" tabindex="0" role="button" aria-expanded="false" aria-controls="detail-motion">
+        <td class="cat-name"><div class="category-cell"><strong><span class="lang-zh" lang="zh-Hant">動態與動畫</span><span class="lang-en" lang="en">Motion & Animation</span></strong><span class="category-desc"><span class="lang-zh" lang="zh-Hant">prefers-reduced-motion、time limit、自動移動內容與互動動畫。</span><span class="lang-en" lang="en">prefers-reduced-motion, time limits, auto-moving content, and animation from interaction.</span></span></div></td>
+        <td class="num pass">0 </td>
+        <td class="num fail">0 </td>
+        <td class="num review">0</td>
+        <td>
+          
+          <span class="state-badge"><span class="lang-zh" lang="zh-Hant">不適用</span><span class="lang-en" lang="en">Not applicable</span></span>
+        </td>
+      </tr>
+      <tr class="category-row" data-category="media" tabindex="0" role="button" aria-expanded="false" aria-controls="detail-media">
+        <td class="cat-name"><div class="category-cell"><strong><span class="lang-zh" lang="zh-Hant">媒體</span><span class="lang-en" lang="en">Media</span></strong><span class="category-desc"><span class="lang-zh" lang="zh-Hant">Caption、transcript、autoplay、audio control、flash 與替代內容。</span><span class="lang-en" lang="en">Captions, transcripts, autoplay, audio control, flashing content, and media alternatives.</span></span></div></td>
+        <td class="num pass">0 </td>
+        <td class="num fail">0 </td>
+        <td class="num review">1</td>
+        <td>
+          
+          <span class="state-badge"><span class="lang-zh" lang="zh-Hant">需人工驗證</span><span class="lang-en" lang="en">Needs human verification</span></span>
+        </td>
+      </tr>
+      <tr class="category-row" data-category="agent" tabindex="0" role="button" aria-expanded="false" aria-controls="detail-agent">
+        <td class="cat-name"><div class="category-cell"><strong><span class="lang-zh" lang="zh-Hant">代理可操作性與 AEO</span><span class="lang-en" lang="en">Agent Operability & AEO</span></strong><span class="category-desc"><span class="lang-zh" lang="zh-Hant">Schema.org、metadata、canonical、heading outline、可爬取內容、robots.txt、sitemap.xml、optional llms.txt 與 answer-engine clarity。</span><span class="lang-en" lang="en">Schema.org, metadata, canonical links, heading outline, crawlable content, robots.txt, sitemap.xml, optional llms.txt, and answer-engine clarity.</span></span></div></td>
+        <td class="num pass">0 </td>
+        <td class="num fail">3 </td>
+        <td class="num review">0</td>
+        <td>
+          
+          <div class="score-bar">
+            <div class="score-fill" style="width:0%;background:var(--fail)"></div>
+            <span class="score-text">0</span>
+          </div>
+          
+        </td>
+      </tr>
+    </tbody>
+  </table>
+
+  
+    <div class="category-detail" id="detail-contrast">
+      <h3><span class="lang-zh" lang="zh-Hant">色彩與對比</span><span class="lang-en" lang="en">Color & Contrast</span></h3>
+      <p class="category-desc"><span class="lang-zh" lang="zh-Hant">文字與 UI 對比、只靠顏色傳達資訊、深色模式與狀態對比。</span><span class="lang-en" lang="en">Text and UI contrast ratios, color-only information, dark mode, and contrast-sensitive states.</span></p>
+      
+      <p class="empty"><span class="lang-zh" lang="zh-Hant">此分類目前無發現項目。</span><span class="lang-en" lang="en">No observations in this category at the moment.</span></p>
+    </div>
+  
+    <div class="category-detail" id="detail-keyboard">
+      <h3><span class="lang-zh" lang="zh-Hant">鍵盤導覽</span><span class="lang-en" lang="en">Keyboard Navigation</span></h3>
+      <p class="category-desc"><span class="lang-zh" lang="zh-Hant">Tab order、focus indicator、keyboard trap、skip link，以及指標互動的鍵盤替代。</span><span class="lang-en" lang="en">Tab order, focus indicators, keyboard traps, skip links, and keyboard alternatives for pointer interactions.</span></p>
+      
+      
+      <div class="finding critical">
+        <div class="finding-header">
+          <span class="severity-icon">&#x1F534;</span>
+          <strong><span class="lang-zh" lang="zh-Hant">Button 可能沒有 accessible name</span><span class="lang-en" lang="en">Button may not have an accessible name</span></strong>
+          <span class="wcag-tag">WCAG 2.2: 4.1.2 Name, Role, Value</span>
+          <span class="level-tag">AA</span>
+        </div>
+        <div class="finding-body">
+          <p><strong><span class="lang-zh" lang="zh-Hant">可能受影響的使用者</span><span class="lang-en" lang="en">Users potentially affected</span>:</strong> Screen-reader and voice-control users</p>
+          <p><strong><span class="lang-zh" lang="zh-Hant">位置</span><span class="lang-en" lang="en">Location</span>:</strong> <code>test/golden/dirty.html:10</code></p>
+          <p><span class="lang-zh" lang="zh-Hant">沒有可見文字或 accessible label 的 button 會讓使用者難以理解或用名稱操作。</span><span class="lang-en" lang="en">A button with no visible text or accessible label is hard to understand or activate by name.</span></p>
+          <div class="fix"><strong><span class="lang-zh" lang="zh-Hant">建議調整</span><span class="lang-en" lang="en">Suggested adjustment</span>:</strong> <span class="lang-zh" lang="zh-Hant">加入可見文字、aria-label 或 aria-labelledby。</span><span class="lang-en" lang="en">Add visible text, aria-label, or aria-labelledby.</span></div>
+          <div class="legal"><strong><span class="lang-zh" lang="zh-Hant">法律參考</span><span class="lang-en" lang="en">Legal note</span>:</strong> May affect ADA / EAA / JIS / Taiwan accessibility expectations depending on deployment context.</div>
+          
+    <p class="learn-more"><strong><span class="lang-zh" lang="zh-Hant">Learn more</span><span class="lang-en" lang="en">Learn more</span>:</strong>
+      <a href="https://www.w3.org/WAI/WCAG22/Understanding/name-role-value.html" target="_blank" rel="noopener noreferrer">WCAG 4.1.2</a>
+    </p>
+          <details><summary><span class="lang-zh" lang="zh-Hant">調整前 / 調整後</span><span class="lang-en" lang="en">Before / After</span></summary><div class="code-compare"><div class="code-before"><div class="code-label"><span class="lang-zh" lang="zh-Hant">調整前</span><span class="lang-en" lang="en">Before</span></div><pre><code>&lt;a href=&quot;/icon&quot;&gt;&lt;img alt=&quot;&quot; src=&quot;icon.png&quot;&gt;&lt;/a&gt;
+&lt;button&gt;&lt;/button&gt;
+&lt;input type=&quot;text&quot; name=&quot;q&quot; placeholder=&quot;Search&quot;&gt;</code></pre></div><div class="code-after"><div class="code-label"><span class="lang-zh" lang="zh-Hant">調整後</span><span class="lang-en" lang="en">After</span></div><pre><code></code></pre></div></div></details>
+        </div>
+      </div>
+      <div class="finding critical">
+        <div class="finding-header">
+          <span class="severity-icon">&#x1F534;</span>
+          <strong><span class="lang-zh" lang="zh-Hant">可點擊元素不是 button</span><span class="lang-en" lang="en">Clickable non-button element</span></strong>
+          <span class="wcag-tag">WCAG 2.2: 2.1.1 Keyboard</span>
+          <span class="level-tag">A</span>
+        </div>
+        <div class="finding-body">
+          <p><strong><span class="lang-zh" lang="zh-Hant">可能受影響的使用者</span><span class="lang-en" lang="en">Users potentially affected</span>:</strong> Keyboard-only, switch-control, screen-reader, and voice-control users</p>
+          <p><strong><span class="lang-zh" lang="zh-Hant">位置</span><span class="lang-en" lang="en">Location</span>:</strong> <code>test/golden/dirty.html:14</code></p>
+          <p><span class="lang-zh" lang="zh-Hant">可點擊的 &lt;div&gt; 或 &lt;span&gt; 預設無法用鍵盤操作。</span><span class="lang-en" lang="en">Clickable &lt;div&gt; or &lt;span&gt; elements are not keyboard-operable by default.</span></p>
+          <div class="fix"><strong><span class="lang-zh" lang="zh-Hant">建議調整</span><span class="lang-en" lang="en">Suggested adjustment</span>:</strong> <span class="lang-zh" lang="zh-Hant">動作使用 &lt;button&gt;；若必須自訂語意，加入 role、tabindex 與 Enter/Space handling。</span><span class="lang-en" lang="en">Use &lt;button&gt; for actions. If custom semantics are unavoidable, add role, tabindex, and Enter/Space handling.</span></div>
+          <div class="legal"><strong><span class="lang-zh" lang="zh-Hant">法律參考</span><span class="lang-en" lang="en">Legal note</span>:</strong> May affect ADA / EAA / JIS / Taiwan accessibility expectations depending on deployment context.</div>
+          
+    <p class="learn-more"><strong><span class="lang-zh" lang="zh-Hant">Learn more</span><span class="lang-en" lang="en">Learn more</span>:</strong>
+      <a href="https://www.w3.org/WAI/WCAG22/Understanding/keyboard.html" target="_blank" rel="noopener noreferrer">WCAG 2.1.1</a>
+    </p>
+          <details><summary><span class="lang-zh" lang="zh-Hant">調整前 / 調整後</span><span class="lang-en" lang="en">Before / After</span></summary><div class="code-compare"><div class="code-before"><div class="code-label"><span class="lang-zh" lang="zh-Hant">調整前</span><span class="lang-en" lang="en">Before</span></div><pre><code>&lt;ul&gt;&lt;div&gt;not a list item&lt;/div&gt;&lt;/ul&gt;
+&lt;span onclick=&quot;go()&quot;&gt;Go&lt;/span&gt;
+&lt;div style=&quot;display:none&quot;&gt;&lt;img src=&quot;hidden-pixel.gif&quot;&gt;&lt;iframe src=&quot;/tracker.html&quot;&gt;&lt;/iframe&gt;&lt;/div&gt;</code></pre></div><div class="code-after"><div class="code-label"><span class="lang-zh" lang="zh-Hant">調整後</span><span class="lang-en" lang="en">After</span></div><pre><code></code></pre></div></div></details>
+        </div>
+      </div>
+    </div>
+  
+    <div class="category-detail" id="detail-screenreader">
+      <h3><span class="lang-zh" lang="zh-Hant">螢幕閱讀器</span><span class="lang-en" lang="en">Screen Reader</span></h3>
+      <p class="category-desc"><span class="lang-zh" lang="zh-Hant">Landmark、heading、alt text、name、role、ARIA、頁面語言與語意結構。</span><span class="lang-en" lang="en">Landmarks, heading structure, alt text, names, roles, ARIA, page language, and semantic structure.</span></p>
+      
+      
+      <div class="finding critical">
+        <div class="finding-header">
+          <span class="severity-icon">&#x1F534;</span>
+          <strong><span class="lang-zh" lang="zh-Hant">頁面語言缺失</span><span class="lang-en" lang="en">Page language is missing</span></strong>
+          <span class="wcag-tag">WCAG 2.2: 3.1.1 Language of Page</span>
+          <span class="level-tag">AA</span>
+        </div>
+        <div class="finding-body">
+          <p><strong><span class="lang-zh" lang="zh-Hant">可能受影響的使用者</span><span class="lang-en" lang="en">Users potentially affected</span>:</strong> Screen-reader users and translation users</p>
+          <p><strong><span class="lang-zh" lang="zh-Hant">位置</span><span class="lang-en" lang="en">Location</span>:</strong> <code>test/golden/dirty.html:1</code></p>
+          <p><span class="lang-zh" lang="zh-Hant">HTML 頁面沒有宣告 lang attribute，assistive technology 可能使用錯誤的發音規則。</span><span class="lang-en" lang="en">The HTML page does not declare a lang attribute, so assistive technology may choose the wrong pronunciation rules.</span></p>
+          <div class="fix"><strong><span class="lang-zh" lang="zh-Hant">建議調整</span><span class="lang-en" lang="en">Suggested adjustment</span>:</strong> <span class="lang-zh" lang="zh-Hant">加入正確的語言 attribute，例如 &lt;html lang=&quot;zh-Hant&quot;&gt;。</span><span class="lang-en" lang="en">Add a language attribute such as &lt;html lang=&quot;zh-Hant&quot;&gt; or the correct document language.</span></div>
+          <div class="legal"><strong><span class="lang-zh" lang="zh-Hant">法律參考</span><span class="lang-en" lang="en">Legal note</span>:</strong> May affect ADA / EAA / JIS / Taiwan accessibility expectations depending on deployment context.</div>
+          
+    <p class="learn-more"><strong><span class="lang-zh" lang="zh-Hant">Learn more</span><span class="lang-en" lang="en">Learn more</span>:</strong>
+      <a href="https://www.w3.org/WAI/WCAG22/Understanding/language-of-page.html" target="_blank" rel="noopener noreferrer">WCAG 3.1.1</a>
+    </p>
+          <details><summary><span class="lang-zh" lang="zh-Hant">調整前 / 調整後</span><span class="lang-en" lang="en">Before / After</span></summary><div class="code-compare"><div class="code-before"><div class="code-label"><span class="lang-zh" lang="zh-Hant">調整前</span><span class="lang-en" lang="en">Before</span></div><pre><code>&lt;html&gt;</code></pre></div><div class="code-after"><div class="code-label"><span class="lang-zh" lang="zh-Hant">調整後</span><span class="lang-en" lang="en">After</span></div><pre><code>&lt;html lang=&quot;zh-Hant&quot;&gt;</code></pre></div></div></details>
+        </div>
+      </div>
+      <div class="finding critical">
+        <div class="finding-header">
+          <span class="severity-icon">&#x1F534;</span>
+          <strong><span class="lang-zh" lang="zh-Hant">文件標題缺失</span><span class="lang-en" lang="en">Document title is missing</span></strong>
+          <span class="wcag-tag">WCAG 2.2: 2.4.2 Page Titled</span>
+          <span class="level-tag">AA</span>
+        </div>
+        <div class="finding-body">
+          <p><strong><span class="lang-zh" lang="zh-Hant">可能受影響的使用者</span><span class="lang-en" lang="en">Users potentially affected</span>:</strong> Screen-reader users, keyboard users, and users with many tabs open</p>
+          <p><strong><span class="lang-zh" lang="zh-Hant">位置</span><span class="lang-en" lang="en">Location</span>:</strong> <code>test/golden/dirty.html</code></p>
+          <p><span class="lang-zh" lang="zh-Hant">缺少或空白的 title 會讓頁面在瀏覽器與 assistive technology 中難以辨識。</span><span class="lang-en" lang="en">A missing or empty title makes the page difficult to identify in browser and assistive technology contexts.</span></p>
+          <div class="fix"><strong><span class="lang-zh" lang="zh-Hant">建議調整</span><span class="lang-en" lang="en">Suggested adjustment</span>:</strong> <span class="lang-zh" lang="zh-Hant">加入簡短且唯一的 &lt;title&gt;。</span><span class="lang-en" lang="en">Add a concise, unique &lt;title&gt;.</span></div>
+          <div class="legal"><strong><span class="lang-zh" lang="zh-Hant">法律參考</span><span class="lang-en" lang="en">Legal note</span>:</strong> May affect ADA / EAA / JIS / Taiwan accessibility expectations depending on deployment context.</div>
+          
+    <p class="learn-more"><strong><span class="lang-zh" lang="zh-Hant">Learn more</span><span class="lang-en" lang="en">Learn more</span>:</strong>
+      <a href="https://www.w3.org/WAI/WCAG22/Understanding/page-titled.html" target="_blank" rel="noopener noreferrer">WCAG 2.4.2</a>
+    </p>
+          
+        </div>
+      </div>
+      <div class="finding critical">
+        <div class="finding-header">
+          <span class="severity-icon">&#x1F534;</span>
+          <strong><span class="lang-zh" lang="zh-Hant">靜態 markup 中看不到 main landmark</span><span class="lang-en" lang="en">Main landmark is not statically visible</span></strong>
+          <span class="wcag-tag">WCAG 2.2: 1.3.1 Info and Relationships</span>
+          <span class="level-tag">AA</span>
+        </div>
+        <div class="finding-body">
+          <p><strong><span class="lang-zh" lang="zh-Hant">可能受影響的使用者</span><span class="lang-en" lang="en">Users potentially affected</span>:</strong> Screen-reader and keyboard users navigating by landmarks</p>
+          <p><strong><span class="lang-zh" lang="zh-Hant">位置</span><span class="lang-en" lang="en">Location</span>:</strong> <code>test/golden/dirty.html</code></p>
+          <p><span class="lang-zh" lang="zh-Hant">靜態檔案中沒有找到 &lt;main&gt; 或 role=&quot;main&quot;。</span><span class="lang-en" lang="en">No &lt;main&gt; or role=&quot;main&quot; was found in this static file.</span></p>
+          <div class="fix"><strong><span class="lang-zh" lang="zh-Hant">建議調整</span><span class="lang-en" lang="en">Suggested adjustment</span>:</strong> <span class="lang-zh" lang="zh-Hant">用 &lt;main id=&quot;main-content&quot;&gt; 包住主要內容。</span><span class="lang-en" lang="en">Wrap primary page content in &lt;main id=&quot;main-content&quot;&gt;.</span></div>
+          <div class="legal"><strong><span class="lang-zh" lang="zh-Hant">法律參考</span><span class="lang-en" lang="en">Legal note</span>:</strong> May affect ADA / EAA / JIS / Taiwan accessibility expectations depending on deployment context.</div>
+          
+    <p class="learn-more"><strong><span class="lang-zh" lang="zh-Hant">Learn more</span><span class="lang-en" lang="en">Learn more</span>:</strong>
+      <a href="https://www.w3.org/WAI/WCAG22/Understanding/info-and-relationships.html" target="_blank" rel="noopener noreferrer">WCAG 1.3.1</a>
+    </p>
+          
+        </div>
+      </div>
+      <div class="finding critical">
+        <div class="finding-header">
+          <span class="severity-icon">&#x1F534;</span>
+          <strong><span class="lang-zh" lang="zh-Hant">Heading level 跳級</span><span class="lang-en" lang="en">Heading level is skipped</span></strong>
+          <span class="wcag-tag">WCAG 2.2: 1.3.1 Info and Relationships</span>
+          <span class="level-tag">AA</span>
+        </div>
+        <div class="finding-body">
+          <p><strong><span class="lang-zh" lang="zh-Hant">可能受影響的使用者</span><span class="lang-en" lang="en">Users potentially affected</span>:</strong> Screen-reader users navigating by heading</p>
+          <p><strong><span class="lang-zh" lang="zh-Hant">位置</span><span class="lang-en" lang="en">Location</span>:</strong> <code>test/golden/dirty.html:5</code></p>
+          <p><span class="lang-zh" lang="zh-Hant">Heading hierarchy 有跳級，會影響用 heading 導覽的使用者。</span><span class="lang-en" lang="en">Heading hierarchy skips a level.</span></p>
+          <div class="fix"><strong><span class="lang-zh" lang="zh-Hant">建議調整</span><span class="lang-en" lang="en">Suggested adjustment</span>:</strong> <span class="lang-zh" lang="zh-Hant">使用連續的 heading hierarchy，或只調整視覺樣式而不改 semantic level。</span><span class="lang-en" lang="en">Use a continuous heading hierarchy or adjust the visual style without changing semantic level.</span></div>
+          <div class="legal"><strong><span class="lang-zh" lang="zh-Hant">法律參考</span><span class="lang-en" lang="en">Legal note</span>:</strong> May affect ADA / EAA / JIS / Taiwan accessibility expectations depending on deployment context.</div>
+          
+    <p class="learn-more"><strong><span class="lang-zh" lang="zh-Hant">Learn more</span><span class="lang-en" lang="en">Learn more</span>:</strong>
+      <a href="https://www.w3.org/WAI/WCAG22/Understanding/info-and-relationships.html" target="_blank" rel="noopener noreferrer">WCAG 1.3.1</a>
+    </p>
+          
+        </div>
+      </div>
+      <div class="finding critical">
+        <div class="finding-header">
+          <span class="severity-icon">&#x1F534;</span>
+          <strong><span class="lang-zh" lang="zh-Hant">圖片缺少 alt text</span><span class="lang-en" lang="en">Image is missing alt text</span></strong>
+          <span class="wcag-tag">WCAG 2.2: 1.1.1 Non-text Content</span>
+          <span class="level-tag">AA</span>
+        </div>
+        <div class="finding-body">
+          <p><strong><span class="lang-zh" lang="zh-Hant">可能受影響的使用者</span><span class="lang-en" lang="en">Users potentially affected</span>:</strong> Blind and low-vision users using screen readers</p>
+          <p><strong><span class="lang-zh" lang="zh-Hant">位置</span><span class="lang-en" lang="en">Location</span>:</strong> <code>test/golden/dirty.html:6</code></p>
+          <p><span class="lang-zh" lang="zh-Hant">沒有 alt text 的圖片可能在 assistive technology 中沉默或被不清楚地朗讀。</span><span class="lang-en" lang="en">An image without alt text is silent or announced poorly by assistive technology.</span></p>
+          <div class="fix"><strong><span class="lang-zh" lang="zh-Hant">建議調整</span><span class="lang-en" lang="en">Suggested adjustment</span>:</strong> <span class="lang-zh" lang="zh-Hant">為有意義的圖片加入 alt text；純裝飾圖片使用 alt=&quot;&quot;。</span><span class="lang-en" lang="en">Add meaningful alt text, or alt=&quot;&quot; for purely decorative images.</span></div>
+          <div class="legal"><strong><span class="lang-zh" lang="zh-Hant">法律參考</span><span class="lang-en" lang="en">Legal note</span>:</strong> May affect ADA / EAA / JIS / Taiwan accessibility expectations depending on deployment context.</div>
+          
+    <p class="learn-more"><strong><span class="lang-zh" lang="zh-Hant">Learn more</span><span class="lang-en" lang="en">Learn more</span>:</strong>
+      <a href="https://www.w3.org/WAI/WCAG22/Understanding/non-text-content.html" target="_blank" rel="noopener noreferrer">WCAG 1.1.1</a>
+    </p>
+          <details><summary><span class="lang-zh" lang="zh-Hant">調整前 / 調整後</span><span class="lang-en" lang="en">Before / After</span></summary><div class="code-compare"><div class="code-before"><div class="code-label"><span class="lang-zh" lang="zh-Hant">調整前</span><span class="lang-en" lang="en">Before</span></div><pre><code>&lt;h4&gt;Skipped levels&lt;/h4&gt;
+&lt;img src=&quot;hero.png&quot;&gt;
+&lt;img src=&quot;chart.png&quot;&gt;</code></pre></div><div class="code-after"><div class="code-label"><span class="lang-zh" lang="zh-Hant">調整後</span><span class="lang-en" lang="en">After</span></div><pre><code></code></pre></div></div></details>
+        </div>
+      </div>
+      <div class="finding critical">
+        <div class="finding-header">
+          <span class="severity-icon">&#x1F534;</span>
+          <strong><span class="lang-zh" lang="zh-Hant">圖片缺少 alt text</span><span class="lang-en" lang="en">Image is missing alt text</span></strong>
+          <span class="wcag-tag">WCAG 2.2: 1.1.1 Non-text Content</span>
+          <span class="level-tag">AA</span>
+        </div>
+        <div class="finding-body">
+          <p><strong><span class="lang-zh" lang="zh-Hant">可能受影響的使用者</span><span class="lang-en" lang="en">Users potentially affected</span>:</strong> Blind and low-vision users using screen readers</p>
+          <p><strong><span class="lang-zh" lang="zh-Hant">位置</span><span class="lang-en" lang="en">Location</span>:</strong> <code>test/golden/dirty.html:7</code></p>
+          <p><span class="lang-zh" lang="zh-Hant">沒有 alt text 的圖片可能在 assistive technology 中沉默或被不清楚地朗讀。</span><span class="lang-en" lang="en">An image without alt text is silent or announced poorly by assistive technology.</span></p>
+          <div class="fix"><strong><span class="lang-zh" lang="zh-Hant">建議調整</span><span class="lang-en" lang="en">Suggested adjustment</span>:</strong> <span class="lang-zh" lang="zh-Hant">為有意義的圖片加入 alt text；純裝飾圖片使用 alt=&quot;&quot;。</span><span class="lang-en" lang="en">Add meaningful alt text, or alt=&quot;&quot; for purely decorative images.</span></div>
+          <div class="legal"><strong><span class="lang-zh" lang="zh-Hant">法律參考</span><span class="lang-en" lang="en">Legal note</span>:</strong> May affect ADA / EAA / JIS / Taiwan accessibility expectations depending on deployment context.</div>
+          
+    <p class="learn-more"><strong><span class="lang-zh" lang="zh-Hant">Learn more</span><span class="lang-en" lang="en">Learn more</span>:</strong>
+      <a href="https://www.w3.org/WAI/WCAG22/Understanding/non-text-content.html" target="_blank" rel="noopener noreferrer">WCAG 1.1.1</a>
+    </p>
+          <details><summary><span class="lang-zh" lang="zh-Hant">調整前 / 調整後</span><span class="lang-en" lang="en">Before / After</span></summary><div class="code-compare"><div class="code-before"><div class="code-label"><span class="lang-zh" lang="zh-Hant">調整前</span><span class="lang-en" lang="en">Before</span></div><pre><code>&lt;img src=&quot;hero.png&quot;&gt;
+&lt;img src=&quot;chart.png&quot;&gt;
+&lt;a href=&quot;/dead&quot;&gt;&lt;/a&gt;</code></pre></div><div class="code-after"><div class="code-label"><span class="lang-zh" lang="zh-Hant">調整後</span><span class="lang-en" lang="en">After</span></div><pre><code></code></pre></div></div></details>
+        </div>
+      </div>
+      <div class="finding critical">
+        <div class="finding-header">
+          <span class="severity-icon">&#x1F534;</span>
+          <strong>Frame is missing a title</strong>
+          <span class="wcag-tag">WCAG 2.2: 4.1.2 Name, Role, Value</span>
+          <span class="level-tag">A</span>
+        </div>
+        <div class="finding-body">
+          <p><strong><span class="lang-zh" lang="zh-Hant">可能受影響的使用者</span><span class="lang-en" lang="en">Users potentially affected</span>:</strong> Screen-reader users navigating between frames</p>
+          <p><strong><span class="lang-zh" lang="zh-Hant">位置</span><span class="lang-en" lang="en">Location</span>:</strong> <code>test/golden/dirty.html:12</code></p>
+          <p>An &lt;iframe&gt; without a title gives screen-reader users no way to know what the frame contains before entering it.</p>
+          <div class="fix"><strong><span class="lang-zh" lang="zh-Hant">建議調整</span><span class="lang-en" lang="en">Suggested adjustment</span>:</strong> Add title=&quot;...&quot; describing the frame content.</div>
+          <div class="legal"><strong><span class="lang-zh" lang="zh-Hant">法律參考</span><span class="lang-en" lang="en">Legal note</span>:</strong> May affect ADA / EAA / JIS / Taiwan accessibility expectations depending on deployment context.</div>
+          
+    <p class="learn-more"><strong><span class="lang-zh" lang="zh-Hant">Learn more</span><span class="lang-en" lang="en">Learn more</span>:</strong>
+      <a href="https://www.w3.org/WAI/WCAG22/Understanding/name-role-value.html" target="_blank" rel="noopener noreferrer">WCAG 4.1.2</a>
+    </p>
+          <details><summary><span class="lang-zh" lang="zh-Hant">調整前 / 調整後</span><span class="lang-en" lang="en">Before / After</span></summary><div class="code-compare"><div class="code-before"><div class="code-label"><span class="lang-zh" lang="zh-Hant">調整前</span><span class="lang-en" lang="en">Before</span></div><pre><code>&lt;input type=&quot;text&quot; name=&quot;q&quot; placeholder=&quot;Search&quot;&gt;
+&lt;iframe src=&quot;/widget.html&quot;&gt;&lt;/iframe&gt;
+&lt;ul&gt;&lt;div&gt;not a list item&lt;/div&gt;&lt;/ul&gt;</code></pre></div><div class="code-after"><div class="code-label"><span class="lang-zh" lang="zh-Hant">調整後</span><span class="lang-en" lang="en">After</span></div><pre><code></code></pre></div></div></details>
+        </div>
+      </div>
+      <div class="finding critical">
+        <div class="finding-header">
+          <span class="severity-icon">&#x1F534;</span>
+          <strong><span class="lang-zh" lang="zh-Hant">List 含有非 list-item 直接子元素</span><span class="lang-en" lang="en">List contains a non-list-item child</span></strong>
+          <span class="wcag-tag">WCAG 2.2: 1.3.1 Info and Relationships</span>
+          <span class="level-tag">A</span>
+        </div>
+        <div class="finding-body">
+          <p><strong><span class="lang-zh" lang="zh-Hant">可能受影響的使用者</span><span class="lang-en" lang="en">Users potentially affected</span>:</strong> Screen-reader users navigating by list semantics</p>
+          <p><strong><span class="lang-zh" lang="zh-Hant">位置</span><span class="lang-en" lang="en">Location</span>:</strong> <code>test/golden/dirty.html:13</code></p>
+          <p><span class="lang-zh" lang="zh-Hant">&lt;ul&gt;/&lt;ol&gt; 的直接子元素不是 &lt;li&gt;、&lt;script&gt; 或 &lt;template&gt;，screen reader 可能無法正確朗讀 list 或 item count。</span><span class="lang-en" lang="en">A &lt;ul&gt;/&lt;ol&gt; has a direct child that is not &lt;li&gt;, &lt;script&gt;, or &lt;template&gt;. Screen readers may not announce the list or its item count correctly.</span></p>
+          <div class="fix"><strong><span class="lang-zh" lang="zh-Hant">建議調整</span><span class="lang-en" lang="en">Suggested adjustment</span>:</strong> <span class="lang-zh" lang="zh-Hant">讓 &lt;li&gt; 成為唯一結構子元素；或在不可避免的非標準結構中使用 role=&quot;list&quot;/role=&quot;listitem&quot;。</span><span class="lang-en" lang="en">Make &lt;li&gt; the only structural child; move wrapper elements inside an &lt;li&gt;, or use role=&quot;list&quot;/role=&quot;listitem&quot; if a non-standard structure is unavoidable.</span></div>
+          <div class="legal"><strong><span class="lang-zh" lang="zh-Hant">法律參考</span><span class="lang-en" lang="en">Legal note</span>:</strong> May affect ADA / EAA / JIS / Taiwan accessibility expectations depending on deployment context.</div>
+          
+    <p class="learn-more"><strong><span class="lang-zh" lang="zh-Hant">Learn more</span><span class="lang-en" lang="en">Learn more</span>:</strong>
+      <a href="https://www.w3.org/WAI/WCAG22/Understanding/info-and-relationships.html" target="_blank" rel="noopener noreferrer">WCAG 1.3.1</a>
+    </p>
+          <details><summary><span class="lang-zh" lang="zh-Hant">調整前 / 調整後</span><span class="lang-en" lang="en">Before / After</span></summary><div class="code-compare"><div class="code-before"><div class="code-label"><span class="lang-zh" lang="zh-Hant">調整前</span><span class="lang-en" lang="en">Before</span></div><pre><code>&lt;iframe src=&quot;/widget.html&quot;&gt;&lt;/iframe&gt;
+&lt;ul&gt;&lt;div&gt;not a list item&lt;/div&gt;&lt;/ul&gt;
+&lt;span onclick=&quot;go()&quot;&gt;Go&lt;/span&gt;</code></pre></div><div class="code-after"><div class="code-label"><span class="lang-zh" lang="zh-Hant">調整後</span><span class="lang-en" lang="en">After</span></div><pre><code></code></pre></div></div></details>
+        </div>
+      </div>
+      <div class="finding critical">
+        <div class="finding-header">
+          <span class="severity-icon">&#x1F534;</span>
+          <strong><span class="lang-zh" lang="zh-Hant">Link 可能沒有 accessible name</span><span class="lang-en" lang="en">Link may not have an accessible name</span></strong>
+          <span class="wcag-tag">WCAG 2.2: 4.1.2 Name, Role, Value</span>
+          <span class="level-tag">A</span>
+        </div>
+        <div class="finding-body">
+          <p><strong><span class="lang-zh" lang="zh-Hant">可能受影響的使用者</span><span class="lang-en" lang="en">Users potentially affected</span>:</strong> Screen-reader, voice-control, and keyboard users</p>
+          <p><strong><span class="lang-zh" lang="zh-Hant">位置</span><span class="lang-en" lang="en">Location</span>:</strong> <code>test/golden/dirty.html:8</code></p>
+          <p><span class="lang-zh" lang="zh-Hant">Link 沒有可見文字、ARIA label、title、圖片 alt 或 SVG title 時，screen reader 可能只朗讀為一般 link。</span><span class="lang-en" lang="en">A link with no visible text, no aria-label/aria-labelledby/title, and no image alt or SVG title has no accessible name.</span></p>
+          <div class="fix"><strong><span class="lang-zh" lang="zh-Hant">建議調整</span><span class="lang-en" lang="en">Suggested adjustment</span>:</strong> <span class="lang-zh" lang="zh-Hant">加入可見 link text、aria-label/aria-labelledby/title、包裹圖片的 alt text，或 &lt;svg&gt;&lt;title&gt;。</span><span class="lang-en" lang="en">Add visible link text, an aria-label/aria-labelledby/title, give a wrapped &lt;img&gt; meaningful alt text, or add an &lt;svg&gt;&lt;title&gt;.</span></div>
+          <div class="legal"><strong><span class="lang-zh" lang="zh-Hant">法律參考</span><span class="lang-en" lang="en">Legal note</span>:</strong> May affect ADA / EAA / JIS / Taiwan accessibility expectations depending on deployment context.</div>
+          
+    <p class="learn-more"><strong><span class="lang-zh" lang="zh-Hant">Learn more</span><span class="lang-en" lang="en">Learn more</span>:</strong>
+      <a href="https://www.w3.org/WAI/WCAG22/Understanding/name-role-value.html" target="_blank" rel="noopener noreferrer">WCAG 4.1.2</a>
+    </p>
+          <details><summary><span class="lang-zh" lang="zh-Hant">調整前 / 調整後</span><span class="lang-en" lang="en">Before / After</span></summary><div class="code-compare"><div class="code-before"><div class="code-label"><span class="lang-zh" lang="zh-Hant">調整前</span><span class="lang-en" lang="en">Before</span></div><pre><code>&lt;img src=&quot;chart.png&quot;&gt;
+&lt;a href=&quot;/dead&quot;&gt;&lt;/a&gt;
+&lt;a href=&quot;/icon&quot;&gt;&lt;img alt=&quot;&quot; src=&quot;icon.png&quot;&gt;&lt;/a&gt;</code></pre></div><div class="code-after"><div class="code-label"><span class="lang-zh" lang="zh-Hant">調整後</span><span class="lang-en" lang="en">After</span></div><pre><code></code></pre></div></div></details>
+        </div>
+      </div>
+      <div class="finding critical">
+        <div class="finding-header">
+          <span class="severity-icon">&#x1F534;</span>
+          <strong><span class="lang-zh" lang="zh-Hant">Link 可能沒有 accessible name</span><span class="lang-en" lang="en">Link may not have an accessible name</span></strong>
+          <span class="wcag-tag">WCAG 2.2: 4.1.2 Name, Role, Value</span>
+          <span class="level-tag">A</span>
+        </div>
+        <div class="finding-body">
+          <p><strong><span class="lang-zh" lang="zh-Hant">可能受影響的使用者</span><span class="lang-en" lang="en">Users potentially affected</span>:</strong> Screen-reader, voice-control, and keyboard users</p>
+          <p><strong><span class="lang-zh" lang="zh-Hant">位置</span><span class="lang-en" lang="en">Location</span>:</strong> <code>test/golden/dirty.html:9</code></p>
+          <p><span class="lang-zh" lang="zh-Hant">Link 沒有可見文字、ARIA label、title、圖片 alt 或 SVG title 時，screen reader 可能只朗讀為一般 link。</span><span class="lang-en" lang="en">A link with no visible text, no aria-label/aria-labelledby/title, and no image alt or SVG title has no accessible name.</span></p>
+          <div class="fix"><strong><span class="lang-zh" lang="zh-Hant">建議調整</span><span class="lang-en" lang="en">Suggested adjustment</span>:</strong> <span class="lang-zh" lang="zh-Hant">加入可見 link text、aria-label/aria-labelledby/title、包裹圖片的 alt text，或 &lt;svg&gt;&lt;title&gt;。</span><span class="lang-en" lang="en">Add visible link text, an aria-label/aria-labelledby/title, give a wrapped &lt;img&gt; meaningful alt text, or add an &lt;svg&gt;&lt;title&gt;.</span></div>
+          <div class="legal"><strong><span class="lang-zh" lang="zh-Hant">法律參考</span><span class="lang-en" lang="en">Legal note</span>:</strong> May affect ADA / EAA / JIS / Taiwan accessibility expectations depending on deployment context.</div>
+          
+    <p class="learn-more"><strong><span class="lang-zh" lang="zh-Hant">Learn more</span><span class="lang-en" lang="en">Learn more</span>:</strong>
+      <a href="https://www.w3.org/WAI/WCAG22/Understanding/name-role-value.html" target="_blank" rel="noopener noreferrer">WCAG 4.1.2</a>
+    </p>
+          <details><summary><span class="lang-zh" lang="zh-Hant">調整前 / 調整後</span><span class="lang-en" lang="en">Before / After</span></summary><div class="code-compare"><div class="code-before"><div class="code-label"><span class="lang-zh" lang="zh-Hant">調整前</span><span class="lang-en" lang="en">Before</span></div><pre><code>&lt;a href=&quot;/dead&quot;&gt;&lt;/a&gt;
+&lt;a href=&quot;/icon&quot;&gt;&lt;img alt=&quot;&quot; src=&quot;icon.png&quot;&gt;&lt;/a&gt;
+&lt;button&gt;&lt;/button&gt;</code></pre></div><div class="code-after"><div class="code-label"><span class="lang-zh" lang="zh-Hant">調整後</span><span class="lang-en" lang="en">After</span></div><pre><code></code></pre></div></div></details>
+        </div>
+      </div>
+    </div>
+  
+    <div class="category-detail" id="detail-forms">
+      <h3><span class="lang-zh" lang="zh-Hant">表單</span><span class="lang-en" lang="en">Forms</span></h3>
+      <p class="category-desc"><span class="lang-zh" lang="zh-Hant">Label、說明、錯誤訊息、autocomplete、required field 與 validation 行為。</span><span class="lang-en" lang="en">Labels, instructions, error messages, autocomplete, required fields, and validation behavior.</span></p>
+      
+      
+      <div class="finding critical">
+        <div class="finding-header">
+          <span class="severity-icon">&#x1F534;</span>
+          <strong><span class="lang-zh" lang="zh-Hant">Input 可能缺少 accessible label</span><span class="lang-en" lang="en">Input may be missing an accessible label</span></strong>
+          <span class="wcag-tag">WCAG 2.2: 3.3.2 Labels or Instructions</span>
+          <span class="level-tag">AA</span>
+        </div>
+        <div class="finding-body">
+          <p><strong><span class="lang-zh" lang="zh-Hant">可能受影響的使用者</span><span class="lang-en" lang="en">Users potentially affected</span>:</strong> Screen-reader, voice-control, and cognitive disability users</p>
+          <p><strong><span class="lang-zh" lang="zh-Hant">位置</span><span class="lang-en" lang="en">Location</span>:</strong> <code>test/golden/dirty.html:11</code></p>
+          <p><span class="lang-zh" lang="zh-Hant">Input 在靜態 markup 中沒有明顯 id 或 ARIA label。</span><span class="lang-en" lang="en">The input has no obvious id or ARIA label in static markup.</span></p>
+          <div class="fix"><strong><span class="lang-zh" lang="zh-Hant">建議調整</span><span class="lang-en" lang="en">Suggested adjustment</span>:</strong> <span class="lang-zh" lang="zh-Hant">搭配 &lt;label for=&quot;...&quot;&gt;，或在已有可見 label 時使用 aria-labelledby。</span><span class="lang-en" lang="en">Pair it with a &lt;label for=&quot;...&quot;&gt; or use aria-labelledby when a visible label already exists.</span></div>
+          <div class="legal"><strong><span class="lang-zh" lang="zh-Hant">法律參考</span><span class="lang-en" lang="en">Legal note</span>:</strong> May affect ADA / EAA / JIS / Taiwan accessibility expectations depending on deployment context.</div>
+          
+    <p class="learn-more"><strong><span class="lang-zh" lang="zh-Hant">Learn more</span><span class="lang-en" lang="en">Learn more</span>:</strong>
+      <a href="https://www.w3.org/WAI/WCAG22/Understanding/labels-or-instructions.html" target="_blank" rel="noopener noreferrer">WCAG 3.3.2</a>
+    </p>
+          <details><summary><span class="lang-zh" lang="zh-Hant">調整前 / 調整後</span><span class="lang-en" lang="en">Before / After</span></summary><div class="code-compare"><div class="code-before"><div class="code-label"><span class="lang-zh" lang="zh-Hant">調整前</span><span class="lang-en" lang="en">Before</span></div><pre><code>&lt;button&gt;&lt;/button&gt;
+&lt;input type=&quot;text&quot; name=&quot;q&quot; placeholder=&quot;Search&quot;&gt;
+&lt;iframe src=&quot;/widget.html&quot;&gt;&lt;/iframe&gt;</code></pre></div><div class="code-after"><div class="code-label"><span class="lang-zh" lang="zh-Hant">調整後</span><span class="lang-en" lang="en">After</span></div><pre><code></code></pre></div></div></details>
+        </div>
+      </div>
+    </div>
+  
+    <div class="category-detail" id="detail-responsive">
+      <h3><span class="lang-zh" lang="zh-Hant">響應式與回流</span><span class="lang-en" lang="en">Responsive & Reflow</span></h3>
+      <p class="category-desc"><span class="lang-zh" lang="zh-Hant">320px reflow、zoom、viewport、fixed width、fluid typography 與 layout overflow。</span><span class="lang-en" lang="en">320px reflow, zoom, viewport settings, fixed widths, fluid typography, and layout overflow.</span></p>
+      
+      
+      <div class="finding warning">
+        <div class="finding-header">
+          <span class="severity-icon">&#9888;</span>
+          <strong><span class="lang-zh" lang="zh-Hant">Viewport meta 禁用 zoom</span><span class="lang-en" lang="en">Viewport meta disables zoom</span></strong>
+          <span class="wcag-tag">WCAG 2.2: 1.4.4 Resize Text</span>
+          <span class="level-tag">AA</span>
+        </div>
+        <div class="finding-body">
+          <p><strong><span class="lang-zh" lang="zh-Hant">可能受影響的使用者</span><span class="lang-en" lang="en">Users potentially affected</span>:</strong> Low-vision users who pinch-zoom, and mobile users</p>
+          <p><strong><span class="lang-zh" lang="zh-Hant">位置</span><span class="lang-en" lang="en">Location</span>:</strong> <code>test/golden/dirty.html:2</code></p>
+          <p><span class="lang-zh" lang="zh-Hant">Viewport meta 阻止使用者放大文字。</span><span class="lang-en" lang="en">The viewport meta tag prevents zoom, so users cannot enlarge text.</span></p>
+          <div class="fix"><strong><span class="lang-zh" lang="zh-Hant">建議調整</span><span class="lang-en" lang="en">Suggested adjustment</span>:</strong> <span class="lang-zh" lang="zh-Hant">移除 user-scalable=no 與低於 5 的 maximum-scale。</span><span class="lang-en" lang="en">Remove user-scalable=no and any maximum-scale below 5; use content=&quot;width=device-width, initial-scale=1&quot;.</span></div>
+          <div class="legal"><strong><span class="lang-zh" lang="zh-Hant">法律參考</span><span class="lang-en" lang="en">Legal note</span>:</strong> May affect ADA / EAA / JIS / Taiwan accessibility expectations depending on deployment context.</div>
+          
+    <p class="learn-more"><strong><span class="lang-zh" lang="zh-Hant">Learn more</span><span class="lang-en" lang="en">Learn more</span>:</strong>
+      <a href="https://www.w3.org/WAI/WCAG22/Understanding/resize-text.html" target="_blank" rel="noopener noreferrer">WCAG 1.4.4</a>
+    </p>
+          <details><summary><span class="lang-zh" lang="zh-Hant">調整前 / 調整後</span><span class="lang-en" lang="en">Before / After</span></summary><div class="code-compare"><div class="code-before"><div class="code-label"><span class="lang-zh" lang="zh-Hant">調整前</span><span class="lang-en" lang="en">Before</span></div><pre><code>&lt;!DOCTYPE html&gt;&lt;html&gt;&lt;head&gt;&lt;title&gt;&lt;/title&gt;
+&lt;meta name=&quot;viewport&quot; content=&quot;width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no&quot;&gt;
+&lt;/head&gt;&lt;body&gt;&lt;div id=&quot;content&quot;&gt;</code></pre></div><div class="code-after"><div class="code-label"><span class="lang-zh" lang="zh-Hant">調整後</span><span class="lang-en" lang="en">After</span></div><pre><code></code></pre></div></div></details>
+        </div>
+      </div>
+    </div>
+  
+    <div class="category-detail" id="detail-touch">
+      <h3><span class="lang-zh" lang="zh-Hant">觸控與目標尺寸</span><span class="lang-en" lang="en">Touch & Targets</span></h3>
+      <p class="category-desc"><span class="lang-zh" lang="zh-Hant">目標尺寸、間距、drag 替代、pointer gesture 與 orientation 假設。</span><span class="lang-en" lang="en">Target size, spacing, drag alternatives, pointer gestures, and orientation assumptions.</span></p>
+      
+      <p class="empty"><span class="lang-zh" lang="zh-Hant">此分類目前無發現項目。</span><span class="lang-en" lang="en">No observations in this category at the moment.</span></p>
+    </div>
+  
+    <div class="category-detail" id="detail-cognitive">
+      <h3><span class="lang-zh" lang="zh-Hant">認知</span><span class="lang-en" lang="en">Cognitive</span></h3>
+      <p class="category-desc"><span class="lang-zh" lang="zh-Hant">一致導覽、help mechanism、易懂標籤、可預期流程與 dark pattern。</span><span class="lang-en" lang="en">Consistent navigation, help mechanisms, readable labels, predictable flows, and dark patterns.</span></p>
+      
+      <p class="empty"><span class="lang-zh" lang="zh-Hant">此分類目前無發現項目。</span><span class="lang-en" lang="en">No observations in this category at the moment.</span></p>
+    </div>
+  
+    <div class="category-detail" id="detail-motion">
+      <h3><span class="lang-zh" lang="zh-Hant">動態與動畫</span><span class="lang-en" lang="en">Motion & Animation</span></h3>
+      <p class="category-desc"><span class="lang-zh" lang="zh-Hant">prefers-reduced-motion、time limit、自動移動內容與互動動畫。</span><span class="lang-en" lang="en">prefers-reduced-motion, time limits, auto-moving content, and animation from interaction.</span></p>
+      
+      <p class="empty"><span class="lang-zh" lang="zh-Hant">此分類目前無發現項目。</span><span class="lang-en" lang="en">No observations in this category at the moment.</span></p>
+    </div>
+  
+    <div class="category-detail" id="detail-media">
+      <h3><span class="lang-zh" lang="zh-Hant">媒體</span><span class="lang-en" lang="en">Media</span></h3>
+      <p class="category-desc"><span class="lang-zh" lang="zh-Hant">Caption、transcript、autoplay、audio control、flash 與替代內容。</span><span class="lang-en" lang="en">Captions, transcripts, autoplay, audio control, flashing content, and media alternatives.</span></p>
+      
+      <p class="empty"><span class="lang-zh" lang="zh-Hant">此分類目前無發現項目。</span><span class="lang-en" lang="en">No observations in this category at the moment.</span></p>
+    </div>
+  
+    <div class="category-detail" id="detail-agent">
+      <h3><span class="lang-zh" lang="zh-Hant">代理可操作性與 AEO</span><span class="lang-en" lang="en">Agent Operability & AEO</span></h3>
+      <p class="category-desc"><span class="lang-zh" lang="zh-Hant">Schema.org、metadata、canonical、heading outline、可爬取內容、robots.txt、sitemap.xml、optional llms.txt 與 answer-engine clarity。</span><span class="lang-en" lang="en">Schema.org, metadata, canonical links, heading outline, crawlable content, robots.txt, sitemap.xml, optional llms.txt, and answer-engine clarity.</span></p>
+      
+    <div class="aeo-disclaimer" role="note" aria-label="AEO sub-score interpretation note">
+      <div class="lang-zh" lang="zh-Hant">
+        <div class="aeo-disclaimer-title">&#9888; 關於 AEO 子分數的解讀</div>
+        <p>
+          AEO 子分數衡量的是<strong>agent 可以協助改善的可引用性前置條件</strong>，例如 JSON-LD、
+          meta tags、canonical、Open Graph、heading outline 與內容可爬取性。這些是實際可處理的建議，
+          但<strong>不是實際引用結果</strong>；結構齊全只代表「比較具備被引用的條件」，不代表 AI 引擎已經引用你的內容。
+        </p>
+        <p class="aeo-disclaimer-cta">
+          因此本段的 finding 可以當成結構修復清單。實務流程是：先修 Beacon 找到的結構問題；若是公開站，
+          再用外部 agent-readiness scanner（例如 Cloudflare 的 isitagentready.com 或 URL Scanner Agent Readiness）
+          交叉檢查 robots.txt、sitemap、Markdown negotiation、Content Signals、MCP/API/OAuth discovery 等 agent-facing
+          標準；最後才用 <strong>server log 的 AI 爬蟲記錄</strong>、<strong>手動在 answer engine 查詢</strong>、
+          以及 <strong>analytics 的 referral 來源</strong>確認引用效果是否真的發生。外部 scanner 可以補強或取代部分結構檢查，
+          但不能取代實際效果量測。
+        </p>
+      </div>
+      <div class="lang-en" lang="en">
+        <div class="aeo-disclaimer-title">&#9888; Reading the AEO Sub-score</div>
+        <p>
+          The AEO sub-score measures <strong>actionable citation-readiness prerequisites</strong>
+          an agent can help improve, such as JSON-LD, meta tags, canonical links, Open Graph,
+          heading outline, and crawlable content. These are real structural recommendations, but
+          <strong>not actual citation outcomes</strong>. Complete structure means "more eligible to
+          be cited", not that any AI engine has cited your content.
+        </p>
+        <p class="aeo-disclaimer-cta">
+          Treat the findings in this section as a structural fix list. A practical workflow is:
+          fix the structural issues Beacon found; for public sites, cross-check with an external
+          agent-readiness scanner such as Cloudflare's isitagentready.com or URL Scanner Agent
+          Readiness for robots.txt, sitemap, Markdown negotiation, Content Signals, MCP/API/OAuth
+          discovery, and similar agent-facing standards; then confirm whether impact happened by
+          checking <strong>AI-crawler hits in server logs</strong>, <strong>manual queries on answer
+          engines</strong>, and <strong>referral sources in analytics</strong>. External scanners can
+          supplement or replace parts of the structural check, but they cannot replace outcome
+          measurement.
+        </p>
+      </div>
+    </div>
+      
+      <div class="finding tip">
+        <div class="finding-header">
+          <span class="severity-icon">&#x1F4A1;</span>
+          <strong><span class="lang-zh" lang="zh-Hant">Meta description 缺失</span><span class="lang-en" lang="en">Meta description is missing</span></strong>
+          <span class="wcag-tag">AEO structural hygiene</span>
+          <span class="level-tag">Review</span>
+        </div>
+        <div class="finding-body">
+          <p><strong><span class="lang-zh" lang="zh-Hant">可能受影響的使用者</span><span class="lang-en" lang="en">Users potentially affected</span>:</strong> Search and answer-engine users evaluating whether to open the result</p>
+          <p><strong><span class="lang-zh" lang="zh-Hant">位置</span><span class="lang-en" lang="en">Location</span>:</strong> <code>test/golden/dirty.html</code></p>
+          <p><span class="lang-zh" lang="zh-Hant">靜態 HTML 中沒有找到 meta description。</span><span class="lang-en" lang="en">No meta description was found in the static HTML.</span></p>
+          <div class="fix"><strong><span class="lang-zh" lang="zh-Hant">建議調整</span><span class="lang-en" lang="en">Suggested adjustment</span>:</strong> <span class="lang-zh" lang="zh-Hant">加入簡短且頁面專屬的 meta description。</span><span class="lang-en" lang="en">Add a concise page-specific meta description.</span></div>
+          <div class="legal"><strong><span class="lang-zh" lang="zh-Hant">法律參考</span><span class="lang-en" lang="en">Legal note</span>:</strong> Not a legal issue; affects search / answer-engine clarity.</div>
+          
+          
+        </div>
+      </div>
+      <div class="finding tip">
+        <div class="finding-header">
+          <span class="severity-icon">&#x1F4A1;</span>
+          <strong><span class="lang-zh" lang="zh-Hant">Canonical link 缺失</span><span class="lang-en" lang="en">Canonical link is missing</span></strong>
+          <span class="wcag-tag">AEO structural hygiene</span>
+          <span class="level-tag">Review</span>
+        </div>
+        <div class="finding-body">
+          <p><strong><span class="lang-zh" lang="zh-Hant">可能受影響的使用者</span><span class="lang-en" lang="en">Users potentially affected</span>:</strong> Search and answer-engine users when duplicate URLs or variants exist</p>
+          <p><strong><span class="lang-zh" lang="zh-Hant">位置</span><span class="lang-en" lang="en">Location</span>:</strong> <code>test/golden/dirty.html</code></p>
+          <p><span class="lang-zh" lang="zh-Hant">靜態 HTML 中沒有找到 canonical URL，crawler 可能需要自行推斷偏好的 URL。</span><span class="lang-en" lang="en">No canonical URL was found in the static HTML, so crawlers may have to infer the preferred URL.</span></p>
+          <div class="fix"><strong><span class="lang-zh" lang="zh-Hant">建議調整</span><span class="lang-en" lang="en">Suggested adjustment</span>:</strong> <span class="lang-zh" lang="zh-Hant">為可索引公開頁加入 &lt;link rel=&quot;canonical&quot; href=&quot;https://example.com/preferred-url&quot;&gt;。</span><span class="lang-en" lang="en">Add &lt;link rel=&quot;canonical&quot; href=&quot;https://example.com/preferred-url&quot;&gt; for indexable public pages.</span></div>
+          <div class="legal"><strong><span class="lang-zh" lang="zh-Hant">法律參考</span><span class="lang-en" lang="en">Legal note</span>:</strong> Not a legal issue; affects search / answer-engine clarity.</div>
+          
+          
+        </div>
+      </div>
+      <div class="finding tip">
+        <div class="finding-header">
+          <span class="severity-icon">&#x1F4A1;</span>
+          <strong><span class="lang-zh" lang="zh-Hant">JSON-LD structured data 缺失</span><span class="lang-en" lang="en">JSON-LD structured data is missing</span></strong>
+          <span class="wcag-tag">AEO structural hygiene</span>
+          <span class="level-tag">Review</span>
+        </div>
+        <div class="finding-body">
+          <p><strong><span class="lang-zh" lang="zh-Hant">可能受影響的使用者</span><span class="lang-en" lang="en">Users potentially affected</span>:</strong> Search and answer-engine users trying to identify the page entity and content type</p>
+          <p><strong><span class="lang-zh" lang="zh-Hant">位置</span><span class="lang-en" lang="en">Location</span>:</strong> <code>test/golden/dirty.html</code></p>
+          <p><span class="lang-zh" lang="zh-Hant">靜態 HTML 中沒有找到 JSON-LD structured data。</span><span class="lang-en" lang="en">No JSON-LD structured data was found in the static HTML.</span></p>
+          <div class="fix"><strong><span class="lang-zh" lang="zh-Hant">建議調整</span><span class="lang-en" lang="en">Suggested adjustment</span>:</strong> <span class="lang-zh" lang="zh-Hant">加入適合頁面的 Schema.org JSON-LD，例如 Organization、Article、FAQPage、Product、BreadcrumbList 或 WebSite。</span><span class="lang-en" lang="en">Add page-appropriate Schema.org JSON-LD, such as Organization, Article, FAQPage, Product, BreadcrumbList, or WebSite.</span></div>
+          <div class="legal"><strong><span class="lang-zh" lang="zh-Hant">法律參考</span><span class="lang-en" lang="en">Legal note</span>:</strong> Not a legal issue; affects answer-engine and search clarity.</div>
+          
+          
+        </div>
+      </div>
+    </div>
+  
+</div>
+
+<!-- Findings Tab -->
+<div id="tab-findings" class="tab-content" role="tabpanel">
+  <h2><span class="lang-zh" lang="zh-Hant">建議優先處理</span><span class="lang-en" lang="en">Priority Items</span></h2>
+  
+      <div class="finding critical">
+        <div class="finding-header">
+          <span class="severity-icon">&#x1F534;</span>
+          <strong><span class="lang-zh" lang="zh-Hant">頁面語言缺失</span><span class="lang-en" lang="en">Page language is missing</span></strong>
+          <span class="wcag-tag">WCAG 2.2: 3.1.1 Language of Page</span>
+          <span class="level-tag">AA</span>
+        </div>
+        <div class="finding-body">
+          <p><strong><span class="lang-zh" lang="zh-Hant">可能受影響的使用者</span><span class="lang-en" lang="en">Users potentially affected</span>:</strong> Screen-reader users and translation users</p>
+          <p><strong><span class="lang-zh" lang="zh-Hant">位置</span><span class="lang-en" lang="en">Location</span>:</strong> <code>test/golden/dirty.html:1</code></p>
+          <p><span class="lang-zh" lang="zh-Hant">HTML 頁面沒有宣告 lang attribute，assistive technology 可能使用錯誤的發音規則。</span><span class="lang-en" lang="en">The HTML page does not declare a lang attribute, so assistive technology may choose the wrong pronunciation rules.</span></p>
+          <div class="fix"><strong><span class="lang-zh" lang="zh-Hant">建議調整</span><span class="lang-en" lang="en">Suggested adjustment</span>:</strong> <span class="lang-zh" lang="zh-Hant">加入正確的語言 attribute，例如 &lt;html lang=&quot;zh-Hant&quot;&gt;。</span><span class="lang-en" lang="en">Add a language attribute such as &lt;html lang=&quot;zh-Hant&quot;&gt; or the correct document language.</span></div>
+          <div class="legal"><strong><span class="lang-zh" lang="zh-Hant">法律參考</span><span class="lang-en" lang="en">Legal note</span>:</strong> May affect ADA / EAA / JIS / Taiwan accessibility expectations depending on deployment context.</div>
+          
+    <p class="learn-more"><strong><span class="lang-zh" lang="zh-Hant">Learn more</span><span class="lang-en" lang="en">Learn more</span>:</strong>
+      <a href="https://www.w3.org/WAI/WCAG22/Understanding/language-of-page.html" target="_blank" rel="noopener noreferrer">WCAG 3.1.1</a>
+    </p>
+          <details><summary><span class="lang-zh" lang="zh-Hant">調整前 / 調整後</span><span class="lang-en" lang="en">Before / After</span></summary><div class="code-compare"><div class="code-before"><div class="code-label"><span class="lang-zh" lang="zh-Hant">調整前</span><span class="lang-en" lang="en">Before</span></div><pre><code>&lt;html&gt;</code></pre></div><div class="code-after"><div class="code-label"><span class="lang-zh" lang="zh-Hant">調整後</span><span class="lang-en" lang="en">After</span></div><pre><code>&lt;html lang=&quot;zh-Hant&quot;&gt;</code></pre></div></div></details>
+        </div>
+      </div>
+      <div class="finding critical">
+        <div class="finding-header">
+          <span class="severity-icon">&#x1F534;</span>
+          <strong><span class="lang-zh" lang="zh-Hant">文件標題缺失</span><span class="lang-en" lang="en">Document title is missing</span></strong>
+          <span class="wcag-tag">WCAG 2.2: 2.4.2 Page Titled</span>
+          <span class="level-tag">AA</span>
+        </div>
+        <div class="finding-body">
+          <p><strong><span class="lang-zh" lang="zh-Hant">可能受影響的使用者</span><span class="lang-en" lang="en">Users potentially affected</span>:</strong> Screen-reader users, keyboard users, and users with many tabs open</p>
+          <p><strong><span class="lang-zh" lang="zh-Hant">位置</span><span class="lang-en" lang="en">Location</span>:</strong> <code>test/golden/dirty.html</code></p>
+          <p><span class="lang-zh" lang="zh-Hant">缺少或空白的 title 會讓頁面在瀏覽器與 assistive technology 中難以辨識。</span><span class="lang-en" lang="en">A missing or empty title makes the page difficult to identify in browser and assistive technology contexts.</span></p>
+          <div class="fix"><strong><span class="lang-zh" lang="zh-Hant">建議調整</span><span class="lang-en" lang="en">Suggested adjustment</span>:</strong> <span class="lang-zh" lang="zh-Hant">加入簡短且唯一的 &lt;title&gt;。</span><span class="lang-en" lang="en">Add a concise, unique &lt;title&gt;.</span></div>
+          <div class="legal"><strong><span class="lang-zh" lang="zh-Hant">法律參考</span><span class="lang-en" lang="en">Legal note</span>:</strong> May affect ADA / EAA / JIS / Taiwan accessibility expectations depending on deployment context.</div>
+          
+    <p class="learn-more"><strong><span class="lang-zh" lang="zh-Hant">Learn more</span><span class="lang-en" lang="en">Learn more</span>:</strong>
+      <a href="https://www.w3.org/WAI/WCAG22/Understanding/page-titled.html" target="_blank" rel="noopener noreferrer">WCAG 2.4.2</a>
+    </p>
+          
+        </div>
+      </div>
+      <div class="finding critical">
+        <div class="finding-header">
+          <span class="severity-icon">&#x1F534;</span>
+          <strong><span class="lang-zh" lang="zh-Hant">靜態 markup 中看不到 main landmark</span><span class="lang-en" lang="en">Main landmark is not statically visible</span></strong>
+          <span class="wcag-tag">WCAG 2.2: 1.3.1 Info and Relationships</span>
+          <span class="level-tag">AA</span>
+        </div>
+        <div class="finding-body">
+          <p><strong><span class="lang-zh" lang="zh-Hant">可能受影響的使用者</span><span class="lang-en" lang="en">Users potentially affected</span>:</strong> Screen-reader and keyboard users navigating by landmarks</p>
+          <p><strong><span class="lang-zh" lang="zh-Hant">位置</span><span class="lang-en" lang="en">Location</span>:</strong> <code>test/golden/dirty.html</code></p>
+          <p><span class="lang-zh" lang="zh-Hant">靜態檔案中沒有找到 &lt;main&gt; 或 role=&quot;main&quot;。</span><span class="lang-en" lang="en">No &lt;main&gt; or role=&quot;main&quot; was found in this static file.</span></p>
+          <div class="fix"><strong><span class="lang-zh" lang="zh-Hant">建議調整</span><span class="lang-en" lang="en">Suggested adjustment</span>:</strong> <span class="lang-zh" lang="zh-Hant">用 &lt;main id=&quot;main-content&quot;&gt; 包住主要內容。</span><span class="lang-en" lang="en">Wrap primary page content in &lt;main id=&quot;main-content&quot;&gt;.</span></div>
+          <div class="legal"><strong><span class="lang-zh" lang="zh-Hant">法律參考</span><span class="lang-en" lang="en">Legal note</span>:</strong> May affect ADA / EAA / JIS / Taiwan accessibility expectations depending on deployment context.</div>
+          
+    <p class="learn-more"><strong><span class="lang-zh" lang="zh-Hant">Learn more</span><span class="lang-en" lang="en">Learn more</span>:</strong>
+      <a href="https://www.w3.org/WAI/WCAG22/Understanding/info-and-relationships.html" target="_blank" rel="noopener noreferrer">WCAG 1.3.1</a>
+    </p>
+          
+        </div>
+      </div>
+      <div class="finding critical">
+        <div class="finding-header">
+          <span class="severity-icon">&#x1F534;</span>
+          <strong><span class="lang-zh" lang="zh-Hant">Heading level 跳級</span><span class="lang-en" lang="en">Heading level is skipped</span></strong>
+          <span class="wcag-tag">WCAG 2.2: 1.3.1 Info and Relationships</span>
+          <span class="level-tag">AA</span>
+        </div>
+        <div class="finding-body">
+          <p><strong><span class="lang-zh" lang="zh-Hant">可能受影響的使用者</span><span class="lang-en" lang="en">Users potentially affected</span>:</strong> Screen-reader users navigating by heading</p>
+          <p><strong><span class="lang-zh" lang="zh-Hant">位置</span><span class="lang-en" lang="en">Location</span>:</strong> <code>test/golden/dirty.html:5</code></p>
+          <p><span class="lang-zh" lang="zh-Hant">Heading hierarchy 有跳級，會影響用 heading 導覽的使用者。</span><span class="lang-en" lang="en">Heading hierarchy skips a level.</span></p>
+          <div class="fix"><strong><span class="lang-zh" lang="zh-Hant">建議調整</span><span class="lang-en" lang="en">Suggested adjustment</span>:</strong> <span class="lang-zh" lang="zh-Hant">使用連續的 heading hierarchy，或只調整視覺樣式而不改 semantic level。</span><span class="lang-en" lang="en">Use a continuous heading hierarchy or adjust the visual style without changing semantic level.</span></div>
+          <div class="legal"><strong><span class="lang-zh" lang="zh-Hant">法律參考</span><span class="lang-en" lang="en">Legal note</span>:</strong> May affect ADA / EAA / JIS / Taiwan accessibility expectations depending on deployment context.</div>
+          
+    <p class="learn-more"><strong><span class="lang-zh" lang="zh-Hant">Learn more</span><span class="lang-en" lang="en">Learn more</span>:</strong>
+      <a href="https://www.w3.org/WAI/WCAG22/Understanding/info-and-relationships.html" target="_blank" rel="noopener noreferrer">WCAG 1.3.1</a>
+    </p>
+          
+        </div>
+      </div>
+      <div class="finding critical">
+        <div class="finding-header">
+          <span class="severity-icon">&#x1F534;</span>
+          <strong><span class="lang-zh" lang="zh-Hant">圖片缺少 alt text</span><span class="lang-en" lang="en">Image is missing alt text</span></strong>
+          <span class="wcag-tag">WCAG 2.2: 1.1.1 Non-text Content</span>
+          <span class="level-tag">AA</span>
+        </div>
+        <div class="finding-body">
+          <p><strong><span class="lang-zh" lang="zh-Hant">可能受影響的使用者</span><span class="lang-en" lang="en">Users potentially affected</span>:</strong> Blind and low-vision users using screen readers</p>
+          <p><strong><span class="lang-zh" lang="zh-Hant">位置</span><span class="lang-en" lang="en">Location</span>:</strong> <code>test/golden/dirty.html:6</code></p>
+          <p><span class="lang-zh" lang="zh-Hant">沒有 alt text 的圖片可能在 assistive technology 中沉默或被不清楚地朗讀。</span><span class="lang-en" lang="en">An image without alt text is silent or announced poorly by assistive technology.</span></p>
+          <div class="fix"><strong><span class="lang-zh" lang="zh-Hant">建議調整</span><span class="lang-en" lang="en">Suggested adjustment</span>:</strong> <span class="lang-zh" lang="zh-Hant">為有意義的圖片加入 alt text；純裝飾圖片使用 alt=&quot;&quot;。</span><span class="lang-en" lang="en">Add meaningful alt text, or alt=&quot;&quot; for purely decorative images.</span></div>
+          <div class="legal"><strong><span class="lang-zh" lang="zh-Hant">法律參考</span><span class="lang-en" lang="en">Legal note</span>:</strong> May affect ADA / EAA / JIS / Taiwan accessibility expectations depending on deployment context.</div>
+          
+    <p class="learn-more"><strong><span class="lang-zh" lang="zh-Hant">Learn more</span><span class="lang-en" lang="en">Learn more</span>:</strong>
+      <a href="https://www.w3.org/WAI/WCAG22/Understanding/non-text-content.html" target="_blank" rel="noopener noreferrer">WCAG 1.1.1</a>
+    </p>
+          <details><summary><span class="lang-zh" lang="zh-Hant">調整前 / 調整後</span><span class="lang-en" lang="en">Before / After</span></summary><div class="code-compare"><div class="code-before"><div class="code-label"><span class="lang-zh" lang="zh-Hant">調整前</span><span class="lang-en" lang="en">Before</span></div><pre><code>&lt;h4&gt;Skipped levels&lt;/h4&gt;
+&lt;img src=&quot;hero.png&quot;&gt;
+&lt;img src=&quot;chart.png&quot;&gt;</code></pre></div><div class="code-after"><div class="code-label"><span class="lang-zh" lang="zh-Hant">調整後</span><span class="lang-en" lang="en">After</span></div><pre><code></code></pre></div></div></details>
+        </div>
+      </div>
+      <div class="finding critical">
+        <div class="finding-header">
+          <span class="severity-icon">&#x1F534;</span>
+          <strong><span class="lang-zh" lang="zh-Hant">圖片缺少 alt text</span><span class="lang-en" lang="en">Image is missing alt text</span></strong>
+          <span class="wcag-tag">WCAG 2.2: 1.1.1 Non-text Content</span>
+          <span class="level-tag">AA</span>
+        </div>
+        <div class="finding-body">
+          <p><strong><span class="lang-zh" lang="zh-Hant">可能受影響的使用者</span><span class="lang-en" lang="en">Users potentially affected</span>:</strong> Blind and low-vision users using screen readers</p>
+          <p><strong><span class="lang-zh" lang="zh-Hant">位置</span><span class="lang-en" lang="en">Location</span>:</strong> <code>test/golden/dirty.html:7</code></p>
+          <p><span class="lang-zh" lang="zh-Hant">沒有 alt text 的圖片可能在 assistive technology 中沉默或被不清楚地朗讀。</span><span class="lang-en" lang="en">An image without alt text is silent or announced poorly by assistive technology.</span></p>
+          <div class="fix"><strong><span class="lang-zh" lang="zh-Hant">建議調整</span><span class="lang-en" lang="en">Suggested adjustment</span>:</strong> <span class="lang-zh" lang="zh-Hant">為有意義的圖片加入 alt text；純裝飾圖片使用 alt=&quot;&quot;。</span><span class="lang-en" lang="en">Add meaningful alt text, or alt=&quot;&quot; for purely decorative images.</span></div>
+          <div class="legal"><strong><span class="lang-zh" lang="zh-Hant">法律參考</span><span class="lang-en" lang="en">Legal note</span>:</strong> May affect ADA / EAA / JIS / Taiwan accessibility expectations depending on deployment context.</div>
+          
+    <p class="learn-more"><strong><span class="lang-zh" lang="zh-Hant">Learn more</span><span class="lang-en" lang="en">Learn more</span>:</strong>
+      <a href="https://www.w3.org/WAI/WCAG22/Understanding/non-text-content.html" target="_blank" rel="noopener noreferrer">WCAG 1.1.1</a>
+    </p>
+          <details><summary><span class="lang-zh" lang="zh-Hant">調整前 / 調整後</span><span class="lang-en" lang="en">Before / After</span></summary><div class="code-compare"><div class="code-before"><div class="code-label"><span class="lang-zh" lang="zh-Hant">調整前</span><span class="lang-en" lang="en">Before</span></div><pre><code>&lt;img src=&quot;hero.png&quot;&gt;
+&lt;img src=&quot;chart.png&quot;&gt;
+&lt;a href=&quot;/dead&quot;&gt;&lt;/a&gt;</code></pre></div><div class="code-after"><div class="code-label"><span class="lang-zh" lang="zh-Hant">調整後</span><span class="lang-en" lang="en">After</span></div><pre><code></code></pre></div></div></details>
+        </div>
+      </div>
+      <div class="finding critical">
+        <div class="finding-header">
+          <span class="severity-icon">&#x1F534;</span>
+          <strong>Frame is missing a title</strong>
+          <span class="wcag-tag">WCAG 2.2: 4.1.2 Name, Role, Value</span>
+          <span class="level-tag">A</span>
+        </div>
+        <div class="finding-body">
+          <p><strong><span class="lang-zh" lang="zh-Hant">可能受影響的使用者</span><span class="lang-en" lang="en">Users potentially affected</span>:</strong> Screen-reader users navigating between frames</p>
+          <p><strong><span class="lang-zh" lang="zh-Hant">位置</span><span class="lang-en" lang="en">Location</span>:</strong> <code>test/golden/dirty.html:12</code></p>
+          <p>An &lt;iframe&gt; without a title gives screen-reader users no way to know what the frame contains before entering it.</p>
+          <div class="fix"><strong><span class="lang-zh" lang="zh-Hant">建議調整</span><span class="lang-en" lang="en">Suggested adjustment</span>:</strong> Add title=&quot;...&quot; describing the frame content.</div>
+          <div class="legal"><strong><span class="lang-zh" lang="zh-Hant">法律參考</span><span class="lang-en" lang="en">Legal note</span>:</strong> May affect ADA / EAA / JIS / Taiwan accessibility expectations depending on deployment context.</div>
+          
+    <p class="learn-more"><strong><span class="lang-zh" lang="zh-Hant">Learn more</span><span class="lang-en" lang="en">Learn more</span>:</strong>
+      <a href="https://www.w3.org/WAI/WCAG22/Understanding/name-role-value.html" target="_blank" rel="noopener noreferrer">WCAG 4.1.2</a>
+    </p>
+          <details><summary><span class="lang-zh" lang="zh-Hant">調整前 / 調整後</span><span class="lang-en" lang="en">Before / After</span></summary><div class="code-compare"><div class="code-before"><div class="code-label"><span class="lang-zh" lang="zh-Hant">調整前</span><span class="lang-en" lang="en">Before</span></div><pre><code>&lt;input type=&quot;text&quot; name=&quot;q&quot; placeholder=&quot;Search&quot;&gt;
+&lt;iframe src=&quot;/widget.html&quot;&gt;&lt;/iframe&gt;
+&lt;ul&gt;&lt;div&gt;not a list item&lt;/div&gt;&lt;/ul&gt;</code></pre></div><div class="code-after"><div class="code-label"><span class="lang-zh" lang="zh-Hant">調整後</span><span class="lang-en" lang="en">After</span></div><pre><code></code></pre></div></div></details>
+        </div>
+      </div>
+      <div class="finding critical">
+        <div class="finding-header">
+          <span class="severity-icon">&#x1F534;</span>
+          <strong><span class="lang-zh" lang="zh-Hant">List 含有非 list-item 直接子元素</span><span class="lang-en" lang="en">List contains a non-list-item child</span></strong>
+          <span class="wcag-tag">WCAG 2.2: 1.3.1 Info and Relationships</span>
+          <span class="level-tag">A</span>
+        </div>
+        <div class="finding-body">
+          <p><strong><span class="lang-zh" lang="zh-Hant">可能受影響的使用者</span><span class="lang-en" lang="en">Users potentially affected</span>:</strong> Screen-reader users navigating by list semantics</p>
+          <p><strong><span class="lang-zh" lang="zh-Hant">位置</span><span class="lang-en" lang="en">Location</span>:</strong> <code>test/golden/dirty.html:13</code></p>
+          <p><span class="lang-zh" lang="zh-Hant">&lt;ul&gt;/&lt;ol&gt; 的直接子元素不是 &lt;li&gt;、&lt;script&gt; 或 &lt;template&gt;，screen reader 可能無法正確朗讀 list 或 item count。</span><span class="lang-en" lang="en">A &lt;ul&gt;/&lt;ol&gt; has a direct child that is not &lt;li&gt;, &lt;script&gt;, or &lt;template&gt;. Screen readers may not announce the list or its item count correctly.</span></p>
+          <div class="fix"><strong><span class="lang-zh" lang="zh-Hant">建議調整</span><span class="lang-en" lang="en">Suggested adjustment</span>:</strong> <span class="lang-zh" lang="zh-Hant">讓 &lt;li&gt; 成為唯一結構子元素；或在不可避免的非標準結構中使用 role=&quot;list&quot;/role=&quot;listitem&quot;。</span><span class="lang-en" lang="en">Make &lt;li&gt; the only structural child; move wrapper elements inside an &lt;li&gt;, or use role=&quot;list&quot;/role=&quot;listitem&quot; if a non-standard structure is unavoidable.</span></div>
+          <div class="legal"><strong><span class="lang-zh" lang="zh-Hant">法律參考</span><span class="lang-en" lang="en">Legal note</span>:</strong> May affect ADA / EAA / JIS / Taiwan accessibility expectations depending on deployment context.</div>
+          
+    <p class="learn-more"><strong><span class="lang-zh" lang="zh-Hant">Learn more</span><span class="lang-en" lang="en">Learn more</span>:</strong>
+      <a href="https://www.w3.org/WAI/WCAG22/Understanding/info-and-relationships.html" target="_blank" rel="noopener noreferrer">WCAG 1.3.1</a>
+    </p>
+          <details><summary><span class="lang-zh" lang="zh-Hant">調整前 / 調整後</span><span class="lang-en" lang="en">Before / After</span></summary><div class="code-compare"><div class="code-before"><div class="code-label"><span class="lang-zh" lang="zh-Hant">調整前</span><span class="lang-en" lang="en">Before</span></div><pre><code>&lt;iframe src=&quot;/widget.html&quot;&gt;&lt;/iframe&gt;
+&lt;ul&gt;&lt;div&gt;not a list item&lt;/div&gt;&lt;/ul&gt;
+&lt;span onclick=&quot;go()&quot;&gt;Go&lt;/span&gt;</code></pre></div><div class="code-after"><div class="code-label"><span class="lang-zh" lang="zh-Hant">調整後</span><span class="lang-en" lang="en">After</span></div><pre><code></code></pre></div></div></details>
+        </div>
+      </div>
+      <div class="finding critical">
+        <div class="finding-header">
+          <span class="severity-icon">&#x1F534;</span>
+          <strong><span class="lang-zh" lang="zh-Hant">Button 可能沒有 accessible name</span><span class="lang-en" lang="en">Button may not have an accessible name</span></strong>
+          <span class="wcag-tag">WCAG 2.2: 4.1.2 Name, Role, Value</span>
+          <span class="level-tag">AA</span>
+        </div>
+        <div class="finding-body">
+          <p><strong><span class="lang-zh" lang="zh-Hant">可能受影響的使用者</span><span class="lang-en" lang="en">Users potentially affected</span>:</strong> Screen-reader and voice-control users</p>
+          <p><strong><span class="lang-zh" lang="zh-Hant">位置</span><span class="lang-en" lang="en">Location</span>:</strong> <code>test/golden/dirty.html:10</code></p>
+          <p><span class="lang-zh" lang="zh-Hant">沒有可見文字或 accessible label 的 button 會讓使用者難以理解或用名稱操作。</span><span class="lang-en" lang="en">A button with no visible text or accessible label is hard to understand or activate by name.</span></p>
+          <div class="fix"><strong><span class="lang-zh" lang="zh-Hant">建議調整</span><span class="lang-en" lang="en">Suggested adjustment</span>:</strong> <span class="lang-zh" lang="zh-Hant">加入可見文字、aria-label 或 aria-labelledby。</span><span class="lang-en" lang="en">Add visible text, aria-label, or aria-labelledby.</span></div>
+          <div class="legal"><strong><span class="lang-zh" lang="zh-Hant">法律參考</span><span class="lang-en" lang="en">Legal note</span>:</strong> May affect ADA / EAA / JIS / Taiwan accessibility expectations depending on deployment context.</div>
+          
+    <p class="learn-more"><strong><span class="lang-zh" lang="zh-Hant">Learn more</span><span class="lang-en" lang="en">Learn more</span>:</strong>
+      <a href="https://www.w3.org/WAI/WCAG22/Understanding/name-role-value.html" target="_blank" rel="noopener noreferrer">WCAG 4.1.2</a>
+    </p>
+          <details><summary><span class="lang-zh" lang="zh-Hant">調整前 / 調整後</span><span class="lang-en" lang="en">Before / After</span></summary><div class="code-compare"><div class="code-before"><div class="code-label"><span class="lang-zh" lang="zh-Hant">調整前</span><span class="lang-en" lang="en">Before</span></div><pre><code>&lt;a href=&quot;/icon&quot;&gt;&lt;img alt=&quot;&quot; src=&quot;icon.png&quot;&gt;&lt;/a&gt;
+&lt;button&gt;&lt;/button&gt;
+&lt;input type=&quot;text&quot; name=&quot;q&quot; placeholder=&quot;Search&quot;&gt;</code></pre></div><div class="code-after"><div class="code-label"><span class="lang-zh" lang="zh-Hant">調整後</span><span class="lang-en" lang="en">After</span></div><pre><code></code></pre></div></div></details>
+        </div>
+      </div>
+      <div class="finding critical">
+        <div class="finding-header">
+          <span class="severity-icon">&#x1F534;</span>
+          <strong><span class="lang-zh" lang="zh-Hant">Link 可能沒有 accessible name</span><span class="lang-en" lang="en">Link may not have an accessible name</span></strong>
+          <span class="wcag-tag">WCAG 2.2: 4.1.2 Name, Role, Value</span>
+          <span class="level-tag">A</span>
+        </div>
+        <div class="finding-body">
+          <p><strong><span class="lang-zh" lang="zh-Hant">可能受影響的使用者</span><span class="lang-en" lang="en">Users potentially affected</span>:</strong> Screen-reader, voice-control, and keyboard users</p>
+          <p><strong><span class="lang-zh" lang="zh-Hant">位置</span><span class="lang-en" lang="en">Location</span>:</strong> <code>test/golden/dirty.html:8</code></p>
+          <p><span class="lang-zh" lang="zh-Hant">Link 沒有可見文字、ARIA label、title、圖片 alt 或 SVG title 時，screen reader 可能只朗讀為一般 link。</span><span class="lang-en" lang="en">A link with no visible text, no aria-label/aria-labelledby/title, and no image alt or SVG title has no accessible name.</span></p>
+          <div class="fix"><strong><span class="lang-zh" lang="zh-Hant">建議調整</span><span class="lang-en" lang="en">Suggested adjustment</span>:</strong> <span class="lang-zh" lang="zh-Hant">加入可見 link text、aria-label/aria-labelledby/title、包裹圖片的 alt text，或 &lt;svg&gt;&lt;title&gt;。</span><span class="lang-en" lang="en">Add visible link text, an aria-label/aria-labelledby/title, give a wrapped &lt;img&gt; meaningful alt text, or add an &lt;svg&gt;&lt;title&gt;.</span></div>
+          <div class="legal"><strong><span class="lang-zh" lang="zh-Hant">法律參考</span><span class="lang-en" lang="en">Legal note</span>:</strong> May affect ADA / EAA / JIS / Taiwan accessibility expectations depending on deployment context.</div>
+          
+    <p class="learn-more"><strong><span class="lang-zh" lang="zh-Hant">Learn more</span><span class="lang-en" lang="en">Learn more</span>:</strong>
+      <a href="https://www.w3.org/WAI/WCAG22/Understanding/name-role-value.html" target="_blank" rel="noopener noreferrer">WCAG 4.1.2</a>
+    </p>
+          <details><summary><span class="lang-zh" lang="zh-Hant">調整前 / 調整後</span><span class="lang-en" lang="en">Before / After</span></summary><div class="code-compare"><div class="code-before"><div class="code-label"><span class="lang-zh" lang="zh-Hant">調整前</span><span class="lang-en" lang="en">Before</span></div><pre><code>&lt;img src=&quot;chart.png&quot;&gt;
+&lt;a href=&quot;/dead&quot;&gt;&lt;/a&gt;
+&lt;a href=&quot;/icon&quot;&gt;&lt;img alt=&quot;&quot; src=&quot;icon.png&quot;&gt;&lt;/a&gt;</code></pre></div><div class="code-after"><div class="code-label"><span class="lang-zh" lang="zh-Hant">調整後</span><span class="lang-en" lang="en">After</span></div><pre><code></code></pre></div></div></details>
+        </div>
+      </div>
+      <div class="finding critical">
+        <div class="finding-header">
+          <span class="severity-icon">&#x1F534;</span>
+          <strong><span class="lang-zh" lang="zh-Hant">Link 可能沒有 accessible name</span><span class="lang-en" lang="en">Link may not have an accessible name</span></strong>
+          <span class="wcag-tag">WCAG 2.2: 4.1.2 Name, Role, Value</span>
+          <span class="level-tag">A</span>
+        </div>
+        <div class="finding-body">
+          <p><strong><span class="lang-zh" lang="zh-Hant">可能受影響的使用者</span><span class="lang-en" lang="en">Users potentially affected</span>:</strong> Screen-reader, voice-control, and keyboard users</p>
+          <p><strong><span class="lang-zh" lang="zh-Hant">位置</span><span class="lang-en" lang="en">Location</span>:</strong> <code>test/golden/dirty.html:9</code></p>
+          <p><span class="lang-zh" lang="zh-Hant">Link 沒有可見文字、ARIA label、title、圖片 alt 或 SVG title 時，screen reader 可能只朗讀為一般 link。</span><span class="lang-en" lang="en">A link with no visible text, no aria-label/aria-labelledby/title, and no image alt or SVG title has no accessible name.</span></p>
+          <div class="fix"><strong><span class="lang-zh" lang="zh-Hant">建議調整</span><span class="lang-en" lang="en">Suggested adjustment</span>:</strong> <span class="lang-zh" lang="zh-Hant">加入可見 link text、aria-label/aria-labelledby/title、包裹圖片的 alt text，或 &lt;svg&gt;&lt;title&gt;。</span><span class="lang-en" lang="en">Add visible link text, an aria-label/aria-labelledby/title, give a wrapped &lt;img&gt; meaningful alt text, or add an &lt;svg&gt;&lt;title&gt;.</span></div>
+          <div class="legal"><strong><span class="lang-zh" lang="zh-Hant">法律參考</span><span class="lang-en" lang="en">Legal note</span>:</strong> May affect ADA / EAA / JIS / Taiwan accessibility expectations depending on deployment context.</div>
+          
+    <p class="learn-more"><strong><span class="lang-zh" lang="zh-Hant">Learn more</span><span class="lang-en" lang="en">Learn more</span>:</strong>
+      <a href="https://www.w3.org/WAI/WCAG22/Understanding/name-role-value.html" target="_blank" rel="noopener noreferrer">WCAG 4.1.2</a>
+    </p>
+          <details><summary><span class="lang-zh" lang="zh-Hant">調整前 / 調整後</span><span class="lang-en" lang="en">Before / After</span></summary><div class="code-compare"><div class="code-before"><div class="code-label"><span class="lang-zh" lang="zh-Hant">調整前</span><span class="lang-en" lang="en">Before</span></div><pre><code>&lt;a href=&quot;/dead&quot;&gt;&lt;/a&gt;
+&lt;a href=&quot;/icon&quot;&gt;&lt;img alt=&quot;&quot; src=&quot;icon.png&quot;&gt;&lt;/a&gt;
+&lt;button&gt;&lt;/button&gt;</code></pre></div><div class="code-after"><div class="code-label"><span class="lang-zh" lang="zh-Hant">調整後</span><span class="lang-en" lang="en">After</span></div><pre><code></code></pre></div></div></details>
+        </div>
+      </div>
+      <div class="finding critical">
+        <div class="finding-header">
+          <span class="severity-icon">&#x1F534;</span>
+          <strong><span class="lang-zh" lang="zh-Hant">可點擊元素不是 button</span><span class="lang-en" lang="en">Clickable non-button element</span></strong>
+          <span class="wcag-tag">WCAG 2.2: 2.1.1 Keyboard</span>
+          <span class="level-tag">A</span>
+        </div>
+        <div class="finding-body">
+          <p><strong><span class="lang-zh" lang="zh-Hant">可能受影響的使用者</span><span class="lang-en" lang="en">Users potentially affected</span>:</strong> Keyboard-only, switch-control, screen-reader, and voice-control users</p>
+          <p><strong><span class="lang-zh" lang="zh-Hant">位置</span><span class="lang-en" lang="en">Location</span>:</strong> <code>test/golden/dirty.html:14</code></p>
+          <p><span class="lang-zh" lang="zh-Hant">可點擊的 &lt;div&gt; 或 &lt;span&gt; 預設無法用鍵盤操作。</span><span class="lang-en" lang="en">Clickable &lt;div&gt; or &lt;span&gt; elements are not keyboard-operable by default.</span></p>
+          <div class="fix"><strong><span class="lang-zh" lang="zh-Hant">建議調整</span><span class="lang-en" lang="en">Suggested adjustment</span>:</strong> <span class="lang-zh" lang="zh-Hant">動作使用 &lt;button&gt;；若必須自訂語意，加入 role、tabindex 與 Enter/Space handling。</span><span class="lang-en" lang="en">Use &lt;button&gt; for actions. If custom semantics are unavoidable, add role, tabindex, and Enter/Space handling.</span></div>
+          <div class="legal"><strong><span class="lang-zh" lang="zh-Hant">法律參考</span><span class="lang-en" lang="en">Legal note</span>:</strong> May affect ADA / EAA / JIS / Taiwan accessibility expectations depending on deployment context.</div>
+          
+    <p class="learn-more"><strong><span class="lang-zh" lang="zh-Hant">Learn more</span><span class="lang-en" lang="en">Learn more</span>:</strong>
+      <a href="https://www.w3.org/WAI/WCAG22/Understanding/keyboard.html" target="_blank" rel="noopener noreferrer">WCAG 2.1.1</a>
+    </p>
+          <details><summary><span class="lang-zh" lang="zh-Hant">調整前 / 調整後</span><span class="lang-en" lang="en">Before / After</span></summary><div class="code-compare"><div class="code-before"><div class="code-label"><span class="lang-zh" lang="zh-Hant">調整前</span><span class="lang-en" lang="en">Before</span></div><pre><code>&lt;ul&gt;&lt;div&gt;not a list item&lt;/div&gt;&lt;/ul&gt;
+&lt;span onclick=&quot;go()&quot;&gt;Go&lt;/span&gt;
+&lt;div style=&quot;display:none&quot;&gt;&lt;img src=&quot;hidden-pixel.gif&quot;&gt;&lt;iframe src=&quot;/tracker.html&quot;&gt;&lt;/iframe&gt;&lt;/div&gt;</code></pre></div><div class="code-after"><div class="code-label"><span class="lang-zh" lang="zh-Hant">調整後</span><span class="lang-en" lang="en">After</span></div><pre><code></code></pre></div></div></details>
+        </div>
+      </div>
+      <div class="finding critical">
+        <div class="finding-header">
+          <span class="severity-icon">&#x1F534;</span>
+          <strong><span class="lang-zh" lang="zh-Hant">Input 可能缺少 accessible label</span><span class="lang-en" lang="en">Input may be missing an accessible label</span></strong>
+          <span class="wcag-tag">WCAG 2.2: 3.3.2 Labels or Instructions</span>
+          <span class="level-tag">AA</span>
+        </div>
+        <div class="finding-body">
+          <p><strong><span class="lang-zh" lang="zh-Hant">可能受影響的使用者</span><span class="lang-en" lang="en">Users potentially affected</span>:</strong> Screen-reader, voice-control, and cognitive disability users</p>
+          <p><strong><span class="lang-zh" lang="zh-Hant">位置</span><span class="lang-en" lang="en">Location</span>:</strong> <code>test/golden/dirty.html:11</code></p>
+          <p><span class="lang-zh" lang="zh-Hant">Input 在靜態 markup 中沒有明顯 id 或 ARIA label。</span><span class="lang-en" lang="en">The input has no obvious id or ARIA label in static markup.</span></p>
+          <div class="fix"><strong><span class="lang-zh" lang="zh-Hant">建議調整</span><span class="lang-en" lang="en">Suggested adjustment</span>:</strong> <span class="lang-zh" lang="zh-Hant">搭配 &lt;label for=&quot;...&quot;&gt;，或在已有可見 label 時使用 aria-labelledby。</span><span class="lang-en" lang="en">Pair it with a &lt;label for=&quot;...&quot;&gt; or use aria-labelledby when a visible label already exists.</span></div>
+          <div class="legal"><strong><span class="lang-zh" lang="zh-Hant">法律參考</span><span class="lang-en" lang="en">Legal note</span>:</strong> May affect ADA / EAA / JIS / Taiwan accessibility expectations depending on deployment context.</div>
+          
+    <p class="learn-more"><strong><span class="lang-zh" lang="zh-Hant">Learn more</span><span class="lang-en" lang="en">Learn more</span>:</strong>
+      <a href="https://www.w3.org/WAI/WCAG22/Understanding/labels-or-instructions.html" target="_blank" rel="noopener noreferrer">WCAG 3.3.2</a>
+    </p>
+          <details><summary><span class="lang-zh" lang="zh-Hant">調整前 / 調整後</span><span class="lang-en" lang="en">Before / After</span></summary><div class="code-compare"><div class="code-before"><div class="code-label"><span class="lang-zh" lang="zh-Hant">調整前</span><span class="lang-en" lang="en">Before</span></div><pre><code>&lt;button&gt;&lt;/button&gt;
+&lt;input type=&quot;text&quot; name=&quot;q&quot; placeholder=&quot;Search&quot;&gt;
+&lt;iframe src=&quot;/widget.html&quot;&gt;&lt;/iframe&gt;</code></pre></div><div class="code-after"><div class="code-label"><span class="lang-zh" lang="zh-Hant">調整後</span><span class="lang-en" lang="en">After</span></div><pre><code></code></pre></div></div></details>
+        </div>
+      </div>
+
+  <h2><span class="lang-zh" lang="zh-Hant">建議留意項目</span><span class="lang-en" lang="en">Items to Note</span></h2>
+  
+      <div class="finding warning">
+        <div class="finding-header">
+          <span class="severity-icon">&#9888;</span>
+          <strong><span class="lang-zh" lang="zh-Hant">Viewport meta 禁用 zoom</span><span class="lang-en" lang="en">Viewport meta disables zoom</span></strong>
+          <span class="wcag-tag">WCAG 2.2: 1.4.4 Resize Text</span>
+          <span class="level-tag">AA</span>
+        </div>
+        <div class="finding-body">
+          <p><strong><span class="lang-zh" lang="zh-Hant">可能受影響的使用者</span><span class="lang-en" lang="en">Users potentially affected</span>:</strong> Low-vision users who pinch-zoom, and mobile users</p>
+          <p><strong><span class="lang-zh" lang="zh-Hant">位置</span><span class="lang-en" lang="en">Location</span>:</strong> <code>test/golden/dirty.html:2</code></p>
+          <p><span class="lang-zh" lang="zh-Hant">Viewport meta 阻止使用者放大文字。</span><span class="lang-en" lang="en">The viewport meta tag prevents zoom, so users cannot enlarge text.</span></p>
+          <div class="fix"><strong><span class="lang-zh" lang="zh-Hant">建議調整</span><span class="lang-en" lang="en">Suggested adjustment</span>:</strong> <span class="lang-zh" lang="zh-Hant">移除 user-scalable=no 與低於 5 的 maximum-scale。</span><span class="lang-en" lang="en">Remove user-scalable=no and any maximum-scale below 5; use content=&quot;width=device-width, initial-scale=1&quot;.</span></div>
+          <div class="legal"><strong><span class="lang-zh" lang="zh-Hant">法律參考</span><span class="lang-en" lang="en">Legal note</span>:</strong> May affect ADA / EAA / JIS / Taiwan accessibility expectations depending on deployment context.</div>
+          
+    <p class="learn-more"><strong><span class="lang-zh" lang="zh-Hant">Learn more</span><span class="lang-en" lang="en">Learn more</span>:</strong>
+      <a href="https://www.w3.org/WAI/WCAG22/Understanding/resize-text.html" target="_blank" rel="noopener noreferrer">WCAG 1.4.4</a>
+    </p>
+          <details><summary><span class="lang-zh" lang="zh-Hant">調整前 / 調整後</span><span class="lang-en" lang="en">Before / After</span></summary><div class="code-compare"><div class="code-before"><div class="code-label"><span class="lang-zh" lang="zh-Hant">調整前</span><span class="lang-en" lang="en">Before</span></div><pre><code>&lt;!DOCTYPE html&gt;&lt;html&gt;&lt;head&gt;&lt;title&gt;&lt;/title&gt;
+&lt;meta name=&quot;viewport&quot; content=&quot;width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no&quot;&gt;
+&lt;/head&gt;&lt;body&gt;&lt;div id=&quot;content&quot;&gt;</code></pre></div><div class="code-after"><div class="code-label"><span class="lang-zh" lang="zh-Hant">調整後</span><span class="lang-en" lang="en">After</span></div><pre><code></code></pre></div></div></details>
+        </div>
+      </div>
+
+  <h2><span class="lang-zh" lang="zh-Hant">參考建議與最佳實踐</span><span class="lang-en" lang="en">Suggestions & Best Practices</span></h2>
+  
+      <div class="finding tip">
+        <div class="finding-header">
+          <span class="severity-icon">&#x1F4A1;</span>
+          <strong><span class="lang-zh" lang="zh-Hant">Meta description 缺失</span><span class="lang-en" lang="en">Meta description is missing</span></strong>
+          <span class="wcag-tag">AEO structural hygiene</span>
+          <span class="level-tag">Review</span>
+        </div>
+        <div class="finding-body">
+          <p><strong><span class="lang-zh" lang="zh-Hant">可能受影響的使用者</span><span class="lang-en" lang="en">Users potentially affected</span>:</strong> Search and answer-engine users evaluating whether to open the result</p>
+          <p><strong><span class="lang-zh" lang="zh-Hant">位置</span><span class="lang-en" lang="en">Location</span>:</strong> <code>test/golden/dirty.html</code></p>
+          <p><span class="lang-zh" lang="zh-Hant">靜態 HTML 中沒有找到 meta description。</span><span class="lang-en" lang="en">No meta description was found in the static HTML.</span></p>
+          <div class="fix"><strong><span class="lang-zh" lang="zh-Hant">建議調整</span><span class="lang-en" lang="en">Suggested adjustment</span>:</strong> <span class="lang-zh" lang="zh-Hant">加入簡短且頁面專屬的 meta description。</span><span class="lang-en" lang="en">Add a concise page-specific meta description.</span></div>
+          <div class="legal"><strong><span class="lang-zh" lang="zh-Hant">法律參考</span><span class="lang-en" lang="en">Legal note</span>:</strong> Not a legal issue; affects search / answer-engine clarity.</div>
+          
+          
+        </div>
+      </div>
+      <div class="finding tip">
+        <div class="finding-header">
+          <span class="severity-icon">&#x1F4A1;</span>
+          <strong><span class="lang-zh" lang="zh-Hant">Canonical link 缺失</span><span class="lang-en" lang="en">Canonical link is missing</span></strong>
+          <span class="wcag-tag">AEO structural hygiene</span>
+          <span class="level-tag">Review</span>
+        </div>
+        <div class="finding-body">
+          <p><strong><span class="lang-zh" lang="zh-Hant">可能受影響的使用者</span><span class="lang-en" lang="en">Users potentially affected</span>:</strong> Search and answer-engine users when duplicate URLs or variants exist</p>
+          <p><strong><span class="lang-zh" lang="zh-Hant">位置</span><span class="lang-en" lang="en">Location</span>:</strong> <code>test/golden/dirty.html</code></p>
+          <p><span class="lang-zh" lang="zh-Hant">靜態 HTML 中沒有找到 canonical URL，crawler 可能需要自行推斷偏好的 URL。</span><span class="lang-en" lang="en">No canonical URL was found in the static HTML, so crawlers may have to infer the preferred URL.</span></p>
+          <div class="fix"><strong><span class="lang-zh" lang="zh-Hant">建議調整</span><span class="lang-en" lang="en">Suggested adjustment</span>:</strong> <span class="lang-zh" lang="zh-Hant">為可索引公開頁加入 &lt;link rel=&quot;canonical&quot; href=&quot;https://example.com/preferred-url&quot;&gt;。</span><span class="lang-en" lang="en">Add &lt;link rel=&quot;canonical&quot; href=&quot;https://example.com/preferred-url&quot;&gt; for indexable public pages.</span></div>
+          <div class="legal"><strong><span class="lang-zh" lang="zh-Hant">法律參考</span><span class="lang-en" lang="en">Legal note</span>:</strong> Not a legal issue; affects search / answer-engine clarity.</div>
+          
+          
+        </div>
+      </div>
+      <div class="finding tip">
+        <div class="finding-header">
+          <span class="severity-icon">&#x1F4A1;</span>
+          <strong><span class="lang-zh" lang="zh-Hant">JSON-LD structured data 缺失</span><span class="lang-en" lang="en">JSON-LD structured data is missing</span></strong>
+          <span class="wcag-tag">AEO structural hygiene</span>
+          <span class="level-tag">Review</span>
+        </div>
+        <div class="finding-body">
+          <p><strong><span class="lang-zh" lang="zh-Hant">可能受影響的使用者</span><span class="lang-en" lang="en">Users potentially affected</span>:</strong> Search and answer-engine users trying to identify the page entity and content type</p>
+          <p><strong><span class="lang-zh" lang="zh-Hant">位置</span><span class="lang-en" lang="en">Location</span>:</strong> <code>test/golden/dirty.html</code></p>
+          <p><span class="lang-zh" lang="zh-Hant">靜態 HTML 中沒有找到 JSON-LD structured data。</span><span class="lang-en" lang="en">No JSON-LD structured data was found in the static HTML.</span></p>
+          <div class="fix"><strong><span class="lang-zh" lang="zh-Hant">建議調整</span><span class="lang-en" lang="en">Suggested adjustment</span>:</strong> <span class="lang-zh" lang="zh-Hant">加入適合頁面的 Schema.org JSON-LD，例如 Organization、Article、FAQPage、Product、BreadcrumbList 或 WebSite。</span><span class="lang-en" lang="en">Add page-appropriate Schema.org JSON-LD, such as Organization, Article, FAQPage, Product, BreadcrumbList, or WebSite.</span></div>
+          <div class="legal"><strong><span class="lang-zh" lang="zh-Hant">法律參考</span><span class="lang-en" lang="en">Legal note</span>:</strong> Not a legal issue; affects answer-engine and search clarity.</div>
+          
+          
+        </div>
+      </div>
+
+  
+      <section class="axe-evidence">
+        <h3><span class="lang-zh" lang="zh-Hant">Live audit evidence</span><span class="lang-en" lang="en">Live Audit Evidence</span></h3>
+        <p class="empty">
+          <span class="lang-zh" lang="zh-Hant">本次 JSON 沒有完整 axe 結果。這是 Tier-1 fallback，contrast、visibility 與 runtime DOM 狀態需要 live browser audit。</span><span class="lang-en" lang="en">This JSON does not include full axe results. This is a Tier-1 fallback; contrast, visibility, and runtime DOM state require a live browser audit.</span>
+        </p>
+      </section>
+</div>
+
+<!-- Legal Tab -->
+<div id="tab-legal" class="tab-content" role="tabpanel">
+  
+    <div class="legal-risk-panel">
+      <h3><span class="lang-zh" lang="zh-Hant">法域脈絡與 WCAG 對照</span><span class="lang-en" lang="en">Jurisdiction Context & WCAG Mapping</span></h3>
+      <div class="legal-context-note">
+        <div class="lang-zh" lang="zh-Hant">
+          本頁提供的是<strong>法域脈絡與 WCAG 技術準則對照</strong>，不是法律意見，也不是依 warning 數量計算的法律風險分數。
+          本次 findings 對應的準則：<strong>1.1.1 Non-text Content; 1.3.1 Info and Relationships; 1.4.4 Resize Text; 2.1.1 Keyboard; 2.4.2 Page Titled; 3.1.1 Language of Page; 3.3.2 Labels or Instructions; 4.1.2 Name, Role, Value</strong>。
+        </div>
+        <div class="lang-en" lang="en">
+          This page provides <strong>jurisdiction context and WCAG technical mapping</strong>, not legal advice and not a warning-count-derived legal conclusion.
+          Criteria mapped by this audit: <strong>1.1.1 Non-text Content; 1.3.1 Info and Relationships; 1.4.4 Resize Text; 2.1.1 Keyboard; 2.4.2 Page Titled; 3.1.1 Language of Page; 3.3.2 Labels or Instructions; 4.1.2 Name, Role, Value</strong>.
+        </div>
+      </div>
+      <div class="risk-grid">
+        
+          <div class="risk-card">
+            <div class="risk-header">
+              <strong>US ADA</strong>
+              <span class="context-badge">Context</span>
+            </div>
+            <p>ADA Title III / Section 508 context &mdash; Use the mapped WCAG criteria as technical evidence; legal exposure depends on business model, sector, and jurisdiction-specific facts.</p>
+            
+            <p class="criteria-map"><strong>WCAG:</strong> 1.1.1 Non-text Content; 1.3.1 Info and Relationships; 1.4.4 Resize Text; 2.1.1 Keyboard; 2.4.2 Page Titled; 3.1.1 Language of Page; 3.3.2 Labels or Instructions; 4.1.2 Name, Role, Value</p>
+          </div>
+          <div class="risk-card">
+            <div class="risk-header">
+              <strong>EU EAA</strong>
+              <span class="context-badge">Context</span>
+            </div>
+            <p>European Accessibility Act &mdash; Use the mapped WCAG criteria as technical evidence for consumer digital-service accessibility planning.</p>
+            
+            <p class="criteria-map"><strong>WCAG:</strong> 1.1.1 Non-text Content; 1.3.1 Info and Relationships; 1.4.4 Resize Text; 2.1.1 Keyboard; 2.4.2 Page Titled; 3.1.1 Language of Page; 3.3.2 Labels or Instructions; 4.1.2 Name, Role, Value</p>
+          </div>
+          <div class="risk-card">
+            <div class="risk-header">
+              <strong>Japan JIS</strong>
+              <span class="context-badge">Context</span>
+            </div>
+            <p>JIS X 8341-3 context &mdash; Use the mapped WCAG criteria as technical evidence; confirm procurement or sector requirements separately.</p>
+            
+            <p class="criteria-map"><strong>WCAG:</strong> 1.1.1 Non-text Content; 1.3.1 Info and Relationships; 1.4.4 Resize Text; 2.1.1 Keyboard; 2.4.2 Page Titled; 3.1.1 Language of Page; 3.3.2 Labels or Instructions; 4.1.2 Name, Role, Value</p>
+          </div>
+          <div class="risk-card">
+            <div class="risk-header">
+              <strong>Taiwan</strong>
+              <span class="context-badge">Context</span>
+            </div>
+            <p>Taiwan accessibility context &mdash; Use the mapped WCAG criteria as technical evidence only; confirm current local program, certification, and seal requirements before making a compliance claim.</p>
+            
+            <p class="criteria-map"><strong>WCAG:</strong> 1.1.1 Non-text Content; 1.3.1 Info and Relationships; 1.4.4 Resize Text; 2.1.1 Keyboard; 2.4.2 Page Titled; 3.1.1 Language of Page; 3.3.2 Labels or Instructions; 4.1.2 Name, Role, Value</p>
+          </div>
+          <div class="risk-card">
+            <div class="risk-header">
+              <strong>Canada ACA</strong>
+              <span class="context-badge">Context</span>
+            </div>
+            <p>Accessible Canada Act context &mdash; Use the mapped WCAG criteria as technical evidence; applicability depends on organization type and regulated context.</p>
+            
+            <p class="criteria-map"><strong>WCAG:</strong> 1.1.1 Non-text Content; 1.3.1 Info and Relationships; 1.4.4 Resize Text; 2.1.1 Keyboard; 2.4.2 Page Titled; 3.1.1 Language of Page; 3.3.2 Labels or Instructions; 4.1.2 Name, Role, Value</p>
+          </div>
+          <div class="risk-card">
+            <div class="risk-header">
+              <strong>Australia DDA</strong>
+              <span class="context-badge">Context</span>
+            </div>
+            <p>Disability Discrimination Act context &mdash; Use the mapped WCAG criteria as technical evidence; legal assessment requires local context and counsel.</p>
+            
+            <p class="criteria-map"><strong>WCAG:</strong> 1.1.1 Non-text Content; 1.3.1 Info and Relationships; 1.4.4 Resize Text; 2.1.1 Keyboard; 2.4.2 Page Titled; 3.1.1 Language of Page; 3.3.2 Labels or Instructions; 4.1.2 Name, Role, Value</p>
+          </div>
+      </div>
+    </div>
+</div>
+
+<!-- Methodology & Limits Tab -->
+<div id="tab-methodology" class="tab-content" role="tabpanel">
+  
+    <div class="methodology-panel">
+
+      <div class="lang-zh" lang="zh-Hant">
+        <h2>方法論與限制</h2>
+        <p class="meta-note">審查層級：<strong>Tier 1 (static file scan only)</strong> &middot;
+          信心水準：<strong>medium</strong></p>
+      </div>
+      <div class="lang-en" lang="en">
+        <h2>Methodology &amp; Limits</h2>
+        <p class="meta-note">Audit tier: <strong>Tier 1 (static file scan only)</strong> &middot;
+          Confidence level: <strong>medium</strong></p>
+      </div>
+
+      
+    <details open class="methods-details">
+      <summary><strong><span class="lang-zh" lang="zh-Hant">本次審查實際採用的方法</span><span class="lang-en" lang="en">Methods applied in this audit</span></strong></summary>
+      <ul class="methods-list"><li>Static scan of 1 UI-like file(s)</li><li>Pattern checks for semantic HTML, keyboard traps, labels, reflow, motion, AEO structure, and site-level agent-readiness files when a directory is scanned</li><li>Runtime behavior, contrast ratios, and screen-reader task completion were not fully verified</li></ul>
+    </details>
+      
+    <div class="live-audit-note" role="note">
+      <span class="lang-zh" lang="zh-Hant">此結果標記為 requires_live_audit: true。靜態層不能計算 contrast，也不能可靠判定 CSS visibility、focus flow 或執行時互動；請用 Tier-2 browser + axe 補齊。</span><span class="lang-en" lang="en">This result is marked requires_live_audit: true. The static tier cannot compute contrast or reliably determine CSS visibility, focus flow, or runtime interaction; complete it with Tier-2 browser + axe evidence.</span>
+    </div>
+      
+    <section class="manual-checks" aria-labelledby="manual-checks-title">
+      <h3 id="manual-checks-title"><span class="lang-zh" lang="zh-Hant">人工檢查項</span><span class="lang-en" lang="en">Manual Checks</span></h3>
+      <p class="section-intro">
+        <span class="lang-zh" lang="zh-Hant">這些項目需要人類判斷、實機操作或與障礙使用者一起測試；不應由自動化分數取代。</span><span class="lang-en" lang="en">These items require human judgement, real-device operation, or testing alongside disabled users; they should not be replaced by an automated score.</span>
+      </p>
+      <div class="manual-check-grid">
+        
+          <article class="manual-check-card">
+            <div class="manual-check-meta">User research</div>
+            <h4><span class="lang-zh" lang="zh-Hant">與障礙使用者一同測試</span><span class="lang-en" lang="en">Test with disabled users</span></h4>
+            <p><strong><span class="lang-zh" lang="zh-Hant">為什麼要檢查：</span><span class="lang-en" lang="en">Why check:</span></strong> <span class="lang-zh" lang="zh-Hant">自動化工具無法證明真實任務能否完成。</span><span class="lang-en" lang="en">Automation cannot prove real task completion.</span></p>
+            <p><strong><span class="lang-zh" lang="zh-Hant">怎麼檢查：</span><span class="lang-en" lang="en">How to check:</span></strong> <span class="lang-zh" lang="zh-Hant">至少安排螢幕閱讀器、鍵盤-only、低視力或認知障礙使用者完成核心流程。</span><span class="lang-en" lang="en">Have screen-reader, keyboard-only, low-vision, or cognitive-disability users complete the core flow.</span></p>
+          </article>
+        
+          <article class="manual-check-card">
+            <div class="manual-check-meta">Assistive technology</div>
+            <h4><span class="lang-zh" lang="zh-Hant">螢幕閱讀器核心任務 walkthrough</span><span class="lang-en" lang="en">Screen-reader core-task walkthrough</span></h4>
+            <p><strong><span class="lang-zh" lang="zh-Hant">為什麼要檢查：</span><span class="lang-en" lang="en">Why check:</span></strong> <span class="lang-zh" lang="zh-Hant">有 name/role 不代表朗讀順序、狀態更新與任務路徑真的清楚。</span><span class="lang-en" lang="en">Name/role checks do not prove reading order, state updates, or task flow clarity.</span></p>
+            <p><strong><span class="lang-zh" lang="zh-Hant">怎麼檢查：</span><span class="lang-en" lang="en">How to check:</span></strong> <span class="lang-zh" lang="zh-Hant">用 VoiceOver、NVDA 或 TalkBack 只靠聽覺完成主要任務並記錄卡點。</span><span class="lang-en" lang="en">Use VoiceOver, NVDA, or TalkBack to complete the primary task by listening only; record blockers.</span></p>
+          </article>
+        
+          <article class="manual-check-card">
+            <div class="manual-check-meta">Keyboard</div>
+            <h4><span class="lang-zh" lang="zh-Hant">鍵盤-only 路徑與 focus 管理</span><span class="lang-en" lang="en">Keyboard-only path and focus management</span></h4>
+            <p><strong><span class="lang-zh" lang="zh-Hant">為什麼要檢查：</span><span class="lang-en" lang="en">Why check:</span></strong> <span class="lang-zh" lang="zh-Hant">Tab 順序、modal 關閉後 focus 返回、SPA route focus 都需要執行時確認。</span><span class="lang-en" lang="en">Tab order, modal return focus, and SPA route focus require runtime confirmation.</span></p>
+            <p><strong><span class="lang-zh" lang="zh-Hant">怎麼檢查：</span><span class="lang-en" lang="en">How to check:</span></strong> <span class="lang-zh" lang="zh-Hant">用 Tab、Shift+Tab、Enter、Space、方向鍵走完核心流程。</span><span class="lang-en" lang="en">Complete the core flow with Tab, Shift+Tab, Enter, Space, and arrow keys.</span></p>
+          </article>
+        
+          <article class="manual-check-card">
+            <div class="manual-check-meta">Responsive</div>
+            <h4><span class="lang-zh" lang="zh-Hant">320px + 200% zoom reflow</span><span class="lang-en" lang="en">320px + 200% zoom reflow</span></h4>
+            <p><strong><span class="lang-zh" lang="zh-Hant">為什麼要檢查：</span><span class="lang-en" lang="en">Why check:</span></strong> <span class="lang-zh" lang="zh-Hant">靜態審查無法可靠證明窄螢幕與放大同時成立。</span><span class="lang-en" lang="en">Static review cannot reliably prove narrow viewport plus zoom behavior.</span></p>
+            <p><strong><span class="lang-zh" lang="zh-Hant">怎麼檢查：</span><span class="lang-en" lang="en">How to check:</span></strong> <span class="lang-zh" lang="zh-Hant">在 320px viewport 與 200% zoom 檢查是否無雙向捲動、遮擋或內容遺失。</span><span class="lang-en" lang="en">At 320px viewport and 200% zoom, check for no two-axis scrolling, clipping, or lost content.</span></p>
+          </article>
+        
+          <article class="manual-check-card">
+            <div class="manual-check-meta">Cognitive</div>
+            <h4><span class="lang-zh" lang="zh-Hant">認知負荷與文案清楚度</span><span class="lang-en" lang="en">Cognitive load and copy clarity</span></h4>
+            <p><strong><span class="lang-zh" lang="zh-Hant">為什麼要檢查：</span><span class="lang-en" lang="en">Why check:</span></strong> <span class="lang-zh" lang="zh-Hant">規則可以通過，但選項過多、錯誤訊息抽象或流程不可預期仍會阻擋使用者。</span><span class="lang-en" lang="en">Rules can pass while dense choices, abstract errors, or unpredictable flow still block users.</span></p>
+            <p><strong><span class="lang-zh" lang="zh-Hant">怎麼檢查：</span><span class="lang-en" lang="en">How to check:</span></strong> <span class="lang-zh" lang="zh-Hant">請目標使用者解釋下一步要做什麼，並檢查 error/help text 是否能引導行動。</span><span class="lang-en" lang="en">Ask target users to explain the next step and verify that error/help text guides action.</span></p>
+          </article>
+        
+      </div>
+    </section>
+
+      <div class="lang-zh" lang="zh-Hant">
+        <h3>本審查擅長偵測的範疇</h3>
+        <p class="section-intro">機器可判定、有靜態或執行時可識別特徵的項目：</p>
+        <ul class="capability-list">
+          <li>圖片缺 alt 文字、表單欄位未配對 label、按鈕無可讀名稱</li>
+          <li>色彩對比比例（4.5:1 / 3:1 / 7:1 數值門檻）</li>
+          <li>缺 landmarks（header / nav / main / footer）、缺 <code>lang</code> 屬性、缺頁面 title</li>
+          <li>正值 tabindex、<code>outline: none</code> 無 <code>:focus-visible</code> 替代</li>
+          <li>Heading 層級斷層（h1 跳 h3）</li>
+          <li>Schema.org / AEO 訊號（JSON-LD、meta tags、canonical、Open Graph）</li>
+          <li>320px 窄視窗下的回流（reflow）行為</li>
+          <li>互動式 <code>&lt;div&gt;</code> / <code>&lt;span&gt;</code> 缺鍵盤處理器</li>
+          <li>可由靜態 HTML 判定的 WCAG 2.2 A &amp; AA 條款</li>
+        </ul>
+
+        <h3>本審查涵蓋之外的範疇</h3>
+        <p class="section-intro">較適合透過人類判斷、真實使用者測試、或執行時任務觀察來確認的項目：</p>
+        <ul class="limitation-list">
+          <li><strong>認知負荷</strong>&mdash;單頁選項過多、文案抽象、版面密集</li>
+          <li><strong>alt 文字或 label 是否真的有用</strong>&mdash;存在不等於清楚。<code>alt="image"</code> 通過 axe，但對螢幕閱讀器使用者毫無幫助</li>
+          <li><strong>真實螢幕閱讀器任務達成路徑</strong>&mdash;例如 VoiceOver 使用者能在 2 分鐘內找到下週活動嗎？</li>
+          <li><strong>動態互動品質</strong>&mdash;<code>aria-live</code> 在篩選器變更時真的有觸發嗎？modal 關閉時 focus 是否正確返回？</li>
+          <li><strong>瀏覽器深色模式覆寫下的效能痛點</strong>&mdash;Edge / Chrome 在手機上的 <em>force-dark</em>，對未原生支援 <code>prefers-color-scheme</code> 的站點會造成卡頓。靜態審查看不到這層</li>
+          <li><strong>SPA 導覽下的 focus 管理</strong>&mdash;route 變更時 focus 有移到合理位置嗎？</li>
+          <li><strong>錯誤訊息是否建設性</strong>&mdash;「無效輸入」通過 3.3.1；「電話號碼應以 0 開頭」才是使用者需要的</li>
+          <li><strong>200% 縮放 + 320px 寬同時成立</strong>&mdash;手機 + 放大鏡使用者組合</li>
+          <li><strong>認知障礙使用者所需的閱讀年齡 / 語言簡明度</strong></li>
+          <li><strong>較舊輔助科技使用者的實際體驗</strong>&mdash;JAWS 2018、Windows 7 上的 NVDA、Android Lollipop 上的 TalkBack</li>
+          <li><strong>設計是否真正包容障礙者</strong>&mdash;而非僅是「未偵測到障礙」</li>
+        </ul>
+
+        <h3>推薦的無障礙工作流程</h3>
+        <p class="section-intro">依真實使用者衝擊排序，而非依測量便利性：</p>
+        <ol class="workflow-list">
+          <li><strong>找障礙使用者實際操作測試。</strong>最高衝擊。一場螢幕閱讀器使用者的測試，比十次自動審查揭露的問題還多。</li>
+          <li><strong>團隊裡僱用障礙者。</strong>預防勝於補救。設計階段內建的可達性，比事後審查補上的更便宜也更好。</li>
+          <li><strong>開發者自己做鍵盤-only 完整流程測試。</strong>5 分鐘，高產出。拔掉滑鼠，用 Tab / Shift+Tab / Enter / Space / 方向鍵走完主要使用者旅程。</li>
+          <li><strong>用螢幕閱讀器跑核心流程。</strong>NVDA（Windows，免費）、VoiceOver（macOS / iOS，內建）、TalkBack（Android）。只用聽的走完主流程。</li>
+          <li><strong>自動化基線審查（本份報告）。</strong>抓出機器可偵測的子集。較適合作為 CI 的回歸防線；建議避免單獨作為完工證書。</li>
+          <li><strong>公開可達性聲明。</strong>EU EAA 強制，其他司法管轄推薦。聲明標準、已知限制、回饋管道。</li>
+        </ol>
+
+        <h3>容易被忽略的脈絡</h3>
+        <table class="traps-table">
+          <thead>
+            <tr><th>常見的想法&hellip;</th><th>值得補充的觀察&hellip;</th></tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>「我們拿到 90 分以上，網站可達。」</td>
+              <td>分數只反映機器可偵測的項目。真實使用者仍可能被本審查看不到的問題擋住。</td>
+            </tr>
+            <tr>
+              <td>「對比通過 4.5:1，文字清楚易讀。」</td>
+              <td>字體選擇、行高、字重、閱讀距離，都會獨立影響可讀性。</td>
+            </tr>
+            <tr>
+              <td>「表單有 <code>&lt;label&gt;</code>，可以用了。」</td>
+              <td>標籤文字本身也建議保持清楚不歧義。<code>&lt;label&gt;欄位&lt;/label&gt;</code> 雖通過 3.3.2，但實際上對使用者幫助有限。</td>
+            </tr>
+            <tr>
+              <td>「axe 沒抓到任何違規，就完工了。」</td>
+              <td>大約 60&ndash;70% 的 WCAG 條款不是機器可判定的。axe 作者明確這麼說。</td>
+            </tr>
+            <tr>
+              <td>「skip link 加了，鍵盤可達就完成。」</td>
+              <td>Skip link 只是一個條款。modal、SPA 路由變化、動態內容更新時的 focus 管理，常常獨立壞掉，且靜態審查看不到。</td>
+            </tr>
+            <tr>
+              <td>「dark mode 寫一半沒關係。」</td>
+              <td>它在使用者啟用手機瀏覽器強制深色時會造成真實效能痛&mdash;瀏覽器退回慢速像素級反轉，而非快速 CSS 切換。</td>
+            </tr>
+          </tbody>
+        </table>
+
+        <h3>建議的使用方式</h3>
+        <ul class="usage-list">
+          <li><strong>作為 CI 回歸防線：</strong>把 <code>axe-core</code> 或本審查接進 CI；對引入新的高影響項目的 PR 建議先複核再合併。</li>
+          <li><strong>作為教育工具：</strong>帶新成員走過 findings 建立 a11y 直覺。before/after 程式碼區塊就是為此設計。</li>
+          <li><strong>作為時序追蹤指標：</strong>用 <code>--previous</code> 旗標比對審查。變化方向比絕對分數更具參考價值。</li>
+          <li><strong>建議避免：當作完工證書</strong>&mdash;「Beacon 95 分」不直接等同於「這個產品完全可達」。公開可達性聲明中建議一併說明方法論與其涵蓋範圍。</li>
+          <li><strong>建議搭配：與障礙使用者一同測試</strong>&mdash;真實 a11y 工作中最昂貴也最容易被低估的環節。本報告作為基線，這項工作補上其他面向。</li>
+        </ul>
+      </div>
+
+      <div class="lang-en" lang="en">
+        <h3>What This Audit Is Well-Suited For</h3>
+        <p class="section-intro">Machine-decidable items with static or runtime signatures:</p>
+        <ul class="capability-list">
+          <li>Missing alt text on images, unlabeled form inputs, missing button names</li>
+          <li>Color contrast ratios (numerical thresholds at 3:1 / 4.5:1 / 7:1)</li>
+          <li>Missing landmarks (header / nav / main / footer), <code>lang</code> attribute, page title</li>
+          <li>Positive tabindex values, <code>outline: none</code> without <code>:focus-visible</code> replacement</li>
+          <li>Heading hierarchy gaps (skipping h1 &rarr; h3)</li>
+          <li>Schema.org / AEO signals (JSON-LD, meta tags, canonical, Open Graph)</li>
+          <li>Reflow behavior at narrow viewports (320px)</li>
+          <li>Interactive <code>&lt;div&gt;</code> / <code>&lt;span&gt;</code> without keyboard handlers</li>
+          <li>Static-detectable WCAG 2.2 A &amp; AA criteria</li>
+        </ul>
+
+        <h3>Areas Beyond This Audit's Scope</h3>
+        <p class="section-intro">Items better confirmed through human judgement, real users, or runtime task observation:</p>
+        <ul class="limitation-list">
+          <li><strong>Cognitive load</strong> &mdash; too many choices on one screen, abstract copy, dense layouts</li>
+          <li><strong>Whether alt text or labels are actually useful</strong> &mdash; presence &ne; clarity. <code>alt="image"</code> passes axe but tells a screen-reader user nothing.</li>
+          <li><strong>Real screen-reader task completion</strong> &mdash; e.g. can a VoiceOver user find next week's event in under 2 minutes?</li>
+          <li><strong>Dynamic interaction quality</strong> &mdash; does <code>aria-live</code> actually fire on filter changes? Does focus return correctly when a modal closes?</li>
+          <li><strong>Performance pain under browser dark-mode overrides</strong> &mdash; Edge / Chrome <em>force-dark</em> on mobile can stall pages that don't natively respond to <code>prefers-color-scheme</code>. Static audits miss this.</li>
+          <li><strong>Focus management in SPA navigation</strong> &mdash; when a route changes, does focus move to a sensible place?</li>
+          <li><strong>Whether error messages are constructively phrased</strong> &mdash; "Invalid input" passes 3.3.1; "Phone number should start with 0" is what a user needs.</li>
+          <li><strong>200% zoom + 320px width simultaneously</strong> &mdash; mobile + magnifier user combination</li>
+          <li><strong>Reading age / language clarity</strong> for cognitive accessibility</li>
+          <li><strong>Real-world performance for users on older assistive tech</strong> &mdash; JAWS 2018, NVDA on Windows 7, Android TalkBack on Lollipop</li>
+          <li><strong>Whether the design genuinely includes disabled people</strong> &mdash; vs. merely the absence of detectable barriers</li>
+        </ul>
+
+        <h3>Recommended Accessibility Workflow</h3>
+        <p class="section-intro">Ordered by real-user impact, not by ease of measurement:</p>
+        <ol class="workflow-list">
+          <li><strong>Real-user testing with disabled people.</strong> Single highest-impact intervention. One session with a screen-reader user reveals more than ten automated audit runs.</li>
+          <li><strong>Hire disabled people on your team.</strong> Preventive, not reactive. Designed-in accessibility is cheaper and better than audited-in.</li>
+          <li><strong>Self keyboard-only walkthrough of core flows.</strong> 5 minutes, very high yield. Unplug the mouse and complete your primary user journey using only Tab / Shift+Tab / Enter / Space / Arrow keys.</li>
+          <li><strong>Screen-reader walkthrough of core flows.</strong> NVDA (Windows, free), VoiceOver (macOS / iOS, built-in), TalkBack (Android). Run through your primary user journey listening only.</li>
+          <li><strong>Automated baseline audit (this report).</strong> Catches the obvious, machine-detectable subset. Well-suited as CI regression-prevention; best not relied on as a standalone completion certificate.</li>
+          <li><strong>Public accessibility statement.</strong> Required in EU under EAA, recommended elsewhere. States your standard, known limitations, and feedback contact.</li>
+        </ol>
+
+        <h3>Context That's Easy to Overlook</h3>
+        <table class="traps-table">
+          <thead>
+            <tr><th>Common assumption&hellip;</th><th>Worth keeping in mind&hellip;</th></tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>"We scored 90+, we're accessible."</td>
+              <td>Score reflects only machine-detectable items. Real users may still be blocked by issues this audit cannot see.</td>
+            </tr>
+            <tr>
+              <td>"Contrast passes 4.5:1, text is readable."</td>
+              <td>Font choice, line-height, glyph weight, and reading-distance affect readability independent of contrast ratio.</td>
+            </tr>
+            <tr>
+              <td>"Form has a <code>&lt;label&gt;</code>, it's usable."</td>
+              <td>Label TEXT must also be unambiguous and contextually clear. <code>&lt;label&gt;Field&lt;/label&gt;</code> passes 3.3.2 and helps no one.</td>
+            </tr>
+            <tr>
+              <td>"axe found 0 violations, we're done."</td>
+              <td>Roughly 60&ndash;70% of WCAG criteria are not machine-decidable. axe's authors say so explicitly.</td>
+            </tr>
+            <tr>
+              <td>"Skip link added, keyboard accessibility complete."</td>
+              <td>Skip link is one criterion. Focus management in modals, SPA route changes, and dynamic content updates is often a separate concern, and may go unnoticed by static audits.</td>
+            </tr>
+            <tr>
+              <td>"Half-implemented dark mode is harmless."</td>
+              <td>It can cause real performance pain on mobile when users enable browser force-dark, because the browser falls back to slow pixel-level inversion instead of fast CSS swap.</td>
+            </tr>
+          </tbody>
+        </table>
+
+        <h3>Suggested Uses</h3>
+        <ul class="usage-list">
+          <li><strong>As baseline regression-prevention:</strong> wire <code>axe-core</code> or this audit into CI. PRs introducing new higher-priority items can be flagged for closer review before merge.</li>
+          <li><strong>As an education tool:</strong> walk new team members through findings to build a11y intuition. The before/after code blocks are designed for this.</li>
+          <li><strong>As a tracking metric over time:</strong> use the <code>--previous</code> flag to compare audits. Direction-of-change matters more than absolute score.</li>
+          <li><strong>Best avoided as a completion certificate:</strong> "Beacon score 95" does not directly equate to "this product is fully accessible". Public accessibility statements work better when they also describe the methodology and its scope.</li>
+          <li><strong>Best paired with testing alongside disabled users:</strong> the most expensive line item in real a11y work, and the most under-invested. This report serves as a baseline; that work covers the rest.</li>
+        </ul>
+      </div>
+    </div>
+</div>
+
+<!-- Remediation Tab -->
+<div id="tab-remediation" class="tab-content" role="tabpanel">
+  <h2><span class="lang-zh" lang="zh-Hant">修復優先序</span><span class="lang-en" lang="en">Remediation Priority</span></h2>
+  
+
+  <h2><span class="lang-zh" lang="zh-Hant">測試建議</span><span class="lang-en" lang="en">Testing Recommendations</span></h2>
+<ul><li>Run keyboard-only walkthrough of the primary flow.</li><li>Run a live browser audit with Playwright + axe-core when a page is available.</li><li>Check 320px reflow and 200% zoom manually.</li><li>Listen to the page with VoiceOver or NVDA for the core task.</li><li>Treat this static score as a regression baseline, not a completion certificate.</li></ul>
+</div>
+
+
+</main>
+
+<script>
+function switchTab(name) {
+  document.querySelectorAll('.tab').forEach(t => {
+    t.classList.remove('active');
+    t.setAttribute('aria-selected', t.dataset.tabBtn === name ? 'true' : 'false');
+  });
+  document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
+  document.querySelector(`.tab[data-tab-btn="${name}"]`).classList.add('active');
+  document.getElementById('tab-' + name).classList.add('active');
+}
+document.querySelectorAll('[data-tab-btn]').forEach(tab => {
+  // Native <button> tabs provide keyboard activation for this click handler.
+  tab.addEventListener('click', () => switchTab(tab.dataset.tabBtn));
+});
+document.querySelectorAll('.category-row').forEach(row => {
+  const toggleCategory = () => {
+    const id = row.dataset.category;
+    const detail = document.getElementById('detail-' + id);
+    if (!detail) return;
+    const open = detail.classList.toggle('open');
+    row.setAttribute('aria-expanded', open ? 'true' : 'false');
+  };
+  row.addEventListener('click', toggleCategory);
+  row.addEventListener('keydown', event => {
+    if (event.key === 'Enter' || event.key === ' ') {
+      event.preventDefault();
+      toggleCategory();
+    }
+  });
+});
+
+/* Language + theme toggles
+   Demonstrates the "correct" dark-mode pattern this report's methodology recommends:
+   - prefers-color-scheme media query for fast CSS-variable swap (no JS needed for OS sync)
+   - Button override that wins via data-theme attribute
+   - localStorage persistence so the choice survives reloads
+   - Default for language is zh; user can switch to en */
+(function () {
+  const STORE_LANG = 'beacon-report-lang';
+  const STORE_THEME = 'beacon-report-theme';
+  const root = document.documentElement;
+  const body = document.body;
+
+  function setLang(lang) {
+    body.dataset.activeLang = lang;
+    document.querySelectorAll('[data-lang-btn]').forEach(b => {
+      b.setAttribute('aria-pressed', b.dataset.langBtn === lang ? 'true' : 'false');
+    });
+    try { localStorage.setItem(STORE_LANG, lang); } catch (e) {}
+  }
+
+  function setTheme(theme) {
+    // theme: 'light' | 'dark' | 'auto'
+    if (theme === 'auto') {
+      root.removeAttribute('data-theme');
+    } else {
+      root.setAttribute('data-theme', theme);
+    }
+    document.querySelectorAll('[data-theme-btn]').forEach(b => {
+      b.setAttribute('aria-pressed', b.dataset.themeBtn === theme ? 'true' : 'false');
+    });
+    try { localStorage.setItem(STORE_THEME, theme); } catch (e) {}
+  }
+
+  // Restore from localStorage (defaults: zh + auto)
+  let savedLang = 'zh';
+  let savedTheme = 'auto';
+  try {
+    savedLang = localStorage.getItem(STORE_LANG) || 'zh';
+    savedTheme = localStorage.getItem(STORE_THEME) || 'auto';
+  } catch (e) {}
+  setLang(savedLang);
+  setTheme(savedTheme);
+
+  // Wire up buttons
+  document.querySelectorAll('[data-lang-btn]').forEach(b => {
+    // Native <button> controls provide keyboard activation for this click handler.
+    b.addEventListener('click', () => setLang(b.dataset.langBtn));
+  });
+  document.querySelectorAll('[data-theme-btn]').forEach(b => {
+    // Native <button> controls provide keyboard activation for this click handler.
+    b.addEventListener('click', () => setTheme(b.dataset.themeBtn));
+  });
+})();
+</script>
+
+</body>
+</html>
