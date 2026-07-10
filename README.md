@@ -61,6 +61,8 @@ Install from the Claude Code plugin marketplace:
 /plugin install beacon@beacon
 ```
 
+(The format is `plugin@marketplace`. This repository is both the marketplace and its only plugin, and both are named beacon — hence the doubled name.)
+
 Your Claude Code config must include `beacon` in `extraKnownMarketplaces`:
 
 ```json
