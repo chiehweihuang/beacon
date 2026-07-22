@@ -727,6 +727,22 @@ What this enables locally:
 
 Beacon keeps these results local unless the user explicitly shares them outside the plugin. Detector improvements come from maintainer-run offline evaluation and plugin updates.
 
+**Cumulative usage ledger (local-only).** In addition to the per-project summary, append ONE line to `~/.beacon/usage.jsonl` (create the directory if missing):
+
+```json
+{"type":"inspect","date":"2026-07-22","engine":"beacon-static-audit@8+ruleset.…","project":"<project dir basename>","score":72,"coverage":55,"states":{"contrast":"not-machine-checkable"},"finding_keys":{"image-alt-missing":4,"link-name-missing":2}}
+```
+
+This file never leaves the machine and is never transmitted by Beacon. Its purpose is local: across many inspects it shows which detectors fire most in this user's real work and accumulates evidence for detector improvement. The user can delete it at any time with no effect on Beacon.
+
+**False-positive marks.** Whenever the user disputes a finding (in any language — "this is wrong", "這是誤報", "誤検知"), append a second kind of line to the same ledger, with full local context:
+
+```json
+{"type":"fp-report","date":"2026-07-22","engine":"…","key":"input-label-missing","location":"src/Form.tsx:88","code_before":"<the flagged snippet>","user_reason":"input is wrapped in a <label>"}
+```
+
+Tell the user it is recorded locally for detector improvement, and offer the upstream report path from Step 10. FP marks are the single most valuable improvement signal Beacon can collect — never skip recording one.
+
 ### Step 10: Follow Up
 
 After delivering the report:
@@ -734,6 +750,13 @@ After delivering the report:
 - Suggest re-audit timeline based on severity
 - If critical findings exist, offer to fix the top 3 immediately
 - If the user has a11y-design-guide skill, suggest using it for redesign work
+
+**Upstream false-positive report (explicit opt-in, never automatic).** If the user marked a finding as a false positive and wants to help improve the detectors, build a SANITIZED payload and walk the send-review flow:
+
+1. Sanitize: keep engine version, finding key, and a MINIMAL reproduction of the markup shape only. Replace EVERY value that can carry real content — inner text AND attribute values: `alt`, `aria-label`/`aria-labelledby` targets, `title`, `placeholder`, `value`, `name`, `data-*`, and full `href`/`src` URLs including query strings — with generic placeholders (`https://example.com/…`, `id="x1"`, `class="c1"`, `alt="photo"`, placeholder words). No file paths, no project names, no scores. Include a `why` line derived from the user's reasoning, generalized the same way — never paste the raw ledger `user_reason` verbatim.
+2. Show the user the complete payload verbatim and say exactly: this is everything that would be shared, nothing else.
+3. Only after the user confirms, open the prefilled issue link: `https://github.com/chiehweihuang/beacon/issues/new?template=fp-report.yml` with the payload pasted into the form fields. GitHub requires an account, so this path is pseudonymous, not anonymous — say so.
+4. If the user declines, nothing further happens: the mark simply stays in the local ledger for the user's own records, and nothing leaves the machine. (Only when the person running Beacon is also the plugin's maintainer does the local ledger feed evaluation rounds — on their own data, on their own machine.)
 
 ## Framework-Specific Fix Patterns
 

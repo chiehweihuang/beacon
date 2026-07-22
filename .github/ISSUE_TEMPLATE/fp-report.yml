@@ -1,0 +1,48 @@
+name: False-positive report
+description: A Beacon finding fired on markup that is actually correct. Sanitized reports directly drive detector fixes.
+title: "[FP] <finding key>: <one line>"
+labels: ["false-positive"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks — false-positive reports are the single most valuable improvement signal.
+        Please keep everything below **sanitized**: generic identifiers, placeholder text,
+        `https://example.com/…` URLs. Do not paste real content, paths, or project names.
+  - type: input
+    id: engine
+    attributes:
+      label: Engine fingerprint
+      description: From the report metadata, e.g. beacon-static-audit@8+ruleset.…
+      placeholder: beacon-static-audit@8+ruleset.7b79d5151b72
+    validations:
+      required: true
+  - type: input
+    id: key
+    attributes:
+      label: Finding key
+      placeholder: input-label-missing
+    validations:
+      required: true
+  - type: textarea
+    id: markup
+    attributes:
+      label: Minimal sanitized markup that reproduces the finding
+      description: The smallest markup shape that makes the detector fire. Generic ids/classes, placeholder text only.
+      render: html
+    validations:
+      required: true
+  - type: textarea
+    id: why
+    attributes:
+      label: Why this is not a violation
+      description: The accessibility reasoning — e.g. "the input is labelled by its wrapping <label>".
+    validations:
+      required: true
+  - type: checkboxes
+    id: sanitized
+    attributes:
+      label: Sanitization confirmed
+      options:
+        - label: This report contains no real URLs, identifiers, text content, ATTRIBUTE values (alt / aria-label / title / placeholder / value / name / data-*), file paths, or other sensitive material.
+          required: true

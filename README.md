@@ -222,6 +222,12 @@ For architecture and roadmap details:
 - AI review cannot replace testing with disabled users.
 - Beacon runs locally; site files and audit artifacts stay on your machine unless you explicitly share them.
 
+## Data & Improvement Loop
+
+- **Local usage ledger**: `beacon:inspect` appends a one-line summary (engine version, finding keys, category states, coverage) and any false-positive marks you make to `~/.beacon/usage.jsonl`. This file is local-only, never transmitted, and safe to delete at any time. Its purpose: your own score history across audits, and the raw material for any false-positive report you later CHOOSE to send.
+- **Upstream false-positive reports** (opt-in, never automatic): if you want a false positive fixed for everyone, Beacon builds a sanitized payload (generic identifiers, placeholder text, no URLs/paths/content), shows you the complete payload before anything leaves your machine, and prefills a [GitHub issue form](https://github.com/chiehweihuang/beacon/issues/new?template=fp-report.yml). GitHub requires an account, so this path is pseudonymous rather than anonymous.
+- Detector changes triggered by these reports go through the committed validation discipline ([VALIDATION.md](./VALIDATION.md)): regression corpus, wild-sample false-positive measurement, ground-truth re-verification.
+
 See [ROADMAP.md](./ROADMAP.md) for known incomplete areas and future work.
 
 ## License

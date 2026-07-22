@@ -9,6 +9,7 @@ manifest (`.claude-plugin/plugin.json`); dates are release-prep dates.
 - Measured (2026-07-22, study rerun): ground-truth precision 0.979 → **1.000**, pattern recall 0.712 → **0.727**, instance recall 0.826 → 0.829, FP patterns 1 → **0** — the engine now reports ibm.com's true 1→4 aria-heading skip instead of the spurious h1→h5, and jnto.go.jp's presentational-heading FP is gone (+3 points, the only benchmark score that moved; 47/47 prior TPs retained; Spearman 0.477, n=71, noise-level vs @7's 0.480). Known ceiling recorded in the GT README: the outline detector reports only the first level-skip per document.
 - Refreshed the public roadmap, release highlights, Claude/Codex install parity, and skill/hook boundary language.
 - Category summaries now say when the static scan completed but a score cannot be justified, provide per-category and expand-all disclosure controls, and render as in-viewport cards on mobile instead of requiring horizontal table scrolling.
+- **Production improvement loop**: `beacon:inspect` now keeps a local-only usage ledger (`~/.beacon/usage.jsonl` — inspect summaries + user false-positive marks; never transmitted, deletable anytime) and offers an opt-in upstream FP report: sanitized payload, shown in full before anything is shared, prefilled into the new `false-positive` GitHub issue form. Detector fixes triggered by reports still walk the full VALIDATION.md discipline.
 
 ## [3.0.0] — 2026-07-07
 
