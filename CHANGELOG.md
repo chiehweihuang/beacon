@@ -1,5 +1,28 @@
 # Changelog
 
+## [3.1.0] — 2026-07-22
+
+### Features
+
+- consulting entry points — report footer, landing #services, README (4563930)
+- production improvement loop — local usage ledger + opt-in FP reports + target registry harness (6e72c1c)
+- aria-heading outline (engine @8) + report category disclosure — validated (d05ccdc)
+- bilingual landing page + live sample reports (GitHub Pages) (be775fd)
+
+### Bug Fixes
+
+- per-entry registry writes — long intake runs no longer clobber concurrent writers (d5997fd)
+
+### Documentation
+
+- community-report ingestion — consented user findings flow into the lab db (6f38752)
+- queryable SQLite layer over all measurement data (node:sqlite, zero deps) (60cebbe)
+- survey tier to 10,000 sites — automated sourcing, nightly intake, append-only registry policy (c350282)
+- candidate-intake tool + registry grown to 100 sites (5328b18)
+- interlink demo reports back to the landing pages (dc98236)
+- explain the plugin@marketplace format next to the install command (eccce99)
+- curate the 3.0.0 section (c7e93e4)
+
 All notable changes to Beacon are documented here. Versions follow the plugin
 manifest (`.claude-plugin/plugin.json`); dates are release-prep dates.
 
