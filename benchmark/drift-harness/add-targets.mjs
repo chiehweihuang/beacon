@@ -12,7 +12,7 @@ import { readFileSync, writeFileSync, mkdirSync, rmSync } from 'node:fs';
 import { resolve, dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { execFileSync } from 'node:child_process';
-import { load } from './targets.mjs';
+import { registerTarget, nextFreeId } from './targets.mjs';
 
 const require = createRequire(import.meta.url);
 const { chromium } = require('C:/nvm4w/nodejs/node_modules/@playwright/cli/node_modules/playwright-core');
@@ -26,9 +26,6 @@ const candidatesFile = process.argv[2];
 if (!candidatesFile) { console.error('usage: node add-targets.mjs <candidates.json>'); process.exit(1); }
 const candidates = JSON.parse(readFileSync(resolve(ROOT, candidatesFile), 'utf8'));
 
-const reg = load();
-const existingUrls = new Set(reg.targets.map((t) => t.url.replace(/\/$/, '')));
-let nextId = Math.max(100, ...reg.targets.map((t) => t.id + 1));
 mkdirSync(resolve(ROOT, 'intake-snapshots'), { recursive: true });
 
 async function captureProbe(browser, url) {
@@ -70,10 +67,10 @@ function lighthouseA11y(url) {
 const browser = await chromium.launch({ headless: true, executablePath: CHROME });
 const added = [];
 for (const c of candidates) {
-  const urlKey = c.url.replace(/\/$/, '');
-  if (existingUrls.has(urlKey)) { console.log(`skip (already registered): ${c.url}`); continue; }
   const probe = await captureProbe(browser, c.url);
-  const id = nextId++;
+  // Fresh id at registration time: the registry is re-read per entry (never held
+  // across the run), so concurrent intake processes cannot clobber each other.
+  const id = nextFreeId(100);
   let a11y = null;
   if (probe.outcome === 'ok') {
     writeFileSync(resolve(ROOT, 'intake-snapshots', `${id}.html`), probe.html);
@@ -92,13 +89,11 @@ for (const c of candidates) {
     added: DATE,
     notes: probe.outcome === 'ok' ? (a11y == null ? 'lighthouse failed at intake; no pairing data' : '') : `${probe.outcome} at intake${probe.error ? ': ' + probe.error : ''}`,
   };
-  reg.targets.push(target);
+  if (!registerTarget(target)) { console.log(`skip (already registered): ${c.url}`); continue; }
   added.push(target);
   console.log(`[${added.length}/${candidates.length}] id ${id}  ${target.status.padEnd(6)}  lh_a11y ${a11y ?? '—'}  ${c.url}`);
 }
 await browser.close();
 
-reg.updated = DATE;
-writeFileSync(resolve(ROOT, 'targets.json'), JSON.stringify(reg, null, 2));
 const okN = added.filter((t) => t.status === 'active').length;
-console.log(`registered ${added.length} candidates (${okN} active); registry now ${reg.targets.length} sites`);
+console.log(`registered ${added.length} candidates (${okN} active)`);

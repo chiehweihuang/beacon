@@ -10,12 +10,12 @@
 // Scheduled as Windows task 'beacon-survey-intake' (nightly); ~300 sites/night
 // reaches 10,000 in about a month. Pure measurement bookkeeping — no AI.
 import { createRequire } from 'node:module';
-import { readFileSync, writeFileSync, mkdirSync, appendFileSync } from 'node:fs';
+import { readFileSync, writeFileSync, mkdirSync, appendFileSync, rmSync } from 'node:fs';
 import { gzipSync } from 'node:zlib';
 import { resolve, dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { execFileSync } from 'node:child_process';
-import { load } from './targets.mjs';
+import { registerTarget, nextFreeId } from './targets.mjs';
 
 const require = createRequire(import.meta.url);
 const { chromium } = require('C:/nvm4w/nodejs/node_modules/@playwright/cli/node_modules/playwright-core');
@@ -38,9 +38,12 @@ const q = JSON.parse(readFileSync(qFile, 'utf8'));
 const batch = q.queue.slice(q.cursor, q.cursor + CHUNK);
 if (!batch.length) { console.log('survey queue exhausted — run source-targets.mjs --build to extend'); process.exit(0); }
 
-const reg = load();
-let nextId = Math.max(100000, ...reg.targets.map((t) => t.id + 1));
 const stats = { ok: 0, bot_protected: 0, failed: 0 };
+// Per-entry registration (targets.mjs registerTarget) re-reads the registry at each
+// insert, so this long-running batch never clobbers concurrent writers. Id allocation
+// + registration are serialized through one in-process mutex to keep workers from
+// racing each other.
+let regLock = Promise.resolve();
 
 async function captureOne(browser, url) {
   const ctx = await browser.newContext({ locale: 'en-US', viewport: { width: 1280, height: 900 } });
@@ -63,11 +66,9 @@ async function captureOne(browser, url) {
 const browser = await chromium.launch({ headless: true, executablePath: CHROME });
 const work = [...batch];
 let done = 0;
-async function worker() {
-  while (work.length) {
-    const c = work.shift();
-    const r = await captureOne(browser, c.url);
-    const id = nextId++;
+function processRegistration(c, r) {
+  regLock = regLock.then(() => {
+    const id = nextFreeId(100000);
     let langTag = null, score = null;
     if (r.outcome === 'ok') {
       writeFileSync(resolve(ROOT, 'survey-snapshots', `${id}.html.gz`), gzipSync(r.html));
@@ -78,11 +79,11 @@ async function worker() {
         const out = resolve(ROOT, 'survey-audits', `${id}.json`);
         execFileSync('node', [SCANNER, '--scope', c.url, '--url', c.url, '--date', DATE, '--output', out, tmp], { stdio: 'pipe', timeout: 120000 });
         score = JSON.parse(readFileSync(out, 'utf8')).summary?.overall_score ?? null;
-        execFileSync('node', ['-e', `require('fs').rmSync(${JSON.stringify(tmp)})`], { stdio: 'pipe' });
+        rmSync(tmp, { force: true });
       } catch { /* audit failure recorded via score null */ }
     }
     stats[r.outcome]++;
-    reg.targets.push({
+    registerTarget({
       id, url: c.url, band: 'survey', tags: ['survey', `tranco-${c.stratum}`, ...(langTag ? [`lang:${langTag.split('-')[0]}`] : [])],
       roles: ['survey'], status: r.outcome === 'ok' ? 'active' : r.outcome === 'bot_protected' ? 'walled' : 'dead',
       capture_streak: r.outcome === 'ok' ? 0 : 1, last_ok: r.outcome === 'ok' ? DATE : null, added: DATE,
@@ -90,6 +91,15 @@ async function worker() {
     });
     done++;
     if (done % 25 === 0) console.log(`[${done}/${batch.length}] ok ${stats.ok} walled ${stats.bot_protected} failed ${stats.failed}`);
+  });
+  return regLock;
+}
+
+async function worker() {
+  while (work.length) {
+    const c = work.shift();
+    const r = await captureOne(browser, c.url);
+    await processRegistration(c, r);
   }
 }
 await Promise.all(Array.from({ length: CONCURRENCY }, worker));
@@ -97,8 +107,7 @@ await browser.close();
 
 q.cursor += batch.length;
 writeFileSync(qFile, JSON.stringify(q, null, 1));
-reg.updated = DATE;
-writeFileSync(resolve(ROOT, 'targets.json'), JSON.stringify(reg, null, 2));
-const entry = { date: DATE, engine_batch: batch.length, ...stats, cursor: q.cursor, queue_total: q.queue.length, survey_total: reg.targets.filter((t) => (t.roles || []).includes('survey')).length };
+const survey_total = (await import('./targets.mjs')).load().targets.filter((t) => (t.roles || []).includes('survey')).length;
+const entry = { date: DATE, engine_batch: batch.length, ...stats, cursor: q.cursor, queue_total: q.queue.length, survey_total };
 appendFileSync(resolve(ROOT, 'survey-log.jsonl'), JSON.stringify(entry) + '\n');
 console.log(`survey intake: ${JSON.stringify(entry)}`);

@@ -88,3 +88,19 @@ export function reviewReport() {
     inactive,
   };
 }
+
+// Atomic-ish single-entry registration: load-append-save at the moment of insertion,
+// so long-running intake processes never hold the whole registry in memory and
+// clobber concurrent writers (the 2026-07-22 pilot-vs-batch2 race). Cross-process
+// windows shrink to milliseconds; the schedulers themselves never overlap by design.
+export function registerTarget(target) {
+  const reg = load();
+  if (reg.targets.some((t) => t.id === target.id || t.url.replace(/\/$/, '') === target.url.replace(/\/$/, ''))) return false;
+  reg.targets.push(target);
+  save(reg);
+  return true;
+}
+
+export function nextFreeId(floor = 100) {
+  return Math.max(floor, ...load().targets.map((t) => t.id + 1));
+}
