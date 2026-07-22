@@ -111,3 +111,5 @@ const survey_total = (await import('./targets.mjs')).load().targets.filter((t) =
 const entry = { date: DATE, engine_batch: batch.length, ...stats, cursor: q.cursor, queue_total: q.queue.length, survey_total };
 appendFileSync(resolve(ROOT, 'survey-log.jsonl'), JSON.stringify(entry) + '\n');
 console.log(`survey intake: ${JSON.stringify(entry)}`);
+
+try { execFileSync('node', [resolve(ROOT, 'db.mjs'), 'sync'], { stdio: 'pipe', timeout: 300000 }); console.log('db synced'); } catch (e) { console.error('db sync failed:', String(e.message).slice(0, 100)); }

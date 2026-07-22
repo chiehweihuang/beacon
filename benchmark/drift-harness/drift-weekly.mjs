@@ -66,3 +66,5 @@ const all = readdirSync(ROOT).filter((d) => /^run-\d{4}-\d{2}-\d{2}-weekly$/.tes
 for (const d of all.slice(0, Math.max(0, all.length - 8))) rmSync(resolve(ROOT, d), { recursive: true, force: true });
 
 console.log(`weekly drift logged: ${JSON.stringify({ date: entry.date, compared_to: entry.compared_to, p95: entry.drift?.score_delta?.p95_abs ?? null, note: entry.note })}`);
+
+try { execFileSync('node', [resolve(ROOT, 'db.mjs'), 'sync'], { stdio: 'pipe', timeout: 300000 }); console.log('db synced'); } catch (e) { console.error('db sync failed:', String(e.message).slice(0, 100)); }
