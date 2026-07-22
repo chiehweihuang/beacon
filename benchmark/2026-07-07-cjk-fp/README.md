@@ -41,7 +41,10 @@ single-line wrapping-label group as the other 42 and are counted with their clas
    carry names).
 3. **`role="presentation"` heading** (1 instance, site 93): an `<h4
    role="presentation">` inside the OneTrust cookie banner is flagged as a heading
-   skip; role=presentation strips it from the AT heading sequence.
+   skip; role=presentation strips it from the AT heading sequence. — FIXED in engine
+   @8 (2026-07-22): presentational headings are excluded from the outline; site 93's
+   heading finding count is now 0. Residual jp-tw FP classes: the site-92 single-line
+   misattribution only (1 instance / 210 findings ≈ 0.005).
 4. Latin control's single FP is the known aria-heading bridging gap (ibm.com, see the
    ground-truth README).
 

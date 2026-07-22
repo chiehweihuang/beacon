@@ -70,8 +70,18 @@ and numbers stay frozen and reproducible via the default run).
 | Tool | Precision | Recall (patterns) | Recall (instances) | FP patterns |
 |---|---|---|---|---|
 | Beacon @4 | 0.600 | 0.591 | 0.743 | 26 |
-| Beacon @6 | **0.979** | **0.712** | **0.826** | **1** |
+| Beacon @6 | 0.979 | 0.712 | 0.826 | 1 |
+| Beacon @8 | **1.000** | **0.727** | **0.829** | **0** |
 | Lighthouse (unchanged runs) | 0.811 | 0.462 | 0.225 | 7 |
+
+**Engine @8 update (2026-07-22)**: the aria-heading fix (`role="heading" aria-level`
+in the outline; `role="presentation|none"` headings excluded) resolves the last FP —
+the engine now reports ibm.com's true 1→4 skip (line 1533) instead of the spurious
+h1→h5 (line 1663); site 90 vi=3 flips to flagged. 47/47 previously flagged TPs
+retained (`beacon_v8` sparse overrides + `aggregate-gt.mjs --engine 8`; @4 and @6
+numbers still reproduce byte-for-byte). Known ceiling recorded: the detector reports
+only the FIRST level-skip per document, so a second skip on the same page (site 90
+vi=4, line 3916) stays missed — next-round design item.
 
 - All 65 residue findings were instances of already-inventoried patterns — zero new
   violations entered the pool (recall denominators unchanged, so the numbers are

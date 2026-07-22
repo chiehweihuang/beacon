@@ -13,7 +13,7 @@
     ],
     "platform": "Web",
     "tool_version": "beacon codex static baseline",
-    "engine_fingerprint": "beacon-static-audit@7+ruleset.7b79d5151b72",
+    "engine_fingerprint": "beacon-static-audit@8+ruleset.7b79d5151b72",
     "confidence_level": "medium",
     "requires_live_audit": true,
     "audit_tier": "Tier 1 (static file scan only)",
@@ -153,7 +153,8 @@
       "description": "The HTML page does not declare a lang attribute, so assistive technology may choose the wrong pronunciation rules.",
       "fix": "Add a language attribute such as <html lang=\"zh-Hant\"> or the correct document language.",
       "code_before": "<html>",
-      "code_after": "<html lang=\"zh-Hant\">"
+      "code_after": "<html lang=\"zh-Hant\">",
+      "check": "fail"
     },
     {
       "level": "AA",
@@ -166,7 +167,8 @@
       "affected_users": "Screen-reader users, keyboard users, and users with many tabs open",
       "location": "test/golden/dirty.html",
       "description": "A missing or empty title makes the page difficult to identify in browser and assistive technology contexts.",
-      "fix": "Add a concise, unique <title>."
+      "fix": "Add a concise, unique <title>.",
+      "check": "fail"
     },
     {
       "level": "AA",
@@ -179,7 +181,8 @@
       "affected_users": "Screen-reader and keyboard users navigating by landmarks",
       "location": "test/golden/dirty.html",
       "description": "No <main> or role=\"main\" was found in this static file.",
-      "fix": "Wrap primary page content in <main id=\"main-content\">."
+      "fix": "Wrap primary page content in <main id=\"main-content\">.",
+      "check": "fail"
     },
     {
       "level": "AA",
@@ -191,8 +194,9 @@
       "title": "Heading level is skipped",
       "affected_users": "Screen-reader users navigating by heading",
       "location": "test/golden/dirty.html:5",
-      "description": "Heading jumps from h1 to h4.",
-      "fix": "Use a continuous heading hierarchy or adjust the visual style without changing semantic level."
+      "description": "Heading jumps from level 1 to level 4.",
+      "fix": "Use a continuous heading hierarchy or adjust the visual style without changing semantic level.",
+      "check": "fail"
     },
     {
       "level": "AA",
@@ -206,7 +210,8 @@
       "location": "test/golden/dirty.html:6",
       "description": "An image without alt text is silent or announced poorly by assistive technology.",
       "fix": "Add meaningful alt text, or alt=\"\" for purely decorative images.",
-      "code_before": "<h4>Skipped levels</h4>\n<img src=\"hero.png\">\n<img src=\"chart.png\">"
+      "code_before": "<h4>Skipped levels</h4>\n<img src=\"hero.png\">\n<img src=\"chart.png\">",
+      "check": "fail"
     },
     {
       "level": "AA",
@@ -220,7 +225,8 @@
       "location": "test/golden/dirty.html:7",
       "description": "An image without alt text is silent or announced poorly by assistive technology.",
       "fix": "Add meaningful alt text, or alt=\"\" for purely decorative images.",
-      "code_before": "<img src=\"hero.png\">\n<img src=\"chart.png\">\n<a href=\"/dead\"></a>"
+      "code_before": "<img src=\"hero.png\">\n<img src=\"chart.png\">\n<a href=\"/dead\"></a>",
+      "check": "fail"
     },
     {
       "level": "A",
@@ -234,7 +240,8 @@
       "location": "test/golden/dirty.html:12",
       "description": "An <iframe> without a title gives screen-reader users no way to know what the frame contains before entering it.",
       "fix": "Add title=\"...\" describing the frame content.",
-      "code_before": "<input type=\"text\" name=\"q\" placeholder=\"Search\">\n<iframe src=\"/widget.html\"></iframe>\n<ul><div>not a list item</div></ul>"
+      "code_before": "<input type=\"text\" name=\"q\" placeholder=\"Search\">\n<iframe src=\"/widget.html\"></iframe>\n<ul><div>not a list item</div></ul>",
+      "check": "fail"
     },
     {
       "level": "A",
@@ -248,7 +255,8 @@
       "location": "test/golden/dirty.html:13",
       "description": "A <ul>/<ol> has a direct child that is not <li>, <script>, or <template> (found <div>). Screen readers may not announce the list or its item count correctly.",
       "fix": "Make <li> the only structural child; move wrapper elements inside an <li>, or use role=\"list\"/role=\"listitem\" if a non-standard structure is unavoidable.",
-      "code_before": "<iframe src=\"/widget.html\"></iframe>\n<ul><div>not a list item</div></ul>\n<span onclick=\"go()\">Go</span>"
+      "code_before": "<iframe src=\"/widget.html\"></iframe>\n<ul><div>not a list item</div></ul>\n<span onclick=\"go()\">Go</span>",
+      "check": "fail"
     },
     {
       "level": "AA",
@@ -262,7 +270,8 @@
       "location": "test/golden/dirty.html:10",
       "description": "A button with no visible text or accessible label is hard to understand or activate by name.",
       "fix": "Add visible text, aria-label, or aria-labelledby.",
-      "code_before": "<a href=\"/icon\"><img alt=\"\" src=\"icon.png\"></a>\n<button></button>\n<input type=\"text\" name=\"q\" placeholder=\"Search\">"
+      "code_before": "<a href=\"/icon\"><img alt=\"\" src=\"icon.png\"></a>\n<button></button>\n<input type=\"text\" name=\"q\" placeholder=\"Search\">",
+      "check": "fail"
     },
     {
       "level": "A",
@@ -276,7 +285,8 @@
       "location": "test/golden/dirty.html:8",
       "description": "A link with no visible text, no aria-label/aria-labelledby/title (on it or a descendant), and no image alt or SVG title has no accessible name. Screen readers announce it as a bare \"link\".",
       "fix": "Add visible link text, an aria-label/aria-labelledby/title, give a wrapped <img> meaningful alt text, or add an <svg><title>.",
-      "code_before": "<img src=\"chart.png\">\n<a href=\"/dead\"></a>\n<a href=\"/icon\"><img alt=\"\" src=\"icon.png\"></a>"
+      "code_before": "<img src=\"chart.png\">\n<a href=\"/dead\"></a>\n<a href=\"/icon\"><img alt=\"\" src=\"icon.png\"></a>",
+      "check": "fail"
     },
     {
       "level": "A",
@@ -290,7 +300,8 @@
       "location": "test/golden/dirty.html:9",
       "description": "A link with no visible text, no aria-label/aria-labelledby/title (on it or a descendant), and no image alt or SVG title has no accessible name. Screen readers announce it as a bare \"link\".",
       "fix": "Add visible link text, an aria-label/aria-labelledby/title, give a wrapped <img> meaningful alt text, or add an <svg><title>.",
-      "code_before": "<a href=\"/dead\"></a>\n<a href=\"/icon\"><img alt=\"\" src=\"icon.png\"></a>\n<button></button>"
+      "code_before": "<a href=\"/dead\"></a>\n<a href=\"/icon\"><img alt=\"\" src=\"icon.png\"></a>\n<button></button>",
+      "check": "fail"
     },
     {
       "level": "A",
@@ -304,7 +315,8 @@
       "location": "test/golden/dirty.html:14",
       "description": "Clickable <div> or <span> elements are not keyboard-operable by default.",
       "fix": "Use <button> for actions. If custom semantics are unavoidable, add role, tabindex, and Enter/Space handling.",
-      "code_before": "<ul><div>not a list item</div></ul>\n<span onclick=\"go()\">Go</span>\n<div style=\"display:none\"><img src=\"hidden-pixel.gif\"><iframe src=\"/tracker.html\"></iframe></div>"
+      "code_before": "<ul><div>not a list item</div></ul>\n<span onclick=\"go()\">Go</span>\n<div style=\"display:none\"><img src=\"hidden-pixel.gif\"><iframe src=\"/tracker.html\"></iframe></div>",
+      "check": "fail"
     },
     {
       "level": "AA",
@@ -318,7 +330,8 @@
       "location": "test/golden/dirty.html:11",
       "description": "The input has no obvious id or ARIA label in static markup.",
       "fix": "Pair it with a <label for=\"...\"> or use aria-labelledby when a visible label already exists.",
-      "code_before": "<button></button>\n<input type=\"text\" name=\"q\" placeholder=\"Search\">\n<iframe src=\"/widget.html\"></iframe>"
+      "code_before": "<button></button>\n<input type=\"text\" name=\"q\" placeholder=\"Search\">\n<iframe src=\"/widget.html\"></iframe>",
+      "check": "fail"
     },
     {
       "level": "AA",
@@ -332,7 +345,8 @@
       "location": "test/golden/dirty.html:2",
       "description": "The viewport meta tag prevents zoom (user-scalable=no), so users cannot enlarge text.",
       "fix": "Remove user-scalable=no and any maximum-scale below 5; use content=\"width=device-width, initial-scale=1\".",
-      "code_before": "<!DOCTYPE html><html><head><title></title>\n<meta name=\"viewport\" content=\"width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no\">\n</head><body><div id=\"content\">"
+      "code_before": "<!DOCTYPE html><html><head><title></title>\n<meta name=\"viewport\" content=\"width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no\">\n</head><body><div id=\"content\">",
+      "check": "fail"
     },
     {
       "level": "Review",
@@ -345,7 +359,8 @@
       "affected_users": "Search and answer-engine users evaluating whether to open the result",
       "location": "test/golden/dirty.html",
       "description": "No meta description was found in the static HTML.",
-      "fix": "Add a concise page-specific meta description."
+      "fix": "Add a concise page-specific meta description.",
+      "check": "fail"
     },
     {
       "level": "Review",
@@ -358,7 +373,8 @@
       "affected_users": "Search and answer-engine users when duplicate URLs or variants exist",
       "location": "test/golden/dirty.html",
       "description": "No canonical URL was found in the static HTML, so crawlers may have to infer the preferred URL.",
-      "fix": "Add <link rel=\"canonical\" href=\"https://example.com/preferred-url\"> for indexable public pages."
+      "fix": "Add <link rel=\"canonical\" href=\"https://example.com/preferred-url\"> for indexable public pages.",
+      "check": "fail"
     },
     {
       "level": "Review",
@@ -371,7 +387,8 @@
       "affected_users": "Search and answer-engine users trying to identify the page entity and content type",
       "location": "test/golden/dirty.html",
       "description": "No JSON-LD structured data was found in the static HTML.",
-      "fix": "Add page-appropriate Schema.org JSON-LD, such as Organization, Article, FAQPage, Product, BreadcrumbList, or WebSite."
+      "fix": "Add page-appropriate Schema.org JSON-LD, such as Organization, Article, FAQPage, Product, BreadcrumbList, or WebSite.",
+      "check": "fail"
     }
   ],
   "legal_risk": {
@@ -619,10 +636,29 @@
     }
   ],
   "testing_recommendations": [
-    "Run keyboard-only walkthrough of the primary flow.",
-    "Run a live browser audit with Playwright + axe-core when a page is available.",
-    "Check 320px reflow and 200% zoom manually.",
-    "Listen to the page with VoiceOver or NVDA for the core task.",
-    "Treat this static score as a regression baseline, not a completion certificate."
+    {
+      "zh": "修復鍵盤發現項後，僅使用 Tab、Shift+Tab、Enter、Space 與方向鍵重跑主要流程。",
+      "en": "After fixing the keyboard findings, rerun the primary flow using only Tab, Shift+Tab, Enter, Space, and arrow keys."
+    },
+    {
+      "zh": "修復表單發現項後，驗證 label、必填狀態與錯誤訊息能被鍵盤及螢幕閱讀器正確使用。",
+      "en": "After fixing the form findings, verify labels, required states, and error messages with both keyboard and screen reader."
+    },
+    {
+      "zh": "修復語意結構發現項後，用 NVDA 或 VoiceOver 完成主要任務。",
+      "en": "After fixing the semantic findings, complete the primary task with NVDA or VoiceOver."
+    },
+    {
+      "zh": "用真實瀏覽器搭配 axe-core 驗證計算後的文字與 UI 對比。",
+      "en": "Verify computed text and UI contrast in a real browser with axe-core."
+    },
+    {
+      "zh": "在 200% 縮放下重跑主要流程；320px 回流結果已由本次掃描另行記錄。",
+      "en": "Rerun the primary flow at 200% zoom; the 320px reflow result is recorded separately by this audit."
+    },
+    {
+      "zh": "請一位不熟悉產品的使用者完成主要任務，觀察標籤、說明與下一步是否清楚。",
+      "en": "Ask a user unfamiliar with the product to complete the primary task and observe whether labels, help, and next steps are clear."
+    }
   ]
 }

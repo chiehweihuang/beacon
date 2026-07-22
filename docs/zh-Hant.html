@@ -185,7 +185,12 @@
     "source": { "source": "github", "repo": "chiehweihuang/beacon" }
   }
 }</code></pre>
-      <p>用 Codex？同一顆引擎有 Codex 轉接器——見 <a href="https://github.com/chiehweihuang/beacon/blob/master/ADAPTERS.md">ADAPTERS.md</a>。</p>
+      <p>使用 Codex？建置並部署內附的轉接器：</p>
+<pre><code>git clone https://github.com/chiehweihuang/beacon.git
+cd beacon
+node build.mjs
+node tools/deploy-codex.mjs</code></pre>
+      <p class="footnote">這會把 Beacon 安裝到 <code>~/.codex/skills/beacon/</code>；安裝後請重新啟動 Codex。執行環境差異請見 <a href="https://github.com/chiehweihuang/beacon/blob/master/ADAPTERS.md">ADAPTERS.md</a>。</p>
     </div>
   </section>
 

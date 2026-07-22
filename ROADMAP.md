@@ -1,6 +1,6 @@
 # Beacon Roadmap
 
-Snapshot **2026-06-25**. Last released **v2.1.0**; active initiative **Pattern Library v1.0** (Steps 0-5 done; release prepped as v2.2.0, not yet tagged).
+Snapshot **2026-07-11**. Last released **v3.0.0**. Pattern Library v1.0 shipped in v2.2.0; v3.0.0 then replaced placeholder scoring with measured category states, coverage-aware scores, and a committed validation charter.
 
 This file is the single place to see **where Beacon is, where it is heading, and how far the current work has got**. Glance here instead of watching individual commits. For internals see [ARCHITECTURE.md](./ARCHITECTURE.md); for skill behaviour see `commands/*.md`.
 
@@ -10,7 +10,7 @@ This file is the single place to see **where Beacon is, where it is heading, and
 
 **The thesis (direction · this rarely changes).** Beacon is a distributed *signal* each developer or agent carries, not a central scanner like Lighthouse. The payoff is collective: stop AI from regenerating the **same** accessibility mistakes. To get there, detectors stop being hardcoded copies and become shared, contributable **data**.
 
-**The active initiative: Pattern Library.** Externalise the advisor's detectors into one declarative library that any carrier can read and, later, contribute to.
+**Current focus: validation.** The shared Pattern Library is shipped, the remaining aria-heading attribution gap is fixed in engine @8, and the next measurement work is to rerun ground truth for @8 and finish cross-machine score-drift measurement.
 
 | Phase | When | What it delivers |
 |---|---|---|
@@ -28,7 +28,7 @@ Updated after each step. This is the live "how far have we got" line.
 - [x] **Step 3**: Shared `core/scripts/pattern-runtime.mjs` interpreter (`regex` / `regex-guarded` / `regex-count`) · `test/pattern-runtime.test.mjs` 29/29
 - [x] **Step 4**: Rewire BOTH runtimes to read the data (behaviour-preserving vs the Step 0 baseline) · baseline still 52/52
 - [x] **Step 5**: Migrate the 4 PDF records; inline detectors removed from both runtimes · 13 records, full suite 265/265
-- [ ] **Step 6**: Ship the v1.0 data-only release (version bump + CHANGELOG + tag/push) · awaiting go
+- [x] **Step 6**: Ship the v1.0 data-only release · released in v2.2.0
 
 **Deliberate behaviour changes in this initiative** (recorded so they are not mistaken for regressions): the CC hook gained `keydown|keyup` suppression on click handlers, a `<div>/<span> onClick` detector, a word-boundary on `outline`, and the tighter `min(Npx, 100%)` reflow guard; the codex advisor gained the `:focus`-without-`:focus-visible` detector and per-line `aria-hidden` scanning. The two runtimes are now behaviour-identical, locked by the Step 0 baseline.
 
@@ -66,9 +66,7 @@ These are intentionally listed so contributors and auto-research loops can targe
 
 ### Skill-level asymmetry
 
-- **`commands/advisor.md` has not received the limits-and-workflow treatment that `guide.md` and `inspect.md` got in v2.0.4 / 2.0.8**. The Advisor still frames its checklist as authoritative review items rather than as conventional defaults + boundary acknowledgement. Bringing it into symmetry is the most obvious next prose pass.
-- **`commands/inspect.md` (skill prose) still mostly speaks in pre-tone-pass language**, even though the rendered HTML report is tone-passed. The skill that *generates* the report is more judgemental than the report itself.
-- **No reference between skills**: each skill has its own "limits" framing now but they don't cross-link. A user reading `/beacon:guide` doesn't see that `/beacon:advisor` says similar things.
+- The guide, advisor, inspect, and hook now share the same boundary: static guidance is a baseline, runtime behavior needs verification, and machine checks do not replace disabled-user testing. Keep this wording aligned when any surface changes.
 
 ### Report (HTML) edges
 
@@ -85,7 +83,6 @@ These are intentionally listed so contributors and auto-research loops can targe
 
 ### Hook layer
 
-- **`scripts/a11y-advisor-hook.mjs`** writes a non-negotiable review checklist to stderr. Tone pass has not reached it. The hook is the most-seen Beacon surface; its phrasing matters a lot.
 - **`scripts/beacon-prompt-gate.mjs`** and **`scripts/beacon-session-start.mjs`** make proactive invocation work; they have not been documented yet (only their existence is mentioned in commit messages).
 
 ### Internationalisation
@@ -95,8 +92,7 @@ These are intentionally listed so contributors and auto-research loops can targe
 
 ### Calibration data
 
-- **The "30-40% / 60-70%" automated-vs-real-user split** quoted in banner and methodology comes from axe-core team statements and WebAIM survey data. The actual numbers from peer-reviewed research are slightly different (Vigo et al. 2013 estimate ~25% machine coverage for older WCAG; more recent estimates higher). The quoted range is defensible but the citation is not embedded in the report.
-- **Score band labels** (Excellent / Good / Needs work / Poor) come from a 44-site benchmark (`commands/inspect.md` step "Scoring Calibration"). The benchmark itself is not committed to the repo, only the calibration ranges.
+- Coverage is now reported from the artifact as `coverage_percent`; retired fixed coverage splits and the uncommitted 44-site narrative are no longer used for current claims.
 
 ---
 
@@ -104,12 +100,12 @@ These are intentionally listed so contributors and auto-research loops can targe
 
 A 1000-loop auto research session can pick at any of these. They are listed in order of "if you only do one, do this":
 
-1. **Is the 30-40% / 60-70% split defensible across modern WCAG 2.2 criteria?** Current sources: axe-core team statements, WebAIM survey. Better: cross-check against Deque, Pa11y, Tenon coverage reports. Output: footnote-able citation or revised range.
-2. **Should `advisor.md` get the same limits-and-workflow treatment as `guide.md` and `inspect.md`?** If yes, what shape — same 6-section template, or different because of hook context? Auto-research could draft a candidate version.
+1. ~~**Is the 30-40% / 60-70% split defensible across modern WCAG 2.2 criteria?**~~ Retired: current reports state measured `coverage_percent` instead of a fixed universal split.
+2. ~~**Should `advisor.md` get the same limits-and-workflow treatment as `guide.md` and `inspect.md`?**~~ Resolved 2026-07-11 with a compact advisor-specific boundary section.
 3. **Is the suggestion-toned vocabulary (Meets baseline / Consider improving / Priority review recommended) actually preferred by developers over the judgemental vocabulary (PASS / NEEDS WORK / FAIL)?** This is a UX-research question, not a technical one. A loop could survey existing literature on developer-tool tone or run a paper exercise.
 4. **How does Beacon's positioning compare to Lighthouse, axe-core CLI, Pa11y, WebAIM WAVE, IBM Equal Access, and Deque axe DevTools?** Differentiation map. Each tool has different blind spots; Beacon's distinguishing claim is "epistemic honesty + bilingual + legal-per-jurisdiction".
 5. **The "Common Misframings to Gently Counter" table** (in `guide.md`) has 6 rows. Each one is an opinion that could be supported by evidence. Which rows have the strongest supporting research? Which are conjecture and should be softened?
-6. **Should `inspect.md` and `advisor.md` skill prose be tone-passed** to match the report?
+6. ~~**Should `inspect.md` and `advisor.md` skill prose be tone-passed** to match the report?~~ Resolved 2026-07-11, including the high-frequency hook output.
 7. **Accessibility overlay claims** (AccessiBe, UserWay, EqualWeb): Beacon currently makes one passing critical remark in `guide.md`. Is that strong enough? Too strong? Cite source.
 8. **Should there be a `/beacon:teach` skill** that's purely educational rather than action-oriented? When a user asks "what is WCAG 1.4.3 about" they don't necessarily want a finding or a guide — they want explanation. Currently this falls between the three skills.
 9. **Performance of `generate-report.mjs` on large audits** (100+ findings, 10k+ DOM nodes): is the synchronous template-literal build the right approach, or does the file need streaming output for very large reports?

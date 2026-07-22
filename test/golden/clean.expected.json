@@ -13,7 +13,7 @@
     ],
     "platform": "Web",
     "tool_version": "beacon codex static baseline",
-    "engine_fingerprint": "beacon-static-audit@7+ruleset.7b79d5151b72",
+    "engine_fingerprint": "beacon-static-audit@8+ruleset.7b79d5151b72",
     "confidence_level": "medium",
     "requires_live_audit": true,
     "audit_tier": "Tier 1 (static file scan only)",
@@ -185,10 +185,17 @@
   },
   "remediation": [],
   "testing_recommendations": [
-    "Run keyboard-only walkthrough of the primary flow.",
-    "Run a live browser audit with Playwright + axe-core when a page is available.",
-    "Check 320px reflow and 200% zoom manually.",
-    "Listen to the page with VoiceOver or NVDA for the core task.",
-    "Treat this static score as a regression baseline, not a completion certificate."
+    {
+      "zh": "用真實瀏覽器搭配 axe-core 驗證計算後的文字與 UI 對比。",
+      "en": "Verify computed text and UI contrast in a real browser with axe-core."
+    },
+    {
+      "zh": "在 200% 縮放下重跑主要流程；320px 回流結果已由本次掃描另行記錄。",
+      "en": "Rerun the primary flow at 200% zoom; the 320px reflow result is recorded separately by this audit."
+    },
+    {
+      "zh": "請一位不熟悉產品的使用者完成主要任務，觀察標籤、說明與下一步是否清楚。",
+      "en": "Ask a user unfamiliar with the product to complete the primary task and observe whether labels, help, and next steps are clear."
+    }
   ]
 }

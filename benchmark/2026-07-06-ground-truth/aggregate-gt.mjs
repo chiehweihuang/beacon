@@ -14,13 +14,17 @@ import { fileURLToPath } from 'node:url';
 
 const DIR = resolve(dirname(fileURLToPath(import.meta.url)));
 const ENGINE = process.argv.includes('--engine') ? process.argv[process.argv.indexOf('--engine') + 1] : '4';
-const BEACON_FIELD = ENGINE === '6' ? 'beacon_v6' : 'beacon';
-const FP_FIELD = ENGINE === '6' ? 'beacon_fp_v6' : 'beacon_fp';
-const OUT_FILE = ENGINE === '6' ? 'pr-analysis-v6.json' : 'pr-analysis.json';
+// @8 re-uses the @6 mapping wherever no beacon_v8 override exists (sparse overrides:
+// only entries whose status actually changed between engines carry the new field).
+const BEACON_FIELD = ENGINE === '8' ? 'beacon_v8' : ENGINE === '6' ? 'beacon_v6' : 'beacon';
+const FALLBACK_FIELD = ENGINE === '8' ? 'beacon_v6' : null;
+const FP_FIELD = ENGINE === '8' ? 'beacon_fp_v8' : ENGINE === '6' ? 'beacon_fp_v6' : 'beacon_fp';
+const FP_FALLBACK = ENGINE === '8' ? 'beacon_fp_v6' : null;
+const OUT_FILE = ENGINE === '8' ? 'pr-analysis-v8.json' : ENGINE === '6' ? 'pr-analysis-v6.json' : 'pr-analysis.json';
 const allSites = JSON.parse(readFileSync(resolve(DIR, 'inventories.json'), 'utf8'));
 const sites = allSites.map((s) => ({
   ...s,
-  violations: (s.violations || []).filter((v) => ENGINE === '6' || !v.added),
+  violations: (s.violations || []).filter((v) => ENGINE !== '4' || !v.added),
 }));
 
 const CRITERIA = ['image-alt', 'link-name', 'button-name', 'frame-title', 'input-label', 'heading-order', 'list-structure', 'html-lang', 'document-title', 'meta-viewport-zoom'];
@@ -33,7 +37,8 @@ function blank() {
 const per = {};
 for (const t of TOOLS) { per[t] = { total: blank() }; for (const c of CRITERIA) per[t][c] = blank(); }
 
-const statusOf = (v, t) => (t === 'beacon' ? v[BEACON_FIELD] : v[t]);
+const statusOf = (v, t) => (t === 'beacon' ? (v[BEACON_FIELD] ?? (FALLBACK_FIELD ? v[FALLBACK_FIELD] : undefined)) : v[t]);
+const fpOf = (s) => s[FP_FIELD] ?? (FP_FALLBACK ? s[FP_FALLBACK] : undefined) ?? [];
 
 for (const s of sites) {
   for (const v of s.violations || []) {
@@ -47,7 +52,7 @@ for (const s of sites) {
       else { cell.oos++; tot.oos++; cell.oos_w += w; tot.oos_w += w; }
     }
   }
-  per.beacon.total.fp += (s[FP_FIELD] || []).length;
+  per.beacon.total.fp += fpOf(s).length;
   per.lighthouse.total.fp += (s.lighthouse_fp || []).length;
 }
 
@@ -77,7 +82,7 @@ out.per_site = sites.map((s) => ({
   violations: (s.violations || []).length,
   beacon_tp: (s.violations || []).filter((v) => statusOf(v, 'beacon') === 'flagged').length,
   beacon_missed: (s.violations || []).filter((v) => statusOf(v, 'beacon') === 'missed').length,
-  beacon_fp: (s[FP_FIELD] || []).length,
+  beacon_fp: fpOf(s).length,
   lh_tp: (s.violations || []).filter((v) => v.lighthouse === 'flagged').length,
   lh_missed: (s.violations || []).filter((v) => v.lighthouse === 'missed').length,
   lh_fp: (s.lighthouse_fp || []).length,

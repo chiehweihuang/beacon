@@ -223,8 +223,12 @@
   .category-desc { color: var(--text-muted); font-size: 0.8rem; line-height: 1.45; max-width: 48rem; }
   .summary-table .pass { color: var(--pass); }
   .summary-table .fail { color: var(--fail); }
-  .category-row { cursor: pointer; }
-  .category-row:hover { background: var(--surface-2); }
+  .category-summary-tools { display: flex; justify-content: space-between; align-items: center; gap: 1rem; margin: 0.5rem 0; }
+  .category-summary-note { color: var(--text-muted); margin: 0; max-width: 60rem; }
+  .category-toggle, .category-expand-all { width: fit-content; border: 1px solid var(--border); border-radius: 4px; background: var(--surface); color: var(--accent); padding: 0.35rem 0.6rem; font: inherit; font-size: 0.8rem; cursor: pointer; }
+  .category-toggle:hover, .category-expand-all:hover { background: var(--surface-2); }
+  .category-toggle:focus-visible, .category-expand-all:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+  .mobile-label { display: none; color: var(--text-muted); font-size: 0.72rem; font-weight: 600; text-transform: uppercase; }
 
   .score-bar { height: 20px; background: var(--surface-2); border-radius: 10px; position: relative; overflow: hidden; min-width: 100px; }
   .score-fill { height: 100%; border-radius: 10px; transition: width 0.8s ease; }
@@ -406,10 +410,12 @@
 
   .empty { color: var(--text-muted); font-style: italic; }
 
-  /* Category detail sections */
-  .category-detail { display: none; margin: 1rem 0 2rem; padding: 1rem;
-    background: var(--surface); border-radius: 8px; }
-  .category-detail.open { display: block; }
+  /* Category detail rows sit directly below their summary row. */
+  .category-detail-row[hidden] { display: none; }
+  .category-detail-row td { padding: 0 0 1rem; }
+  .category-detail { padding: 1rem; background: var(--surface); border: 1px solid var(--border); border-radius: 0 0 8px 8px; white-space: normal; }
+  .category-detail h3 { margin-top: 0; }
+  .category-status-note { color: var(--text-muted); }
 
   @media (max-width: 720px) {
     body { padding: 1rem; }
@@ -425,11 +431,20 @@
       grid-template-columns: 1fr 1fr;
       gap: 0.8rem;
     }
-    .summary-table {
-      display: block;
-      overflow-x: auto;
-      white-space: nowrap;
-    }
+    .summary-table { display: block; overflow: visible; white-space: normal; }
+    .summary-table thead { display: none; }
+    .summary-table tbody { display: grid; gap: 0.75rem; }
+    .summary-table .category-row { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); border: 1px solid var(--border); border-radius: 8px; overflow: hidden; }
+    .summary-table .category-row td { border: 0; min-width: 0; }
+    .summary-table .cat-name, .summary-table .result-cell { grid-column: 1 / -1; }
+    .summary-table .num { display: grid; gap: 0.15rem; text-align: left; }
+    .summary-table .result-cell { display: grid; gap: 0.35rem; }
+    .mobile-label { display: block; }
+    .state-badge { white-space: normal; width: fit-content; }
+    .category-detail-row { display: block; }
+    .category-detail-row[hidden] { display: none; }
+    .category-detail-row td { display: block; padding: 0; }
+    .category-summary-tools { align-items: flex-start; flex-direction: column; }
     .code-compare {
       grid-template-columns: 1fr;
     }
@@ -846,6 +861,10 @@
 <!-- Overview Tab -->
 <div id="tab-overview" class="tab-content active" role="tabpanel">
   <h2><span class="lang-zh" lang="zh-Hant">分類摘要</span><span class="lang-en" lang="en">Category Summary</span></h2>
+  <div class="category-summary-tools">
+    <p class="category-summary-note"><span class="lang-zh" lang="zh-Hant">所有分類都已執行靜態掃描。只有取得可計分機器證據的分類顯示分數；其餘分類顯示掃描狀態。</span><span class="lang-en" lang="en">Every category was statically scanned. A score appears only when machine-scoreable evidence exists; otherwise the completed scan state is shown.</span></p>
+    <button type="button" class="category-expand-all" data-expand-categories aria-pressed="false"><span class="lang-zh" lang="zh-Hant">全部展開</span><span class="lang-en" lang="en">Expand all</span></button>
+  </div>
   <table class="summary-table">
     <thead>
       <tr>
@@ -853,194 +872,217 @@
         <th class="num"><span class="lang-zh" lang="zh-Hant">通過</span><span class="lang-en" lang="en">Pass</span></th>
         <th class="num"><span class="lang-zh" lang="zh-Hant">待修</span><span class="lang-en" lang="en">Adjust</span></th>
         <th class="num"><span class="lang-zh" lang="zh-Hant">待審</span><span class="lang-en" lang="en">Review</span></th>
-        <th><span class="lang-zh" lang="zh-Hant">分數</span><span class="lang-en" lang="en">Score</span></th>
+        <th><span class="lang-zh" lang="zh-Hant">結果</span><span class="lang-en" lang="en">Result</span></th>
       </tr>
     </thead>
     <tbody>
       
-      <tr class="category-row" data-category="contrast" tabindex="0" role="button" aria-expanded="false" aria-controls="detail-contrast">
-        <td class="cat-name"><div class="category-cell"><strong><span class="lang-zh" lang="zh-Hant">色彩與對比</span><span class="lang-en" lang="en">Color & Contrast</span></strong><span class="category-desc"><span class="lang-zh" lang="zh-Hant">文字與 UI 對比、只靠顏色傳達資訊、深色模式與狀態對比。</span><span class="lang-en" lang="en">Text and UI contrast ratios, color-only information, dark mode, and contrast-sensitive states.</span></span></div></td>
-        <td class="num pass">0 </td>
-        <td class="num fail">0 </td>
-        <td class="num review">1</td>
-        <td>
-          
-          <span class="state-badge"><span class="lang-zh" lang="zh-Hant">需人工驗證</span><span class="lang-en" lang="en">Needs human verification</span></span>
+      <tr class="category-row" data-category="contrast">
+        <td class="cat-name"><div class="category-cell"><strong><span class="lang-zh" lang="zh-Hant">色彩與對比</span><span class="lang-en" lang="en">Color & Contrast</span></strong><span class="category-desc"><span class="lang-zh" lang="zh-Hant">文字與 UI 對比、只靠顏色傳達資訊、深色模式與狀態對比。</span><span class="lang-en" lang="en">Text and UI contrast ratios, color-only information, dark mode, and contrast-sensitive states.</span></span><button type="button" class="category-toggle" data-category-toggle="contrast" aria-expanded="false" aria-controls="detail-contrast"><span class="lang-zh" lang="zh-Hant">展開詳情</span><span class="lang-en" lang="en">Show details</span></button></div></td>
+        <td class="num pass"><span class="mobile-label"><span class="lang-zh" lang="zh-Hant">通過</span><span class="lang-en" lang="en">Pass</span></span><span>0 </span></td>
+        <td class="num fail"><span class="mobile-label"><span class="lang-zh" lang="zh-Hant">待修</span><span class="lang-en" lang="en">Adjust</span></span><span>0 </span></td>
+        <td class="num review"><span class="mobile-label"><span class="lang-zh" lang="zh-Hant">待審</span><span class="lang-en" lang="en">Review</span></span><span>1</span></td>
+        <td class="result-cell">
+          <span class="mobile-label"><span class="lang-zh" lang="zh-Hant">結果</span><span class="lang-en" lang="en">Result</span></span>
+<span class="state-badge"><span class="lang-zh" lang="zh-Hant">已完成靜態掃描 · 需人工驗證</span><span class="lang-en" lang="en">Static scan complete · human verification needed</span></span>
         </td>
       </tr>
-      <tr class="category-row" data-category="keyboard" tabindex="0" role="button" aria-expanded="false" aria-controls="detail-keyboard">
-        <td class="cat-name"><div class="category-cell"><strong><span class="lang-zh" lang="zh-Hant">鍵盤導覽</span><span class="lang-en" lang="en">Keyboard Navigation</span></strong><span class="category-desc"><span class="lang-zh" lang="zh-Hant">Tab order、focus indicator、keyboard trap、skip link，以及指標互動的鍵盤替代。</span><span class="lang-en" lang="en">Tab order, focus indicators, keyboard traps, skip links, and keyboard alternatives for pointer interactions.</span></span></div></td>
-        <td class="num pass">0 </td>
-        <td class="num fail">0 </td>
-        <td class="num review">0</td>
-        <td>
-          
-          <span class="state-badge"><span class="lang-zh" lang="zh-Hant">不適用</span><span class="lang-en" lang="en">Not applicable</span></span>
-        </td>
-      </tr>
-      <tr class="category-row" data-category="screenreader" tabindex="0" role="button" aria-expanded="false" aria-controls="detail-screenreader">
-        <td class="cat-name"><div class="category-cell"><strong><span class="lang-zh" lang="zh-Hant">螢幕閱讀器</span><span class="lang-en" lang="en">Screen Reader</span></strong><span class="category-desc"><span class="lang-zh" lang="zh-Hant">Landmark、heading、alt text、name、role、ARIA、頁面語言與語意結構。</span><span class="lang-en" lang="en">Landmarks, heading structure, alt text, names, roles, ARIA, page language, and semantic structure.</span></span></div></td>
-        <td class="num pass">22 </td>
-        <td class="num fail">0 </td>
-        <td class="num review">0</td>
-        <td>
-          
-          <div class="score-bar">
-            <div class="score-fill" style="width:100%;background:var(--pass)"></div>
-            <span class="score-text">100</span>
-          </div>
-          
-        </td>
-      </tr>
-      <tr class="category-row" data-category="forms" tabindex="0" role="button" aria-expanded="false" aria-controls="detail-forms">
-        <td class="cat-name"><div class="category-cell"><strong><span class="lang-zh" lang="zh-Hant">表單</span><span class="lang-en" lang="en">Forms</span></strong><span class="category-desc"><span class="lang-zh" lang="zh-Hant">Label、說明、錯誤訊息、autocomplete、required field 與 validation 行為。</span><span class="lang-en" lang="en">Labels, instructions, error messages, autocomplete, required fields, and validation behavior.</span></span></div></td>
-        <td class="num pass">0 </td>
-        <td class="num fail">0 </td>
-        <td class="num review">0</td>
-        <td>
-          
-          <span class="state-badge"><span class="lang-zh" lang="zh-Hant">不適用</span><span class="lang-en" lang="en">Not applicable</span></span>
-        </td>
-      </tr>
-      <tr class="category-row" data-category="responsive" tabindex="0" role="button" aria-expanded="false" aria-controls="detail-responsive">
-        <td class="cat-name"><div class="category-cell"><strong><span class="lang-zh" lang="zh-Hant">響應式與回流</span><span class="lang-en" lang="en">Responsive & Reflow</span></strong><span class="category-desc"><span class="lang-zh" lang="zh-Hant">320px reflow、zoom、viewport、fixed width、fluid typography 與 layout overflow。</span><span class="lang-en" lang="en">320px reflow, zoom, viewport settings, fixed widths, fluid typography, and layout overflow.</span></span></div></td>
-        <td class="num pass">1 </td>
-        <td class="num fail">0 </td>
-        <td class="num review">0</td>
-        <td>
-          
-          <div class="score-bar">
-            <div class="score-fill" style="width:100%;background:var(--pass)"></div>
-            <span class="score-text">100</span>
-          </div>
-          
-        </td>
-      </tr>
-      <tr class="category-row" data-category="touch" tabindex="0" role="button" aria-expanded="false" aria-controls="detail-touch">
-        <td class="cat-name"><div class="category-cell"><strong><span class="lang-zh" lang="zh-Hant">觸控與目標尺寸</span><span class="lang-en" lang="en">Touch & Targets</span></strong><span class="category-desc"><span class="lang-zh" lang="zh-Hant">目標尺寸、間距、drag 替代、pointer gesture 與 orientation 假設。</span><span class="lang-en" lang="en">Target size, spacing, drag alternatives, pointer gestures, and orientation assumptions.</span></span></div></td>
-        <td class="num pass">0 </td>
-        <td class="num fail">0 </td>
-        <td class="num review">1</td>
-        <td>
-          
-          <span class="state-badge"><span class="lang-zh" lang="zh-Hant">需人工驗證</span><span class="lang-en" lang="en">Needs human verification</span></span>
-        </td>
-      </tr>
-      <tr class="category-row" data-category="cognitive" tabindex="0" role="button" aria-expanded="false" aria-controls="detail-cognitive">
-        <td class="cat-name"><div class="category-cell"><strong><span class="lang-zh" lang="zh-Hant">認知</span><span class="lang-en" lang="en">Cognitive</span></strong><span class="category-desc"><span class="lang-zh" lang="zh-Hant">一致導覽、help mechanism、易懂標籤、可預期流程與 dark pattern。</span><span class="lang-en" lang="en">Consistent navigation, help mechanisms, readable labels, predictable flows, and dark patterns.</span></span></div></td>
-        <td class="num pass">0 </td>
-        <td class="num fail">0 </td>
-        <td class="num review">1</td>
-        <td>
-          
-          <span class="state-badge"><span class="lang-zh" lang="zh-Hant">需人工驗證</span><span class="lang-en" lang="en">Needs human verification</span></span>
-        </td>
-      </tr>
-      <tr class="category-row" data-category="motion" tabindex="0" role="button" aria-expanded="false" aria-controls="detail-motion">
-        <td class="cat-name"><div class="category-cell"><strong><span class="lang-zh" lang="zh-Hant">動態與動畫</span><span class="lang-en" lang="en">Motion & Animation</span></strong><span class="category-desc"><span class="lang-zh" lang="zh-Hant">prefers-reduced-motion、time limit、自動移動內容與互動動畫。</span><span class="lang-en" lang="en">prefers-reduced-motion, time limits, auto-moving content, and animation from interaction.</span></span></div></td>
-        <td class="num pass">0 </td>
-        <td class="num fail">0 </td>
-        <td class="num review">0</td>
-        <td>
-          
-          <span class="state-badge"><span class="lang-zh" lang="zh-Hant">不適用</span><span class="lang-en" lang="en">Not applicable</span></span>
-        </td>
-      </tr>
-      <tr class="category-row" data-category="media" tabindex="0" role="button" aria-expanded="false" aria-controls="detail-media">
-        <td class="cat-name"><div class="category-cell"><strong><span class="lang-zh" lang="zh-Hant">媒體</span><span class="lang-en" lang="en">Media</span></strong><span class="category-desc"><span class="lang-zh" lang="zh-Hant">Caption、transcript、autoplay、audio control、flash 與替代內容。</span><span class="lang-en" lang="en">Captions, transcripts, autoplay, audio control, flashing content, and media alternatives.</span></span></div></td>
-        <td class="num pass">0 </td>
-        <td class="num fail">0 </td>
-        <td class="num review">1</td>
-        <td>
-          
-          <span class="state-badge"><span class="lang-zh" lang="zh-Hant">需人工驗證</span><span class="lang-en" lang="en">Needs human verification</span></span>
-        </td>
-      </tr>
-      <tr class="category-row" data-category="agent" tabindex="0" role="button" aria-expanded="false" aria-controls="detail-agent">
-        <td class="cat-name"><div class="category-cell"><strong><span class="lang-zh" lang="zh-Hant">代理可操作性與 AEO</span><span class="lang-en" lang="en">Agent Operability & AEO</span></strong><span class="category-desc"><span class="lang-zh" lang="zh-Hant">Schema.org、metadata、canonical、heading outline、可爬取內容、robots.txt、sitemap.xml、optional llms.txt 與 answer-engine clarity。</span><span class="lang-en" lang="en">Schema.org, metadata, canonical links, heading outline, crawlable content, robots.txt, sitemap.xml, optional llms.txt, and answer-engine clarity.</span></span></div></td>
-        <td class="num pass">3 </td>
-        <td class="num fail">0 </td>
-        <td class="num review">0</td>
-        <td>
-          
-          <div class="score-bar">
-            <div class="score-fill" style="width:100%;background:var(--pass)"></div>
-            <span class="score-text">100</span>
-          </div>
-          
-        </td>
-      </tr>
-    </tbody>
-  </table>
+      <tr class="category-detail-row" id="detail-contrast" hidden>
+        <td colspan="5">
+          <div class="category-detail">
+            <h3><span class="lang-zh" lang="zh-Hant">色彩與對比</span><span class="lang-en" lang="en">Color & Contrast</span></h3>
+            <p class="category-status-note"><span class="lang-zh" lang="zh-Hant">靜態掃描已完成；這類檢查需要瀏覽器、輔助科技或人工操作，因此不製造分數。</span><span class="lang-en" lang="en">The static scan completed. This category needs browser, assistive-technology, or human interaction evidence, so no score is invented.</span></p>
+<p class="category-desc"><span class="lang-zh" lang="zh-Hant">文字與 UI 對比、只靠顏色傳達資訊、深色模式與狀態對比。</span><span class="lang-en" lang="en">Text and UI contrast ratios, color-only information, dark mode, and contrast-sensitive states.</span></p>
 
-  
-    <div class="category-detail" id="detail-contrast">
-      <h3><span class="lang-zh" lang="zh-Hant">色彩與對比</span><span class="lang-en" lang="en">Color & Contrast</span></h3>
-      <p class="category-desc"><span class="lang-zh" lang="zh-Hant">文字與 UI 對比、只靠顏色傳達資訊、深色模式與狀態對比。</span><span class="lang-en" lang="en">Text and UI contrast ratios, color-only information, dark mode, and contrast-sensitive states.</span></p>
-      
-      <p class="empty"><span class="lang-zh" lang="zh-Hant">此分類目前無發現項目。</span><span class="lang-en" lang="en">No observations in this category at the moment.</span></p>
-    </div>
-  
-    <div class="category-detail" id="detail-keyboard">
-      <h3><span class="lang-zh" lang="zh-Hant">鍵盤導覽</span><span class="lang-en" lang="en">Keyboard Navigation</span></h3>
-      <p class="category-desc"><span class="lang-zh" lang="zh-Hant">Tab order、focus indicator、keyboard trap、skip link，以及指標互動的鍵盤替代。</span><span class="lang-en" lang="en">Tab order, focus indicators, keyboard traps, skip links, and keyboard alternatives for pointer interactions.</span></p>
-      
-      <p class="empty"><span class="lang-zh" lang="zh-Hant">此分類目前無發現項目。</span><span class="lang-en" lang="en">No observations in this category at the moment.</span></p>
-    </div>
-  
-    <div class="category-detail" id="detail-screenreader">
-      <h3><span class="lang-zh" lang="zh-Hant">螢幕閱讀器</span><span class="lang-en" lang="en">Screen Reader</span></h3>
-      <p class="category-desc"><span class="lang-zh" lang="zh-Hant">Landmark、heading、alt text、name、role、ARIA、頁面語言與語意結構。</span><span class="lang-en" lang="en">Landmarks, heading structure, alt text, names, roles, ARIA, page language, and semantic structure.</span></p>
-      
-      <p class="empty"><span class="lang-zh" lang="zh-Hant">此分類目前無發現項目。</span><span class="lang-en" lang="en">No observations in this category at the moment.</span></p>
-    </div>
-  
-    <div class="category-detail" id="detail-forms">
-      <h3><span class="lang-zh" lang="zh-Hant">表單</span><span class="lang-en" lang="en">Forms</span></h3>
-      <p class="category-desc"><span class="lang-zh" lang="zh-Hant">Label、說明、錯誤訊息、autocomplete、required field 與 validation 行為。</span><span class="lang-en" lang="en">Labels, instructions, error messages, autocomplete, required fields, and validation behavior.</span></p>
-      
-      <p class="empty"><span class="lang-zh" lang="zh-Hant">此分類目前無發現項目。</span><span class="lang-en" lang="en">No observations in this category at the moment.</span></p>
-    </div>
-  
-    <div class="category-detail" id="detail-responsive">
-      <h3><span class="lang-zh" lang="zh-Hant">響應式與回流</span><span class="lang-en" lang="en">Responsive & Reflow</span></h3>
-      <p class="category-desc"><span class="lang-zh" lang="zh-Hant">320px reflow、zoom、viewport、fixed width、fluid typography 與 layout overflow。</span><span class="lang-en" lang="en">320px reflow, zoom, viewport settings, fixed widths, fluid typography, and layout overflow.</span></p>
-      
-      <p class="empty"><span class="lang-zh" lang="zh-Hant">此分類目前無發現項目。</span><span class="lang-en" lang="en">No observations in this category at the moment.</span></p>
-    </div>
-  
-    <div class="category-detail" id="detail-touch">
-      <h3><span class="lang-zh" lang="zh-Hant">觸控與目標尺寸</span><span class="lang-en" lang="en">Touch & Targets</span></h3>
-      <p class="category-desc"><span class="lang-zh" lang="zh-Hant">目標尺寸、間距、drag 替代、pointer gesture 與 orientation 假設。</span><span class="lang-en" lang="en">Target size, spacing, drag alternatives, pointer gestures, and orientation assumptions.</span></p>
-      
-      <p class="empty"><span class="lang-zh" lang="zh-Hant">此分類目前無發現項目。</span><span class="lang-en" lang="en">No observations in this category at the moment.</span></p>
-    </div>
-  
-    <div class="category-detail" id="detail-cognitive">
-      <h3><span class="lang-zh" lang="zh-Hant">認知</span><span class="lang-en" lang="en">Cognitive</span></h3>
-      <p class="category-desc"><span class="lang-zh" lang="zh-Hant">一致導覽、help mechanism、易懂標籤、可預期流程與 dark pattern。</span><span class="lang-en" lang="en">Consistent navigation, help mechanisms, readable labels, predictable flows, and dark patterns.</span></p>
-      
-      <p class="empty"><span class="lang-zh" lang="zh-Hant">此分類目前無發現項目。</span><span class="lang-en" lang="en">No observations in this category at the moment.</span></p>
-    </div>
-  
-    <div class="category-detail" id="detail-motion">
-      <h3><span class="lang-zh" lang="zh-Hant">動態與動畫</span><span class="lang-en" lang="en">Motion & Animation</span></h3>
-      <p class="category-desc"><span class="lang-zh" lang="zh-Hant">prefers-reduced-motion、time limit、自動移動內容與互動動畫。</span><span class="lang-en" lang="en">prefers-reduced-motion, time limits, auto-moving content, and animation from interaction.</span></p>
-      
-      <p class="empty"><span class="lang-zh" lang="zh-Hant">此分類目前無發現項目。</span><span class="lang-en" lang="en">No observations in this category at the moment.</span></p>
-    </div>
-  
-    <div class="category-detail" id="detail-media">
-      <h3><span class="lang-zh" lang="zh-Hant">媒體</span><span class="lang-en" lang="en">Media</span></h3>
-      <p class="category-desc"><span class="lang-zh" lang="zh-Hant">Caption、transcript、autoplay、audio control、flash 與替代內容。</span><span class="lang-en" lang="en">Captions, transcripts, autoplay, audio control, flashing content, and media alternatives.</span></p>
-      
-      <p class="empty"><span class="lang-zh" lang="zh-Hant">此分類目前無發現項目。</span><span class="lang-en" lang="en">No observations in this category at the moment.</span></p>
-    </div>
-  
-    <div class="category-detail" id="detail-agent">
-      <h3><span class="lang-zh" lang="zh-Hant">代理可操作性與 AEO</span><span class="lang-en" lang="en">Agent Operability & AEO</span></h3>
-      <p class="category-desc"><span class="lang-zh" lang="zh-Hant">Schema.org、metadata、canonical、heading outline、可爬取內容、robots.txt、sitemap.xml、optional llms.txt 與 answer-engine clarity。</span><span class="lang-en" lang="en">Schema.org, metadata, canonical links, heading outline, crawlable content, robots.txt, sitemap.xml, optional llms.txt, and answer-engine clarity.</span></p>
-      
+<p class="empty"><span class="lang-zh" lang="zh-Hant">此分類目前無發現項目。</span><span class="lang-en" lang="en">No observations in this category at the moment.</span></p>
+          </div>
+        </td>
+      </tr>
+      <tr class="category-row" data-category="keyboard">
+        <td class="cat-name"><div class="category-cell"><strong><span class="lang-zh" lang="zh-Hant">鍵盤導覽</span><span class="lang-en" lang="en">Keyboard Navigation</span></strong><span class="category-desc"><span class="lang-zh" lang="zh-Hant">Tab order、focus indicator、keyboard trap、skip link，以及指標互動的鍵盤替代。</span><span class="lang-en" lang="en">Tab order, focus indicators, keyboard traps, skip links, and keyboard alternatives for pointer interactions.</span></span><button type="button" class="category-toggle" data-category-toggle="keyboard" aria-expanded="false" aria-controls="detail-keyboard"><span class="lang-zh" lang="zh-Hant">展開詳情</span><span class="lang-en" lang="en">Show details</span></button></div></td>
+        <td class="num pass"><span class="mobile-label"><span class="lang-zh" lang="zh-Hant">通過</span><span class="lang-en" lang="en">Pass</span></span><span>0 </span></td>
+        <td class="num fail"><span class="mobile-label"><span class="lang-zh" lang="zh-Hant">待修</span><span class="lang-en" lang="en">Adjust</span></span><span>0 </span></td>
+        <td class="num review"><span class="mobile-label"><span class="lang-zh" lang="zh-Hant">待審</span><span class="lang-en" lang="en">Review</span></span><span>0</span></td>
+        <td class="result-cell">
+          <span class="mobile-label"><span class="lang-zh" lang="zh-Hant">結果</span><span class="lang-en" lang="en">Result</span></span>
+<span class="state-badge"><span class="lang-zh" lang="zh-Hant">已完成靜態掃描 · 本頁不適用</span><span class="lang-en" lang="en">Static scan complete · not applicable here</span></span>
+        </td>
+      </tr>
+      <tr class="category-detail-row" id="detail-keyboard" hidden>
+        <td colspan="5">
+          <div class="category-detail">
+            <h3><span class="lang-zh" lang="zh-Hant">鍵盤導覽</span><span class="lang-en" lang="en">Keyboard Navigation</span></h3>
+            <p class="category-status-note"><span class="lang-zh" lang="zh-Hant">靜態掃描已完成；本次範圍沒有偵測到此分類可檢查的內容。</span><span class="lang-en" lang="en">The static scan completed. No applicable content for this category was detected in the audited scope.</span></p>
+<p class="category-desc"><span class="lang-zh" lang="zh-Hant">Tab order、focus indicator、keyboard trap、skip link，以及指標互動的鍵盤替代。</span><span class="lang-en" lang="en">Tab order, focus indicators, keyboard traps, skip links, and keyboard alternatives for pointer interactions.</span></p>
+
+<p class="empty"><span class="lang-zh" lang="zh-Hant">此分類目前無發現項目。</span><span class="lang-en" lang="en">No observations in this category at the moment.</span></p>
+          </div>
+        </td>
+      </tr>
+      <tr class="category-row" data-category="screenreader">
+        <td class="cat-name"><div class="category-cell"><strong><span class="lang-zh" lang="zh-Hant">螢幕閱讀器</span><span class="lang-en" lang="en">Screen Reader</span></strong><span class="category-desc"><span class="lang-zh" lang="zh-Hant">Landmark、heading、alt text、name、role、ARIA、頁面語言與語意結構。</span><span class="lang-en" lang="en">Landmarks, heading structure, alt text, names, roles, ARIA, page language, and semantic structure.</span></span><button type="button" class="category-toggle" data-category-toggle="screenreader" aria-expanded="false" aria-controls="detail-screenreader"><span class="lang-zh" lang="zh-Hant">展開詳情</span><span class="lang-en" lang="en">Show details</span></button></div></td>
+        <td class="num pass"><span class="mobile-label"><span class="lang-zh" lang="zh-Hant">通過</span><span class="lang-en" lang="en">Pass</span></span><span>22 </span></td>
+        <td class="num fail"><span class="mobile-label"><span class="lang-zh" lang="zh-Hant">待修</span><span class="lang-en" lang="en">Adjust</span></span><span>0 </span></td>
+        <td class="num review"><span class="mobile-label"><span class="lang-zh" lang="zh-Hant">待審</span><span class="lang-en" lang="en">Review</span></span><span>0</span></td>
+        <td class="result-cell">
+          <span class="mobile-label"><span class="lang-zh" lang="zh-Hant">結果</span><span class="lang-en" lang="en">Result</span></span>
+<div class="score-bar"><div class="score-fill" style="width:100%;background:var(--pass)"></div><span class="score-text">100</span></div>
+        </td>
+      </tr>
+      <tr class="category-detail-row" id="detail-screenreader" hidden>
+        <td colspan="5">
+          <div class="category-detail">
+            <h3><span class="lang-zh" lang="zh-Hant">螢幕閱讀器</span><span class="lang-en" lang="en">Screen Reader</span></h3>
+            <p class="category-status-note"><span class="lang-zh" lang="zh-Hant">已取得可計分的機器證據。</span><span class="lang-en" lang="en">Machine-scoreable evidence was collected.</span></p>
+<p class="category-desc"><span class="lang-zh" lang="zh-Hant">Landmark、heading、alt text、name、role、ARIA、頁面語言與語意結構。</span><span class="lang-en" lang="en">Landmarks, heading structure, alt text, names, roles, ARIA, page language, and semantic structure.</span></p>
+
+<p class="empty"><span class="lang-zh" lang="zh-Hant">此分類目前無發現項目。</span><span class="lang-en" lang="en">No observations in this category at the moment.</span></p>
+          </div>
+        </td>
+      </tr>
+      <tr class="category-row" data-category="forms">
+        <td class="cat-name"><div class="category-cell"><strong><span class="lang-zh" lang="zh-Hant">表單</span><span class="lang-en" lang="en">Forms</span></strong><span class="category-desc"><span class="lang-zh" lang="zh-Hant">Label、說明、錯誤訊息、autocomplete、required field 與 validation 行為。</span><span class="lang-en" lang="en">Labels, instructions, error messages, autocomplete, required fields, and validation behavior.</span></span><button type="button" class="category-toggle" data-category-toggle="forms" aria-expanded="false" aria-controls="detail-forms"><span class="lang-zh" lang="zh-Hant">展開詳情</span><span class="lang-en" lang="en">Show details</span></button></div></td>
+        <td class="num pass"><span class="mobile-label"><span class="lang-zh" lang="zh-Hant">通過</span><span class="lang-en" lang="en">Pass</span></span><span>0 </span></td>
+        <td class="num fail"><span class="mobile-label"><span class="lang-zh" lang="zh-Hant">待修</span><span class="lang-en" lang="en">Adjust</span></span><span>0 </span></td>
+        <td class="num review"><span class="mobile-label"><span class="lang-zh" lang="zh-Hant">待審</span><span class="lang-en" lang="en">Review</span></span><span>0</span></td>
+        <td class="result-cell">
+          <span class="mobile-label"><span class="lang-zh" lang="zh-Hant">結果</span><span class="lang-en" lang="en">Result</span></span>
+<span class="state-badge"><span class="lang-zh" lang="zh-Hant">已完成靜態掃描 · 本頁不適用</span><span class="lang-en" lang="en">Static scan complete · not applicable here</span></span>
+        </td>
+      </tr>
+      <tr class="category-detail-row" id="detail-forms" hidden>
+        <td colspan="5">
+          <div class="category-detail">
+            <h3><span class="lang-zh" lang="zh-Hant">表單</span><span class="lang-en" lang="en">Forms</span></h3>
+            <p class="category-status-note"><span class="lang-zh" lang="zh-Hant">靜態掃描已完成；本次範圍沒有偵測到此分類可檢查的內容。</span><span class="lang-en" lang="en">The static scan completed. No applicable content for this category was detected in the audited scope.</span></p>
+<p class="category-desc"><span class="lang-zh" lang="zh-Hant">Label、說明、錯誤訊息、autocomplete、required field 與 validation 行為。</span><span class="lang-en" lang="en">Labels, instructions, error messages, autocomplete, required fields, and validation behavior.</span></p>
+
+<p class="empty"><span class="lang-zh" lang="zh-Hant">此分類目前無發現項目。</span><span class="lang-en" lang="en">No observations in this category at the moment.</span></p>
+          </div>
+        </td>
+      </tr>
+      <tr class="category-row" data-category="responsive">
+        <td class="cat-name"><div class="category-cell"><strong><span class="lang-zh" lang="zh-Hant">響應式與回流</span><span class="lang-en" lang="en">Responsive & Reflow</span></strong><span class="category-desc"><span class="lang-zh" lang="zh-Hant">320px reflow、zoom、viewport、fixed width、fluid typography 與 layout overflow。</span><span class="lang-en" lang="en">320px reflow, zoom, viewport settings, fixed widths, fluid typography, and layout overflow.</span></span><button type="button" class="category-toggle" data-category-toggle="responsive" aria-expanded="false" aria-controls="detail-responsive"><span class="lang-zh" lang="zh-Hant">展開詳情</span><span class="lang-en" lang="en">Show details</span></button></div></td>
+        <td class="num pass"><span class="mobile-label"><span class="lang-zh" lang="zh-Hant">通過</span><span class="lang-en" lang="en">Pass</span></span><span>1 </span></td>
+        <td class="num fail"><span class="mobile-label"><span class="lang-zh" lang="zh-Hant">待修</span><span class="lang-en" lang="en">Adjust</span></span><span>0 </span></td>
+        <td class="num review"><span class="mobile-label"><span class="lang-zh" lang="zh-Hant">待審</span><span class="lang-en" lang="en">Review</span></span><span>0</span></td>
+        <td class="result-cell">
+          <span class="mobile-label"><span class="lang-zh" lang="zh-Hant">結果</span><span class="lang-en" lang="en">Result</span></span>
+<div class="score-bar"><div class="score-fill" style="width:100%;background:var(--pass)"></div><span class="score-text">100</span></div>
+        </td>
+      </tr>
+      <tr class="category-detail-row" id="detail-responsive" hidden>
+        <td colspan="5">
+          <div class="category-detail">
+            <h3><span class="lang-zh" lang="zh-Hant">響應式與回流</span><span class="lang-en" lang="en">Responsive & Reflow</span></h3>
+            <p class="category-status-note"><span class="lang-zh" lang="zh-Hant">已取得可計分的機器證據。</span><span class="lang-en" lang="en">Machine-scoreable evidence was collected.</span></p>
+<p class="category-desc"><span class="lang-zh" lang="zh-Hant">320px reflow、zoom、viewport、fixed width、fluid typography 與 layout overflow。</span><span class="lang-en" lang="en">320px reflow, zoom, viewport settings, fixed widths, fluid typography, and layout overflow.</span></p>
+
+<p class="empty"><span class="lang-zh" lang="zh-Hant">此分類目前無發現項目。</span><span class="lang-en" lang="en">No observations in this category at the moment.</span></p>
+          </div>
+        </td>
+      </tr>
+      <tr class="category-row" data-category="touch">
+        <td class="cat-name"><div class="category-cell"><strong><span class="lang-zh" lang="zh-Hant">觸控與目標尺寸</span><span class="lang-en" lang="en">Touch & Targets</span></strong><span class="category-desc"><span class="lang-zh" lang="zh-Hant">目標尺寸、間距、drag 替代、pointer gesture 與 orientation 假設。</span><span class="lang-en" lang="en">Target size, spacing, drag alternatives, pointer gestures, and orientation assumptions.</span></span><button type="button" class="category-toggle" data-category-toggle="touch" aria-expanded="false" aria-controls="detail-touch"><span class="lang-zh" lang="zh-Hant">展開詳情</span><span class="lang-en" lang="en">Show details</span></button></div></td>
+        <td class="num pass"><span class="mobile-label"><span class="lang-zh" lang="zh-Hant">通過</span><span class="lang-en" lang="en">Pass</span></span><span>0 </span></td>
+        <td class="num fail"><span class="mobile-label"><span class="lang-zh" lang="zh-Hant">待修</span><span class="lang-en" lang="en">Adjust</span></span><span>0 </span></td>
+        <td class="num review"><span class="mobile-label"><span class="lang-zh" lang="zh-Hant">待審</span><span class="lang-en" lang="en">Review</span></span><span>1</span></td>
+        <td class="result-cell">
+          <span class="mobile-label"><span class="lang-zh" lang="zh-Hant">結果</span><span class="lang-en" lang="en">Result</span></span>
+<span class="state-badge"><span class="lang-zh" lang="zh-Hant">已完成靜態掃描 · 需人工驗證</span><span class="lang-en" lang="en">Static scan complete · human verification needed</span></span>
+        </td>
+      </tr>
+      <tr class="category-detail-row" id="detail-touch" hidden>
+        <td colspan="5">
+          <div class="category-detail">
+            <h3><span class="lang-zh" lang="zh-Hant">觸控與目標尺寸</span><span class="lang-en" lang="en">Touch & Targets</span></h3>
+            <p class="category-status-note"><span class="lang-zh" lang="zh-Hant">靜態掃描已完成；這類檢查需要瀏覽器、輔助科技或人工操作，因此不製造分數。</span><span class="lang-en" lang="en">The static scan completed. This category needs browser, assistive-technology, or human interaction evidence, so no score is invented.</span></p>
+<p class="category-desc"><span class="lang-zh" lang="zh-Hant">目標尺寸、間距、drag 替代、pointer gesture 與 orientation 假設。</span><span class="lang-en" lang="en">Target size, spacing, drag alternatives, pointer gestures, and orientation assumptions.</span></p>
+
+<p class="empty"><span class="lang-zh" lang="zh-Hant">此分類目前無發現項目。</span><span class="lang-en" lang="en">No observations in this category at the moment.</span></p>
+          </div>
+        </td>
+      </tr>
+      <tr class="category-row" data-category="cognitive">
+        <td class="cat-name"><div class="category-cell"><strong><span class="lang-zh" lang="zh-Hant">認知</span><span class="lang-en" lang="en">Cognitive</span></strong><span class="category-desc"><span class="lang-zh" lang="zh-Hant">一致導覽、help mechanism、易懂標籤、可預期流程與 dark pattern。</span><span class="lang-en" lang="en">Consistent navigation, help mechanisms, readable labels, predictable flows, and dark patterns.</span></span><button type="button" class="category-toggle" data-category-toggle="cognitive" aria-expanded="false" aria-controls="detail-cognitive"><span class="lang-zh" lang="zh-Hant">展開詳情</span><span class="lang-en" lang="en">Show details</span></button></div></td>
+        <td class="num pass"><span class="mobile-label"><span class="lang-zh" lang="zh-Hant">通過</span><span class="lang-en" lang="en">Pass</span></span><span>0 </span></td>
+        <td class="num fail"><span class="mobile-label"><span class="lang-zh" lang="zh-Hant">待修</span><span class="lang-en" lang="en">Adjust</span></span><span>0 </span></td>
+        <td class="num review"><span class="mobile-label"><span class="lang-zh" lang="zh-Hant">待審</span><span class="lang-en" lang="en">Review</span></span><span>1</span></td>
+        <td class="result-cell">
+          <span class="mobile-label"><span class="lang-zh" lang="zh-Hant">結果</span><span class="lang-en" lang="en">Result</span></span>
+<span class="state-badge"><span class="lang-zh" lang="zh-Hant">已完成靜態掃描 · 需人工驗證</span><span class="lang-en" lang="en">Static scan complete · human verification needed</span></span>
+        </td>
+      </tr>
+      <tr class="category-detail-row" id="detail-cognitive" hidden>
+        <td colspan="5">
+          <div class="category-detail">
+            <h3><span class="lang-zh" lang="zh-Hant">認知</span><span class="lang-en" lang="en">Cognitive</span></h3>
+            <p class="category-status-note"><span class="lang-zh" lang="zh-Hant">靜態掃描已完成；這類檢查需要瀏覽器、輔助科技或人工操作，因此不製造分數。</span><span class="lang-en" lang="en">The static scan completed. This category needs browser, assistive-technology, or human interaction evidence, so no score is invented.</span></p>
+<p class="category-desc"><span class="lang-zh" lang="zh-Hant">一致導覽、help mechanism、易懂標籤、可預期流程與 dark pattern。</span><span class="lang-en" lang="en">Consistent navigation, help mechanisms, readable labels, predictable flows, and dark patterns.</span></p>
+
+<p class="empty"><span class="lang-zh" lang="zh-Hant">此分類目前無發現項目。</span><span class="lang-en" lang="en">No observations in this category at the moment.</span></p>
+          </div>
+        </td>
+      </tr>
+      <tr class="category-row" data-category="motion">
+        <td class="cat-name"><div class="category-cell"><strong><span class="lang-zh" lang="zh-Hant">動態與動畫</span><span class="lang-en" lang="en">Motion & Animation</span></strong><span class="category-desc"><span class="lang-zh" lang="zh-Hant">prefers-reduced-motion、time limit、自動移動內容與互動動畫。</span><span class="lang-en" lang="en">prefers-reduced-motion, time limits, auto-moving content, and animation from interaction.</span></span><button type="button" class="category-toggle" data-category-toggle="motion" aria-expanded="false" aria-controls="detail-motion"><span class="lang-zh" lang="zh-Hant">展開詳情</span><span class="lang-en" lang="en">Show details</span></button></div></td>
+        <td class="num pass"><span class="mobile-label"><span class="lang-zh" lang="zh-Hant">通過</span><span class="lang-en" lang="en">Pass</span></span><span>0 </span></td>
+        <td class="num fail"><span class="mobile-label"><span class="lang-zh" lang="zh-Hant">待修</span><span class="lang-en" lang="en">Adjust</span></span><span>0 </span></td>
+        <td class="num review"><span class="mobile-label"><span class="lang-zh" lang="zh-Hant">待審</span><span class="lang-en" lang="en">Review</span></span><span>0</span></td>
+        <td class="result-cell">
+          <span class="mobile-label"><span class="lang-zh" lang="zh-Hant">結果</span><span class="lang-en" lang="en">Result</span></span>
+<span class="state-badge"><span class="lang-zh" lang="zh-Hant">已完成靜態掃描 · 本頁不適用</span><span class="lang-en" lang="en">Static scan complete · not applicable here</span></span>
+        </td>
+      </tr>
+      <tr class="category-detail-row" id="detail-motion" hidden>
+        <td colspan="5">
+          <div class="category-detail">
+            <h3><span class="lang-zh" lang="zh-Hant">動態與動畫</span><span class="lang-en" lang="en">Motion & Animation</span></h3>
+            <p class="category-status-note"><span class="lang-zh" lang="zh-Hant">靜態掃描已完成；本次範圍沒有偵測到此分類可檢查的內容。</span><span class="lang-en" lang="en">The static scan completed. No applicable content for this category was detected in the audited scope.</span></p>
+<p class="category-desc"><span class="lang-zh" lang="zh-Hant">prefers-reduced-motion、time limit、自動移動內容與互動動畫。</span><span class="lang-en" lang="en">prefers-reduced-motion, time limits, auto-moving content, and animation from interaction.</span></p>
+
+<p class="empty"><span class="lang-zh" lang="zh-Hant">此分類目前無發現項目。</span><span class="lang-en" lang="en">No observations in this category at the moment.</span></p>
+          </div>
+        </td>
+      </tr>
+      <tr class="category-row" data-category="media">
+        <td class="cat-name"><div class="category-cell"><strong><span class="lang-zh" lang="zh-Hant">媒體</span><span class="lang-en" lang="en">Media</span></strong><span class="category-desc"><span class="lang-zh" lang="zh-Hant">Caption、transcript、autoplay、audio control、flash 與替代內容。</span><span class="lang-en" lang="en">Captions, transcripts, autoplay, audio control, flashing content, and media alternatives.</span></span><button type="button" class="category-toggle" data-category-toggle="media" aria-expanded="false" aria-controls="detail-media"><span class="lang-zh" lang="zh-Hant">展開詳情</span><span class="lang-en" lang="en">Show details</span></button></div></td>
+        <td class="num pass"><span class="mobile-label"><span class="lang-zh" lang="zh-Hant">通過</span><span class="lang-en" lang="en">Pass</span></span><span>0 </span></td>
+        <td class="num fail"><span class="mobile-label"><span class="lang-zh" lang="zh-Hant">待修</span><span class="lang-en" lang="en">Adjust</span></span><span>0 </span></td>
+        <td class="num review"><span class="mobile-label"><span class="lang-zh" lang="zh-Hant">待審</span><span class="lang-en" lang="en">Review</span></span><span>1</span></td>
+        <td class="result-cell">
+          <span class="mobile-label"><span class="lang-zh" lang="zh-Hant">結果</span><span class="lang-en" lang="en">Result</span></span>
+<span class="state-badge"><span class="lang-zh" lang="zh-Hant">已完成靜態掃描 · 需人工驗證</span><span class="lang-en" lang="en">Static scan complete · human verification needed</span></span>
+        </td>
+      </tr>
+      <tr class="category-detail-row" id="detail-media" hidden>
+        <td colspan="5">
+          <div class="category-detail">
+            <h3><span class="lang-zh" lang="zh-Hant">媒體</span><span class="lang-en" lang="en">Media</span></h3>
+            <p class="category-status-note"><span class="lang-zh" lang="zh-Hant">靜態掃描已完成；這類檢查需要瀏覽器、輔助科技或人工操作，因此不製造分數。</span><span class="lang-en" lang="en">The static scan completed. This category needs browser, assistive-technology, or human interaction evidence, so no score is invented.</span></p>
+<p class="category-desc"><span class="lang-zh" lang="zh-Hant">Caption、transcript、autoplay、audio control、flash 與替代內容。</span><span class="lang-en" lang="en">Captions, transcripts, autoplay, audio control, flashing content, and media alternatives.</span></p>
+
+<p class="empty"><span class="lang-zh" lang="zh-Hant">此分類目前無發現項目。</span><span class="lang-en" lang="en">No observations in this category at the moment.</span></p>
+          </div>
+        </td>
+      </tr>
+      <tr class="category-row" data-category="agent">
+        <td class="cat-name"><div class="category-cell"><strong><span class="lang-zh" lang="zh-Hant">代理可操作性與 AEO</span><span class="lang-en" lang="en">Agent Operability & AEO</span></strong><span class="category-desc"><span class="lang-zh" lang="zh-Hant">Schema.org、metadata、canonical、heading outline、可爬取內容、robots.txt、sitemap.xml、optional llms.txt 與 answer-engine clarity。</span><span class="lang-en" lang="en">Schema.org, metadata, canonical links, heading outline, crawlable content, robots.txt, sitemap.xml, optional llms.txt, and answer-engine clarity.</span></span><button type="button" class="category-toggle" data-category-toggle="agent" aria-expanded="false" aria-controls="detail-agent"><span class="lang-zh" lang="zh-Hant">展開詳情</span><span class="lang-en" lang="en">Show details</span></button></div></td>
+        <td class="num pass"><span class="mobile-label"><span class="lang-zh" lang="zh-Hant">通過</span><span class="lang-en" lang="en">Pass</span></span><span>3 </span></td>
+        <td class="num fail"><span class="mobile-label"><span class="lang-zh" lang="zh-Hant">待修</span><span class="lang-en" lang="en">Adjust</span></span><span>0 </span></td>
+        <td class="num review"><span class="mobile-label"><span class="lang-zh" lang="zh-Hant">待審</span><span class="lang-en" lang="en">Review</span></span><span>0</span></td>
+        <td class="result-cell">
+          <span class="mobile-label"><span class="lang-zh" lang="zh-Hant">結果</span><span class="lang-en" lang="en">Result</span></span>
+<div class="score-bar"><div class="score-fill" style="width:100%;background:var(--pass)"></div><span class="score-text">100</span></div>
+        </td>
+      </tr>
+      <tr class="category-detail-row" id="detail-agent" hidden>
+        <td colspan="5">
+          <div class="category-detail">
+            <h3><span class="lang-zh" lang="zh-Hant">代理可操作性與 AEO</span><span class="lang-en" lang="en">Agent Operability & AEO</span></h3>
+            <p class="category-status-note"><span class="lang-zh" lang="zh-Hant">已取得可計分的機器證據。</span><span class="lang-en" lang="en">Machine-scoreable evidence was collected.</span></p>
+<p class="category-desc"><span class="lang-zh" lang="zh-Hant">Schema.org、metadata、canonical、heading outline、可爬取內容、robots.txt、sitemap.xml、optional llms.txt 與 answer-engine clarity。</span><span class="lang-en" lang="en">Schema.org, metadata, canonical links, heading outline, crawlable content, robots.txt, sitemap.xml, optional llms.txt, and answer-engine clarity.</span></p>
+
     <div class="aeo-disclaimer" role="note" aria-label="AEO sub-score interpretation note">
       <div class="lang-zh" lang="zh-Hant">
         <div class="aeo-disclaimer-title">&#9888; 關於 AEO 子分數的解讀</div>
@@ -1080,9 +1122,12 @@
         </p>
       </div>
     </div>
-      <p class="empty"><span class="lang-zh" lang="zh-Hant">此分類目前無發現項目。</span><span class="lang-en" lang="en">No observations in this category at the moment.</span></p>
-    </div>
-  
+<p class="empty"><span class="lang-zh" lang="zh-Hant">此分類目前無發現項目。</span><span class="lang-en" lang="en">No observations in this category at the moment.</span></p>
+          </div>
+        </td>
+      </tr>
+    </tbody>
+  </table>
 </div>
 
 <!-- Findings Tab -->
@@ -1449,21 +1494,25 @@ document.querySelectorAll('[data-tab-btn]').forEach(tab => {
   // Native <button> tabs provide keyboard activation for this click handler.
   tab.addEventListener('click', () => switchTab(tab.dataset.tabBtn));
 });
-document.querySelectorAll('.category-row').forEach(row => {
-  const toggleCategory = () => {
-    const id = row.dataset.category;
-    const detail = document.getElementById('detail-' + id);
-    if (!detail) return;
-    const open = detail.classList.toggle('open');
-    row.setAttribute('aria-expanded', open ? 'true' : 'false');
-  };
-  row.addEventListener('click', toggleCategory);
-  row.addEventListener('keydown', event => {
-    if (event.key === 'Enter' || event.key === ' ') {
-      event.preventDefault();
-      toggleCategory();
-    }
-  });
+function setCategoryOpen(button, open) {
+  const detail = document.getElementById('detail-' + button.dataset.categoryToggle);
+  if (!detail) return;
+  detail.hidden = !open;
+  button.setAttribute('aria-expanded', open ? 'true' : 'false');
+  button.querySelector('.lang-zh').textContent = open ? "收合詳情" : "展開詳情";
+  button.querySelector('.lang-en').textContent = open ? "Hide details" : "Show details";
+}
+document.querySelectorAll('[data-category-toggle]').forEach(button => {
+  button.addEventListener('click', () => setCategoryOpen(button, button.getAttribute('aria-expanded') !== 'true'));
+});
+const expandAll = document.querySelector('[data-expand-categories]');
+expandAll?.addEventListener('click', () => {
+  const buttons = [...document.querySelectorAll('[data-category-toggle]')];
+  const open = buttons.some(button => button.getAttribute('aria-expanded') !== 'true');
+  buttons.forEach(button => setCategoryOpen(button, open));
+  expandAll.setAttribute('aria-pressed', open ? 'true' : 'false');
+  expandAll.querySelector('.lang-zh').textContent = open ? "全部收合" : "全部展開";
+  expandAll.querySelector('.lang-en').textContent = open ? "Collapse all" : "Expand all";
 });
 
 /* Language + theme toggles

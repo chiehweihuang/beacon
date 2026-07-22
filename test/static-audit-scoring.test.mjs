@@ -329,6 +329,15 @@ test('unverifiable (review) merged finding does NOT reduce the score', () => {
   } finally { rev.cleanup(); }
 });
 
+test('review evidence is not presented as remediation work', () => {
+  const review = writeFindings([{ category: 'touch', check: 'review', title: 'Target geometry verified' }]);
+  try {
+    const { audit } = run({ args: ['--date', '2020-01-01', '--merge-findings', review.file] });
+    assert.ok(audit.findings.some(f => f.title === 'Target geometry verified'));
+    assert.ok(!audit.remediation.some(r => r.title === 'Target geometry verified'));
+  } finally { review.cleanup(); }
+});
+
 test('merged check:pass counts as a pass and does NOT create a finding', () => {
   const { file, cleanup } = writeFindings([{ category: 'contrast', check: 'pass', title: 'contrast verified externally' }]);
   try {

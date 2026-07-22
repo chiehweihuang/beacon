@@ -81,7 +81,7 @@ const SEV_REPEAT_CAP = 3;
 // (axe / capture-recipe components are added when Tier-2 findings are merged with their own
 // engine provenance; the pure static engine here is axe-free, so claiming an axe version would
 // be dishonest.)
-const DETECTOR_VERSION = 'beacon-static-audit@7';
+const DETECTOR_VERSION = 'beacon-static-audit@8';
 
 function rulesetHash() {
   const payload = JSON.stringify({
@@ -293,7 +293,8 @@ function addCheck(stats, category, status) {
 function addFinding(findings, stats, f) {
   // `check` controls which stats bucket this finding lands in (default 'fail').
   // REVIEW-level findings pass check:'review' so they don't count as hard fails.
-  // It is stripped from the emitted finding object.
+  // Keep it in the emitted finding so downstream remediation can distinguish
+  // confirmed failures from review-only evidence.
   const { check = 'fail', ...rest } = f;
   // Single funnel for the severity matrix: native and merged findings normalise here.
   // The matrix asserts the severity of a CONFIRMED violation, so it only applies to
@@ -304,6 +305,7 @@ function addFinding(findings, stats, f) {
     level: rest.level || 'AA',
     legal_exposure: rest.legal_exposure || 'May affect ADA / EAA / JIS / Taiwan accessibility expectations depending on deployment context.',
     ...rest,
+    check,
     severity,
   });
   addCheck(stats, rest.category, check);
@@ -482,9 +484,21 @@ function scanFile(file, root, stats, findings) {
       });
     } else addCheck(stats, 'screenreader', 'pass');
 
-    // Hidden headings are not part of the AT-facing outline — exclude them from the
-    // level sequence (a display:none h2 must not bridge an h1->h3 skip).
-    const headings = [...text.matchAll(/<h([1-6])\b/gi)].filter(m => visible(m.index || 0)).map(m => ({ level: Number(m[1]), index: m.index || 0 }));
+    // Build the AT-facing outline in document order. ARIA headings participate;
+    // presentational native headings do not. Hidden/masked headings stay excluded.
+    const headings = [];
+    for (const m of text.matchAll(/<([a-z][\w:-]*)\b((?:"[^"]*"|'[^']*'|[^>"'])*)>/gi)) {
+      if (!visible(m.index || 0)) continue;
+      const tag = m[1].toLowerCase();
+      const attrs = m[2];
+      const roleMatch = attrs.match(/\brole\s*=\s*(?:"([^"]*)"|'([^']*)'|([^\s>]+))/i);
+      const roles = (roleMatch?.[1] ?? roleMatch?.[2] ?? roleMatch?.[3] ?? '').toLowerCase().split(/\s+/);
+      if (roles.includes('presentation') || roles.includes('none')) continue;
+      const native = tag.match(/^h([1-6])$/);
+      const ariaMatch = attrs.match(/\baria-level\s*=\s*(?:"([1-6])"|'([1-6])'|([1-6]))/i);
+      const level = native ? Number(native[1]) : roles.includes('heading') ? Number(ariaMatch?.[1] ?? ariaMatch?.[2] ?? ariaMatch?.[3]) : 0;
+      if (level) headings.push({ level, index: m.index || 0 });
+    }
     if (headings.length === 0) {
       addFinding(findings, stats, {
         key: 'headings-missing',
@@ -509,7 +523,7 @@ function scanFile(file, root, stats, findings) {
             title: 'Heading level is skipped',
             affected_users: 'Screen-reader users navigating by heading',
             location: `${rel}:${lineOf(text, headings[i].index)}`,
-            description: `Heading jumps from h${headings[i - 1].level} to h${headings[i].level}.`,
+            description: `Heading jumps from level ${headings[i - 1].level} to level ${headings[i].level}.`,
             fix: 'Use a continuous heading hierarchy or adjust the visual style without changing semantic level.',
           });
           break;
@@ -1084,6 +1098,36 @@ function criteriaFromFindings(findings) {
   return [...criteria].sort((a, b) => a.localeCompare(b, undefined, { numeric: true }));
 }
 
+function testingRecommendations(categories) {
+  const byId = Object.fromEntries(categories.map(cat => [cat.id, cat]));
+  const recommendations = [];
+  if (byId.keyboard?.fail) recommendations.push({
+    zh: '修復鍵盤發現項後，僅使用 Tab、Shift+Tab、Enter、Space 與方向鍵重跑主要流程。',
+    en: 'After fixing the keyboard findings, rerun the primary flow using only Tab, Shift+Tab, Enter, Space, and arrow keys.',
+  });
+  if (byId.forms?.fail) recommendations.push({
+    zh: '修復表單發現項後，驗證 label、必填狀態與錯誤訊息能被鍵盤及螢幕閱讀器正確使用。',
+    en: 'After fixing the form findings, verify labels, required states, and error messages with both keyboard and screen reader.',
+  });
+  if (byId.screenreader?.fail) recommendations.push({
+    zh: '修復語意結構發現項後，用 NVDA 或 VoiceOver 完成主要任務。',
+    en: 'After fixing the semantic findings, complete the primary task with NVDA or VoiceOver.',
+  });
+  if (byId.contrast?.state === 'not-machine-checkable') recommendations.push({
+    zh: '用真實瀏覽器搭配 axe-core 驗證計算後的文字與 UI 對比。',
+    en: 'Verify computed text and UI contrast in a real browser with axe-core.',
+  });
+  recommendations.push({
+    zh: '在 200% 縮放下重跑主要流程；320px 回流結果已由本次掃描另行記錄。',
+    en: 'Rerun the primary flow at 200% zoom; the 320px reflow result is recorded separately by this audit.',
+  });
+  if (byId.cognitive?.state === 'not-machine-checkable') recommendations.push({
+    zh: '請一位不熟悉產品的使用者完成主要任務，觀察標籤、說明與下一步是否清楚。',
+    en: 'Ask a user unfamiliar with the product to complete the primary task and observe whether labels, help, and next steps are clear.',
+  });
+  return recommendations;
+}
+
 // P1: the SOLE channel for Tier-2/manual findings (axe contrast, focus, human review) to
 // enter the scored artifact. The agent feeds findings as data; the script — never the
 // agent — applies the matrix and recomputes the verdict. Untrusted input: validated here.
@@ -1236,7 +1280,7 @@ function main() {
         { name: 'Australia DDA', law: 'Disability Discrimination Act context', detail: 'Use the mapped WCAG criteria as technical evidence; legal assessment requires local context and counsel.', criteria: legalCriteria },
       ],
     },
-    remediation: findings.map(f => ({
+    remediation: findings.filter(f => f.check !== 'review').map(f => ({
       priority: priorityFor(f.severity),
       key: f.key,
       title: f.title,
@@ -1244,13 +1288,7 @@ function main() {
       wcag: f.wcag,
       fix: f.fix || 'Review and fix.',
     })),
-    testing_recommendations: [
-      'Run keyboard-only walkthrough of the primary flow.',
-      'Run a live browser audit with Playwright + axe-core when a page is available.',
-      'Check 320px reflow and 200% zoom manually.',
-      'Listen to the page with VoiceOver or NVDA for the core task.',
-      'Treat this static score as a regression baseline, not a completion certificate.',
-    ],
+    testing_recommendations: testingRecommendations(categories),
   };
 
   // Attach the quarantined LLM-judgment block AFTER scoring — it is never folded into

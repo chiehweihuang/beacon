@@ -1,0 +1,375 @@
+{
+  "metadata": {
+    "date": "2026-07-11",
+    "url": "https://wpmaster.demo.civicrm.org/event-page/",
+    "scope": "CiviCRM Event Page case study (official WordPress sandbox snapshot)",
+    "standard": "WCAG 2.2 AA static baseline",
+    "jurisdictions": [
+      "US ADA",
+      "EU EAA",
+      "Japan JIS",
+      "Taiwan",
+      "Canada ACA",
+      "Australia DDA"
+    ],
+    "platform": "Web",
+    "tool_version": "beacon codex static baseline",
+    "engine_fingerprint": "beacon-static-audit@8+ruleset.7b79d5151b72",
+    "confidence_level": "medium",
+    "requires_live_audit": true,
+    "audit_tier": "Tier 1 (static file scan only)",
+    "audit_methods": [
+      "Static scan of 1 UI-like file(s)",
+      "Pattern checks for semantic HTML, keyboard traps, labels, reflow, motion, AEO structure, and site-level agent-readiness files when a directory is scanned",
+      "Runtime behavior, contrast ratios, and screen-reader task completion were not fully verified"
+    ]
+  },
+  "summary": {
+    "overall_score": 83,
+    "coverage_percent": 69,
+    "life_safety_flag": false,
+    "score_bands": [
+      {
+        "min": 90,
+        "id": "pass"
+      },
+      {
+        "min": 50,
+        "id": "needs-work"
+      },
+      {
+        "min": 0,
+        "id": "fail"
+      }
+    ],
+    "total_findings": 6,
+    "critical": 2,
+    "warnings": 1,
+    "tips": 3,
+    "unverifiable": 5,
+    "categories": [
+      {
+        "id": "contrast",
+        "name": "Color & Contrast",
+        "pass": 0,
+        "fail": 0,
+        "review": 1,
+        "state": "not-machine-checkable",
+        "score": null
+      },
+      {
+        "id": "keyboard",
+        "name": "Keyboard Navigation",
+        "pass": 6,
+        "fail": 1,
+        "review": 0,
+        "state": "scored",
+        "score": 81
+      },
+      {
+        "id": "screenreader",
+        "name": "Screen Reader",
+        "pass": 26,
+        "fail": 1,
+        "review": 0,
+        "state": "scored",
+        "score": 84
+      },
+      {
+        "id": "forms",
+        "name": "Forms",
+        "pass": 8,
+        "fail": 1,
+        "review": 0,
+        "state": "scored",
+        "score": 77
+      },
+      {
+        "id": "responsive",
+        "name": "Responsive & Reflow",
+        "pass": 2,
+        "fail": 0,
+        "review": 0,
+        "state": "scored",
+        "score": 100
+      },
+      {
+        "id": "touch",
+        "name": "Touch & Targets",
+        "pass": 4,
+        "fail": 0,
+        "review": 2,
+        "state": "scored",
+        "score": 100
+      },
+      {
+        "id": "cognitive",
+        "name": "Cognitive",
+        "pass": 0,
+        "fail": 0,
+        "review": 1,
+        "state": "not-machine-checkable",
+        "score": null
+      },
+      {
+        "id": "motion",
+        "name": "Motion & Animation",
+        "pass": 0,
+        "fail": 0,
+        "review": 0,
+        "state": "not-applicable",
+        "score": null
+      },
+      {
+        "id": "media",
+        "name": "Media",
+        "pass": 0,
+        "fail": 0,
+        "review": 1,
+        "state": "not-machine-checkable",
+        "score": null
+      },
+      {
+        "id": "agent",
+        "name": "Agent Operability & AEO",
+        "pass": 1,
+        "fail": 2,
+        "review": 0,
+        "state": "scored",
+        "score": 31
+      }
+    ]
+  },
+  "findings": [
+    {
+      "level": "AA",
+      "legal_exposure": "May affect ADA / EAA / JIS / Taiwan accessibility expectations depending on deployment context.",
+      "key": "heading-level-skipped",
+      "category": "screenreader",
+      "severity": "critical",
+      "wcag": "WCAG 2.2: 1.3.1 Info and Relationships",
+      "title": "Heading level is skipped",
+      "affected_users": "Screen-reader users navigating by heading",
+      "location": "beacon-civicrm-event.html:401",
+      "description": "Heading jumps from level 1 to level 3.",
+      "fix": "Use a continuous heading hierarchy or adjust the visual style without changing semantic level.",
+      "check": "fail"
+    },
+    {
+      "level": "AA",
+      "legal_exposure": "May affect ADA / EAA / JIS / Taiwan accessibility expectations depending on deployment context.",
+      "key": "input-label-missing",
+      "category": "forms",
+      "severity": "critical",
+      "wcag": "WCAG 2.2: 3.3.2 Labels or Instructions",
+      "title": "Input may be missing an accessible label",
+      "affected_users": "Screen-reader, voice-control, and cognitive disability users",
+      "location": "beacon-civicrm-event.html:207",
+      "description": "The input has no obvious id or ARIA label in static markup.",
+      "fix": "Pair it with a <label for=\"...\"> or use aria-labelledby when a visible label already exists.",
+      "code_before": "</label>\n\t\t\t\t<input type=\"submit\" class=\"search-submit\" value=\"Search\" />\n\t\t\t</form>\t\t\t\t</nav><!-- #site-navigation -->",
+      "check": "fail"
+    },
+    {
+      "level": "Review",
+      "legal_exposure": "Not a legal issue; affects search / answer-engine clarity.",
+      "key": "meta-description-missing",
+      "category": "agent",
+      "severity": "tip",
+      "wcag": "AEO structural hygiene",
+      "title": "Meta description is missing",
+      "affected_users": "Search and answer-engine users evaluating whether to open the result",
+      "location": "beacon-civicrm-event.html",
+      "description": "No meta description was found in the static HTML.",
+      "fix": "Add a concise page-specific meta description.",
+      "check": "fail"
+    },
+    {
+      "level": "Review",
+      "legal_exposure": "Not a legal issue; affects answer-engine and search clarity.",
+      "key": "jsonld-missing",
+      "category": "agent",
+      "severity": "tip",
+      "wcag": "AEO structural hygiene",
+      "title": "JSON-LD structured data is missing",
+      "affected_users": "Search and answer-engine users trying to identify the page entity and content type",
+      "location": "beacon-civicrm-event.html",
+      "description": "No JSON-LD structured data was found in the static HTML.",
+      "fix": "Add page-appropriate Schema.org JSON-LD, such as Organization, Article, FAQPage, Product, BreadcrumbList, or WebSite.",
+      "check": "fail"
+    },
+    {
+      "level": "AA",
+      "legal_exposure": "May affect ADA / EAA / JIS / Taiwan accessibility expectations depending on deployment context.",
+      "key": "focus-outline-removed",
+      "category": "keyboard",
+      "severity": "warning",
+      "wcag": "WCAG 2.2: 2.4.7 Focus Visible",
+      "title": "Focus outline removed without replacement",
+      "affected_users": "Sighted keyboard users and low-vision keyboard users",
+      "location": "beacon-civicrm-event.html:60",
+      "description": "Removing outline without a :focus-visible replacement makes keyboard location invisible.",
+      "fix": "Restore outline or add a strong :focus-visible style.",
+      "code_before": "<style id=\"wp-block-search-inline-css\">\n.wp-block-search__button{margin-left:10px;word-break:normal}.wp-block-search__button.has-icon{line-height:0}.wp-block-search__button svg{fill:currentColor;height:1.25em;min-height:24px;min-width:24px;vertical-align:text-bottom;width:1.25em}:where(.wp-block-search__button){border:1px solid #ccc;padding:6px 10px}.wp-block-search__inside-wrapper{display:flex;flex:auto;flex-wrap:nowrap;max-width:100%}.wp-block-search__label{width:100%}.wp-block-search.wp-block-search__button-only .wp-block-search__button{box-sizing:border-box;display:flex;flex-shrink:0;justify-content:center;margin-left:0;max-width:100%}.wp-block-search.wp-block-search__button-only .wp-block-search__inside-wrapper{min-width:0!important;transition-property:width}.wp-block-search.wp-block-search__button-only .wp-block-search__input{flex-basis:100%;transition-duration:.3s}.wp-block-search.wp-block-search__button-only.wp-block-search__searchfield-hidden,.wp-block-search.wp-block-search__button-only.wp-block-search__searchfield-hidden .wp-block-search__inside-wrapper{overflow:hidden}.wp-block-search.wp-block-search__button-only.wp-block-search__searchfield-hidden .wp-block-search__input{border-left-width:0!important;border-right-width:0!important;flex-basis:0;flex-grow:0;margin:0;min-width:0!important;padding-left:0!important;padding-right:0!important;width:0!important}:where(.wp-block-search__input){appearance:none;border:1px solid #949494;flex-grow:1;font-family:inherit;font-size:inherit;font-style:inherit;font-weight:inherit;letter-spacing:inherit;line-height:inherit;margin-left:0;margin-right:0;min-width:3rem;padding:8px;text-decoration:unset!important;text-transform:inherit}:where(.wp-block-search__button-inside .wp-block-search__inside-wrapper){background-color:#fff;border:1px solid #949494;box-sizing:border-box;padding:4px}:where(.wp-block-search__button-inside .wp-block-search__inside-wrapper) .wp-block-search__input{border:none;border-radius:0;padding:0 4px}:where(.wp-block-search__button-inside .wp-block-search__inside-wrapper) .wp-block-search__input:focus{outline:none}:where(.wp-block-search__button-inside .wp-block-search__inside-wrapper) :where(.wp-block-search__button){padding:4px 8px}.wp-block-search.aligncenter .wp-block-search__inside-wrapper{margin:auto}.wp-block[data-align=right] .wp-block-search.wp-block-search__button-only .wp-block-search__inside-wrapper{float:right}\n/*# sourceURL=https://wpmaster.demo.civicrm.org/wp-includes/blocks/search/style.min.css */",
+      "check": "fail"
+    },
+    {
+      "level": "AA",
+      "legal_exposure": "May affect ADA / EAA / JIS / Taiwan accessibility expectations depending on deployment context.",
+      "category": "touch",
+      "severity": "tip",
+      "wcag": "WCAG 2.2: 2.5.8 Target Size (Minimum)",
+      "key": "browser-target-geometry",
+      "title": "Browser check: 34 interactive targets; form controls are at least 34px high, and the 13px checkbox has a 274x44px associated label",
+      "location": "https://wpmaster.demo.civicrm.org/event-page/ at 320px",
+      "source": "Chrome rendered audit on 2026-07-11",
+      "check": "review"
+    }
+  ],
+  "legal_risk": {
+    "assessment_mode": "wcag_criteria_context",
+    "narrative": "Technical WCAG criteria mapping only. This is not a legal opinion and is not derived from warning counts.",
+    "mapped_criteria": [
+      "1.3.1",
+      "2.4.7",
+      "2.5.8",
+      "3.3.2"
+    ],
+    "jurisdictions": [
+      {
+        "name": "US ADA",
+        "law": "ADA Title III / Section 508 context",
+        "detail": "Use the mapped WCAG criteria as technical evidence; legal exposure depends on business model, sector, and jurisdiction-specific facts.",
+        "criteria": [
+          "1.3.1",
+          "2.4.7",
+          "2.5.8",
+          "3.3.2"
+        ]
+      },
+      {
+        "name": "EU EAA",
+        "law": "European Accessibility Act",
+        "detail": "Use the mapped WCAG criteria as technical evidence for consumer digital-service accessibility planning.",
+        "criteria": [
+          "1.3.1",
+          "2.4.7",
+          "2.5.8",
+          "3.3.2"
+        ]
+      },
+      {
+        "name": "Japan JIS",
+        "law": "JIS X 8341-3 context",
+        "detail": "Use the mapped WCAG criteria as technical evidence; confirm procurement or sector requirements separately.",
+        "criteria": [
+          "1.3.1",
+          "2.4.7",
+          "2.5.8",
+          "3.3.2"
+        ]
+      },
+      {
+        "name": "Taiwan",
+        "law": "Taiwan accessibility context",
+        "detail": "Use the mapped WCAG criteria as technical evidence only; confirm current local program, certification, and seal requirements before making a compliance claim.",
+        "criteria": [
+          "1.3.1",
+          "2.4.7",
+          "2.5.8",
+          "3.3.2"
+        ]
+      },
+      {
+        "name": "Canada ACA",
+        "law": "Accessible Canada Act context",
+        "detail": "Use the mapped WCAG criteria as technical evidence; applicability depends on organization type and regulated context.",
+        "criteria": [
+          "1.3.1",
+          "2.4.7",
+          "2.5.8",
+          "3.3.2"
+        ]
+      },
+      {
+        "name": "Australia DDA",
+        "law": "Disability Discrimination Act context",
+        "detail": "Use the mapped WCAG criteria as technical evidence; legal assessment requires local context and counsel.",
+        "criteria": [
+          "1.3.1",
+          "2.4.7",
+          "2.5.8",
+          "3.3.2"
+        ]
+      }
+    ]
+  },
+  "remediation": [
+    {
+      "priority": "P0",
+      "key": "heading-level-skipped",
+      "title": "Heading level is skipped",
+      "location": "beacon-civicrm-event.html:401",
+      "wcag": "WCAG 2.2: 1.3.1 Info and Relationships",
+      "fix": "Use a continuous heading hierarchy or adjust the visual style without changing semantic level."
+    },
+    {
+      "priority": "P0",
+      "key": "input-label-missing",
+      "title": "Input may be missing an accessible label",
+      "location": "beacon-civicrm-event.html:207",
+      "wcag": "WCAG 2.2: 3.3.2 Labels or Instructions",
+      "fix": "Pair it with a <label for=\"...\"> or use aria-labelledby when a visible label already exists."
+    },
+    {
+      "priority": "P2",
+      "key": "meta-description-missing",
+      "title": "Meta description is missing",
+      "location": "beacon-civicrm-event.html",
+      "wcag": "AEO structural hygiene",
+      "fix": "Add a concise page-specific meta description."
+    },
+    {
+      "priority": "P2",
+      "key": "jsonld-missing",
+      "title": "JSON-LD structured data is missing",
+      "location": "beacon-civicrm-event.html",
+      "wcag": "AEO structural hygiene",
+      "fix": "Add page-appropriate Schema.org JSON-LD, such as Organization, Article, FAQPage, Product, BreadcrumbList, or WebSite."
+    },
+    {
+      "priority": "P1",
+      "key": "focus-outline-removed",
+      "title": "Focus outline removed without replacement",
+      "location": "beacon-civicrm-event.html:60",
+      "wcag": "WCAG 2.2: 2.4.7 Focus Visible",
+      "fix": "Restore outline or add a strong :focus-visible style."
+    }
+  ],
+  "testing_recommendations": [
+    {
+      "zh": "修復鍵盤發現項後，僅使用 Tab、Shift+Tab、Enter、Space 與方向鍵重跑主要流程。",
+      "en": "After fixing the keyboard findings, rerun the primary flow using only Tab, Shift+Tab, Enter, Space, and arrow keys."
+    },
+    {
+      "zh": "修復表單發現項後，驗證 label、必填狀態與錯誤訊息能被鍵盤及螢幕閱讀器正確使用。",
+      "en": "After fixing the form findings, verify labels, required states, and error messages with both keyboard and screen reader."
+    },
+    {
+      "zh": "修復語意結構發現項後，用 NVDA 或 VoiceOver 完成主要任務。",
+      "en": "After fixing the semantic findings, complete the primary task with NVDA or VoiceOver."
+    },
+    {
+      "zh": "用真實瀏覽器搭配 axe-core 驗證計算後的文字與 UI 對比。",
+      "en": "Verify computed text and UI contrast in a real browser with axe-core."
+    },
+    {
+      "zh": "在 200% 縮放下重跑主要流程；320px 回流結果已由本次掃描另行記錄。",
+      "en": "Rerun the primary flow at 200% zoom; the 320px reflow result is recorded separately by this audit."
+    },
+    {
+      "zh": "請一位不熟悉產品的使用者完成主要任務，觀察標籤、說明與下一步是否清楚。",
+      "en": "Ask a user unfamiliar with the product to complete the primary task and observe whether labels, help, and next steps are clear."
+    }
+  ]
+}

@@ -188,8 +188,10 @@ The Codex adapter carries the same accessibility and AEO knowledge without the C
 
 See [CHANGELOG.md](./CHANGELOG.md) for the full history. Recent highlights:
 
+- **3.0.0** — Validated scoring semantics: unmeasured categories now report states instead of invented scores, every overall score carries measured-weight coverage, life-safety findings cap the score, and the committed validation suite covers reliability, detector validity, score properties, external benchmarks, fairness, and interpretation.
+- **2.3.0** — Held-out detector precision/recall improvements, including Latin-language mismatch detection and stricter false-positive guards.
+- **2.2.0** — Shared declarative Pattern Library used by both the Claude Code hook and Codex advisor, eliminating detector drift between runtimes.
 - **2.1.0** — Lighthouse performance/best-practices/SEO signal in `beacon:inspect`, with cross-cutting root causes and a Performance report tab. Supplementary; not part of the accessibility score. Backward compatible.
-- **2.0.10** — Phase A core-extraction build system (`core/` + `build.mjs` + marker grammar), Codex adapter, deterministic Tier 1 static scanner with new detectors (link-name, list, meta-viewport-zoom, frame-title), contrast verification gate, and default-on automated scan.
 
 ## Development Notes
 

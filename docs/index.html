@@ -184,7 +184,12 @@
     "source": { "source": "github", "repo": "chiehweihuang/beacon" }
   }
 }</code></pre>
-      <p>Using Codex instead? The same engine ships as a Codex adapter — see <a href="https://github.com/chiehweihuang/beacon/blob/master/ADAPTERS.md">ADAPTERS.md</a>.</p>
+      <p>Using Codex instead? Build and deploy the included adapter:</p>
+<pre><code>git clone https://github.com/chiehweihuang/beacon.git
+cd beacon
+node build.mjs
+node tools/deploy-codex.mjs</code></pre>
+      <p class="footnote">This installs Beacon to <code>~/.codex/skills/beacon/</code>. Restart Codex after installation. See <a href="https://github.com/chiehweihuang/beacon/blob/master/ADAPTERS.md">ADAPTERS.md</a> for the runtime differences.</p>
     </div>
   </section>
 

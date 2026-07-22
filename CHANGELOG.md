@@ -3,6 +3,13 @@
 All notable changes to Beacon are documented here. Versions follow the plugin
 manifest (`.claude-plugin/plugin.json`); dates are release-prep dates.
 
+## Unreleased
+
+- Engine `beacon-static-audit@8` includes `role="heading" aria-level="1-6"` in the document outline and excludes native headings with `role="presentation|none"`. This addresses the remaining aria-heading attribution gap identified by the v3.0 ground-truth study.
+- Measured (2026-07-22, study rerun): ground-truth precision 0.979 → **1.000**, pattern recall 0.712 → **0.727**, instance recall 0.826 → 0.829, FP patterns 1 → **0** — the engine now reports ibm.com's true 1→4 aria-heading skip instead of the spurious h1→h5, and jnto.go.jp's presentational-heading FP is gone (+3 points, the only benchmark score that moved; 47/47 prior TPs retained; Spearman 0.477, n=71, noise-level vs @7's 0.480). Known ceiling recorded in the GT README: the outline detector reports only the first level-skip per document.
+- Refreshed the public roadmap, release highlights, Claude/Codex install parity, and skill/hook boundary language.
+- Category summaries now say when the static scan completed but a score cannot be justified, provide per-category and expand-all disclosure controls, and render as in-viewport cards on mobile instead of requiring horizontal table scrolling.
+
 ## [3.0.0] — 2026-07-07
 
 Scoring-semantics overhaul driven by the 2026-07-05 scoring-validity audit, hardened

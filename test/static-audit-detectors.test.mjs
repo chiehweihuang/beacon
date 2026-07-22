@@ -117,6 +117,20 @@ test('link-name: attribute matching is whitespace-anchored (data-* safe, spaced 
 const findingsMatching = (audit, titleRe, wcagRe) =>
   audit.findings.filter((f) => titleRe.test(f.title) && wcagRe.test(f.wcag));
 
+test('heading outline includes ARIA headings and excludes presentational native headings', () => {
+  const bridged = runScanner(`<!DOCTYPE html><html lang="en"><head><title>t</title></head><body><main>
+<h1>Title</h1><div role="heading" aria-level="2">Section</div><h3>Detail</h3>
+</main></body></html>`);
+  assert.equal(findingsMatching(bridged, /heading level/i, /1\.3\.1/).length, 0, 'ARIA level 2 must bridge h1 to h3');
+
+  const presentational = runScanner(`<!DOCTYPE html><html lang="en"><head><title>t</title></head><body><main>
+<h1>Title</h1><h2 role="presentation">Visual only</h2><h3>Detail</h3>
+</main></body></html>`);
+  const hits = findingsMatching(presentational, /heading level/i, /1\.3\.1/);
+  assert.equal(hits.length, 1, 'presentational h2 must not bridge h1 to h3');
+  assert.match(hits[0].description, /level 1 to level 3/);
+});
+
 test('meta-viewport: zoom-disabling viewport is flagged; zoomable is not', () => {
   const noScale = runScanner(`<!DOCTYPE html><html lang="en"><head><title>t</title>
 <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no"></head><body><main><h1>x</h1></main></body></html>`);

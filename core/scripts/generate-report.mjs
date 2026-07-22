@@ -101,15 +101,24 @@ const I18N = {
     th_pass: '通過',
     th_fail: '待修',
     th_review: '待審',
-    th_score: '分數',
-    state_not_machine_checkable: '需人工驗證',
-    state_not_applicable: '不適用',
+    th_score: '結果',
+    state_not_machine_checkable: '已完成靜態掃描 · 需人工驗證',
+    state_not_applicable: '已完成靜態掃描 · 本頁不適用',
+    category_summary_note: '所有分類都已執行靜態掃描。只有取得可計分機器證據的分類顯示分數；其餘分類顯示掃描狀態。',
+    category_expand_all: '全部展開',
+    category_collapse_all: '全部收合',
+    category_show_details: '展開詳情',
+    category_hide_details: '收合詳情',
+    category_detail_scored: '已取得可計分的機器證據。',
+    category_detail_manual: '靜態掃描已完成；這類檢查需要瀏覽器、輔助科技或人工操作，因此不製造分數。',
+    category_detail_na: '靜態掃描已完成；本次範圍沒有偵測到此分類可檢查的內容。',
     coverage_line: '機測權重涵蓋',
     coverage_note: '其餘部分需人工或即時審查',
     score_na: '—',
     // Meta line
     meta_date: '日期',
     meta_scope: '範圍',
+    meta_url: '受測網頁',
     meta_standard: '標準',
     meta_auditor: '審查者',
     // Verdict (suggestion-toned, not judgmental)
@@ -195,14 +204,23 @@ const I18N = {
     th_pass: 'Pass',
     th_fail: 'Adjust',
     th_review: 'Review',
-    th_score: 'Score',
-    state_not_machine_checkable: 'Needs human verification',
-    state_not_applicable: 'Not applicable',
+    th_score: 'Result',
+    state_not_machine_checkable: 'Static scan complete · human verification needed',
+    state_not_applicable: 'Static scan complete · not applicable here',
+    category_summary_note: 'Every category was statically scanned. A score appears only when machine-scoreable evidence exists; otherwise the completed scan state is shown.',
+    category_expand_all: 'Expand all',
+    category_collapse_all: 'Collapse all',
+    category_show_details: 'Show details',
+    category_hide_details: 'Hide details',
+    category_detail_scored: 'Machine-scoreable evidence was collected.',
+    category_detail_manual: 'The static scan completed. This category needs browser, assistive-technology, or human interaction evidence, so no score is invented.',
+    category_detail_na: 'The static scan completed. No applicable content for this category was detected in the audited scope.',
     coverage_line: 'Machine-measured weight coverage',
     coverage_note: 'the rest needs human or live review',
     score_na: 'n/a',
     meta_date: 'Date',
     meta_scope: 'Scope',
+    meta_url: 'Audited page',
     meta_standard: 'Standard',
     meta_auditor: 'Auditor',
     verdict_pass: 'Meets baseline',
@@ -525,6 +543,13 @@ function findingText(f, field) {
   return bi(escapeHtml(zh), escapeHtml(en));
 }
 
+function localizedText(value) {
+  if (value && typeof value === 'object') {
+    return bi(escapeHtml(value.zh || value.en || ''), escapeHtml(value.en || value.zh || ''));
+  }
+  return escapeHtml(value || '');
+}
+
 function asArray(value) {
   return Array.isArray(value) ? value : [];
 }
@@ -765,26 +790,38 @@ function deltaArrow(current, prev) {
   return '<span class="delta neutral">--</span>';
 }
 
-function buildCategoryRows(categories, prevCategories) {
+function buildCategoryRows(categories, prevCategories, findings) {
   return categories.map(cat => {
     const prev = prevCategories?.find(p => p.id === cat.id);
     const prevPass = prev ? prev.pass : null;
     const prevFail = prev ? prev.fail : null;
     const prevScore = prev ? prev.score : null;
+    const detailState = cat.score !== null && cat.score !== undefined
+      ? t('category_detail_scored')
+      : cat.state === 'not-applicable' ? t('category_detail_na') : t('category_detail_manual');
+    const resultHtml = cat.score === null || cat.score === undefined
+      ? `<span class="state-badge">${cat.state === 'not-applicable' ? t('state_not_applicable') : t('state_not_machine_checkable')}</span>`
+      : `<div class="score-bar"><div class="score-fill" style="width:${cat.score}%;background:${scoreColor(cat.score)}"></div><span class="score-text">${cat.score}</span></div>${prevScore !== null && prevScore !== undefined ? `<div class="prev-score">${t('score_was_prefix')} ${prevScore}</div>` : ''}`;
     return `
-      <tr class="category-row" data-category="${cat.id}" tabindex="0" role="button" aria-expanded="false" aria-controls="detail-${cat.id}">
-        <td class="cat-name"><div class="category-cell"><strong>${catName(cat)}</strong>${catDesc(cat) ? `<span class="category-desc">${catDesc(cat)}</span>` : ''}</div></td>
-        <td class="num pass">${cat.pass} ${deltaArrow(cat.pass, prevPass)}</td>
-        <td class="num fail">${cat.fail} ${deltaArrow(cat.fail, prevFail)}</td>
-        <td class="num review">${cat.review || 0}</td>
-        <td>
-          ${cat.score === null || cat.score === undefined ? `
-          <span class="state-badge">${cat.state === 'not-applicable' ? t('state_not_applicable') : t('state_not_machine_checkable')}</span>` : `
-          <div class="score-bar">
-            <div class="score-fill" style="width:${cat.score}%;background:${scoreColor(cat.score)}"></div>
-            <span class="score-text">${cat.score}</span>
+      <tr class="category-row" data-category="${cat.id}">
+        <td class="cat-name"><div class="category-cell"><strong>${catName(cat)}</strong>${catDesc(cat) ? `<span class="category-desc">${catDesc(cat)}</span>` : ''}<button type="button" class="category-toggle" data-category-toggle="${cat.id}" aria-expanded="false" aria-controls="detail-${cat.id}">${t('category_show_details')}</button></div></td>
+        <td class="num pass"><span class="mobile-label">${t('th_pass')}</span><span>${cat.pass} ${deltaArrow(cat.pass, prevPass)}</span></td>
+        <td class="num fail"><span class="mobile-label">${t('th_fail')}</span><span>${cat.fail} ${deltaArrow(cat.fail, prevFail)}</span></td>
+        <td class="num review"><span class="mobile-label">${t('th_review')}</span><span>${cat.review || 0}</span></td>
+        <td class="result-cell">
+          <span class="mobile-label">${t('th_score')}</span>
+${resultHtml}
+        </td>
+      </tr>
+      <tr class="category-detail-row" id="detail-${cat.id}" hidden>
+        <td colspan="5">
+          <div class="category-detail">
+            <h3>${catName(cat)}</h3>
+            <p class="category-status-note">${detailState}</p>
+${catDesc(cat) ? `<p class="category-desc">${catDesc(cat)}</p>` : ''}
+${cat.id === 'agent' ? buildAeoDisclaimer() : ''}
+${buildFindingsHTML(findings.filter(f => f.category === cat.id))}
           </div>
-          ${prevScore !== null && prevScore !== undefined ? `<div class="prev-score">${t('score_was_prefix')} ${prevScore}</div>` : ''}`}
         </td>
       </tr>`;
   }).join('');
@@ -1605,8 +1642,12 @@ const html = `<!DOCTYPE html>
   .category-desc { color: var(--text-muted); font-size: 0.8rem; line-height: 1.45; max-width: 48rem; }
   .summary-table .pass { color: var(--pass); }
   .summary-table .fail { color: var(--fail); }
-  .category-row { cursor: pointer; }
-  .category-row:hover { background: var(--surface-2); }
+  .category-summary-tools { display: flex; justify-content: space-between; align-items: center; gap: 1rem; margin: 0.5rem 0; }
+  .category-summary-note { color: var(--text-muted); margin: 0; max-width: 60rem; }
+  .category-toggle, .category-expand-all { width: fit-content; border: 1px solid var(--border); border-radius: 4px; background: var(--surface); color: var(--accent); padding: 0.35rem 0.6rem; font: inherit; font-size: 0.8rem; cursor: pointer; }
+  .category-toggle:hover, .category-expand-all:hover { background: var(--surface-2); }
+  .category-toggle:focus-visible, .category-expand-all:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+  .mobile-label { display: none; color: var(--text-muted); font-size: 0.72rem; font-weight: 600; text-transform: uppercase; }
 
   .score-bar { height: 20px; background: var(--surface-2); border-radius: 10px; position: relative; overflow: hidden; min-width: 100px; }
   .score-fill { height: 100%; border-radius: 10px; transition: width 0.8s ease; }
@@ -1788,10 +1829,12 @@ const html = `<!DOCTYPE html>
 
   .empty { color: var(--text-muted); font-style: italic; }
 
-  /* Category detail sections */
-  .category-detail { display: none; margin: 1rem 0 2rem; padding: 1rem;
-    background: var(--surface); border-radius: 8px; }
-  .category-detail.open { display: block; }
+  /* Category detail rows sit directly below their summary row. */
+  .category-detail-row[hidden] { display: none; }
+  .category-detail-row td { padding: 0 0 1rem; }
+  .category-detail { padding: 1rem; background: var(--surface); border: 1px solid var(--border); border-radius: 0 0 8px 8px; white-space: normal; }
+  .category-detail h3 { margin-top: 0; }
+  .category-status-note { color: var(--text-muted); }
 
   @media (max-width: 720px) {
     body { padding: 1rem; }
@@ -1807,11 +1850,20 @@ const html = `<!DOCTYPE html>
       grid-template-columns: 1fr 1fr;
       gap: 0.8rem;
     }
-    .summary-table {
-      display: block;
-      overflow-x: auto;
-      white-space: nowrap;
-    }
+    .summary-table { display: block; overflow: visible; white-space: normal; }
+    .summary-table thead { display: none; }
+    .summary-table tbody { display: grid; gap: 0.75rem; }
+    .summary-table .category-row { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); border: 1px solid var(--border); border-radius: 8px; overflow: hidden; }
+    .summary-table .category-row td { border: 0; min-width: 0; }
+    .summary-table .cat-name, .summary-table .result-cell { grid-column: 1 / -1; }
+    .summary-table .num { display: grid; gap: 0.15rem; text-align: left; }
+    .summary-table .result-cell { display: grid; gap: 0.35rem; }
+    .mobile-label { display: block; }
+    .state-badge { white-space: normal; width: fit-content; }
+    .category-detail-row { display: block; }
+    .category-detail-row[hidden] { display: none; }
+    .category-detail-row td { display: block; padding: 0; }
+    .category-summary-tools { align-items: flex-start; flex-direction: column; }
     .code-compare {
       grid-template-columns: 1fr;
     }
@@ -2098,6 +2150,7 @@ const html = `<!DOCTYPE html>
 <div class="meta">
   <span>${t('meta_date')}: ${audit.metadata?.date || 'N/A'}</span>
   <span>${t('meta_scope')}: ${escapeHtml(audit.metadata?.scope || 'N/A')}</span>
+  ${audit.metadata?.url ? `<span>${t('meta_url')}: <a href="${escapeHtml(audit.metadata.url)}" target="_blank" rel="noopener noreferrer">${escapeHtml(audit.metadata.url)}</a></span>` : ''}
   <span>${t('meta_standard')}: ${escapeHtml(audit.metadata?.standard || 'WCAG 2.2 AA')}</span>
   <span>${t('meta_auditor')}: Claude Code (a11y-audit)</span>
 </div>
@@ -2165,6 +2218,10 @@ ${audit.summary.coverage_percent !== undefined ? `
 <!-- Overview Tab -->
 <div id="tab-overview" class="tab-content active" role="tabpanel">
   <h2>${t('h2_category_summary')}</h2>
+  <div class="category-summary-tools">
+    <p class="category-summary-note">${t('category_summary_note')}</p>
+    <button type="button" class="category-expand-all" data-expand-categories aria-pressed="false">${t('category_expand_all')}</button>
+  </div>
   <table class="summary-table">
     <thead>
       <tr>
@@ -2176,18 +2233,9 @@ ${audit.summary.coverage_percent !== undefined ? `
       </tr>
     </thead>
     <tbody>
-      ${buildCategoryRows(audit.summary.categories, previous?.summary?.categories)}
+      ${buildCategoryRows(audit.summary.categories, previous?.summary?.categories, reportFindings)}
     </tbody>
   </table>
-
-  ${audit.summary.categories.map(cat => `
-    <div class="category-detail" id="detail-${cat.id}">
-      <h3>${catName(cat)}</h3>
-      ${catDesc(cat) ? `<p class="category-desc">${catDesc(cat)}</p>` : ''}
-      ${cat.id === 'agent' ? buildAeoDisclaimer() : ''}
-      ${buildFindingsHTML(reportFindings.filter(f => f.category === cat.id))}
-    </div>
-  `).join('')}
 </div>
 
 <!-- Findings Tab -->
@@ -2218,7 +2266,7 @@ ${audit.summary.coverage_percent !== undefined ? `
 <div id="tab-remediation" class="tab-content" role="tabpanel">
   <h2>${t('h2_remediation_priority')}</h2>
   ${['p0', 'p1', 'p2'].map(priority => {
-    const items = audit.remediation?.filter(r => r.priority === priority) || [];
+    const items = audit.remediation?.filter(r => String(r.priority).toLowerCase() === priority) || [];
     if (items.length === 0) return '';
     const labelKey = priority === 'p0' ? 'rem_p0' : priority === 'p1' ? 'rem_p1' : 'rem_p2';
     return `
@@ -2226,15 +2274,19 @@ ${audit.summary.coverage_percent !== undefined ? `
         <h3><span class="priority-tag ${priority}">${priority.toUpperCase()}</span> ${t(labelKey)}</h3>
         ${items.map(r => `
           <div class="remediation-item">
-            <span>&#8226; ${findingText(r, 'title')} &mdash; ${escapeHtml(r.wcag || '')}</span>
-            <span class="effort-tag">${escapeHtml(r.effort || '')}</span>
+            <div>
+              <strong>${findingText(r, 'title')}</strong>${r.wcag ? ` <span class="wcag-tag">${escapeHtml(r.wcag)}</span>` : ''}
+              ${r.location ? `<div><code>${escapeHtml(r.location)}</code></div>` : ''}
+              ${r.fix ? `<div class="fix"><strong>${t('finding_fix')}:</strong> ${findingText(r, 'fix')}</div>` : ''}
+            </div>
+            ${r.effort ? `<span class="effort-tag">${escapeHtml(r.effort)}</span>` : ''}
           </div>
         `).join('')}
       </div>`;
   }).join('')}
 
   <h2>${t('h2_testing_recommendations')}</h2>
-${audit.testing_recommendations ? `<ul>${audit.testing_recommendations.map(rec => `<li>${escapeHtml(rec)}</li>`).join('')}</ul>` : `<p class="empty">${t('rem_empty')}</p>`}
+${audit.testing_recommendations?.length ? `<ul>${audit.testing_recommendations.map(rec => `<li>${localizedText(rec)}</li>`).join('')}</ul>` : `<p class="empty">${t('rem_empty')}</p>`}
 </div>
 
 ${audit.lighthouse ? `<!-- Performance Signals Tab -->
@@ -2258,21 +2310,25 @@ document.querySelectorAll('[data-tab-btn]').forEach(tab => {
   // Native <button> tabs provide keyboard activation for this click handler.
   tab.addEventListener('click', () => switchTab(tab.dataset.tabBtn));
 });
-document.querySelectorAll('.category-row').forEach(row => {
-  const toggleCategory = () => {
-    const id = row.dataset.category;
-    const detail = document.getElementById('detail-' + id);
-    if (!detail) return;
-    const open = detail.classList.toggle('open');
-    row.setAttribute('aria-expanded', open ? 'true' : 'false');
-  };
-  row.addEventListener('click', toggleCategory);
-  row.addEventListener('keydown', event => {
-    if (event.key === 'Enter' || event.key === ' ') {
-      event.preventDefault();
-      toggleCategory();
-    }
-  });
+function setCategoryOpen(button, open) {
+  const detail = document.getElementById('detail-' + button.dataset.categoryToggle);
+  if (!detail) return;
+  detail.hidden = !open;
+  button.setAttribute('aria-expanded', open ? 'true' : 'false');
+  button.querySelector('.lang-zh').textContent = open ? ${JSON.stringify(I18N.zh.category_hide_details)} : ${JSON.stringify(I18N.zh.category_show_details)};
+  button.querySelector('.lang-en').textContent = open ? ${JSON.stringify(I18N.en.category_hide_details)} : ${JSON.stringify(I18N.en.category_show_details)};
+}
+document.querySelectorAll('[data-category-toggle]').forEach(button => {
+  button.addEventListener('click', () => setCategoryOpen(button, button.getAttribute('aria-expanded') !== 'true'));
+});
+const expandAll = document.querySelector('[data-expand-categories]');
+expandAll?.addEventListener('click', () => {
+  const buttons = [...document.querySelectorAll('[data-category-toggle]')];
+  const open = buttons.some(button => button.getAttribute('aria-expanded') !== 'true');
+  buttons.forEach(button => setCategoryOpen(button, open));
+  expandAll.setAttribute('aria-pressed', open ? 'true' : 'false');
+  expandAll.querySelector('.lang-zh').textContent = open ? ${JSON.stringify(I18N.zh.category_collapse_all)} : ${JSON.stringify(I18N.zh.category_expand_all)};
+  expandAll.querySelector('.lang-en').textContent = open ? ${JSON.stringify(I18N.en.category_collapse_all)} : ${JSON.stringify(I18N.en.category_expand_all)};
 });
 
 /* Language + theme toggles

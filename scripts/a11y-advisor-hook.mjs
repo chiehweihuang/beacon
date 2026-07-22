@@ -158,7 +158,7 @@ checks.push('Works without color alone? (shape, text, icon as alternatives)');
 const lines = [`A11Y Check (${ext.toUpperCase()} modified${isPdfGen ? ' · PDF output' : ''}):`];
 
 if (findings.length > 0) {
-  lines.push('', 'Detected issues (fix before proceeding):');
+  lines.push('', 'Detected patterns to review:');
   findings.forEach(f => lines.push(`  ${f}`));
 }
 
@@ -168,8 +168,8 @@ checks.forEach((c, i) => lines.push(`  ${i + 1}. ${c}`));
 lines.push(
   '',
   findings.length > 0
-    ? 'Fix detected issues above. Then verify checklist items.'
-    : 'If issues found, apply fixes. If clean, proceed silently.',
+    ? 'Address confirmed issues above, then verify runtime-dependent checklist items.'
+    : 'No static detector fired; verify runtime-dependent checklist items when relevant.',
   isPdfGen
     ? 'For document specifics: read references/documents.md in the beacon plugin (PDF/UA, Matterhorn checkpoints, EPUB alternative).'
     : 'For detailed patterns: invoke /beacon:advisor or read the references/ directory in the beacon plugin.',

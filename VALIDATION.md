@@ -114,7 +114,7 @@ are RECORDED, never silently edited.
 - `meta-viewport` violations mean zoom-blocking (`user-scalable=no` /
   `maximum-scale<5`), not tag presence.
 - Heading order is judged on the AT-visible sequence (hidden headings excluded);
-  `role="heading" aria-level` participates (known gap: not yet implemented).
+  `role="heading" aria-level` participates; native headings with `role="presentation|none"` do not (implemented in engine @8).
 
 ## L4 — fairness invariants
 
@@ -161,13 +161,13 @@ node tools/measure-semantic.mjs --min-precision 1.0 --min-recall 0.4
 
 Record in CHANGELOG: engine version, Spearman, and (when GT re-ran) P/R.
 
-## Measured state (2026-07-07, engine `beacon-static-audit@7`)
+## Measured state (2026-07-22, engine `beacon-static-audit@8`)
 
 | Metric | Value |
 |---|---|
-| Spearman vs Lighthouse a11y (n=71) | 0.354 (@3) → 0.474 (@4) → 0.488 (@5/@6) → 0.480 (@7) |
-| Ground-truth P/R, pattern-level | @4: 0.600 / 0.591 → @6: **0.979 / 0.712** (carries to @7: 47/47 TPs retained) · Lighthouse 0.811 / 0.462 |
-| Ground-truth recall, instance-level | @4: 0.743 → @6: **0.826** · Lighthouse 0.225 |
+| Spearman vs Lighthouse a11y (n=71) | 0.354 (@3) → 0.474 (@4) → 0.488 (@5/@6) → 0.480 (@7) → 0.477 (@8) |
+| Ground-truth P/R, pattern-level | @4: 0.600 / 0.591 → @6: 0.979 / 0.712 → @8: **1.000 / 0.727** (48/48 TPs incl. the recovered aria-heading case; FP 0) · Lighthouse 0.811 / 0.462 |
+| Ground-truth recall, instance-level | @4: 0.743 → @6: 0.826 → @8: **0.829** · Lighthouse 0.225 |
 | @5 re-verification | 14/15 FP classes eliminated, 39/39 TPs retained, 18 new catches |
 | @7 wild input-label FP elimination | 46/57 findings were wrapped-input FPs → 0; only jnto (+20) and spotify (+8) moved |
 | CJK fairness | jp-tw FP 0.214 → ~0.01 residual after @7; no CJK-text-semantics bias found |
@@ -182,7 +182,9 @@ Record in CHANGELOG: engine version, Spearman, and (when GT re-ran) P/R.
    cross-machine bar is still open) → publish the full error bar.
 4. ~~CJK FP-rate measurement~~ DONE 2026-07-07 (`benchmark/2026-07-07-cjk-fp/`); its
    product: fix the wrapping-label input-label FP class (engine @7, 46/57 wild FPs).
-5. `role="heading" aria-level` in the outline sequence (now the ONLY remaining GT FP
-   pattern); `role="presentation"` should strip headings from the outline; class-based
-   hiding needs the Tier-2 capture-annotation plan (stamp computed visibility +
-   accessible names into the snapshot; see the GT README spot-check list).
+5. ~~Engine @8 aria-heading / presentational stripping~~ GT RERUN DONE 2026-07-22:
+   P 1.000 / R 0.727, FP 0 (GT README, `pr-analysis-v8.json`); benchmark rerun Spearman
+   0.477, only jnto moved (+3, its presentational-heading FP gone). New known ceiling
+   recorded: the outline detector reports only the FIRST level-skip per document
+   (site 90 vi=4 stays missed). Class-based hiding still needs Tier-2 capture
+   annotations if future benchmark evidence justifies that larger change.

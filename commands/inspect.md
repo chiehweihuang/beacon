@@ -5,7 +5,7 @@ description: >-
   interactive HTML report with score rings and code diffs, before/after comparison with
   previous inspections, legal context mapping for 6 jurisdictions (US ADA, EU EAA, Japan JIS,
   Taiwan, Canada ACA, Australia DDA), framework-specific fix patterns (React/Vue/Angular/
-  Svelte/HTML), and CI/CD pipeline integration. Calibrated against a 44-site benchmark.
+  Svelte/HTML), and CI/CD pipeline integration. Validated against committed benchmark data.
   Three-tier architecture: static analysis → Playwright browser audit → manual testing
   recommendations. Handles CSR/SPA detection and pedagogical demo exclusion.
   Triggers on "accessibility inspect", "a11y inspect", "a11y audit", "a11y score",
@@ -14,9 +14,9 @@ description: >-
   the accessibility of a project, page, component, URL, or design.
 ---
 
-# Accessibility Audit v2.1
+# Accessibility Audit v3.0
 
-Conduct a structured accessibility audit that produces **quantitative scores** and an **interactive HTML report** — not just a checklist. Think Lighthouse for accessibility, but with jurisdiction-aware context and human-centered explanations.
+Conduct a structured accessibility audit that produces **quantitative scores** and an **interactive HTML report**. Treat the score as a machine-detectable baseline at the reported coverage, with jurisdiction-aware context and human-centered explanations.
 
 ## What This Version Adds
 
@@ -55,7 +55,7 @@ Ask the user (if not already specified):
 
 Run automated tools first. Treat this as the baseline tier — if any of the tools below is unavailable, log the gap and continue, but do not skip the entire step on the assumption that "manual will catch it".
 
-**Why default-on:** Beacon's Tier 1 static analysis cannot detect computed-style issues (color contrast in particular). The improve pipeline confirmed this empirically. A 50-site real-world survey (2026-05-31) found `color-contrast` violations axe-core caught and the Tier 1 static scanner missed on 18 of the 50 sites, the single largest cross-site detection gap (next: `link-name` on 9). Running axe-core in-process closes that gap without re-implementing contrast math.
+**Why default-on:** Beacon's Tier 1 static analysis cannot detect computed-style issues such as real color contrast. Running axe-core in a browser covers that gap without re-implementing browser layout and contrast behavior.
 
 ```bash
 # axe-core via Playwright — REQUIRED baseline if Playwright MCP is available
@@ -81,7 +81,7 @@ node scripts/static-audit.mjs --scope "<scope>" --output audit-results.json <fil
 
 **Contrast verification gate (do not skip):** Color contrast is the single largest real-world gap a static scan cannot see (18 of 50 sites in the 2026-05-31 survey). Before writing `audit-results.json`, answer explicitly: was contrast actually exercised by a rendering engine (axe-core via a browser) this run? If not, whether because no browser was available or because the run skipped it, you MUST (a) set `"requires_live_audit": true` in metadata, and (b) emit the `contrast` category as an explicit unverified finding (severity tip, title "Contrast not verified, run Tier 2"), not a silent `review` count. Never report a passing contrast score from a static-only run.
 
-Automated tools catch ~30-40% of WCAG criteria. The remaining 60-70% (cognitive load, screen-reader task completion, dynamic interaction quality) requires manual review — but for the 30-40% that *is* automatable, skipping the run produces silent false negatives.
+Automated coverage varies by page and criterion. Run the available tools, report `coverage_percent`, and reserve cognitive load, screen-reader task completion, and dynamic interaction quality for human or live review.
 
 ### Step 2a: Three-Tier Audit Architecture
 
@@ -582,7 +582,7 @@ The script emits this shape (reference — do not author it by hand):
     "standard": "WCAG 2.2 AA",
     "jurisdictions": ["US ADA", "Japan JIS"],
     "platform": "Web",
-    "tool_version": "a11y-audit-v2.1",
+    "tool_version": "beacon-static-audit@8",
     "confidence_level": "medium",
     "requires_live_audit": true
   },
@@ -776,9 +776,9 @@ npx eslint --rule 'jsx-a11y/*' --max-warnings 0 src/
 
 Include the appropriate config in the audit report when CI/CD integration is requested.
 
-## Common Pitfalls
+## Common Misframings
 
-| Pitfall | Correct Approach |
+| Common approach | More reliable approach |
 |---------|------------------|
 | `role="button"` on a `<div>` | Use native `<button>` -- includes keyboard handling for free |
 | `tabindex="0"` on everything | Only interactive elements need focus; use native elements |
