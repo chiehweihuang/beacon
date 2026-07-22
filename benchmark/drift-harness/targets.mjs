@@ -68,3 +68,23 @@ export function health() {
   for (const t of reg.targets) by[t.status] = (by[t.status] || 0) + 1;
   return { total: reg.targets.length, ...by };
 }
+
+// Core-tier review: shortfall vs the configured active floor + the inactive list for
+// human replenishment decisions. Survey-tier targets never count toward the floor.
+export function reviewReport() {
+  const reg = load();
+  const floor = reg.config?.core_active_floor ?? 100;
+  const core = reg.targets.filter((t) => (t.roles || []).includes('benchmark'));
+  const active = core.filter((t) => t.status === 'active');
+  const inactive = core.filter((t) => t.status !== 'active').map((t) => ({
+    id: t.id, url: t.url, band: t.band, status: t.status,
+    important: !!t.important, notes: t.notes || '',
+  }));
+  return {
+    core_total: core.length,
+    core_active: active.length,
+    floor,
+    shortfall: Math.max(0, floor - active.length),
+    inactive,
+  };
+}

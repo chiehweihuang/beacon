@@ -1,0 +1,17 @@
+[
+  { "url": "https://www.mako.co.il", "band": "rtl", "tags": ["rtl", "hebrew", "media"] },
+  { "url": "https://www.walla.co.il", "band": "rtl", "tags": ["rtl", "hebrew", "media"] },
+  { "url": "https://www.mercadolibre.com.ar", "band": "commercial", "tags": ["spanish", "latam"] },
+  { "url": "https://elpais.com", "band": "media", "tags": ["spanish"] },
+  { "url": "https://www.spiegel.de", "band": "media", "tags": ["german"] },
+  { "url": "https://www.lemonde.fr", "band": "media", "tags": ["french"] },
+  { "url": "https://www.uol.com.br", "band": "media", "tags": ["portuguese", "latam"] },
+  { "url": "https://www.nih.gov", "band": "gov-form", "tags": ["gov", "health"] },
+  { "url": "https://www.mit.edu", "band": "edu", "tags": ["education"] },
+  { "url": "https://www.coursera.org", "band": "edu", "tags": ["education", "spa"] },
+  { "url": "https://shopee.tw", "band": "jp-tw", "tags": ["cjk", "ecommerce", "sea"] },
+  { "url": "https://www.flipkart.com", "band": "commercial", "tags": ["indic", "ecommerce"] },
+  { "url": "https://archive.org", "band": "legacy", "tags": ["nonprofit", "legacy"] },
+  { "url": "https://allegro.pl", "band": "commercial", "tags": ["polish", "ecommerce"] },
+  { "url": "https://www.zalando.de", "band": "commercial", "tags": ["german", "ecommerce"] }
+]

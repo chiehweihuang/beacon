@@ -11,6 +11,7 @@ import { readFileSync, readdirSync, appendFileSync, rmSync, existsSync } from 'n
 import { execFileSync } from 'node:child_process';
 import { resolve, dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { reviewReport } from './targets.mjs';
 
 const ROOT = resolve(dirname(fileURLToPath(import.meta.url)));
 const DATE = new Date().toISOString().slice(0, 10);
@@ -43,6 +44,20 @@ try {
   }
 } catch (e) {
   entry.note = `comparison failed: ${String(e.message).slice(0, 200)}`;
+}
+// Re-probe stale walled/dead core sites (self-filtering; usually a no-op), then
+// attach the core-tier review so every weekly log line carries registry health.
+try {
+  execFileSync('node', [resolve(ROOT, 'probe-walled.mjs')], { stdio: 'inherit', timeout: 15 * 60000 });
+} catch (e) {
+  console.error('probe-walled failed:', String(e.message).slice(0, 120));
+}
+const review = reviewReport();
+entry.registry = { core_active: review.core_active, core_total: review.core_total, shortfall: review.shortfall };
+if (review.shortfall > 0) {
+  console.log(`REGISTRY SHORTFALL: core active ${review.core_active} < floor ${review.floor} — replacement candidates needed for:`);
+  for (const i of review.inactive.filter((x) => !x.important)) console.log(`  - [${i.status}] (${i.band}) ${i.url}`);
+  for (const i of review.inactive.filter((x) => x.important)) console.log(`  - [${i.status}] (${i.band}) ${i.url}  << IMPORTANT: keep, do not replace`);
 }
 appendFileSync(resolve(ROOT, 'drift-history.jsonl'), JSON.stringify(entry) + '\n');
 
