@@ -9,6 +9,7 @@ measurement infrastructure survives the machine.
 | `targets.mjs` | Target registry API: `select({role,tag,status})` + capture-outcome writeback; 3 consecutive failures auto-exclude a site (walled/dead) and prompt a same-band replacement. `targets.json` (local) is the single source of truth for all site lists. |
 | `build-targets.mjs` | One-time migration that assembled `targets.json` from `raw/*-rec.json` + the 2026-07-05 capture outcomes + the drift/GT role sets. |
 | `drift-capture.mjs` | Captures the registry's active drift subset with the pinned recipe and audits with the current engine. |
+| `add-targets.mjs` | Candidate intake: given a JSON list of {url, band, tags}, probes each with the pinned capture recipe, runs Lighthouse (accessibility) for pairing data, and self-registers survivors (walled/dead attempts are recorded too). Used 2026-07-22 to grow the registry to 100 sites with new rtl / indic-sea / gov-form / legacy archetype bands (`candidates-2026-07-22.json`). |
 | `drift-weekly.mjs` | Weekly scheduled entry point (Windows Task Scheduler task `beacon-weekly-drift`, Mondays 10:00, catch-up on missed runs): capture → same-engine compare vs the previous weekly run → append `drift-history.jsonl` → prune run dirs beyond 8. |
 
 The weekly job is pure measurement bookkeeping — no AI, no transmission; results

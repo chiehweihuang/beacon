@@ -1,0 +1,15 @@
+[
+  { "url": "https://www.aljazeera.net", "band": "rtl", "tags": ["rtl", "arabic", "media"] },
+  { "url": "https://www.alarabiya.net", "band": "rtl", "tags": ["rtl", "arabic", "media"] },
+  { "url": "https://www.ynet.co.il", "band": "rtl", "tags": ["rtl", "hebrew", "media"] },
+  { "url": "https://www.israelhayom.co.il", "band": "rtl", "tags": ["rtl", "hebrew", "media"] },
+  { "url": "https://www.bbc.com/hindi", "band": "indic-sea", "tags": ["indic", "hindi", "media"] },
+  { "url": "https://www.aajtak.in", "band": "indic-sea", "tags": ["indic", "hindi", "media"] },
+  { "url": "https://www.thairath.co.th", "band": "indic-sea", "tags": ["sea", "thai", "media"] },
+  { "url": "https://vnexpress.net", "band": "indic-sea", "tags": ["sea", "vietnamese", "media"] },
+  { "url": "https://www.detik.com", "band": "indic-sea", "tags": ["sea", "indonesian", "media"] },
+  { "url": "https://www.ssa.gov", "band": "gov-form", "tags": ["gov", "forms"] },
+  { "url": "https://www.canada.ca/en.html", "band": "gov-form", "tags": ["gov", "forms", "bilingual"] },
+  { "url": "https://www.service-public.fr", "band": "gov-form", "tags": ["gov", "forms", "french"] },
+  { "url": "https://www.craigslist.org/about/sites", "band": "legacy", "tags": ["legacy", "table-layout"] }
+]
