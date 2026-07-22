@@ -736,8 +736,9 @@
 <main id="main-content">
 <h1>Accessibility Audit Report</h1>
 <div class="meta">
-  <span><span class="lang-zh" lang="zh-Hant">日期</span><span class="lang-en" lang="en">Date</span>: 2026-07-10</span>
+  <span><span class="lang-zh" lang="zh-Hant">日期</span><span class="lang-en" lang="en">Date</span>: 2026-07-22</span>
   <span><span class="lang-zh" lang="zh-Hant">範圍</span><span class="lang-en" lang="en">Scope</span>: beacon-golden-fixture</span>
+  <span><span class="lang-zh" lang="zh-Hant">受測網頁</span><span class="lang-en" lang="en">Audited page</span>: <a href="beacon-golden-fixture" target="_blank" rel="noopener noreferrer">beacon-golden-fixture</a></span>
   <span><span class="lang-zh" lang="zh-Hant">標準</span><span class="lang-en" lang="en">Standard</span>: WCAG 2.2 AA static baseline</span>
   <span><span class="lang-zh" lang="zh-Hant">審查者</span><span class="lang-en" lang="en">Auditor</span>: Claude Code (a11y-audit)</span>
 </div>
@@ -2198,13 +2199,182 @@
 <div id="tab-remediation" class="tab-content" role="tabpanel">
   <h2><span class="lang-zh" lang="zh-Hant">修復優先序</span><span class="lang-en" lang="en">Remediation Priority</span></h2>
   
+      <div class="priority-section">
+        <h3><span class="priority-tag p0">P0</span> <span class="lang-zh" lang="zh-Hant">P0 — 建議優先處理（Level A）</span><span class="lang-en" lang="en">P0 — Recommended priority (Level A)</span></h3>
+        
+          <div class="remediation-item">
+            <div>
+              <strong><span class="lang-zh" lang="zh-Hant">頁面語言缺失</span><span class="lang-en" lang="en">Page language is missing</span></strong> <span class="wcag-tag">WCAG 2.2: 3.1.1 Language of Page</span>
+              <div><code>test/golden/dirty.html:1</code></div>
+              <div class="fix"><strong><span class="lang-zh" lang="zh-Hant">建議調整</span><span class="lang-en" lang="en">Suggested adjustment</span>:</strong> <span class="lang-zh" lang="zh-Hant">加入正確的語言 attribute，例如 &lt;html lang=&quot;zh-Hant&quot;&gt;。</span><span class="lang-en" lang="en">Add a language attribute such as &lt;html lang=&quot;zh-Hant&quot;&gt; or the correct document language.</span></div>
+            </div>
+            
+          </div>
+        
+          <div class="remediation-item">
+            <div>
+              <strong><span class="lang-zh" lang="zh-Hant">文件標題缺失</span><span class="lang-en" lang="en">Document title is missing</span></strong> <span class="wcag-tag">WCAG 2.2: 2.4.2 Page Titled</span>
+              <div><code>test/golden/dirty.html</code></div>
+              <div class="fix"><strong><span class="lang-zh" lang="zh-Hant">建議調整</span><span class="lang-en" lang="en">Suggested adjustment</span>:</strong> <span class="lang-zh" lang="zh-Hant">加入簡短且唯一的 &lt;title&gt;。</span><span class="lang-en" lang="en">Add a concise, unique &lt;title&gt;.</span></div>
+            </div>
+            
+          </div>
+        
+          <div class="remediation-item">
+            <div>
+              <strong><span class="lang-zh" lang="zh-Hant">靜態 markup 中看不到 main landmark</span><span class="lang-en" lang="en">Main landmark is not statically visible</span></strong> <span class="wcag-tag">WCAG 2.2: 1.3.1 Info and Relationships</span>
+              <div><code>test/golden/dirty.html</code></div>
+              <div class="fix"><strong><span class="lang-zh" lang="zh-Hant">建議調整</span><span class="lang-en" lang="en">Suggested adjustment</span>:</strong> <span class="lang-zh" lang="zh-Hant">用 &lt;main id=&quot;main-content&quot;&gt; 包住主要內容。</span><span class="lang-en" lang="en">Wrap primary page content in &lt;main id=&quot;main-content&quot;&gt;.</span></div>
+            </div>
+            
+          </div>
+        
+          <div class="remediation-item">
+            <div>
+              <strong><span class="lang-zh" lang="zh-Hant">Heading level 跳級</span><span class="lang-en" lang="en">Heading level is skipped</span></strong> <span class="wcag-tag">WCAG 2.2: 1.3.1 Info and Relationships</span>
+              <div><code>test/golden/dirty.html:5</code></div>
+              <div class="fix"><strong><span class="lang-zh" lang="zh-Hant">建議調整</span><span class="lang-en" lang="en">Suggested adjustment</span>:</strong> <span class="lang-zh" lang="zh-Hant">使用連續的 heading hierarchy，或只調整視覺樣式而不改 semantic level。</span><span class="lang-en" lang="en">Use a continuous heading hierarchy or adjust the visual style without changing semantic level.</span></div>
+            </div>
+            
+          </div>
+        
+          <div class="remediation-item">
+            <div>
+              <strong><span class="lang-zh" lang="zh-Hant">圖片缺少 alt text</span><span class="lang-en" lang="en">Image is missing alt text</span></strong> <span class="wcag-tag">WCAG 2.2: 1.1.1 Non-text Content</span>
+              <div><code>test/golden/dirty.html:6</code></div>
+              <div class="fix"><strong><span class="lang-zh" lang="zh-Hant">建議調整</span><span class="lang-en" lang="en">Suggested adjustment</span>:</strong> <span class="lang-zh" lang="zh-Hant">為有意義的圖片加入 alt text；純裝飾圖片使用 alt=&quot;&quot;。</span><span class="lang-en" lang="en">Add meaningful alt text, or alt=&quot;&quot; for purely decorative images.</span></div>
+            </div>
+            
+          </div>
+        
+          <div class="remediation-item">
+            <div>
+              <strong><span class="lang-zh" lang="zh-Hant">圖片缺少 alt text</span><span class="lang-en" lang="en">Image is missing alt text</span></strong> <span class="wcag-tag">WCAG 2.2: 1.1.1 Non-text Content</span>
+              <div><code>test/golden/dirty.html:7</code></div>
+              <div class="fix"><strong><span class="lang-zh" lang="zh-Hant">建議調整</span><span class="lang-en" lang="en">Suggested adjustment</span>:</strong> <span class="lang-zh" lang="zh-Hant">為有意義的圖片加入 alt text；純裝飾圖片使用 alt=&quot;&quot;。</span><span class="lang-en" lang="en">Add meaningful alt text, or alt=&quot;&quot; for purely decorative images.</span></div>
+            </div>
+            
+          </div>
+        
+          <div class="remediation-item">
+            <div>
+              <strong>Frame is missing a title</strong> <span class="wcag-tag">WCAG 2.2: 4.1.2 Name, Role, Value</span>
+              <div><code>test/golden/dirty.html:12</code></div>
+              <div class="fix"><strong><span class="lang-zh" lang="zh-Hant">建議調整</span><span class="lang-en" lang="en">Suggested adjustment</span>:</strong> Add title=&quot;...&quot; describing the frame content.</div>
+            </div>
+            
+          </div>
+        
+          <div class="remediation-item">
+            <div>
+              <strong><span class="lang-zh" lang="zh-Hant">List 含有非 list-item 直接子元素</span><span class="lang-en" lang="en">List contains a non-list-item child</span></strong> <span class="wcag-tag">WCAG 2.2: 1.3.1 Info and Relationships</span>
+              <div><code>test/golden/dirty.html:13</code></div>
+              <div class="fix"><strong><span class="lang-zh" lang="zh-Hant">建議調整</span><span class="lang-en" lang="en">Suggested adjustment</span>:</strong> <span class="lang-zh" lang="zh-Hant">讓 &lt;li&gt; 成為唯一結構子元素；或在不可避免的非標準結構中使用 role=&quot;list&quot;/role=&quot;listitem&quot;。</span><span class="lang-en" lang="en">Make &lt;li&gt; the only structural child; move wrapper elements inside an &lt;li&gt;, or use role=&quot;list&quot;/role=&quot;listitem&quot; if a non-standard structure is unavoidable.</span></div>
+            </div>
+            
+          </div>
+        
+          <div class="remediation-item">
+            <div>
+              <strong><span class="lang-zh" lang="zh-Hant">Button 可能沒有 accessible name</span><span class="lang-en" lang="en">Button may not have an accessible name</span></strong> <span class="wcag-tag">WCAG 2.2: 4.1.2 Name, Role, Value</span>
+              <div><code>test/golden/dirty.html:10</code></div>
+              <div class="fix"><strong><span class="lang-zh" lang="zh-Hant">建議調整</span><span class="lang-en" lang="en">Suggested adjustment</span>:</strong> <span class="lang-zh" lang="zh-Hant">加入可見文字、aria-label 或 aria-labelledby。</span><span class="lang-en" lang="en">Add visible text, aria-label, or aria-labelledby.</span></div>
+            </div>
+            
+          </div>
+        
+          <div class="remediation-item">
+            <div>
+              <strong><span class="lang-zh" lang="zh-Hant">Link 可能沒有 accessible name</span><span class="lang-en" lang="en">Link may not have an accessible name</span></strong> <span class="wcag-tag">WCAG 2.2: 4.1.2 Name, Role, Value</span>
+              <div><code>test/golden/dirty.html:8</code></div>
+              <div class="fix"><strong><span class="lang-zh" lang="zh-Hant">建議調整</span><span class="lang-en" lang="en">Suggested adjustment</span>:</strong> <span class="lang-zh" lang="zh-Hant">加入可見 link text、aria-label/aria-labelledby/title、包裹圖片的 alt text，或 &lt;svg&gt;&lt;title&gt;。</span><span class="lang-en" lang="en">Add visible link text, an aria-label/aria-labelledby/title, give a wrapped &lt;img&gt; meaningful alt text, or add an &lt;svg&gt;&lt;title&gt;.</span></div>
+            </div>
+            
+          </div>
+        
+          <div class="remediation-item">
+            <div>
+              <strong><span class="lang-zh" lang="zh-Hant">Link 可能沒有 accessible name</span><span class="lang-en" lang="en">Link may not have an accessible name</span></strong> <span class="wcag-tag">WCAG 2.2: 4.1.2 Name, Role, Value</span>
+              <div><code>test/golden/dirty.html:9</code></div>
+              <div class="fix"><strong><span class="lang-zh" lang="zh-Hant">建議調整</span><span class="lang-en" lang="en">Suggested adjustment</span>:</strong> <span class="lang-zh" lang="zh-Hant">加入可見 link text、aria-label/aria-labelledby/title、包裹圖片的 alt text，或 &lt;svg&gt;&lt;title&gt;。</span><span class="lang-en" lang="en">Add visible link text, an aria-label/aria-labelledby/title, give a wrapped &lt;img&gt; meaningful alt text, or add an &lt;svg&gt;&lt;title&gt;.</span></div>
+            </div>
+            
+          </div>
+        
+          <div class="remediation-item">
+            <div>
+              <strong><span class="lang-zh" lang="zh-Hant">可點擊元素不是 button</span><span class="lang-en" lang="en">Clickable non-button element</span></strong> <span class="wcag-tag">WCAG 2.2: 2.1.1 Keyboard</span>
+              <div><code>test/golden/dirty.html:14</code></div>
+              <div class="fix"><strong><span class="lang-zh" lang="zh-Hant">建議調整</span><span class="lang-en" lang="en">Suggested adjustment</span>:</strong> <span class="lang-zh" lang="zh-Hant">動作使用 &lt;button&gt;；若必須自訂語意，加入 role、tabindex 與 Enter/Space handling。</span><span class="lang-en" lang="en">Use &lt;button&gt; for actions. If custom semantics are unavoidable, add role, tabindex, and Enter/Space handling.</span></div>
+            </div>
+            
+          </div>
+        
+          <div class="remediation-item">
+            <div>
+              <strong><span class="lang-zh" lang="zh-Hant">Input 可能缺少 accessible label</span><span class="lang-en" lang="en">Input may be missing an accessible label</span></strong> <span class="wcag-tag">WCAG 2.2: 3.3.2 Labels or Instructions</span>
+              <div><code>test/golden/dirty.html:11</code></div>
+              <div class="fix"><strong><span class="lang-zh" lang="zh-Hant">建議調整</span><span class="lang-en" lang="en">Suggested adjustment</span>:</strong> <span class="lang-zh" lang="zh-Hant">搭配 &lt;label for=&quot;...&quot;&gt;，或在已有可見 label 時使用 aria-labelledby。</span><span class="lang-en" lang="en">Pair it with a &lt;label for=&quot;...&quot;&gt; or use aria-labelledby when a visible label already exists.</span></div>
+            </div>
+            
+          </div>
+        
+      </div>
+      <div class="priority-section">
+        <h3><span class="priority-tag p1">P1</span> <span class="lang-zh" lang="zh-Hant">P1 — 建議在合理時程內處理（Level AA）</span><span class="lang-en" lang="en">P1 — Recommended in due course (Level AA)</span></h3>
+        
+          <div class="remediation-item">
+            <div>
+              <strong><span class="lang-zh" lang="zh-Hant">Viewport meta 禁用 zoom</span><span class="lang-en" lang="en">Viewport meta disables zoom</span></strong> <span class="wcag-tag">WCAG 2.2: 1.4.4 Resize Text</span>
+              <div><code>test/golden/dirty.html:2</code></div>
+              <div class="fix"><strong><span class="lang-zh" lang="zh-Hant">建議調整</span><span class="lang-en" lang="en">Suggested adjustment</span>:</strong> <span class="lang-zh" lang="zh-Hant">移除 user-scalable=no 與低於 5 的 maximum-scale。</span><span class="lang-en" lang="en">Remove user-scalable=no and any maximum-scale below 5; use content=&quot;width=device-width, initial-scale=1&quot;.</span></div>
+            </div>
+            
+          </div>
+        
+      </div>
+      <div class="priority-section">
+        <h3><span class="priority-tag p2">P2</span> <span class="lang-zh" lang="zh-Hant">P2 — 可考慮處理（最佳實踐）</span><span class="lang-en" lang="en">P2 — Optional enhancement (Best Practices)</span></h3>
+        
+          <div class="remediation-item">
+            <div>
+              <strong><span class="lang-zh" lang="zh-Hant">Meta description 缺失</span><span class="lang-en" lang="en">Meta description is missing</span></strong> <span class="wcag-tag">AEO structural hygiene</span>
+              <div><code>test/golden/dirty.html</code></div>
+              <div class="fix"><strong><span class="lang-zh" lang="zh-Hant">建議調整</span><span class="lang-en" lang="en">Suggested adjustment</span>:</strong> <span class="lang-zh" lang="zh-Hant">加入簡短且頁面專屬的 meta description。</span><span class="lang-en" lang="en">Add a concise page-specific meta description.</span></div>
+            </div>
+            
+          </div>
+        
+          <div class="remediation-item">
+            <div>
+              <strong><span class="lang-zh" lang="zh-Hant">Canonical link 缺失</span><span class="lang-en" lang="en">Canonical link is missing</span></strong> <span class="wcag-tag">AEO structural hygiene</span>
+              <div><code>test/golden/dirty.html</code></div>
+              <div class="fix"><strong><span class="lang-zh" lang="zh-Hant">建議調整</span><span class="lang-en" lang="en">Suggested adjustment</span>:</strong> <span class="lang-zh" lang="zh-Hant">為可索引公開頁加入 &lt;link rel=&quot;canonical&quot; href=&quot;https://example.com/preferred-url&quot;&gt;。</span><span class="lang-en" lang="en">Add &lt;link rel=&quot;canonical&quot; href=&quot;https://example.com/preferred-url&quot;&gt; for indexable public pages.</span></div>
+            </div>
+            
+          </div>
+        
+          <div class="remediation-item">
+            <div>
+              <strong><span class="lang-zh" lang="zh-Hant">JSON-LD structured data 缺失</span><span class="lang-en" lang="en">JSON-LD structured data is missing</span></strong> <span class="wcag-tag">AEO structural hygiene</span>
+              <div><code>test/golden/dirty.html</code></div>
+              <div class="fix"><strong><span class="lang-zh" lang="zh-Hant">建議調整</span><span class="lang-en" lang="en">Suggested adjustment</span>:</strong> <span class="lang-zh" lang="zh-Hant">加入適合頁面的 Schema.org JSON-LD，例如 Organization、Article、FAQPage、Product、BreadcrumbList 或 WebSite。</span><span class="lang-en" lang="en">Add page-appropriate Schema.org JSON-LD, such as Organization, Article, FAQPage, Product, BreadcrumbList, or WebSite.</span></div>
+            </div>
+            
+          </div>
+        
+      </div>
 
   <h2><span class="lang-zh" lang="zh-Hant">測試建議</span><span class="lang-en" lang="en">Testing Recommendations</span></h2>
-<ul><li>Run keyboard-only walkthrough of the primary flow.</li><li>Run a live browser audit with Playwright + axe-core when a page is available.</li><li>Check 320px reflow and 200% zoom manually.</li><li>Listen to the page with VoiceOver or NVDA for the core task.</li><li>Treat this static score as a regression baseline, not a completion certificate.</li></ul>
+<ul><li><span class="lang-zh" lang="zh-Hant">修復鍵盤發現項後，僅使用 Tab、Shift+Tab、Enter、Space 與方向鍵重跑主要流程。</span><span class="lang-en" lang="en">After fixing the keyboard findings, rerun the primary flow using only Tab, Shift+Tab, Enter, Space, and arrow keys.</span></li><li><span class="lang-zh" lang="zh-Hant">修復表單發現項後，驗證 label、必填狀態與錯誤訊息能被鍵盤及螢幕閱讀器正確使用。</span><span class="lang-en" lang="en">After fixing the form findings, verify labels, required states, and error messages with both keyboard and screen reader.</span></li><li><span class="lang-zh" lang="zh-Hant">修復語意結構發現項後，用 NVDA 或 VoiceOver 完成主要任務。</span><span class="lang-en" lang="en">After fixing the semantic findings, complete the primary task with NVDA or VoiceOver.</span></li><li><span class="lang-zh" lang="zh-Hant">用真實瀏覽器搭配 axe-core 驗證計算後的文字與 UI 對比。</span><span class="lang-en" lang="en">Verify computed text and UI contrast in a real browser with axe-core.</span></li><li><span class="lang-zh" lang="zh-Hant">在 200% 縮放下重跑主要流程；320px 回流結果已由本次掃描另行記錄。</span><span class="lang-en" lang="en">Rerun the primary flow at 200% zoom; the 320px reflow result is recorded separately by this audit.</span></li><li><span class="lang-zh" lang="zh-Hant">請一位不熟悉產品的使用者完成主要任務，觀察標籤、說明與下一步是否清楚。</span><span class="lang-en" lang="en">Ask a user unfamiliar with the product to complete the primary task and observe whether labels, help, and next steps are clear.</span></li></ul>
 </div>
 
 
 </main>
+
+<footer style="max-width:1080px;margin:0 auto;padding:1.25rem 24px 2.5rem;color:var(--text-soft);border-top:1px solid var(--border-soft);font-size:0.85rem;">
+  <p><span class="lang-zh" lang="zh-Hant">Beacon 是免費開源工具，評分背後的驗證資料全數公開。維護者提供無障礙 AI 檢測與修復的顧問服務：</span><span class="lang-en" lang="en">Beacon is free and open source, and the validation data behind its scores is public. The maintainer offers accessibility consulting for AI-assisted development: </span><a href="https://chiehweihuang.github.io/beacon/#services" style="color:var(--accent);">chiehweihuang.github.io/beacon#services</a></p>
+</footer>
 
 <script>
 function switchTab(name) {

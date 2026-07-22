@@ -2296,6 +2296,10 @@ ${audit.lighthouse ? `<!-- Performance Signals Tab -->
 </div>` : ''}
 </main>
 
+<footer style="max-width:1080px;margin:0 auto;padding:1.25rem 24px 2.5rem;color:var(--text-soft);border-top:1px solid var(--border-soft);font-size:0.85rem;">
+  <p>${bi('Beacon 是免費開源工具，評分背後的驗證資料全數公開。維護者提供無障礙 AI 檢測與修復的顧問服務：', 'Beacon is free and open source, and the validation data behind its scores is public. The maintainer offers accessibility consulting for AI-assisted development: ')}<a href="https://chiehweihuang.github.io/beacon/#services" style="color:var(--accent);">chiehweihuang.github.io/beacon#services</a></p>
+</footer>
+
 <script>
 function switchTab(name) {
   document.querySelectorAll('.tab').forEach(t => {

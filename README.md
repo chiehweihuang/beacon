@@ -228,6 +228,15 @@ For architecture and roadmap details:
 - **Upstream false-positive reports** (opt-in, never automatic): if you want a false positive fixed for everyone, Beacon builds a sanitized payload (generic identifiers, placeholder text, no URLs/paths/content), shows you the complete payload before anything leaves your machine, and prefills a [GitHub issue form](https://github.com/chiehweihuang/beacon/issues/new?template=fp-report.yml). GitHub requires an account, so this path is pseudonymous rather than anonymous.
 - Detector changes triggered by these reports go through the committed validation discipline ([VALIDATION.md](./VALIDATION.md)): regression corpus, wild-sample false-positive measurement, ground-truth re-verification.
 
+## Professional Services
+
+Beacon's maintainer offers accessibility consulting for AI-assisted development —
+remediation of audit findings, accessibility validation of AI-generated UI, and
+audits beyond the automated tiers, with particular depth in CJK-language products.
+Details and contact: [chiehweihuang.github.io/beacon#services](https://chiehweihuang.github.io/beacon/#services).
+Disclosure: the tool is free and its validation data is public precisely so findings
+can be judged independently of any service.
+
 See [ROADMAP.md](./ROADMAP.md) for known incomplete areas and future work.
 
 ## License

@@ -736,8 +736,9 @@
 <main id="main-content">
 <h1>Accessibility Audit Report</h1>
 <div class="meta">
-  <span><span class="lang-zh" lang="zh-Hant">日期</span><span class="lang-en" lang="en">Date</span>: 2026-07-10</span>
+  <span><span class="lang-zh" lang="zh-Hant">日期</span><span class="lang-en" lang="en">Date</span>: 2026-07-22</span>
   <span><span class="lang-zh" lang="zh-Hant">範圍</span><span class="lang-en" lang="en">Scope</span>: https://chiehweihuang.github.io/beacon/</span>
+  <span><span class="lang-zh" lang="zh-Hant">受測網頁</span><span class="lang-en" lang="en">Audited page</span>: <a href="https://chiehweihuang.github.io/beacon/" target="_blank" rel="noopener noreferrer">https://chiehweihuang.github.io/beacon/</a></span>
   <span><span class="lang-zh" lang="zh-Hant">標準</span><span class="lang-en" lang="en">Standard</span>: WCAG 2.2 AA static baseline</span>
   <span><span class="lang-zh" lang="zh-Hant">審查者</span><span class="lang-en" lang="en">Auditor</span>: Claude Code (a11y-audit)</span>
 </div>
@@ -921,7 +922,7 @@
       </tr>
       <tr class="category-row" data-category="screenreader">
         <td class="cat-name"><div class="category-cell"><strong><span class="lang-zh" lang="zh-Hant">螢幕閱讀器</span><span class="lang-en" lang="en">Screen Reader</span></strong><span class="category-desc"><span class="lang-zh" lang="zh-Hant">Landmark、heading、alt text、name、role、ARIA、頁面語言與語意結構。</span><span class="lang-en" lang="en">Landmarks, heading structure, alt text, names, roles, ARIA, page language, and semantic structure.</span></span><button type="button" class="category-toggle" data-category-toggle="screenreader" aria-expanded="false" aria-controls="detail-screenreader"><span class="lang-zh" lang="zh-Hant">展開詳情</span><span class="lang-en" lang="en">Show details</span></button></div></td>
-        <td class="num pass"><span class="mobile-label"><span class="lang-zh" lang="zh-Hant">通過</span><span class="lang-en" lang="en">Pass</span></span><span>22 </span></td>
+        <td class="num pass"><span class="mobile-label"><span class="lang-zh" lang="zh-Hant">通過</span><span class="lang-en" lang="en">Pass</span></span><span>25 </span></td>
         <td class="num fail"><span class="mobile-label"><span class="lang-zh" lang="zh-Hant">待修</span><span class="lang-en" lang="en">Adjust</span></span><span>0 </span></td>
         <td class="num review"><span class="mobile-label"><span class="lang-zh" lang="zh-Hant">待審</span><span class="lang-en" lang="en">Review</span></span><span>0</span></td>
         <td class="result-cell">
@@ -1474,11 +1475,15 @@
   
 
   <h2><span class="lang-zh" lang="zh-Hant">測試建議</span><span class="lang-en" lang="en">Testing Recommendations</span></h2>
-<ul><li>Run keyboard-only walkthrough of the primary flow.</li><li>Run a live browser audit with Playwright + axe-core when a page is available.</li><li>Check 320px reflow and 200% zoom manually.</li><li>Listen to the page with VoiceOver or NVDA for the core task.</li><li>Treat this static score as a regression baseline, not a completion certificate.</li></ul>
+<ul><li><span class="lang-zh" lang="zh-Hant">用真實瀏覽器搭配 axe-core 驗證計算後的文字與 UI 對比。</span><span class="lang-en" lang="en">Verify computed text and UI contrast in a real browser with axe-core.</span></li><li><span class="lang-zh" lang="zh-Hant">在 200% 縮放下重跑主要流程；320px 回流結果已由本次掃描另行記錄。</span><span class="lang-en" lang="en">Rerun the primary flow at 200% zoom; the 320px reflow result is recorded separately by this audit.</span></li><li><span class="lang-zh" lang="zh-Hant">請一位不熟悉產品的使用者完成主要任務，觀察標籤、說明與下一步是否清楚。</span><span class="lang-en" lang="en">Ask a user unfamiliar with the product to complete the primary task and observe whether labels, help, and next steps are clear.</span></li></ul>
 </div>
 
 
 </main>
+
+<footer style="max-width:1080px;margin:0 auto;padding:1.25rem 24px 2.5rem;color:var(--text-soft);border-top:1px solid var(--border-soft);font-size:0.85rem;">
+  <p><span class="lang-zh" lang="zh-Hant">Beacon 是免費開源工具，評分背後的驗證資料全數公開。維護者提供無障礙 AI 檢測與修復的顧問服務：</span><span class="lang-en" lang="en">Beacon is free and open source, and the validation data behind its scores is public. The maintainer offers accessibility consulting for AI-assisted development: </span><a href="https://chiehweihuang.github.io/beacon/#services" style="color:var(--accent);">chiehweihuang.github.io/beacon#services</a></p>
+</footer>
 
 <script>
 function switchTab(name) {
