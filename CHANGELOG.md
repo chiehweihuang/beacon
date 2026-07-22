@@ -2,31 +2,7 @@
 
 ## [3.1.0] — 2026-07-22
 
-### Features
-
-- consulting entry points — report footer, landing #services, README (4563930)
-- production improvement loop — local usage ledger + opt-in FP reports + target registry harness (6e72c1c)
-- aria-heading outline (engine @8) + report category disclosure — validated (d05ccdc)
-- bilingual landing page + live sample reports (GitHub Pages) (be775fd)
-
-### Bug Fixes
-
-- per-entry registry writes — long intake runs no longer clobber concurrent writers (d5997fd)
-
-### Documentation
-
-- community-report ingestion — consented user findings flow into the lab db (6f38752)
-- queryable SQLite layer over all measurement data (node:sqlite, zero deps) (60cebbe)
-- survey tier to 10,000 sites — automated sourcing, nightly intake, append-only registry policy (c350282)
-- candidate-intake tool + registry grown to 100 sites (5328b18)
-- interlink demo reports back to the landing pages (dc98236)
-- explain the plugin@marketplace format next to the install command (eccce99)
-- curate the 3.0.0 section (c7e93e4)
-
-All notable changes to Beacon are documented here. Versions follow the plugin
-manifest (`.claude-plugin/plugin.json`); dates are release-prep dates.
-
-## Unreleased
+Engine @8 + the production improvement loop + public services entry points.
 
 - Engine `beacon-static-audit@8` includes `role="heading" aria-level="1-6"` in the document outline and excludes native headings with `role="presentation|none"`. This addresses the remaining aria-heading attribution gap identified by the v3.0 ground-truth study.
 - Measured (2026-07-22, study rerun): ground-truth precision 0.979 → **1.000**, pattern recall 0.712 → **0.727**, instance recall 0.826 → 0.829, FP patterns 1 → **0** — the engine now reports ibm.com's true 1→4 aria-heading skip instead of the spurious h1→h5, and jnto.go.jp's presentational-heading FP is gone (+3 points, the only benchmark score that moved; 47/47 prior TPs retained; Spearman 0.477, n=71, noise-level vs @7's 0.480). Known ceiling recorded in the GT README: the outline detector reports only the first level-skip per document.
@@ -34,6 +10,12 @@ manifest (`.claude-plugin/plugin.json`); dates are release-prep dates.
 - Category summaries now say when the static scan completed but a score cannot be justified, provide per-category and expand-all disclosure controls, and render as in-viewport cards on mobile instead of requiring horizontal table scrolling.
 - **Services pointer**: the HTML report gains a one-line footer linking to the landing page's new Services section (maintainer's accessibility consulting; disclosure included — scores are never influenced by contact). Landing pages and README carry the same section.
 - **Production improvement loop**: `beacon:inspect` now keeps a local-only usage ledger (`~/.beacon/usage.jsonl` — inspect summaries + user false-positive marks; never transmitted, deletable anytime) and offers an opt-in upstream FP report: sanitized payload, shown in full before anything is shared, prefilled into the new `false-positive` GitHub issue form. Detector fixes triggered by reports still walk the full VALIDATION.md discipline.
+- Bilingual landing page with live sample reports (GitHub Pages), demo-report back-navigation, and the plugin@marketplace format note next to the install command.
+- Measurement infrastructure (local benchmark workspace, reference copies in benchmark/drift-harness/): self-maintaining target registry grown to 100 core sites (append-only policy, active floor, auto re-probe of walled sites), Tranco-sourced survey tier on the road to 10,000 sites, weekly capture-drift schedule, a queryable SQLite layer over all measurement data, and consented community-report ingestion.
+
+
+All notable changes to Beacon are documented here. Versions follow the plugin
+manifest (`.claude-plugin/plugin.json`); dates are release-prep dates.
 
 ## [3.0.0] — 2026-07-07
 

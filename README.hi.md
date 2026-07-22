@@ -47,7 +47,7 @@ Marketplace जोड़ें:
 }
 ```
 
-Plugin facts: `beacon`, version `3.0.0`, MIT, repository `chiehweihuang/beacon`.
+Plugin facts: `beacon`, version `3.1.0`, MIT, repository `chiehweihuang/beacon`.
 
 ## स्कोर की व्याख्या
 
