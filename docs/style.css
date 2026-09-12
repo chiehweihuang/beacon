@@ -1,12 +1,12 @@
-/* Beacon landing — no framework, no JS, WCAG 2.2 AA by construction.
+/* Beacon landing — no framework or client JavaScript.
    Light is the default theme; dark follows the system preference.
    Font stacks are explicit end-to-end so CJK never reaches a legacy serif. */
 
 :root {
   --sans: "Segoe UI", system-ui, -apple-system, "Helvetica Neue", Arial,
-          "Noto Sans TC", "PingFang TC", "Microsoft JhengHei", sans-serif;
+          "Noto Sans TC", "PingFang TC", "Microsoft JhengHei", "Noto Sans JP", "Yu Gothic", sans-serif;
   --mono: "Cascadia Code", Consolas, "SF Mono", Menlo, "Noto Sans Mono",
-          "Microsoft JhengHei", monospace;
+          "Noto Sans TC", "Microsoft JhengHei", "Noto Sans JP", "Yu Gothic", monospace;
 
   --bg: #ffffff;
   --surface: #f4f5f9;
@@ -44,7 +44,7 @@
   :root { --muted: #d3d8e4; --line: #8a92a6; }
 }
 
-* { box-sizing: border-box; }
+* { box-sizing: border-box; letter-spacing: 0; }
 
 html { -webkit-text-size-adjust: 100%; }
 
@@ -55,13 +55,14 @@ body {
   line-height: 1.65;
   color: var(--text);
   background: var(--bg);
+  overflow-wrap: anywhere;
 }
 
 /* ---- focus: visible, never removed ---- */
 :focus-visible {
   outline: 3px solid var(--focus);
   outline-offset: 3px;
-  border-radius: 2px;
+  border-radius: 0;
 }
 
 @media (prefers-reduced-motion: reduce) {
@@ -99,8 +100,8 @@ header.site {
   border-bottom: 1px solid var(--line);
 }
 header.site .wrap {
-  display: flex;
-  flex-wrap: wrap;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) max-content;
   align-items: center;
   gap: 0.5rem 1.5rem;
   min-height: 4rem;
@@ -110,7 +111,7 @@ header.site .wrap {
 .brand {
   font-weight: 700;
   font-size: 1.25rem;
-  letter-spacing: 0.02em;
+  letter-spacing: 0;
   color: var(--text);
   text-decoration: none;
   display: inline-flex;
@@ -122,8 +123,8 @@ header.site .wrap {
 nav.site-nav ul {
   list-style: none;
   display: flex;
-  flex-wrap: wrap;
-  gap: 0.25rem 1rem;
+  justify-content: space-between;
+  gap: 0.25rem;
   margin: 0;
   padding: 0;
 }
@@ -137,11 +138,20 @@ nav.site-nav a,
   text-decoration: none;
   font-weight: 500;
 }
-nav.site-nav a:hover, .lang-switch a:hover { color: var(--text); text-decoration: underline; }
-.lang-switch { margin-left: auto; }
+nav.site-nav { grid-column: 1 / -1; }
+nav.site-nav a { width: 100%; height: 100%; }
+nav.site-nav a:hover, .lang-switch a:hover { color: var(--text); text-decoration: underline; background: var(--surface); }
+.lang-switch { justify-self: end; }
+.lang-switch a { text-decoration: underline; text-underline-offset: .2em; }
+@media (max-width: 52rem) {
+  nav.site-nav ul { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); }
+}
+@media (max-width: 430px) {
+  nav.site-nav ul { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
 
 /* ---- hero ---- */
-.hero { padding: clamp(3rem, 8vw, 5.5rem) 0 clamp(2rem, 5vw, 3.5rem); }
+.hero { padding: 2rem 0; }
 .hero h1 {
   font-size: 3rem;
   line-height: 1.15;
@@ -167,7 +177,7 @@ nav.site-nav a:hover, .lang-switch a:hover { color: var(--text); text-decoration
   align-items: center;
   min-height: 48px;
   padding: 0 1.4rem;
-  border-radius: 8px;
+  border-radius: 0;
   font-weight: 600;
   text-decoration: none;
 }
@@ -190,13 +200,13 @@ p { max-width: 65ch; }
 
 .cards {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(min(16rem, 100%), 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(min(23rem, 100%), 1fr));
   gap: 1.25rem;
 }
 .card {
   background: var(--surface);
   border: 1px solid var(--line);
-  border-radius: 12px;
+  border-radius: 0;
   padding: 1.5rem;
 }
 .card .when {
@@ -240,7 +250,7 @@ th, td {
   border-bottom: 1px solid var(--line);
   overflow-wrap: anywhere;
 }
-th[scope="col"] { font-size: 0.9rem; letter-spacing: 0.04em; color: var(--muted); }
+th[scope="col"] { font-size: 0.9rem; letter-spacing: 0; color: var(--muted); }
 td.win { color: var(--good); font-weight: 700; }
 
 .footnote { font-size: 0.9rem; color: var(--muted); max-width: 65ch; }
@@ -248,13 +258,13 @@ td.win { color: var(--good); font-weight: 700; }
 /* ---- stats ---- */
 .stats {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(min(14rem, 100%), 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(min(23rem, 100%), 1fr));
   gap: 1.25rem;
   margin: 1.5rem 0;
 }
 .stat {
   border: 1px solid var(--line);
-  border-radius: 12px;
+  border-radius: 0;
   padding: 1.25rem 1.5rem;
 }
 .stat .n {
@@ -271,16 +281,16 @@ td.win { color: var(--good); font-weight: 700; }
   gap: 0.5rem;
   border: 2px solid var(--good);
   color: var(--good);
-  border-radius: 999px;
+  border-radius: 0;
   padding: 0.4rem 1rem;
   font-weight: 700;
 }
 
 /* ---- gallery ---- */
-.gallery { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(18rem, 100%), 1fr)); gap: 1.25rem; }
+.gallery { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(23rem, 100%), 1fr)); gap: 1.25rem; }
 .shot {
   border: 1px solid var(--line);
-  border-radius: 12px;
+  border-radius: 0;
   padding: 1.5rem;
   background: var(--surface);
 }
@@ -294,7 +304,7 @@ td.win { color: var(--good); font-weight: 700; }
 pre {
   background: var(--surface);
   border: 1px solid var(--line);
-  border-radius: 8px;
+  border-radius: 0;
   padding: 1rem 1.25rem;
   white-space: pre-wrap;
   overflow-wrap: anywhere;
@@ -319,5 +329,10 @@ footer.site a:hover { color: var(--text); }
   h2 { font-size: 1.6rem; }
   .tool-row { grid-template-columns: minmax(0, 1fr); gap: 0.35rem; }
   th, td { padding: 0.5rem 0.35rem 0.5rem 0; font-size: 0.875rem; }
-  .badge { border-radius: 8px; }
+  .card, .shot, .stat { padding: 1rem; }
+}
+@media (max-width: 360px) {
+  .wrap { padding-inline: .5rem; }
+  .card, .shot, .stat { padding-inline: 0; border-inline: 0; }
+  main ul, main ol { padding-inline-start: 0; list-style-position: inside; }
 }
