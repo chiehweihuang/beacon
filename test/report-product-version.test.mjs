@@ -41,10 +41,12 @@ test('found path: real repo -> footer shows "Beacon <version>" matching .claude-
 test('fallback path: no plugin manifest in the ancestor chain -> renders nothing, never a wrong number', () => {
   const dir = mkdtempSync(join(tmpdir(), 'beacon-version-fallback-'));
   try {
-    // Isolate the script (plus its one relative import) away from any .claude-plugin/
+    // Isolate the script and its presentation dependencies away from any .claude-plugin/
     // ancestor -- os.tmpdir()'s own ancestry never contains one.
     cpSync(REPORT, join(dir, 'generate-report.mjs'));
-    cpSync(resolve(ROOT, 'core/scripts/jurisdictions.mjs'), join(dir, 'jurisdictions.mjs'));
+    for (const name of ['jurisdictions', 'report-components', 'report-styles', 'report-interactions']) {
+      cpSync(resolve(ROOT, `core/scripts/${name}.mjs`), join(dir, `${name}.mjs`));
+    }
     const audit = join(dir, 'audit.json');
     const report = join(dir, 'report.html');
     writeMinimalAudit(audit);

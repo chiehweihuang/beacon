@@ -1,0 +1,758 @@
+{
+  "metadata": {
+    "date": "2026-09-12",
+    "scope": "beacon-golden-fixture",
+    "standard": "WCAG 2.2 AA static baseline",
+    "jurisdictions": [
+      "US ADA",
+      "EU EAA",
+      "Japan JIS",
+      "Taiwan",
+      "Canada ACA",
+      "Australia DDA"
+    ],
+    "platform": "Web",
+    "tool_version": "beacon codex static baseline",
+    "engine_fingerprint": "beacon-static-audit@19+ruleset.bde99ddc0571",
+    "confidence_level": "medium",
+    "requires_live_audit": true,
+    "audit_tier": "Tier 1 (static file scan only)",
+    "audit_methods": [
+      "Static scan of 1 UI-like file(s)",
+      "Pattern checks for semantic HTML, keyboard traps, labels, reflow, motion, AEO structure, and site-level agent-readiness files when a directory is scanned",
+      "Runtime behavior, contrast ratios, and screen-reader task completion were not fully verified"
+    ],
+    "source_file": "test/golden/dirty.html",
+    "source_sha256": "069a81ed47aa01589e5e15d9affb128e6b812019cc4217cfef824ee6a4cac512"
+  },
+  "summary": {
+    "overall_score": 9,
+    "coverage_percent": 61,
+    "category_weights": {
+      "screenreader": 18,
+      "keyboard": 13,
+      "contrast": 13,
+      "forms": 13,
+      "responsive": 12,
+      "touch": 8,
+      "cognitive": 8,
+      "motion": 5,
+      "media": 5,
+      "agent": 5
+    },
+    "scope_weight": 100,
+    "applicable_weight": 95,
+    "applicable_weight_percent": 95,
+    "scored_weight": 61,
+    "not_applicable_weight": 5,
+    "life_safety_flag": false,
+    "score_bands": [
+      {
+        "min": 90,
+        "id": "pass"
+      },
+      {
+        "min": 50,
+        "id": "needs-work"
+      },
+      {
+        "min": 0,
+        "id": "fail"
+      }
+    ],
+    "total_findings": 19,
+    "critical": 13,
+    "warnings": 2,
+    "tips": 4,
+    "unverifiable": 6,
+    "categories": [
+      {
+        "id": "contrast",
+        "name": "Color & Contrast",
+        "pass": 0,
+        "fail": 0,
+        "review": 2,
+        "state": "not-machine-checkable",
+        "score": null,
+        "thin": false,
+        "derived_pass": 0
+      },
+      {
+        "id": "keyboard",
+        "name": "Keyboard Navigation",
+        "pass": 0,
+        "fail": 2,
+        "review": 0,
+        "state": "scored",
+        "score": 0,
+        "thin": true,
+        "derived_pass": 0
+      },
+      {
+        "id": "screenreader",
+        "name": "Screen Reader",
+        "pass": 2,
+        "fail": 11,
+        "review": 0,
+        "state": "scored",
+        "score": 0,
+        "thin": false,
+        "derived_pass": 0
+      },
+      {
+        "id": "forms",
+        "name": "Forms",
+        "pass": 0,
+        "fail": 1,
+        "review": 1,
+        "state": "scored",
+        "score": 0,
+        "thin": true,
+        "derived_pass": 0
+      },
+      {
+        "id": "responsive",
+        "name": "Responsive & Reflow",
+        "pass": 1,
+        "fail": 1,
+        "review": 0,
+        "state": "scored",
+        "score": 45,
+        "thin": true,
+        "derived_pass": 0
+      },
+      {
+        "id": "touch",
+        "name": "Touch & Targets",
+        "pass": 0,
+        "fail": 0,
+        "review": 1,
+        "state": "not-machine-checkable",
+        "score": null,
+        "thin": false,
+        "derived_pass": 0
+      },
+      {
+        "id": "cognitive",
+        "name": "Cognitive",
+        "pass": 0,
+        "fail": 0,
+        "review": 1,
+        "state": "not-machine-checkable",
+        "score": null,
+        "thin": false,
+        "derived_pass": 0
+      },
+      {
+        "id": "motion",
+        "name": "Motion & Animation",
+        "pass": 0,
+        "fail": 0,
+        "review": 0,
+        "state": "not-applicable",
+        "score": null,
+        "thin": false,
+        "derived_pass": 0
+      },
+      {
+        "id": "media",
+        "name": "Media",
+        "pass": 0,
+        "fail": 0,
+        "review": 1,
+        "state": "not-machine-checkable",
+        "score": null,
+        "thin": false,
+        "derived_pass": 0
+      },
+      {
+        "id": "agent",
+        "name": "Agent Operability & AEO",
+        "pass": 0,
+        "fail": 3,
+        "review": 0,
+        "state": "scored",
+        "score": 0,
+        "thin": false,
+        "derived_pass": 0
+      }
+    ]
+  },
+  "findings": [
+    {
+      "level": "AA",
+      "legal_exposure": "This criterion is at A/AA level, within the range most tracked jurisdictions' technical standards cover (e.g. WCAG 2.1 AA, EN 301 549, JIS X 8341-3, KWCAG 2.2, GB/T 37668), including: United States, European Union, Japan, Taiwan, Canada, Australia, China (Mainland), South Korea, Hong Kong SAR, Argentina, Chile, Uruguay, Ecuador. This is a summary-level technical mapping, not a jurisdiction-by-jurisdiction legal determination; actual exposure depends on deployment context, target market, and whether that jurisdiction's rule is currently in force.",
+      "key": "html-lang-missing",
+      "category": "screenreader",
+      "severity": "critical",
+      "wcag": "WCAG 2.2: 3.1.1 Language of Page",
+      "title": "Page language is missing",
+      "affected_users": "Screen-reader users and translation users",
+      "location": "test/golden/dirty.html:1",
+      "description": "The HTML page does not declare a lang attribute, so assistive technology may choose the wrong pronunciation rules.",
+      "fix": "Add a language attribute such as <html lang=\"zh-Hant\"> or the correct document language.",
+      "code_before": "<html>",
+      "code_after": "<html lang=\"zh-Hant\">",
+      "check": "fail",
+      "action": "direct-fix"
+    },
+    {
+      "level": "AA",
+      "legal_exposure": "This criterion is at A/AA level, within the range most tracked jurisdictions' technical standards cover (e.g. WCAG 2.1 AA, EN 301 549, JIS X 8341-3, KWCAG 2.2, GB/T 37668), including: United States, European Union, Japan, Taiwan, Canada, Australia, China (Mainland), South Korea, Hong Kong SAR, Argentina, Chile, Uruguay, Ecuador. This is a summary-level technical mapping, not a jurisdiction-by-jurisdiction legal determination; actual exposure depends on deployment context, target market, and whether that jurisdiction's rule is currently in force.",
+      "key": "document-title-missing",
+      "category": "screenreader",
+      "severity": "critical",
+      "wcag": "WCAG 2.2: 2.4.2 Page Titled",
+      "title": "Document title is missing",
+      "affected_users": "Screen-reader users, keyboard users, and users with many tabs open",
+      "location": "test/golden/dirty.html",
+      "description": "A missing or empty title makes the page difficult to identify in browser and assistive technology contexts.",
+      "fix": "Add a concise, unique <title>.",
+      "check": "fail",
+      "action": "direct-fix"
+    },
+    {
+      "level": "AA",
+      "legal_exposure": "This criterion is at A/AA level, within the range most tracked jurisdictions' technical standards cover (e.g. WCAG 2.1 AA, EN 301 549, JIS X 8341-3, KWCAG 2.2, GB/T 37668), including: United States, European Union, Japan, Taiwan, Canada, Australia, China (Mainland), South Korea, Hong Kong SAR, Argentina, Chile, Uruguay, Ecuador. This is a summary-level technical mapping, not a jurisdiction-by-jurisdiction legal determination; actual exposure depends on deployment context, target market, and whether that jurisdiction's rule is currently in force.",
+      "key": "main-landmark-missing",
+      "category": "screenreader",
+      "severity": "critical",
+      "wcag": "WCAG 2.2: 1.3.1 Info and Relationships",
+      "title": "Main landmark is not statically visible",
+      "affected_users": "Screen-reader and keyboard users navigating by landmarks",
+      "location": "test/golden/dirty.html",
+      "description": "No <main> or role=\"main\" was found in this static file.",
+      "fix": "Wrap primary page content in <main id=\"main-content\">.",
+      "check": "fail",
+      "action": "direct-fix"
+    },
+    {
+      "level": "AA",
+      "legal_exposure": "This criterion is at A/AA level, within the range most tracked jurisdictions' technical standards cover (e.g. WCAG 2.1 AA, EN 301 549, JIS X 8341-3, KWCAG 2.2, GB/T 37668), including: United States, European Union, Japan, Taiwan, Canada, Australia, China (Mainland), South Korea, Hong Kong SAR, Argentina, Chile, Uruguay, Ecuador. This is a summary-level technical mapping, not a jurisdiction-by-jurisdiction legal determination; actual exposure depends on deployment context, target market, and whether that jurisdiction's rule is currently in force.",
+      "key": "heading-level-skipped",
+      "category": "screenreader",
+      "severity": "critical",
+      "wcag": "WCAG 2.2: 1.3.1 Info and Relationships",
+      "title": "Heading level is skipped",
+      "affected_users": "Screen-reader users navigating by heading",
+      "location": "test/golden/dirty.html:5",
+      "description": "Heading jumps from level 1 to level 4.",
+      "fix": "Use a continuous heading hierarchy or adjust the visual style without changing semantic level.",
+      "check": "fail",
+      "action": "direct-fix"
+    },
+    {
+      "level": "AA",
+      "legal_exposure": "This criterion is at A/AA level, within the range most tracked jurisdictions' technical standards cover (e.g. WCAG 2.1 AA, EN 301 549, JIS X 8341-3, KWCAG 2.2, GB/T 37668), including: United States, European Union, Japan, Taiwan, Canada, Australia, China (Mainland), South Korea, Hong Kong SAR, Argentina, Chile, Uruguay, Ecuador. This is a summary-level technical mapping, not a jurisdiction-by-jurisdiction legal determination; actual exposure depends on deployment context, target market, and whether that jurisdiction's rule is currently in force.",
+      "key": "image-alt-missing",
+      "category": "screenreader",
+      "severity": "critical",
+      "wcag": "WCAG 2.2: 1.1.1 Non-text Content",
+      "title": "Image is missing alt text",
+      "affected_users": "Blind and low-vision users using screen readers",
+      "location": "test/golden/dirty.html:6",
+      "description": "An image without alt text is silent or announced poorly by assistive technology.",
+      "fix": "Add meaningful alt text, or alt=\"\" for purely decorative images.",
+      "code_before": "<h4>Skipped levels</h4>\n<img src=\"hero.png\">\n<img src=\"chart.png\">",
+      "check": "fail",
+      "action": "direct-fix"
+    },
+    {
+      "level": "AA",
+      "legal_exposure": "This criterion is at A/AA level, within the range most tracked jurisdictions' technical standards cover (e.g. WCAG 2.1 AA, EN 301 549, JIS X 8341-3, KWCAG 2.2, GB/T 37668), including: United States, European Union, Japan, Taiwan, Canada, Australia, China (Mainland), South Korea, Hong Kong SAR, Argentina, Chile, Uruguay, Ecuador. This is a summary-level technical mapping, not a jurisdiction-by-jurisdiction legal determination; actual exposure depends on deployment context, target market, and whether that jurisdiction's rule is currently in force.",
+      "key": "image-alt-missing",
+      "category": "screenreader",
+      "severity": "critical",
+      "wcag": "WCAG 2.2: 1.1.1 Non-text Content",
+      "title": "Image is missing alt text",
+      "affected_users": "Blind and low-vision users using screen readers",
+      "location": "test/golden/dirty.html:7",
+      "description": "An image without alt text is silent or announced poorly by assistive technology.",
+      "fix": "Add meaningful alt text, or alt=\"\" for purely decorative images.",
+      "code_before": "<img src=\"hero.png\">\n<img src=\"chart.png\">\n<a href=\"/dead\"></a>",
+      "check": "fail",
+      "action": "direct-fix"
+    },
+    {
+      "level": "A",
+      "legal_exposure": "This criterion is at A/AA level, within the range most tracked jurisdictions' technical standards cover (e.g. WCAG 2.1 AA, EN 301 549, JIS X 8341-3, KWCAG 2.2, GB/T 37668), including: United States, European Union, Japan, Taiwan, Canada, Australia, China (Mainland), South Korea, Hong Kong SAR, Argentina, Chile, Uruguay, Ecuador. This is a summary-level technical mapping, not a jurisdiction-by-jurisdiction legal determination; actual exposure depends on deployment context, target market, and whether that jurisdiction's rule is currently in force.",
+      "key": "frame-title-missing",
+      "category": "screenreader",
+      "severity": "critical",
+      "wcag": "WCAG 2.2: 4.1.2 Name, Role, Value",
+      "title": "Frame is missing a title",
+      "affected_users": "Screen-reader users navigating between frames",
+      "location": "test/golden/dirty.html:13",
+      "description": "An <iframe> without a title gives screen-reader users no way to know what the frame contains before entering it.",
+      "fix": "Add title=\"...\" describing the frame content.",
+      "code_before": "<input type=\"text\" name=\"r\">\n<iframe src=\"/widget.html\"></iframe>\n<ul><div>not a list item</div></ul>",
+      "check": "fail",
+      "action": "direct-fix"
+    },
+    {
+      "level": "A",
+      "legal_exposure": "This criterion is at A/AA level, within the range most tracked jurisdictions' technical standards cover (e.g. WCAG 2.1 AA, EN 301 549, JIS X 8341-3, KWCAG 2.2, GB/T 37668), including: United States, European Union, Japan, Taiwan, Canada, Australia, China (Mainland), South Korea, Hong Kong SAR, Argentina, Chile, Uruguay, Ecuador. This is a summary-level technical mapping, not a jurisdiction-by-jurisdiction legal determination; actual exposure depends on deployment context, target market, and whether that jurisdiction's rule is currently in force.",
+      "key": "list-non-li-child",
+      "category": "screenreader",
+      "severity": "critical",
+      "wcag": "WCAG 2.2: 1.3.1 Info and Relationships",
+      "title": "List contains a non-list-item child",
+      "affected_users": "Screen-reader users navigating by list semantics",
+      "location": "test/golden/dirty.html:14",
+      "description": "A <ul>/<ol> has a direct child that is not <li>, <script>, or <template> (found <div>). Screen readers may not announce the list or its item count correctly.",
+      "fix": "Make <li> the only structural child; move wrapper elements inside an <li>, or use role=\"list\"/role=\"listitem\" if a non-standard structure is unavoidable.",
+      "code_before": "<iframe src=\"/widget.html\"></iframe>\n<ul><div>not a list item</div></ul>\n<span onclick=\"go()\">Go</span>",
+      "check": "fail",
+      "action": "direct-fix"
+    },
+    {
+      "level": "AA",
+      "legal_exposure": "This criterion is at A/AA level, within the range most tracked jurisdictions' technical standards cover (e.g. WCAG 2.1 AA, EN 301 549, JIS X 8341-3, KWCAG 2.2, GB/T 37668), including: United States, European Union, Japan, Taiwan, Canada, Australia, China (Mainland), South Korea, Hong Kong SAR, Argentina, Chile, Uruguay, Ecuador. This is a summary-level technical mapping, not a jurisdiction-by-jurisdiction legal determination; actual exposure depends on deployment context, target market, and whether that jurisdiction's rule is currently in force.",
+      "key": "button-name-missing",
+      "category": "keyboard",
+      "severity": "critical",
+      "wcag": "WCAG 2.2: 4.1.2 Name, Role, Value",
+      "title": "Button may not have an accessible name",
+      "affected_users": "Screen-reader and voice-control users",
+      "location": "test/golden/dirty.html:10",
+      "description": "A button with no visible text or accessible label is hard to understand or activate by name.",
+      "fix": "Add visible text, aria-label, or aria-labelledby.",
+      "code_before": "<a href=\"/icon\"><img alt=\"\" src=\"icon.png\"></a>\n<button></button>\n<input type=\"text\" name=\"q\" placeholder=\"Search\">",
+      "check": "fail",
+      "action": "direct-fix"
+    },
+    {
+      "level": "A",
+      "legal_exposure": "This criterion is at A/AA level, within the range most tracked jurisdictions' technical standards cover (e.g. WCAG 2.1 AA, EN 301 549, JIS X 8341-3, KWCAG 2.2, GB/T 37668), including: United States, European Union, Japan, Taiwan, Canada, Australia, China (Mainland), South Korea, Hong Kong SAR, Argentina, Chile, Uruguay, Ecuador. This is a summary-level technical mapping, not a jurisdiction-by-jurisdiction legal determination; actual exposure depends on deployment context, target market, and whether that jurisdiction's rule is currently in force.",
+      "key": "link-name-missing",
+      "category": "screenreader",
+      "severity": "critical",
+      "wcag": "WCAG 2.2: 4.1.2 Name, Role, Value",
+      "title": "Link may not have an accessible name",
+      "affected_users": "Screen-reader, voice-control, and keyboard users",
+      "location": "test/golden/dirty.html:8",
+      "description": "A link with no visible text, no aria-label/aria-labelledby/title (on it or a descendant), and no image alt or SVG title has no accessible name. Screen readers announce it as a bare \"link\".",
+      "fix": "Add visible link text, an aria-label/aria-labelledby/title, give a wrapped <img> meaningful alt text, or add an <svg><title>.",
+      "code_before": "<img src=\"chart.png\">\n<a href=\"/dead\"></a>\n<a href=\"/icon\"><img alt=\"\" src=\"icon.png\"></a>",
+      "check": "fail",
+      "action": "direct-fix"
+    },
+    {
+      "level": "A",
+      "legal_exposure": "This criterion is at A/AA level, within the range most tracked jurisdictions' technical standards cover (e.g. WCAG 2.1 AA, EN 301 549, JIS X 8341-3, KWCAG 2.2, GB/T 37668), including: United States, European Union, Japan, Taiwan, Canada, Australia, China (Mainland), South Korea, Hong Kong SAR, Argentina, Chile, Uruguay, Ecuador. This is a summary-level technical mapping, not a jurisdiction-by-jurisdiction legal determination; actual exposure depends on deployment context, target market, and whether that jurisdiction's rule is currently in force.",
+      "key": "link-name-missing",
+      "category": "screenreader",
+      "severity": "critical",
+      "wcag": "WCAG 2.2: 4.1.2 Name, Role, Value",
+      "title": "Link may not have an accessible name",
+      "affected_users": "Screen-reader, voice-control, and keyboard users",
+      "location": "test/golden/dirty.html:9",
+      "description": "A link with no visible text, no aria-label/aria-labelledby/title (on it or a descendant), and no image alt or SVG title has no accessible name. Screen readers announce it as a bare \"link\".",
+      "fix": "Add visible link text, an aria-label/aria-labelledby/title, give a wrapped <img> meaningful alt text, or add an <svg><title>.",
+      "code_before": "<a href=\"/dead\"></a>\n<a href=\"/icon\"><img alt=\"\" src=\"icon.png\"></a>\n<button></button>",
+      "check": "fail",
+      "action": "direct-fix"
+    },
+    {
+      "level": "A",
+      "legal_exposure": "This criterion is at A/AA level, within the range most tracked jurisdictions' technical standards cover (e.g. WCAG 2.1 AA, EN 301 549, JIS X 8341-3, KWCAG 2.2, GB/T 37668), including: United States, European Union, Japan, Taiwan, Canada, Australia, China (Mainland), South Korea, Hong Kong SAR, Argentina, Chile, Uruguay, Ecuador. This is a summary-level technical mapping, not a jurisdiction-by-jurisdiction legal determination; actual exposure depends on deployment context, target market, and whether that jurisdiction's rule is currently in force.",
+      "key": "clickable-non-button",
+      "category": "keyboard",
+      "severity": "critical",
+      "wcag": "WCAG 2.2: 2.1.1 Keyboard",
+      "title": "Clickable non-button element",
+      "affected_users": "Keyboard-only, switch-control, screen-reader, and voice-control users",
+      "location": "test/golden/dirty.html:15",
+      "description": "Clickable <div> or <span> elements are not keyboard-operable by default.",
+      "fix": "Use <button> for actions. If custom semantics are unavoidable, add role, tabindex, and Enter/Space handling.",
+      "code_before": "<ul><div>not a list item</div></ul>\n<span onclick=\"go()\">Go</span>\n<div style=\"display:none\"><img src=\"hidden-pixel.gif\"><iframe src=\"/tracker.html\"></iframe></div>",
+      "check": "fail",
+      "action": "direct-fix"
+    },
+    {
+      "level": "A",
+      "legal_exposure": "This criterion is at A/AA level, within the range most tracked jurisdictions' technical standards cover (e.g. WCAG 2.1 AA, EN 301 549, JIS X 8341-3, KWCAG 2.2, GB/T 37668), including: United States, European Union, Japan, Taiwan, Canada, Australia, China (Mainland), South Korea, Hong Kong SAR, Argentina, Chile, Uruguay, Ecuador. This is a summary-level technical mapping, not a jurisdiction-by-jurisdiction legal determination; actual exposure depends on deployment context, target market, and whether that jurisdiction's rule is currently in force.",
+      "key": "input-label-weak",
+      "category": "forms",
+      "severity": "warning",
+      "wcag": "WCAG 2.2: 3.3.2 Labels or Instructions",
+      "title": "Input is named only by title or placeholder, not a persistent visible label",
+      "affected_users": "Screen-reader, voice-control, and cognitive disability users",
+      "location": "test/golden/dirty.html:11",
+      "description": "The input has an accessible name (title or placeholder), so it is not nameless, but neither is a visible label that persists once the field has content.",
+      "fix": "Add a visible <label for=\"...\"> (or wrap the input in one) so the label persists once the user starts typing.",
+      "code_before": "<button></button>\n<input type=\"text\" name=\"q\" placeholder=\"Search\">\n<input type=\"text\" name=\"r\">",
+      "check": "review",
+      "action": "human-verify"
+    },
+    {
+      "level": "A",
+      "legal_exposure": "This criterion is at A/AA level, within the range most tracked jurisdictions' technical standards cover (e.g. WCAG 2.1 AA, EN 301 549, JIS X 8341-3, KWCAG 2.2, GB/T 37668), including: United States, European Union, Japan, Taiwan, Canada, Australia, China (Mainland), South Korea, Hong Kong SAR, Argentina, Chile, Uruguay, Ecuador. This is a summary-level technical mapping, not a jurisdiction-by-jurisdiction legal determination; actual exposure depends on deployment context, target market, and whether that jurisdiction's rule is currently in force.",
+      "key": "input-label-missing",
+      "category": "forms",
+      "severity": "critical",
+      "wcag": "WCAG 2.2: 3.3.2 Labels or Instructions",
+      "title": "Input may be missing an accessible label",
+      "affected_users": "Screen-reader, voice-control, and cognitive disability users",
+      "location": "test/golden/dirty.html:12",
+      "description": "The input has no obvious id or ARIA label in static markup.",
+      "fix": "Pair it with a <label for=\"...\"> or use aria-labelledby when a visible label already exists.",
+      "code_before": "<input type=\"text\" name=\"q\" placeholder=\"Search\">\n<input type=\"text\" name=\"r\">\n<iframe src=\"/widget.html\"></iframe>",
+      "check": "fail",
+      "action": "direct-fix"
+    },
+    {
+      "level": "AA",
+      "legal_exposure": "This criterion is at A/AA level, within the range most tracked jurisdictions' technical standards cover (e.g. WCAG 2.1 AA, EN 301 549, JIS X 8341-3, KWCAG 2.2, GB/T 37668), including: United States, European Union, Japan, Taiwan, Canada, Australia, China (Mainland), South Korea, Hong Kong SAR, Argentina, Chile, Uruguay, Ecuador. This is a summary-level technical mapping, not a jurisdiction-by-jurisdiction legal determination; actual exposure depends on deployment context, target market, and whether that jurisdiction's rule is currently in force.",
+      "key": "viewport-zoom-disabled",
+      "category": "responsive",
+      "severity": "warning",
+      "wcag": "WCAG 2.2: 1.4.4 Resize Text",
+      "title": "Viewport meta disables zoom",
+      "affected_users": "Low-vision users who pinch-zoom, and mobile users",
+      "location": "test/golden/dirty.html:2",
+      "description": "The viewport meta tag prevents zoom (user-scalable=no), so users cannot enlarge text.",
+      "fix": "Remove user-scalable=no and any maximum-scale below 5; use content=\"width=device-width, initial-scale=1\".",
+      "code_before": "<!DOCTYPE html><html><head><title></title>\n<meta name=\"viewport\" content=\"width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no\">\n</head><body><div id=\"content\">",
+      "check": "fail",
+      "action": "direct-fix"
+    },
+    {
+      "level": "Review",
+      "legal_exposure": "Not a legal issue; affects search / answer-engine clarity.",
+      "key": "meta-description-missing",
+      "category": "agent",
+      "severity": "tip",
+      "wcag": "AEO structural hygiene",
+      "title": "Meta description is missing",
+      "affected_users": "Search and answer-engine users evaluating whether to open the result",
+      "location": "test/golden/dirty.html",
+      "description": "No meta description was found in the static HTML.",
+      "fix": "Add a concise page-specific meta description.",
+      "check": "fail",
+      "action": "direct-fix"
+    },
+    {
+      "level": "Review",
+      "legal_exposure": "Not a legal issue; affects search / answer-engine clarity.",
+      "key": "canonical-missing",
+      "category": "agent",
+      "severity": "tip",
+      "wcag": "AEO structural hygiene",
+      "title": "Canonical link is missing",
+      "affected_users": "Search and answer-engine users when duplicate URLs or variants exist",
+      "location": "test/golden/dirty.html",
+      "description": "No canonical URL was found in the static HTML, so crawlers may have to infer the preferred URL.",
+      "fix": "Add <link rel=\"canonical\" href=\"https://example.com/preferred-url\"> for indexable public pages.",
+      "check": "fail",
+      "action": "direct-fix"
+    },
+    {
+      "level": "Review",
+      "legal_exposure": "Not a legal issue; affects answer-engine and search clarity.",
+      "key": "jsonld-missing",
+      "category": "agent",
+      "severity": "tip",
+      "wcag": "AEO structural hygiene",
+      "title": "JSON-LD structured data is missing",
+      "affected_users": "Search and answer-engine users trying to identify the page entity and content type",
+      "location": "test/golden/dirty.html",
+      "description": "No JSON-LD structured data was found in the static HTML.",
+      "fix": "Add Schema.org JSON-LD. Default to WebSite for a general page (or Organization for a company/brand page); use a more specific type instead — Article, FAQPage, Product, or BreadcrumbList — only when the page is clearly that kind of content.",
+      "check": "fail",
+      "action": "direct-fix"
+    },
+    {
+      "level": "AA",
+      "legal_exposure": "This criterion is at A/AA level, within the range most tracked jurisdictions' technical standards cover (e.g. WCAG 2.1 AA, EN 301 549, JIS X 8341-3, KWCAG 2.2, GB/T 37668), including: United States, European Union, Japan, Taiwan, Canada, Australia, China (Mainland), South Korea, Hong Kong SAR, Argentina, Chile, Uruguay, Ecuador. This is a summary-level technical mapping, not a jurisdiction-by-jurisdiction legal determination; actual exposure depends on deployment context, target market, and whether that jurisdiction's rule is currently in force.",
+      "key": "contrast-not-verified",
+      "category": "contrast",
+      "severity": "tip",
+      "wcag": "WCAG 2.2: 1.4.3 Contrast (Minimum)",
+      "title": "Contrast not verified, run Tier 2",
+      "affected_users": "Low-vision users and users in high ambient light",
+      "location": "site-wide (static scan only)",
+      "description": "This run only scanned static markup/CSS. No browser-rendered contrast evidence (Beacon-native tier2-audit.mjs or axe-core) was merged in, so real computed-style contrast was never exercised by a rendering engine.",
+      "fix": "Run node scripts/tier2-audit.mjs (default) or an axe-core pass, then fold its findings in with --merge-findings for verified contrast coverage.",
+      "check": "review",
+      "action": "human-verify"
+    }
+  ],
+  "legal_risk": {
+    "assessment_mode": "wcag_criteria_context",
+    "narrative": "Technical WCAG criteria mapping only. This is not a legal opinion and is not derived from warning counts.",
+    "mapped_criteria": [
+      "1.1.1",
+      "1.3.1",
+      "1.4.3",
+      "1.4.4",
+      "2.1.1",
+      "2.4.2",
+      "3.1.1",
+      "3.3.2",
+      "4.1.2"
+    ],
+    "jurisdictions": [
+      {
+        "name": "US ADA",
+        "law": "ADA Title III / Section 508 context",
+        "detail": "Use the mapped WCAG criteria as technical evidence; legal exposure depends on business model, sector, and jurisdiction-specific facts.",
+        "criteria": [
+          "1.1.1",
+          "1.3.1",
+          "1.4.3",
+          "1.4.4",
+          "2.1.1",
+          "2.4.2",
+          "3.1.1",
+          "3.3.2",
+          "4.1.2"
+        ]
+      },
+      {
+        "name": "EU EAA",
+        "law": "European Accessibility Act",
+        "detail": "Use the mapped WCAG criteria as technical evidence for consumer digital-service accessibility planning.",
+        "criteria": [
+          "1.1.1",
+          "1.3.1",
+          "1.4.3",
+          "1.4.4",
+          "2.1.1",
+          "2.4.2",
+          "3.1.1",
+          "3.3.2",
+          "4.1.2"
+        ]
+      },
+      {
+        "name": "Japan JIS",
+        "law": "JIS X 8341-3 context",
+        "detail": "Use the mapped WCAG criteria as technical evidence; confirm procurement or sector requirements separately.",
+        "criteria": [
+          "1.1.1",
+          "1.3.1",
+          "1.4.3",
+          "1.4.4",
+          "2.1.1",
+          "2.4.2",
+          "3.1.1",
+          "3.3.2",
+          "4.1.2"
+        ]
+      },
+      {
+        "name": "Taiwan",
+        "law": "Taiwan accessibility context",
+        "detail": "Use the mapped WCAG criteria as technical evidence only; confirm current local program, certification, and seal requirements before making a compliance claim.",
+        "criteria": [
+          "1.1.1",
+          "1.3.1",
+          "1.4.3",
+          "1.4.4",
+          "2.1.1",
+          "2.4.2",
+          "3.1.1",
+          "3.3.2",
+          "4.1.2"
+        ]
+      },
+      {
+        "name": "Canada ACA",
+        "law": "Accessible Canada Act context",
+        "detail": "Use the mapped WCAG criteria as technical evidence; applicability depends on organization type and regulated context.",
+        "criteria": [
+          "1.1.1",
+          "1.3.1",
+          "1.4.3",
+          "1.4.4",
+          "2.1.1",
+          "2.4.2",
+          "3.1.1",
+          "3.3.2",
+          "4.1.2"
+        ]
+      },
+      {
+        "name": "Australia DDA",
+        "law": "Disability Discrimination Act context",
+        "detail": "Use the mapped WCAG criteria as technical evidence; legal assessment requires local context and counsel.",
+        "criteria": [
+          "1.1.1",
+          "1.3.1",
+          "1.4.3",
+          "1.4.4",
+          "2.1.1",
+          "2.4.2",
+          "3.1.1",
+          "3.3.2",
+          "4.1.2"
+        ]
+      }
+    ]
+  },
+  "remediation": [
+    {
+      "priority": "P0",
+      "key": "html-lang-missing",
+      "title": "Page language is missing",
+      "location": "test/golden/dirty.html:1",
+      "wcag": "WCAG 2.2: 3.1.1 Language of Page",
+      "fix": "Add a language attribute such as <html lang=\"zh-Hant\"> or the correct document language."
+    },
+    {
+      "priority": "P0",
+      "key": "document-title-missing",
+      "title": "Document title is missing",
+      "location": "test/golden/dirty.html",
+      "wcag": "WCAG 2.2: 2.4.2 Page Titled",
+      "fix": "Add a concise, unique <title>."
+    },
+    {
+      "priority": "P0",
+      "key": "main-landmark-missing",
+      "title": "Main landmark is not statically visible",
+      "location": "test/golden/dirty.html",
+      "wcag": "WCAG 2.2: 1.3.1 Info and Relationships",
+      "fix": "Wrap primary page content in <main id=\"main-content\">."
+    },
+    {
+      "priority": "P0",
+      "key": "heading-level-skipped",
+      "title": "Heading level is skipped",
+      "location": "test/golden/dirty.html:5",
+      "wcag": "WCAG 2.2: 1.3.1 Info and Relationships",
+      "fix": "Use a continuous heading hierarchy or adjust the visual style without changing semantic level."
+    },
+    {
+      "priority": "P0",
+      "key": "image-alt-missing",
+      "title": "Image is missing alt text",
+      "location": "test/golden/dirty.html:6",
+      "wcag": "WCAG 2.2: 1.1.1 Non-text Content",
+      "fix": "Add meaningful alt text, or alt=\"\" for purely decorative images."
+    },
+    {
+      "priority": "P0",
+      "key": "image-alt-missing",
+      "title": "Image is missing alt text",
+      "location": "test/golden/dirty.html:7",
+      "wcag": "WCAG 2.2: 1.1.1 Non-text Content",
+      "fix": "Add meaningful alt text, or alt=\"\" for purely decorative images."
+    },
+    {
+      "priority": "P0",
+      "key": "frame-title-missing",
+      "title": "Frame is missing a title",
+      "location": "test/golden/dirty.html:13",
+      "wcag": "WCAG 2.2: 4.1.2 Name, Role, Value",
+      "fix": "Add title=\"...\" describing the frame content."
+    },
+    {
+      "priority": "P0",
+      "key": "list-non-li-child",
+      "title": "List contains a non-list-item child",
+      "location": "test/golden/dirty.html:14",
+      "wcag": "WCAG 2.2: 1.3.1 Info and Relationships",
+      "fix": "Make <li> the only structural child; move wrapper elements inside an <li>, or use role=\"list\"/role=\"listitem\" if a non-standard structure is unavoidable."
+    },
+    {
+      "priority": "P0",
+      "key": "button-name-missing",
+      "title": "Button may not have an accessible name",
+      "location": "test/golden/dirty.html:10",
+      "wcag": "WCAG 2.2: 4.1.2 Name, Role, Value",
+      "fix": "Add visible text, aria-label, or aria-labelledby."
+    },
+    {
+      "priority": "P0",
+      "key": "link-name-missing",
+      "title": "Link may not have an accessible name",
+      "location": "test/golden/dirty.html:8",
+      "wcag": "WCAG 2.2: 4.1.2 Name, Role, Value",
+      "fix": "Add visible link text, an aria-label/aria-labelledby/title, give a wrapped <img> meaningful alt text, or add an <svg><title>."
+    },
+    {
+      "priority": "P0",
+      "key": "link-name-missing",
+      "title": "Link may not have an accessible name",
+      "location": "test/golden/dirty.html:9",
+      "wcag": "WCAG 2.2: 4.1.2 Name, Role, Value",
+      "fix": "Add visible link text, an aria-label/aria-labelledby/title, give a wrapped <img> meaningful alt text, or add an <svg><title>."
+    },
+    {
+      "priority": "P0",
+      "key": "clickable-non-button",
+      "title": "Clickable non-button element",
+      "location": "test/golden/dirty.html:15",
+      "wcag": "WCAG 2.2: 2.1.1 Keyboard",
+      "fix": "Use <button> for actions. If custom semantics are unavoidable, add role, tabindex, and Enter/Space handling."
+    },
+    {
+      "priority": "P0",
+      "key": "input-label-missing",
+      "title": "Input may be missing an accessible label",
+      "location": "test/golden/dirty.html:12",
+      "wcag": "WCAG 2.2: 3.3.2 Labels or Instructions",
+      "fix": "Pair it with a <label for=\"...\"> or use aria-labelledby when a visible label already exists."
+    },
+    {
+      "priority": "P1",
+      "key": "viewport-zoom-disabled",
+      "title": "Viewport meta disables zoom",
+      "location": "test/golden/dirty.html:2",
+      "wcag": "WCAG 2.2: 1.4.4 Resize Text",
+      "fix": "Remove user-scalable=no and any maximum-scale below 5; use content=\"width=device-width, initial-scale=1\"."
+    },
+    {
+      "priority": "P2",
+      "key": "meta-description-missing",
+      "title": "Meta description is missing",
+      "location": "test/golden/dirty.html",
+      "wcag": "AEO structural hygiene",
+      "fix": "Add a concise page-specific meta description."
+    },
+    {
+      "priority": "P2",
+      "key": "canonical-missing",
+      "title": "Canonical link is missing",
+      "location": "test/golden/dirty.html",
+      "wcag": "AEO structural hygiene",
+      "fix": "Add <link rel=\"canonical\" href=\"https://example.com/preferred-url\"> for indexable public pages."
+    },
+    {
+      "priority": "P2",
+      "key": "jsonld-missing",
+      "title": "JSON-LD structured data is missing",
+      "location": "test/golden/dirty.html",
+      "wcag": "AEO structural hygiene",
+      "fix": "Add Schema.org JSON-LD. Default to WebSite for a general page (or Organization for a company/brand page); use a more specific type instead — Article, FAQPage, Product, or BreadcrumbList — only when the page is clearly that kind of content."
+    }
+  ],
+  "testing_recommendations": [
+    {
+      "zh": "修復鍵盤發現項後，僅使用 Tab、Shift+Tab、Enter、Space 與方向鍵重跑主要流程。",
+      "en": "After fixing the keyboard findings, rerun the primary flow using only Tab, Shift+Tab, Enter, Space, and arrow keys."
+    },
+    {
+      "zh": "修復表單發現項後，驗證 label、必填狀態與錯誤訊息能被鍵盤及螢幕閱讀器正確使用。",
+      "en": "After fixing the form findings, verify labels, required states, and error messages with both keyboard and screen reader."
+    },
+    {
+      "zh": "修復語意結構發現項後，用 NVDA 或 VoiceOver 完成主要任務。",
+      "en": "After fixing the semantic findings, complete the primary task with NVDA or VoiceOver."
+    },
+    {
+      "zh": "用 Beacon 原生的 tier2-audit.mjs（預設）或 axe-core 驗證計算後的文字與 UI 對比。",
+      "en": "Verify computed text and UI contrast with Beacon-native tier2-audit.mjs (default) or axe-core."
+    },
+    {
+      "zh": "在 320px 寬度與實際 200% 瀏覽器縮放下分別重跑主要流程，保留操作結果；靜態掃描本身不能證明回流或縮放已通過。",
+      "en": "Repeat the primary flow at 320px width and, separately, at actual 200% browser zoom. Record both results; a static scan alone does not establish that reflow or zoom passed."
+    },
+    {
+      "zh": "請一位不熟悉產品的使用者完成主要任務，觀察標籤、說明與下一步是否清楚。",
+      "en": "Ask a user unfamiliar with the product to complete the primary task and observe whether labels, help, and next steps are clear."
+    }
+  ]
+}

@@ -12,6 +12,9 @@
 import { readFileSync, writeFileSync, mkdirSync, existsSync } from 'fs';
 import { resolve, dirname, basename, join } from 'path';
 import { fileURLToPath } from 'node:url';
+import { REPORT_STYLES } from './report-styles.mjs';
+import { renderFinding, renderCategory } from './report-components.mjs';
+import { REPORT_INTERACTIONS } from './report-interactions.mjs';
 import { JURISDICTIONS, legalExposureFor } from './jurisdictions.mjs';
 
 // Product version, read at RUNTIME from wherever this script actually lives -- never
@@ -512,8 +515,8 @@ const FINDING_I18N = {
     en: { title: 'Static-contrast-resolvable pairs, summarized', description: 'The total count of foreground/background pairs this scan could resolve with certainty from static source, and how many of those are below 4.5:1.', fix: 'Review the individual sub-threshold findings, and run a real-browser or tier-2 contrast audit for full coverage.', standard: 'WCAG 1.4.3 contrast ultimately needs browser-computed styles to verify fully; this is a summary of pairs the static scan could resolve with certainty (inline / same-file style blocks only, no external CSS or cascade guessing) — evidence only, never scored.' },
   },
   'contrast-not-verified': {
-    zh: { title: '對比未經驗證，請執行 Tier 2', description: '本次只掃描了靜態 markup／CSS，沒有合併任何瀏覽器算出的對比證據（Beacon 原生 tier2-audit.mjs 或 axe-core），所以真實的計算後樣式對比從未被渲染引擎驗證過。', fix: '執行 node scripts/tier2-audit.mjs（預設）或 axe-core，再用 --merge-findings 併入結果以取得驗證過的對比覆蓋率。', standard: 'WCAG 1.4.3 的對比比例需要瀏覽器計算後的樣式才能完整驗證；純靜態掃描無法看到真實渲染後的顏色，因此明確標記為未驗證，而非默默略過或誤報通過。' },
-    en: { title: 'Contrast not verified, run Tier 2', description: 'This run only scanned static markup/CSS; no browser-rendered contrast evidence (Beacon-native tier2-audit.mjs or axe-core) was merged in, so real computed-style contrast was never exercised by a rendering engine.', fix: 'Run node scripts/tier2-audit.mjs (default) or an axe-core pass, then fold its findings in with --merge-findings for verified contrast coverage.', standard: 'WCAG 1.4.3 contrast ratios require browser-computed styles to verify fully; a static-only scan cannot see real rendered color, so this is flagged explicitly as unverified rather than silently skipped or reported as a false pass.' },
+    zh: { title: '文字對比尚未取得瀏覽器測試結果', description: '目前還不知道文字與背景是否容易辨識。這份報告沒有網頁實際顯示顏色的量測結果，不能據此判定對比不合格。', fix: '請 agent 開啟受測頁面，執行對比檢查，再更新報告。先取得結果，不需要現在就修改顏色；工具無法判定的部分再交由人工確認。', standard: 'WCAG 1.4.3 的對比比例需要瀏覽器計算後的樣式才能完整驗證；純靜態掃描無法看到真實渲染後的顏色，因此明確標記為未驗證，而非默默略過或誤報通過。' },
+    en: { title: 'Browser contrast results are not available', description: 'We do not yet know whether text is easy to distinguish from its background. This report has no measurements of the rendered colors; that does not establish a contrast failure.', fix: 'Ask the agent to open the audited page, check contrast and update the report. Get the results before changing colors. Have a person review anything the tool cannot determine.', standard: 'WCAG 1.4.3 contrast ratios require browser-computed styles to verify fully; a static-only scan cannot see real rendered color, so this is flagged explicitly as unverified rather than silently skipped or reported as a false pass.' },
   },
   'tier2-contrast-fail': {
     zh: { title: '瀏覽器量測對比低於門檻', description: '在真實瀏覽器渲染後，量測到的文字前景／背景對比低於 WCAG 門檻。', fix: '提高前景與背景的對比，直到一般文字達到 4.5:1、大型文字達到 3:1。', standard: 'WCAG 1.4.3 要求一般文字對比至少 4.5:1，大型文字（18pt 以上，或 14pt 以上粗體）至少 3:1；本項目由瀏覽器實際渲染後的計算樣式量測得出，比靜態解析更確定。這類發現預設只以證據呈現；只有在明確以 --merge-findings 併入時才會進入分數，併入後一旦該類別的機測數達到門檻就會計分。' },
@@ -1127,8 +1130,8 @@ function dominantCauseHTML(g) {
 }
 
 function tensionLineHTML(cat, passRatePct, criticalCount) {
-  const zh = `<b>${passRatePct}% 通過率，分數卻是 ${cat.score}</b> — 由 ${criticalCount} 個確認的嚴重問題觸發嚴重度扣分。`;
-  const en = `<b>${passRatePct}% pass rate; score of ${cat.score}</b> is driven by severity penalties on ${criticalCount} confirmed finding${criticalCount === 1 ? '' : 's'}.`;
+  const zh = `<b>${passRatePct}% 通過率，機測分數 ${cat.score}</b>。分數另計失敗項目的嚴重度權重，不等於通過率；其中 ${criticalCount} 個為嚴重問題。`;
+  const en = `<b>${passRatePct}% pass rate; machine score ${cat.score}</b>. The score also weights failures by severity; ${criticalCount} are critical. It is not a pass rate.`;
   return bi(zh, en);
 }
 
@@ -1222,6 +1225,7 @@ function catNameCompact(cat) {
 // that broke the page's own bilingual convention. All three now pair the same way.
 const SEVERITY_CHIP_LABEL = { critical: '嚴重 · critical', warning: '警示 · warning', tip: '建議 · tip' };
 function severityChipHTML(g) {
+  if (isMissingBrowserEvidence(g)) return `<span class="chip review">${bi('缺少量測證據', 'Measurement evidence missing')}</span>`;
   const cls = g.sample.check === 'review' ? 'review' : ({ critical: 'crit', warning: 'warn', tip: 'review' }[g.severity] || 'review');
   const text = g.sample.check === 'review' ? '待複審 · review' : (SEVERITY_CHIP_LABEL[g.severity] || escapeHtml(g.severity || 'tip'));
   return `<span class="chip ${cls}">${text}</span>`;
@@ -1233,7 +1237,9 @@ function severityChipHTML(g) {
 // '看不到' is reserved for detectors that name their own inability to resolve a value
 // (key ends '-unresolvable') — everything else that needs a human sits under '需人工'.
 function verdictOf(g) {
+  if (isMissingBrowserEvidence(g)) return ['待瀏覽器檢查', 'Browser check needed'];
   const check = g.sample.check;
+  if (findingKind(g.sample) === 'advice') return ['改善建議', 'Improvement suggestion'];
   if (check === 'fail') return ['不通過', 'Fail'];
   if (check === 'pass') return ['通過', 'Pass'];
   return /-unresolvable$/.test(g.key || '') ? ['看不到', "Can't tell"] : ['需人工', 'Needs human check'];
@@ -1275,7 +1281,7 @@ function precisionHTML(key) {
     ? `; measured on engine ${rec.engine}, the current ${current} includes later false-positive fixes not yet re-measured`
     : `; measured on engine ${rec.engine}`;
   return bi(
-    `實測誤報率 precision ${rec.precision.toFixed(3)}（95% CI ${rec.ci}，n=${rec.n}）${engineNoteZh}`,
+    `偵測精確率 precision ${rec.precision.toFixed(3)}（95% CI ${rec.ci}，n=${rec.n}）${engineNoteZh}`,
     `measured wild precision ${rec.precision.toFixed(3)} (95% CI ${rec.ci}, n=${rec.n})${engineNoteEn}`
   );
 }
@@ -1290,13 +1296,14 @@ const ACTION_LABEL = {
 };
 
 function verdictLineHTML(g) {
+  if (isMissingBrowserEvidence(g)) return `<p class="who-line verdict-line"><strong>${bi('待瀏覽器檢查', 'Browser check needed')}</strong></p>`;
   const [zh, en] = verdictOf(g);
-  const actionLabel = ACTION_LABEL[g.sample.action];
+  const actionLabel = findingKind(g.sample) === 'advice' ? ['依目標選擇是否改善', 'optional, based on product goals'] : ACTION_LABEL[g.sample.action];
   const actionHTML = actionLabel ? bi(`　行動：${actionLabel[0]}`, `　action: ${actionLabel[1]}`) : '';
   const countLabel = g.count === 1
     ? bi('　共 1 項', '　1 instance')
     : bi(`　共 ${g.count} 項`, `　${g.count} instances`);
-  return `<p class="who-line verdict-line"><strong>${bi(zh, en)}</strong>${countLabel}${actionHTML}${bi('　', ' — ')}${precisionHTML(g.key)}</p>`;
+  return `<p class="who-line verdict-line"><strong>${bi(zh, en)}</strong>${countLabel}${actionHTML}</p>`;
 }
 
 // The blind-spot/limitation sentence: reuses the finding's own description text (the
@@ -1375,6 +1382,7 @@ function tier2MeasuredHTML(g) {
 // A3: a merged touch group's count is unique ELEMENTS, not flattened viewport rows —
 // say the viewport factor once, next to the count, everywhere the count is shown.
 function fgCountHTML(g) {
+  if (isMissingBrowserEvidence(g)) return '';
   const byViewport = isTier2Finding(g.sample) && g.category === 'touch' ? g.sample.computed?.byViewport : null;
   const vpNote = byViewport ? bi(`（每個 ${byViewport.length} 個 viewport）`, ` (${byViewport.length} viewports each)`) : '';
   return `<span class="fg-count">&times;${g.count}${vpNote}</span>`;
@@ -1399,47 +1407,56 @@ function diffBlocksHTML(g) {
 function buildFindingGroupHTML(g) {
   const anchor = `fg-${slugify(g.key)}`;
   const diffHtml = diffBlocksHTML(g);
-  return `
-    <article class="fgroup" id="${anchor}" data-category="${escapeHtml(g.category || 'other')}">
-      <div class="fg-head">
-        <div class="fg-title">${findingText(g.sample, 'title')}</div>
-        ${fgCountHTML(g)}
-        <div class="meta-row">${severityChipHTML(g)}${g.wcag ? `<span class="chip wcag">${escapeHtml(g.wcag)}</span>` : ''}</div>
-      </div>
-      <div class="fg-body">
-        ${verdictLineHTML(g)}
+  return renderFinding({
+    id: anchor,
+    category: escapeHtml(g.category || 'other'),
+    titleHTML: findingText(g.sample, 'title'),
+    countHTML: fgCountHTML(g),
+    statusHTML: severityChipHTML(g),
+    verdictHTML: verdictLineHTML(g),
+    impactHTML: blindSpotHTML(g),
+    nextHTML: `<p class="fix-line"><strong>${bi('下一步', 'Next step')}:</strong> ${g.fix ? findingText(g.sample, 'fix') : bi('本次未提供具體修復方式；請先查核證據，再決定處理方法。', 'No specific fix was provided. Review the evidence before deciding how to proceed.')}</p>`,
+    evidenceHTML: `
+        ${g.wcag ? `<p class="standard-line wcag">${escapeHtml(g.wcag)}</p>` : ''}
+        ${isMissingBrowserEvidence(g) ? `<p>${bi('執行 Beacon 的 tier2-audit.mjs 或 axe-core，並用 --merge-findings 合併結果；需要可開啟的受測頁面與瀏覽器環境。', 'Run Beacon tier2-audit.mjs or axe-core and merge results with --merge-findings. An accessible audit URL and a browser environment are required.')}</p>` : ''}
         <p class="who-line"><span class="who-badge">${t('finding_affected')}:</span> ${escapeHtml(g.affected_users || 'N/A')}</p>
-        ${blindSpotHTML(g)}
+        ${isMissingBrowserEvidence(g) ? '' : `<p>${precisionHTML(g.key)}</p>`}
         ${diffHtml}
         ${buildLocationListHTML(g.locations)}
         ${FINDING_I18N[g.key]?.zh?.standard ? `<p class="standard-line"><strong>${t('finding_standard')}:</strong> ${findingText(g.sample, 'standard')}</p>` : ''}
         ${tier2MeasuredHTML(g)}
-        ${g.fix ? `<p class="fix-line"><strong>${t('finding_fix')}:</strong> ${findingText(g.sample, 'fix')}</p>` : ''}
-        ${buildLearnMoreHTML(g.sample)}
-      </div>
-    </article>`;
+        ${buildLearnMoreHTML(g.sample)}`,
+  });
 }
 
 function buildFindingsSectionHTML(audit, groups) {
   const categories = audit.summary.categories;
-  const countByCat = new Map();
-  for (const g of groups) countByCat.set(g.category, (countByCat.get(g.category) || 0) + 1);
-  const presentCats = categories.filter(c => countByCat.has(c.id));
-  const filterButtons = presentCats.map(c =>
-    `<button class="fbtn" type="button" data-filter="${escapeHtml(c.id)}" aria-pressed="false">${catNameCompact(c)}（${countByCat.get(c.id)}）</button>`
-  ).join('');
-  const groupsHtml = groups.length
-    ? groups.map(buildFindingGroupHTML).join('')
-    : `<p class="empty">${t('finding_empty')}</p>`;
+  const presentCats = [...categories];
+  for (const g of groups) {
+    const id = g.category || 'other';
+    if (!presentCats.some(c => c.id === id)) presentCats.push({ id, name: id });
+  }
+  const groupsHtml = presentCats.map(c => {
+    const items = groups.filter(g => (g.category || 'other') === c.id);
+    const count = kind => items.filter(g => findingKind(g.sample) === kind).reduce((n, g) => n + g.count, 0);
+    const counts = bi(`${count('fail')} 項問題 · ${count('review')} 項待確認 · ${count('advice')} 項建議`, `${count('fail')} failures · ${count('review')} to verify · ${count('advice')} suggestions`);
+    const empty = c.state === 'not-applicable'
+      ? bi('本次未偵測到適用內容；這不是通過判定。', 'No applicable content detected in this scan; this is not a pass.')
+      : c.state === 'not-machine-checkable' || c.review > 0
+        ? bi('沒有逐項發現可列出；此分類仍需取得人工或瀏覽器測試證據。', 'No itemized findings; this category still needs human or browser evidence.')
+        : bi('本次沒有逐項發現可列出。請對照證據範圍，不代表整個分類已通過。', 'No itemized findings in this scan. Check the evidence scope; this is not a category-wide pass.');
+    return renderCategory({ id: `review-${slugify(c.id)}`, nameHTML: catName(c), statusHTML: items.length ? counts : empty, contentHTML: items.map(buildFindingGroupHTML).join(''), backHTML: bi('回到此分類', 'Back to this category') });
+  }).join('');
   return `
-    <section id="layer-findings" aria-labelledby="h-findings">
+    <section id="layer-findings" data-report-step aria-labelledby="h-findings">
       <div class="wrap">
-        <p class="eyebrow"><span class="num">03</span> ${bi('問題層', 'Findings')}</p>
-        <h2 class="layer-h" id="h-findings">${bi('依「修正動作」分組，一組就是一個可執行單位', 'Grouped by fix action — one group is one thing to do')}</h2>
-        <p class="layer-sub">${bi('同一種修法的所有發現項合併為一組，不是一列一列重複同一件事。每組附上受影響對象、程式碼線索、檔案位置與 WCAG 對照。', 'All findings sharing one fix are merged into a single group, not repeated row by row. Each group carries the affected users, a code clue, file locations, and its WCAG mapping.')}</p>
-        ${groups.length > 1 ? `<div class="filters" role="group" aria-label="Filter by category / 依分類篩選"><span class="flabel">${bi('篩選', 'Filter')}</span><button class="fbtn" type="button" data-filter="all" aria-pressed="true">全部 · All（${groups.length}）</button>${filterButtons}</div>` : ''}
+        <p class="eyebrow"><span class="num">02</span> ${bi('問題與修復', 'Review and repair')}</p>
+        <h2 class="layer-h" id="h-findings">${bi('逐類檢視與修復', 'Review and repair by category')}</h2>
+        <p class="layer-sub">${bi(`本次有 ${groups.length} 組發現。待確認項目先驗證；改善建議依需求決定。`, `${groups.length} finding groups. Verify uncertain items first; choose suggestions based on your needs.`)}</p>
+        <div class="review-controls"><button type="button" data-review-open="true">${bi('展開所有證據', 'Expand all evidence')}</button><button type="button" data-review-open="false">${bi('收合所有證據', 'Collapse all evidence')}</button></div>
         ${groupsHtml}
         ${buildAxeEvidenceHTML(audit)}
+        ${retestGuidanceHTML()}
       </div>
     </section>`;
 }
@@ -1453,7 +1470,7 @@ function buildFixcardHTML(g, rank) {
   return `
     <div class="fixcard">
       <span class="rank">${rank}</span>
-      <h3>${findingText(g.sample, 'title')}<span style="font-variant-numeric:tabular-nums;font-weight:700">${bi(`（&times;${g.count}）`, ` (&times;${g.count})`)}</span></h3>
+      <h3><a href="#fg-${slugify(g.key)}">${findingText(g.sample, 'title')}</a>${isMissingBrowserEvidence(g) ? '' : `<span style="font-variant-numeric:tabular-nums;font-weight:700">${bi(`（&times;${g.count}）`, ` (&times;${g.count})`)}</span>`}</h3>
       <p class="who">${escapeHtml(g.affected_users || '')}</p>
       <div class="foot">${severityChipHTML(g)}${g.wcag ? `<span class="chip wcag">${escapeHtml(g.wcag)}</span>` : ''}</div>
     </div>`;
@@ -1466,10 +1483,21 @@ function buildFixcardHTML(g, rank) {
 // Confirmed (check:'fail') vs needs-human-check (check:'review') — the two counts a
 // 30-second reader actually needs. A raw "N findings, M critical" count conflates
 // confirmed defects with unconfirmed heuristics and non-normative advisories.
+function isMissingBrowserEvidence(g) {
+  return g.key === 'contrast-not-verified' && g.sample.check === 'review';
+}
+
+function findingKind(f) {
+  if (f.check === 'review' || !f.check) return 'review';
+  if (f.check === 'pass') return 'pass';
+  return f.severity === 'tip' ? 'advice' : 'fail';
+}
+
 function confirmedVsReviewCounts(findings) {
   return {
-    confirmed: findings.filter(f => f.check === 'fail').length,
-    needsHuman: findings.filter(f => f.check === 'review').length,
+    confirmed: findings.filter(f => findingKind(f) === 'fail').length,
+    needsHuman: findings.filter(f => findingKind(f) === 'review').length,
+    suggestions: findings.filter(f => findingKind(f) === 'advice').length,
   };
 }
 
@@ -1492,10 +1520,10 @@ function nonItemizedReviewCount(audit, findings) {
 function headlineSentenceHTML(confirmed, needsHuman) {
   const zh = confirmed === 0 && needsHuman === 0
     ? '這次掃描沒有找到已確認的問題，也沒有待人工複審的項目。'
-    : `目前有 <b>${confirmed}</b> 個已確認問題，另有 <b>${needsHuman}</b> 項需要人工複審後才能判定。`;
+    : `目前有 <b>${confirmed}</b> 個已確認問題，另有 <b>${needsHuman}</b> 項尚待驗證。`;
   const en = confirmed === 0 && needsHuman === 0
     ? 'This scan found no confirmed problems and nothing pending human review.'
-    : `<b>${confirmed}</b> confirmed problem${confirmed === 1 ? '' : 's'}, and <b>${needsHuman}</b> item${needsHuman === 1 ? '' : 's'} pending human review before they count as a problem.`;
+    : `<b>${confirmed}</b> confirmed problem${confirmed === 1 ? '' : 's'}, and <b>${needsHuman}</b> item${needsHuman === 1 ? '' : 's'} pending verification.`;
   return `<p class="exec-lead headline-sentence">${bi(zh, en)}</p>`;
 }
 
@@ -1542,14 +1570,14 @@ function bandBridgeHTML(bandId, confirmedCritical, needsHuman) {
   if (bandId === 'pass') {
     return needsHuman > 0
       ? bi(
-          `帶狀是綠色，因為目前沒有已確認的嚴重問題；仍有 <b>${needsHuman}</b> 項待人工複審，不代表已全數驗證完成。`,
+          `帶狀是綠色，因為目前沒有已確認的嚴重問題；仍有 <b>${needsHuman}</b> 項尚待驗證，不代表已全數驗證完成。`,
           `This band is green because there are no confirmed critical issues; <b>${needsHuman}</b> item${needsHuman === 1 ? '' : 's'} still need${needsHuman === 1 ? 's' : ''} a human check and are not yet fully verified.`
         )
       : bi('帶狀是綠色，且沒有已確認的嚴重問題或待複審項目。', 'This band is green, with no confirmed critical issues or items pending review.');
   }
   return bi(
-    `帶狀不是綠色，但目前沒有已確認的嚴重問題；分數受限主要來自證據覆蓋率與 <b>${needsHuman}</b> 項待複審，而非已確認的缺陷。`,
-    `This band is not green, but there are no confirmed critical issues right now; the score is limited mainly by evidence coverage and <b>${needsHuman}</b> item${needsHuman === 1 ? '' : 's'} pending review, not confirmed defects.`
+    `目前沒有已確認的嚴重問題。請對照各分類的失敗、警示與建議解讀分數；另有 <b>${needsHuman}</b> 項待複審，待複審本身不扣分。`,
+    `There are no confirmed critical issues. Read the category failures, warnings and suggestions to interpret the score; <b>${needsHuman}</b> items remain pending review. Review status itself does not deduct points.`
   );
 }
 
@@ -1569,26 +1597,29 @@ function decisionTestingChecklistHTML(audit) {
 // review item — no cross-tier ranking, and each tier's coverage line is truthful about
 // what it actually covers (including evidence that never became an itemized finding).
 function buildFixNextHTML(groups, audit, findings) {
-  const confirmedGroups = groups.filter(g => g.sample.check === 'fail');
-  const reviewGroups = groups.filter(g => g.sample.check !== 'fail');
-  if (!confirmedGroups.length && !reviewGroups.length) {
+  const confirmedGroups = groups.filter(g => findingKind(g.sample) === 'fail');
+  const reviewGroups = groups.filter(g => findingKind(g.sample) === 'review');
+  const adviceGroups = groups.filter(g => findingKind(g.sample) === 'advice');
+  if (!confirmedGroups.length && !reviewGroups.length && !adviceGroups.length) {
     return `<p class="clear-line">${bi('這次靜態掃描沒有發現需要優先處理的問題。', 'This static scan found nothing that needs priority attention.')}</p>`;
   }
 
   const topConfirmed = confirmedGroups.slice(0, 3);
   const confirmedTotal = confirmedGroups.reduce((s, g) => s + g.count, 0);
+  const shownConfirmed = topConfirmed.reduce((s, g) => s + g.count, 0);
   const confirmedBlock = `
     <h3 class="fix-tier-h">${bi('確認可修', 'Confirmed to fix')}</h3>
     ${topConfirmed.length
       ? `<p class="clear-line">${bi(
-          `以下 ${topConfirmed.length} 項涵蓋全部 <b>${confirmedTotal}</b> 個已確認問題。`,
-          `${topConfirmed.length === 1 ? 'This 1 covers' : `These ${topConfirmed.length} cover`} all <b>${confirmedTotal}</b> confirmed problem${confirmedTotal === 1 ? '' : 's'}.`
+          `以下 ${topConfirmed.length} 組涵蓋 <b>${shownConfirmed}</b> 個問題；本次共有 <b>${confirmedTotal}</b> 個已確認問題。`,
+          `These ${topConfirmed.length} groups cover <b>${shownConfirmed}</b> of <b>${confirmedTotal}</b> confirmed problems.`
         )}</p>
          <div class="fixlist">${topConfirmed.map((g, i) => buildFixcardHTML(g, i + 1)).join('')}</div>`
       : `<p class="clear-line">${bi('這次掃描沒有已確認的失敗項目。', 'This scan found no confirmed failures.')}</p>`}`;
 
   const topReview = reviewGroups.slice(0, 3);
   const reviewTotal = reviewGroups.reduce((s, g) => s + g.count, 0);
+  const shownReview = topReview.reduce((s, g) => s + g.count, 0);
   const extra = nonItemizedReviewCount(audit, findings);
   const extraZh = extra > 0 ? `；另有 ${extra} 項只在類別統計中出現，未逐項列出` : '';
   const extraEn = extra > 0 ? `; ${extra} more exist only as category-level evidence, not itemized here` : '';
@@ -1596,13 +1627,27 @@ function buildFixNextHTML(groups, audit, findings) {
     ? `
     <h3 class="fix-tier-h">${bi('需判斷／需驗證', 'Needs judgment or verification')}</h3>
     <p class="clear-line">${bi(
-      `以下 ${topReview.length} 組涵蓋 ${reviewTotal} 項需人工複審或設計判斷的發現${extraZh}。`,
-      `${topReview.length === 1 ? 'This 1 covers' : `These ${topReview.length} cover`} ${reviewTotal} item${reviewTotal === 1 ? '' : 's'} needing human review or design judgment${extraEn}.`
+      `以下 ${topReview.length} 組涵蓋 ${shownReview} 項，本次共 ${reviewTotal} 項尚待驗證的發現${extraZh}。`,
+      `These ${topReview.length} groups cover ${shownReview} of ${reviewTotal} items needing review${extraEn}.`
     )}</p>
     <div class="fixlist">${topReview.map((g, i) => buildFixcardHTML(g, i + 1)).join('')}</div>`
     : '';
 
-  return `${confirmedBlock}${reviewBlock}`;
+  const adviceBlock = adviceGroups.length ? `<h3>${bi('改善建議（可選）', 'Improvement suggestions (optional)')}</h3><ul>${adviceGroups.map(g => `<li><a href="#fg-${slugify(g.key)}">${findingText(g.sample, 'title')}</a></li>`).join('')}</ul>` : '';
+  return `${confirmedBlock}${reviewBlock}${adviceBlock}<p><a href="#layer-findings">${bi('查看全部問題、建議與證據', 'See all findings, suggestions and evidence')}</a></p>`;
+}
+
+function retestGuidanceHTML() {
+  return `<div class="decision-testing" id="retest" data-report-step><p class="eyebrow"><span class="num">03</span> ${bi('重測與確認', 'Retest and verify')}</p><h2 class="layer-h">${bi('重測與本輪停止條件', 'Retest and close this round')}</h2><ol>
+    <li>${bi('保留本次 JSON、受測檔案版本、工具版本與檢查範圍；修改後用相同指令重跑，另存新 JSON。', 'Keep this JSON, source revision, tool versions and scope. Repeat the same command after the fix and save a new JSON.')}</li>
+    <li>${bi('逐項對照規則、位置與證據，再操作原本失敗的任務。問題消失或分數提高，不能單獨證明修復成功。', 'Compare each rule, location and evidence, then repeat the affected task. A disappearing finding or higher score alone does not establish a fix.')}</li>
+    <li>${bi('本輪指定的失敗項目有重測證據、沒有新增阻擋，才可結束本輪修復。待確認項目保留負責人與下一次測試；建議可接受或附理由暫緩。這不是整站合規或上線批准。', 'Close this repair round when its assigned failures have retest evidence and no new blockers. Keep an owner and next test for unknowns; accept or defer suggestions with a reason. This is not site-wide compliance or release approval.')}</li>
+    </ol></div>`;
+}
+
+function suggestionsHTML(findings) {
+  const { suggestions } = confirmedVsReviewCounts(findings);
+  return suggestions ? `<p class="coverage">${bi(`另有 <b>${suggestions}</b> 項改善建議，不計為上方的已確認問題。既有機測分數仍包含 AEO 結構檢查，並非違規數或通過率。`, `<b>${suggestions}</b> improvement suggestions are separate from the confirmed problems above. The existing machine score still includes AEO structural checks; it is not a violation count or pass rate.`)}</p>` : '';
 }
 
 // B4: the fixed-scope percentages and the industry-coverage comparison used to compete
@@ -1648,14 +1693,16 @@ function buildHeroHTML(audit, previous, groups) {
   const bandId = overall != null ? bandOf(overall).id : null;
 
   return `
-    <section class="hero" id="layer-decision" aria-labelledby="h-decision">
+    <section class="hero" id="layer-decision" data-report-step aria-labelledby="h-decision">
       <div class="wrap">
-        <p class="eyebrow"><span class="num">01</span> ${bi('決策層', 'Decision')}</p>
-        <h1 class="layer-h" id="h-decision">${bi('一眼看懂結論，一步知道下一步做什麼', 'The whole verdict, and what to do next, on one screen')}</h1>
+        <p class="eyebrow"><span class="num">01</span> ${bi('檢查結果', 'Results')}</p>
+        <h1 class="layer-h" id="h-decision">${bi('本次檢查結果', 'Results of this check')}</h1>
         ${audit.summary.life_safety_flag ? buildLifeSafetyBanner() : ''}
         ${headlineSentenceHTML(confirmed, needsHuman)}
+        ${suggestionsHTML(reportFindings)}
         ${largestPassCategoryHTML(audit)}
 
+        <details class="score-details"><summary>${bi('查看機測分數與計算方式', 'Machine score and calculation')}</summary>
         <div class="verdict">
           <div class="overall">
             <div class="metric-pair" role="group" aria-label="機測分數與機器證據 / Machine-checked score and machine evidence">
@@ -1689,6 +1736,8 @@ function buildHeroHTML(audit, previous, groups) {
           </div>
         </div>
 
+        </details>
+        <p><a href="#layer-methodology">${bi('查看檢查範圍與限制', 'Check scope and limitations')}</a></p>
         <div class="fixnext" aria-labelledby="h-fix">
           <h2 id="h-fix">${bi('接下來怎麼做', 'What to do next')}</h2>
           ${buildFixNextHTML(groups, audit, reportFindings)}
@@ -1700,7 +1749,7 @@ function buildHeroHTML(audit, previous, groups) {
 }
 
 // ============================================================================
-// 04 Client / executive summary — print-ready, always visible (no mode toggle).
+// Supplementary executive summary; expanded for printing.
 // ============================================================================
 
 function buildExecSummaryHTML(audit, groups) {
@@ -1716,19 +1765,21 @@ function buildExecSummaryHTML(audit, groups) {
   const nothingFound = confirmed === 0 && needsHuman === 0;
   const execLeadZh = `本次檢測在${scopeLabel || '受測頁面'}上，${nothingFound
     ? '沒有找到已確認的問題，也沒有待人工複審的項目'
-    : `找到 <b>${confirmed}</b> 個已確認問題，另有 <b>${needsHuman}</b> 項需要人工複審後才能判定`}。`;
+    : `找到 <b>${confirmed}</b> 個已確認問題，另有 <b>${needsHuman}</b> 項尚待驗證`}。`;
   const execLeadEn = `On ${scopeLabel || 'the audited page'}, this audit found ${nothingFound
     ? 'no confirmed problems and nothing pending human review'
-    : `<b>${confirmed}</b> confirmed problem${confirmed === 1 ? '' : 's'} and <b>${needsHuman}</b> item${needsHuman === 1 ? '' : 's'} pending human review`}.`;
+    : `<b>${confirmed}</b> confirmed problem${confirmed === 1 ? '' : 's'} and <b>${needsHuman}</b> item${needsHuman === 1 ? '' : 's'} pending verification`}.`;
 
   // Two tiers, never one cross-ranked list mixing a confirmed defect with a design-judgment
   // review item (same split as buildFixNextHTML) — no cross-tier ranking here either.
-  const confirmedGroups = groups.filter(g => g.sample.check === 'fail');
-  const reviewGroups = groups.filter(g => g.sample.check !== 'fail');
+  const confirmedGroups = groups.filter(g => findingKind(g.sample) === 'fail');
+  const reviewGroups = groups.filter(g => findingKind(g.sample) === 'review');
+  const adviceGroups = groups.filter(g => findingKind(g.sample) === 'advice');
   const prioListHTML = (list) => `<ol class="prio">${list.map(g => `<li>${findingText(g.sample, 'title')}${g.wcag ? ` (${escapeHtml(g.wcag)})` : ''}</li>`).join('')}</ol>`;
   const prioSectionsHTML = `
     ${confirmedGroups.length ? `<h3>${bi('確認可修', 'Confirmed to fix')}</h3>${prioListHTML(confirmedGroups)}` : ''}
-    ${reviewGroups.length ? `<h3>${bi('需判斷／需驗證', 'Needs judgment or verification')}</h3>${prioListHTML(reviewGroups)}` : ''}`;
+    ${reviewGroups.length ? `<h3>${bi('需判斷／需驗證', 'Needs judgment or verification')}</h3>${prioListHTML(reviewGroups)}` : ''}
+    ${adviceGroups.length ? `<h3>${bi('改善建議（可選）', 'Improvement suggestions (optional)')}</h3>${prioListHTML(adviceGroups)}` : ''}`;
 
   const jurisdictions = buildJurisdictions(audit.legal_risk);
   const jurisdictionChips = jurisdictions.map(j => `<span class="chip review">${bi(escapeHtml(j.name.zh), escapeHtml(j.name.en))}</span>`).join('');
@@ -1742,7 +1793,7 @@ function buildExecSummaryHTML(audit, groups) {
       <div class="wrap">
         <p class="eyebrow"><span class="num">04</span> ${bi('客戶層', 'Client Summary')}</p>
         <h2 class="layer-h" id="h-client">${bi('給非技術讀者的執行摘要（可直接列印）', 'Plain-language executive summary — print-ready')}</h2>
-        <p class="layer-sub">${bi('這一節永遠可見，並附有列印樣式。不需切換模式，直接送印或轉 PDF 就是給客戶的一頁摘要。', 'Always visible, with print styles. Print or export to PDF for a client-ready one-pager — no mode toggle.')}</p>
+        <p class="layer-sub">${bi('彙整本次發現，供交接與列印；不是合規證明。', 'A summary for handoff and printing, not a compliance certificate.')}</p>
 
         <div class="exec">
           <div class="exec-head">
@@ -1753,6 +1804,7 @@ function buildExecSummaryHTML(audit, groups) {
             <p class="exec-lead"><span class="lang-zh" lang="zh-Hant">${execLeadZh}</span><span class="lang-en" lang="en">${execLeadEn}</span></p>
 
             ${prioSectionsHTML}
+            ${suggestionsHTML(reportFindings)}
 
             <h3>${bi('法規範圍', 'Jurisdiction exposure')}</h3>
             <p style="font-size:.92rem;color:var(--ink-soft);margin:.2rem 0 .5rem">${bi('此靜態基線所示問題可能影響下列司法管轄區的無障礙要求（視實際部署情境而定）：', 'This static baseline may affect accessibility expectations in:')}</p>
@@ -2261,8 +2313,7 @@ function buildMethodologySectionHTML(audit) {
   return `
     <section id="layer-methodology" aria-labelledby="h-methodology">
       <div class="wrap">
-        <p class="eyebrow"><span class="num">05</span> ${bi('方法論層', 'Methodology')}</p>
-        <h2 class="layer-h" id="h-methodology">${bi('這份審查擅長什麼、不擅長什麼', 'What this audit is good at, and where it stops')}</h2>
+        <h2 class="layer-h" id="h-methodology">${bi('檢查範圍與限制', 'Check scope and limitations')}</h2>
         <details class="methods-details layer-fold">
           <summary>${bi('展開完整檢查範圍、方法論與限制', 'Expand full check scope, methodology & limits')}</summary>
           ${buildScopeDetailHTML(audit)}
@@ -2278,10 +2329,9 @@ function buildLegalSectionHTML(audit) {
   return `
     <section class="section-alt" id="layer-legal" aria-labelledby="h-legal">
       <div class="wrap">
-        <p class="eyebrow"><span class="num">06</span> ${bi('法規層', 'Jurisdiction')}</p>
-        <h2 class="layer-h" id="h-legal">${bi('完整法規對照與 WCAG 準則清單', 'Full jurisdiction mapping and WCAG criteria list')}</h2>
+        <h2 class="layer-h" id="h-legal">${bi('各地法規參考', 'Jurisdiction references')}</h2>
         <details class="methods-details layer-fold">
-          <summary>${bi('展開完整法規對照', 'Expand full jurisdiction mapping')}</summary>
+          <summary>${bi('選擇國家／地區查閱參考資料', 'Browse references by country or region')}</summary>
           ${buildLegalRiskHTML(audit.legal_risk, reportFindings)}
         </details>
       </div>
@@ -2345,7 +2395,7 @@ function jurisdictionCardHTML(j) {
       ${statuteHTML}
       ${scopeHTML}
       ${standardHTML}
-      ${enforcementHTML}
+      ${enforcementHTML ? `<details class="legal-background"><summary>${bi('背景與案例', 'Background and cases')}</summary>${enforcementHTML}</details>` : ''}
       ${sourcesHTML}
     </div>`;
 }
@@ -2394,9 +2444,6 @@ function jurisdictionOnelineListHTML(list) {
 function buildLegalRiskHTML(legal, findings) {
   const criteria = collectCriteria(findings);
   const criteriaText = criteria.length ? criteriaLabel(criteria) : 'No WCAG criteria were mapped by this audit.';
-  const fullCards = JURISDICTIONS.filter(j => j.cardStyle === 'full');
-  const groupedCards = JURISDICTIONS.filter(j => j.cardStyle === 'grouped');
-  const onelineCards = JURISDICTIONS.filter(j => j.cardStyle === 'oneline');
   return `
     <div class="legal-risk-panel">
       <div class="legal-context-note">
@@ -2409,11 +2456,10 @@ function buildLegalRiskHTML(legal, findings) {
           Criteria mapped by this audit: <strong>${escapeHtml(criteriaText)}</strong>.
         </div>
       </div>
-      <div class="risk-grid">
-        ${fullCards.map(jurisdictionCardHTML).join('')}
-      </div>
-      ${jurisdictionGroupedTableHTML(groupedCards)}
-      ${jurisdictionOnelineListHTML(onelineCards)}
+      <p>${bi('選擇地區只改變參考資料的顯示，不判定法律是否適用，也不改變檢查結果。逐地區查核日期未提供；報告產生日期不是法規更新日期。', 'Selecting a region only changes the references shown. It does not determine legal applicability or change audit results. Per-region verification dates are not supplied; the report date is not a legal update date.')}</p>
+      <label for="jurisdiction-choice">${bi('國家／地區', 'Country or region')}</label>
+      <select id="jurisdiction-choice"><option value="all">全部地區 / All regions</option>${JURISDICTIONS.map(j => `<option value="${escapeHtml(j.id)}">${escapeHtml(j.name.zh)} / ${escapeHtml(j.name.en)}</option>`).join('')}</select>
+      ${JURISDICTIONS.map(j => `<div class="jurisdiction-entry" data-jurisdiction="${escapeHtml(j.id)}">${j.cardStyle === 'full' ? jurisdictionCardHTML(j) : j.cardStyle === 'grouped' ? jurisdictionGroupedTableHTML([j]) : jurisdictionOnelineListHTML([j])}</div>`).join('')}
     </div>`;
 }
 
@@ -2441,14 +2487,14 @@ function affectsBadges(affects = []) {
   return affects
     .map((a) => {
       const [zh, en] = AFFECTS_LABEL[a] || [a, a];
-      return `<span style="display:inline-block;font-size:.72rem;padding:.1rem .45rem;margin:0 .25rem .25rem 0;border:1px solid var(--border);border-radius:999px;color:var(--text);background:var(--bg);">${bi(zh, en)}</span>`;
+      return `<span style="display:inline-block;font-size:.72rem;padding:.1rem .45rem;margin:0 .25rem .25rem 0;border:1px solid var(--border);border-radius:0;color:var(--text);background:var(--bg);">${bi(zh, en)}</span>`;
     })
     .join('');
 }
 
 function perfChip(label, score) {
   if (score == null) return '';
-  return `<div style="flex:1;min-width:120px;text-align:center;padding:.9rem .6rem;border:1px solid var(--border);border-radius:10px;background:var(--surface);">
+  return `<div style="flex:1;min-width:120px;text-align:center;padding:.9rem .6rem;border:1px solid var(--border);border-radius:0;background:var(--surface);">
     <div style="font-size:2rem;font-weight:700;line-height:1;color:${scoreColor(score)};">${score}</div>
     <div style="font-size:.82rem;margin-top:.35rem;color:var(--text);">${escapeHtml(label)}</div>
   </div>`;
@@ -2464,7 +2510,7 @@ function buildPerformanceHTML(audit) {
     lh.final_url ? escapeHtml(lh.final_url) : '',
   ].filter(Boolean).join(' &middot; ');
 
-  const banner = `<div role="note" style="border:1px solid var(--warn);border-radius:8px;padding:.8rem 1rem;margin:.5rem 0 1.2rem;background:var(--bg);">
+  const banner = `<div role="note" style="border:1px solid var(--warn);border-radius:0;padding:.8rem 1rem;margin:.5rem 0 1.2rem;background:var(--bg);">
     <div style="font-size:.9rem;color:var(--text);">&#9888; ${bi(lh.note_zh || '', lh.note_en || '')}</div>
     ${meta ? `<div style="font-size:.78rem;margin-top:.4rem;color:var(--text);opacity:.75;">${meta}</div>` : ''}
   </div>`;
@@ -2482,7 +2528,7 @@ function buildPerformanceHTML(audit) {
          'One root cause harms several dimensions at once — the insight no single tool surfaces, only the integrated view does.',
        )}</p>
        ${lh.cross_cutting.map((c) => `
-         <div style="border-left:3px solid var(--accent);padding:.6rem .9rem;margin:.6rem 0;background:var(--surface);border-radius:0 8px 8px 0;">
+         <div style="border-left:3px solid var(--accent);padding:.6rem .9rem;margin:.6rem 0;background:var(--surface);border-radius:0;">
            <div style="font-weight:600;color:var(--text);margin-bottom:.3rem;">${bi(c.title_zh || '', c.title_en || '')}</div>
            <div style="margin-bottom:.5rem;">${affectsBadges(c.affects)}</div>
            <div style="font-size:.88rem;color:var(--text);">${bi(c.detail_zh || '', c.detail_en || '')}</div>
@@ -2511,7 +2557,7 @@ function buildPerformanceHTML(audit) {
         ${lh.mainthread.map((m) => `
           <div style="display:flex;align-items:center;gap:.6rem;margin:.3rem 0;">
             <div style="flex:0 0 11rem;font-size:.84rem;color:var(--text);">${escapeHtml(m.group)}</div>
-            <div style="flex:1;background:var(--bg);border-radius:4px;overflow:hidden;">
+            <div style="flex:1;background:var(--bg);border-radius:0;overflow:hidden;">
               <div style="width:${Math.round((m.ms / max) * 100)}%;min-width:2px;height:1.1rem;background:var(--accent);"></div>
             </div>
             <div style="flex:0 0 5rem;text-align:right;font-size:.84rem;font-variant-numeric:tabular-nums;color:var(--text);">${m.ms.toLocaleString('en-US')} ms</div>
@@ -2547,10 +2593,10 @@ function buildPerformanceSectionHTML(audit) {
 }
 
 function buildMastheadHTML(audit) {
-  const pageLine = audit.metadata?.url
-    ? `<span><b>${t('meta_url')}</b> <a href="${escapeHtml(audit.metadata.url)}" target="_blank" rel="noopener noreferrer">${escapeHtml(audit.metadata.url)}</a></span>`
+  const pageLine = /^https?:\/\//i.test(audit.metadata?.url || '')
+    ? `<div><dt>${t('meta_url')}</dt><dd><a href="${escapeHtml(audit.metadata.url)}" target="_blank" rel="noopener noreferrer">${escapeHtml(audit.metadata.url)}</a></dd></div>`
     : audit.metadata?.scope
-      ? `<span><b>${t('meta_scope')}</b> ${escapeHtml(audit.metadata.scope)}</span>`
+      ? `<div><dt>${t('meta_scope')}</dt><dd>${escapeHtml(audit.metadata.scope)}</dd></div>`
       : '';
   return `
     <header class="masthead">
@@ -2559,26 +2605,22 @@ function buildMastheadHTML(audit) {
           <span class="beacon-mark" aria-hidden="true"></span>
           <span>Beacon <span style="color:var(--ink-muted);font-weight:600">${bi('無障礙檢測報告', 'Accessibility Audit')}</span></span>
         </div>
-        <div class="metagrid">
+        <dl class="metagrid">
           ${pageLine}
-          <span><b>${t('meta_date')}</b> ${escapeHtml(audit.metadata?.date || 'N/A')}</span>
-          <span><b>${t('meta_standard')}</b> ${escapeHtml(audit.metadata?.standard || 'WCAG 2.2 AA')}</span>
-          <span><b>${bi('層級', 'Tier')}</b> ${escapeHtml(audit.metadata?.audit_tier || 'Tier 1')}</span>
-        </div>
+          <div><dt>${t('meta_date')}</dt><dd>${escapeHtml(audit.metadata?.date || 'N/A')}</dd></div>
+          <div><dt>${t('meta_standard')}</dt><dd>${escapeHtml(audit.metadata?.standard || 'WCAG 2.2 AA')}</dd></div>
+          <div><dt>${bi('層級', 'Tier')}</dt><dd>${escapeHtml(audit.metadata?.audit_tier || 'Tier 1')}</dd></div>
+        </dl>
       </div>
     </header>`;
 }
 
-function buildJumpNavHTML(hasLighthouse) {
+function buildJumpNavHTML() {
   const items = [
-    ['#layer-decision', '01 決策 &middot; Decision'],
-    ['#layer-evidence', '02 證據 &middot; Evidence'],
-    ['#layer-findings', '03 問題 &middot; Findings'],
-    ['#layer-client', '04 摘要 &middot; Summary'],
-    ['#layer-methodology', '05 方法論 &middot; Methodology'],
-    ['#layer-legal', '06 法規 &middot; Legal'],
+    ['#layer-decision', bi('1. 檢查結果', '1. Results')],
+    ['#layer-findings', bi('2. 問題與修復', '2. Review and repair')],
+    ['#retest', bi('3. 重測與確認', '3. Retest and verify')],
   ];
-  if (hasLighthouse) items.push(['#layer-performance', '07 效能 &middot; Performance']);
   return `
     <nav class="jump" aria-label="Report sections / 報告章節">
       <ul>${items.map(([href, label]) => `<li><a href="${href}">${label}</a></li>`).join('')}</ul>
@@ -2621,465 +2663,7 @@ const html = `<!DOCTYPE html>
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Beacon 無障礙檢測報告 &middot; Accessibility Audit Report &mdash; ${escapeHtml(titleHost(audit))}</title>
 <style>
-/* ============================================================
-   Beacon report — v3.2.0 information architecture.
-   Signature: evidence-density meter — a score's weight is shown
-   next to the score, so "0 on 1 check" never reads like "100 on 6".
-   ============================================================ */
-
-/* ---- font stacks: explicit CJK-safe everywhere; no legacy serif fallback ---- */
-:root{
-  /* Arial-first Latin sans; explicit TC + JP sans cover every CJK glyph so
-     no Ming/Mincho serif is ever reachable (esp. Japanese on Windows). */
-  --sans:Arial,"Segoe UI",system-ui,-apple-system,"Noto Sans TC","Noto Sans JP",
-         "Yu Gothic UI","Yu Gothic",Meiryo,"Hiragino Sans","Microsoft JhengHei",sans-serif;
-  /* mono Latin for code; CJK inside code falls to an explicit CJK sans
-     before the final monospace keyword. */
-  --mono:ui-monospace,"Cascadia Code",Consolas,"SFMono-Regular","Noto Sans Mono",
-         "Noto Sans TC","Yu Gothic UI",Meiryo,"Microsoft JhengHei",monospace;
-
-  /* light (default) */
-  --bg:#ffffff;
-  --surface:#f5f7fb;
-  --surface-2:#ecf0f7;
-  --ink:#17203a;
-  --ink-soft:#454f6b;
-  --ink-muted:#56607e;
-  --border:#d6dce8;
-  --border-strong:#b8c0d3;
-
-  --beacon:#b4530a;        /* accent — the beacon light; 5.4:1 on white */
-  --beacon-soft:#f7efe4;
-  --beacon-line:#e7d3b8;
-
-  --crit:#b3261e;   --crit-bg:#fbeceb;  --crit-line:#f0c9c6;
-  --warn:#8a5a00;   --warn-bg:#fbf3e1;  --warn-line:#ecdcb2;
-  --pass:#1f7a43;   --pass-bg:#e7f4ec;  --pass-line:#bfe3cd;
-  --review:#465166; --review-bg:#eef1f6;--review-line:#d3dae6;
-  --thin:#544bc0;
-
-  --shadow:0 1px 2px rgba(23,32,58,.06),0 6px 18px rgba(23,32,58,.06);
-  --radius:14px;
-  --maxw:1080px;
-  color-scheme:light;
-
-  /* ---- compatibility aliases: let the pre-v3.2 CSS blocks below (methodology,
-     legal risk, axe evidence, manual checks, AEO/life-safety banners, delta,
-     lighthouse) keep working unchanged against the new token names. Declared
-     ONCE here (never re-declared in the dark/theme blocks) so they keep
-     following --ink/--beacon/--crit/etc. through every override. ---- */
-  --text:var(--ink); --text-muted:var(--ink-soft); --text-soft:var(--ink-muted);
-  --border-soft:var(--border);
-  --accent:var(--beacon); --accent-hover:var(--beacon); --accent-bg:var(--beacon-soft); --accent-text:var(--bg);
-  --fail:var(--crit); --fail-bg:var(--crit-bg);
-  --tip:var(--beacon); --tip-bg:var(--beacon-soft);
-  --info:var(--review); --info-bg:var(--review-bg); --info-border:var(--review-line);
-  --font:var(--sans); --font-mono:var(--mono);
-  --mid:var(--warn);
-}
-@media (prefers-color-scheme:dark){
-  :root{
-    --bg:#0f141d;
-    --surface:#171f2c;
-    --surface-2:#1e2839;
-    --ink:#e8edf6;
-    --ink-soft:#b4bdd0;
-    --ink-muted:#8c96ac;
-    --border:#2b3547;
-    --border-strong:#3d4860;
-
-    --beacon:#f0a24c;
-    --beacon-soft:#241a10;
-    --beacon-line:#4a3719;
-
-    --crit:#f4877f; --crit-bg:#2b1513; --crit-line:#4a221f;
-    --warn:#e8b55c; --warn-bg:#271f0f; --warn-line:#463713;
-    --pass:#5fc98a; --pass-bg:#122619; --pass-line:#1f4630;
-    --review:#9aa6bc;--review-bg:#1a2230;--review-line:#303c50;
-    --thin:#a29cf0;
-
-    --shadow:0 1px 2px rgba(0,0,0,.3),0 6px 20px rgba(0,0,0,.35);
-    color-scheme:dark;
-  }
-}
-
-/* ---- user-explicit theme override via toolbar; wins over the media query ---- */
-:root[data-theme="light"]{
-  --bg:#ffffff;--surface:#f5f7fb;--surface-2:#ecf0f7;
-  --ink:#17203a;--ink-soft:#454f6b;--ink-muted:#56607e;
-  --border:#d6dce8;--border-strong:#b8c0d3;
-  --beacon:#b4530a;--beacon-soft:#f7efe4;--beacon-line:#e7d3b8;
-  --crit:#b3261e;--crit-bg:#fbeceb;--crit-line:#f0c9c6;
-  --warn:#8a5a00;--warn-bg:#fbf3e1;--warn-line:#ecdcb2;
-  --pass:#1f7a43;--pass-bg:#e7f4ec;--pass-line:#bfe3cd;
-  --review:#465166;--review-bg:#eef1f6;--review-line:#d3dae6;
-  --thin:#544bc0;
-  --shadow:0 1px 2px rgba(23,32,58,.06),0 6px 18px rgba(23,32,58,.06);
-  color-scheme:light;
-}
-:root[data-theme="dark"]{
-  --bg:#0f141d;--surface:#171f2c;--surface-2:#1e2839;
-  --ink:#e8edf6;--ink-soft:#b4bdd0;--ink-muted:#8c96ac;
-  --border:#2b3547;--border-strong:#3d4860;
-  --beacon:#f0a24c;--beacon-soft:#241a10;--beacon-line:#4a3719;
-  --crit:#f4877f;--crit-bg:#2b1513;--crit-line:#4a221f;
-  --warn:#e8b55c;--warn-bg:#271f0f;--warn-line:#463713;
-  --pass:#5fc98a;--pass-bg:#122619;--pass-line:#1f4630;
-  --review:#9aa6bc;--review-bg:#1a2230;--review-line:#303c50;
-  --thin:#a29cf0;
-  --shadow:0 1px 2px rgba(0,0,0,.3),0 6px 20px rgba(0,0,0,.35);
-  color-scheme:dark;
-}
-
-/* ---- language switch: default zh. .lang-en/.lang-zh toggle by body[data-active-lang];
-   compact inline "中文 · English" labels (chips, filter buttons) stay bilingual always. ---- */
-body[data-active-lang="zh"] .lang-en,
-body:not([data-active-lang]) .lang-en{display:none!important}
-body[data-active-lang="en"] .lang-zh{display:none!important}
-body[data-active-lang="en"] .lang-en{display:block;color:inherit;font-size:1em;
-  font-weight:inherit;line-height:1.5;margin:0}
-
-/* ---- report toolbar (language + theme); static so the sticky jump-nav keeps top:0 ---- */
-.report-toolbar{display:flex;flex-wrap:wrap;gap:.5rem;justify-content:flex-end;
-  max-width:var(--maxw);margin:0 auto;padding:.6rem 20px .4rem}
-.tb-group{display:inline-flex;background:var(--surface);border:1px solid var(--border);
-  border-radius:10px;padding:2px;box-shadow:var(--shadow)}
-.tb-group button{background:transparent;border:0;color:var(--ink-soft);font:inherit;
-  font-size:.85rem;font-weight:600;cursor:pointer;padding:.4rem .8rem;min-height:44px;
-  min-width:44px;border-radius:8px;display:inline-flex;align-items:center;
-  justify-content:center;line-height:1.2;transition:background .15s,color .15s}
-.tb-group button:hover{color:var(--ink)}
-.tb-group button[aria-pressed="true"]{background:var(--beacon);color:var(--bg)}
-
-*{box-sizing:border-box}
-html{-webkit-text-size-adjust:100%}
-body{
-  margin:0;
-  font-family:var(--sans);
-  font-size:16px;
-  line-height:1.6;
-  color:var(--ink);
-  background:var(--bg);
-}
-img{max-width:100%;height:auto}
-/* UA sets pre/code to bare monospace, defeating .diff's var(--mono); force the
-   explicit stack so CJK in code never reaches a legacy font. */
-pre,code,kbd,samp{font-family:var(--mono)}
-a{color:var(--beacon);text-underline-offset:2px}
-p,a,li,td,th,h1,h2,h3{overflow-wrap:anywhere;word-break:break-word}
-a:hover{text-decoration-thickness:2px}
-:focus-visible{outline:3px solid var(--beacon);outline-offset:2px;border-radius:4px}
-.wrap{max-width:var(--maxw);margin:0 auto;padding:0 20px}
-h1,h2,h3{line-height:1.25;letter-spacing:0}
-code{background:var(--surface-2);padding:.1rem .35rem;border-radius:4px;font-size:.9em}
-.skip{position:absolute;left:-9999px;top:0;background:var(--ink);color:var(--bg);
-  padding:10px 16px;border-radius:0 0 8px 0;z-index:100}
-.skip:focus{left:0}
-
-/* ---- eyebrow / layer labels: the numbered layers are a real reading sequence ---- */
-.eyebrow{display:flex;align-items:baseline;gap:.6rem;margin:0 0 .35rem;
-  font-size:.82rem;font-weight:700;letter-spacing:.12em;text-transform:uppercase;
-  color:var(--beacon)}
-.eyebrow .num{font-variant-numeric:tabular-nums;font-size:1rem;
-  color:var(--ink-muted);letter-spacing:0}
-.layer-h{font-size:1.5rem;margin:.1rem 0 .2rem}
-.layer-sub{color:var(--ink-soft);margin:.1rem 0 1.4rem;max-width:62ch}
-
-/* =========================== HEADER =========================== */
-.masthead{background:var(--surface);border-bottom:1px solid var(--border)}
-.masthead .wrap{padding-top:1.4rem;padding-bottom:1.4rem}
-.brand{display:flex;align-items:center;gap:.7rem;font-weight:700;font-size:1.05rem}
-.beacon-mark{width:26px;height:26px;flex:0 0 auto;border-radius:50%;
-  background:radial-gradient(circle at 50% 42%,#fff 0 14%,var(--beacon) 20% 46%,transparent 52%),
-             conic-gradient(from 200deg,var(--beacon) 0 22deg,transparent 22deg 90deg,
-             var(--beacon) 90deg 112deg,transparent 112deg);
-  box-shadow:0 0 0 1px var(--beacon-line) inset}
-.metagrid{display:flex;flex-wrap:wrap;gap:.4rem 1.4rem;margin-top:.9rem;
-  font-size:.9rem;color:var(--ink-soft)}
-.metagrid b{color:var(--ink);font-weight:600}
-.engine-tag{font-family:var(--mono);font-size:.78rem;color:var(--ink-muted)}
-
-/* jump nav */
-.jump{position:sticky;top:0;z-index:40;background:color-mix(in srgb,var(--bg) 88%,transparent);
-  backdrop-filter:blur(8px);border-bottom:1px solid var(--border)}
-.jump ul{display:flex;flex-wrap:wrap;gap:.2rem;margin:0 auto;padding:.4rem 20px;
-  list-style:none;max-width:var(--maxw)}
-.jump a{white-space:nowrap;text-decoration:none;color:var(--ink-soft);font-size:.86rem;
-  font-weight:600;padding:.5rem .7rem;border-radius:8px;min-height:44px;display:flex;
-  align-items:center}
-.jump a:hover{background:var(--surface-2);color:var(--ink)}
-
-/* =========================== 01 DECISION / HERO =========================== */
-.hero{padding:2.4rem 0 2rem;position:relative}
-.hero .wrap{position:relative;z-index:1}
-.verdict{display:grid;grid-template-columns:1fr;gap:1.6rem;align-items:start}
-/* two-col only when both fit at a readable measure: left capped so a long
-   coverage line can't balloon it; right floored so CJK never collapses. */
-@media(min-width:820px){.verdict{grid-template-columns:minmax(auto,26rem) minmax(20rem,1fr)}}
-.overall{display:grid;gap:1rem;min-width:0}
-.metric-pair{display:grid;grid-template-columns:repeat(2,minmax(9rem,1fr));gap:.75rem}
-.metric{min-width:0;padding:1rem;border:1px solid var(--border);border-radius:8px;background:var(--surface)}
-.metric-label{display:block;font-size:.82rem;font-weight:700;color:var(--ink-soft)}
-.metric-value{display:flex;align-items:baseline;gap:.25rem;margin:.35rem 0 0;font-variant-numeric:tabular-nums}
-.metric-value b{font-size:2.25rem;line-height:1;font-weight:800;color:var(--ink)}
-.metric-value span{font-size:.78rem;color:var(--ink-muted)}
-.metric-value.s-crit b{color:var(--crit)}
-.metric-value.s-warn b{color:var(--warn)}
-.metric-value.s-pass b{color:var(--pass)}
-.metric-note{margin:.45rem 0 0;font-size:.78rem;line-height:1.35;color:var(--ink-muted)}
-.coverage-track{height:.45rem;margin-top:.55rem;border-radius:999px;background:var(--surface-2);overflow:hidden}
-.coverage-track span{display:block;height:100%;background:var(--accent)}
-.scope-summary{margin-top:.65rem;padding-top:.55rem;border-top:1px solid var(--border);font-size:.78rem;line-height:1.45;color:var(--ink-muted)}
-.scope-summary p{margin:.15rem 0}
-.scope-summary b{color:var(--ink-soft)}
-.verdict-detail{min-width:0}
-@media(max-width:430px){.metric-pair{grid-template-columns:minmax(0,1fr)}}
-.band{display:inline-flex;align-items:center;gap:.4rem;padding:.28rem .7rem;border-radius:999px;
-  font-size:.84rem;font-weight:700;border:1px solid transparent}
-.coverage{margin-top:.55rem;font-size:.92rem;color:var(--ink-soft)}
-.coverage b{color:var(--ink);font-variant-numeric:tabular-nums}
-.honesty{margin-top:.9rem;padding:.85rem 1rem;border-left:4px solid var(--beacon);
-  background:var(--beacon-soft);border-radius:0 10px 10px 0;font-size:.92rem;color:var(--ink)}
-
-/* fix these next */
-.fixnext{margin-top:2rem;background:var(--surface);border:1px solid var(--border);
-  border-radius:var(--radius);padding:1.3rem 1.3rem 1.4rem;box-shadow:var(--shadow)}
-.fixnext > h2{margin:0;font-size:1.12rem;display:flex;align-items:center;gap:.5rem}
-.fixnext .clear-line{margin:.5rem 0 1.1rem;font-size:.95rem;color:var(--ink-soft)}
-.fixnext .clear-line b{color:var(--crit);font-variant-numeric:tabular-nums}
-.fixlist{display:grid;gap:.8rem;grid-template-columns:1fr}
-/* 3-across only once each card clears a readable CJK measure (~264px here);
-   below that the ranked cards stack rather than squeeze. */
-@media(min-width:900px){.fixlist{grid-template-columns:repeat(3,1fr)}}
-.fixcard{position:relative;background:var(--bg);border:1px solid var(--border);
-  border-radius:12px;padding:1rem 1rem 1.05rem;display:flex;flex-direction:column;gap:.5rem}
-.fixcard .rank{position:absolute;top:-12px;left:14px;width:26px;height:26px;border-radius:50%;
-  background:var(--beacon);color:#fff;font-weight:800;font-size:.85rem;display:flex;
-  align-items:center;justify-content:center;font-variant-numeric:tabular-nums}
-@media (prefers-color-scheme:dark){.fixcard .rank{color:#1a1206}}
-.fixcard h3{margin:.35rem 0 0;font-size:1rem;line-height:1.35;font-weight:700}
-.fixcard .who{font-size:.86rem;color:var(--ink-soft)}
-.fixcard .foot{margin-top:auto;display:flex;flex-wrap:wrap;gap:.4rem;align-items:center;
-  font-size:.76rem}
-
-/* chips / badges */
-.chip{display:inline-flex;align-items:center;gap:.35rem;padding:.2rem .55rem;border-radius:999px;
-  font-size:.75rem;font-weight:600;line-height:1.4;border:1px solid transparent}
-.chip.crit{background:var(--crit-bg);color:var(--crit);border-color:var(--crit-line)}
-.chip.warn{background:var(--warn-bg);color:var(--warn);border-color:var(--warn-line)}
-.chip.pass{background:var(--pass-bg);color:var(--pass);border-color:var(--pass-line)}
-.chip.review{background:var(--review-bg);color:var(--review);border-color:var(--review-line)}
-.chip.wcag{background:var(--surface-2);color:var(--ink-soft);border-color:var(--border);
-  font-family:var(--mono);font-size:.72rem}
-
-/* =========================== 02 EVIDENCE / CATEGORIES =========================== */
-section{padding:2.2rem 0}
-.section-alt{background:var(--surface);border-top:1px solid var(--border);
-  border-bottom:1px solid var(--border)}
-.catgrid{display:grid;gap:1rem;grid-template-columns:1fr}
-@media(min-width:600px){.catgrid{grid-template-columns:1fr 1fr}}
-@media(min-width:960px){.catgrid{grid-template-columns:1fr 1fr 1fr}}
-.catcard{display:flex;flex-direction:column;gap:.6rem;background:var(--bg);
-  border:1px solid var(--border);border-radius:12px;padding:1rem 1.05rem;
-  text-decoration:none;color:inherit;transition:border-color .15s,transform .15s}
-.catcard:hover{border-color:var(--border-strong);transform:translateY(-2px)}
-.catcard.nmc{background:var(--surface);opacity:.9}
-.cat-top{display:flex;align-items:flex-start;justify-content:space-between;gap:.6rem}
-.cat-name{font-weight:700;font-size:1.02rem;line-height:1.3}
-.score-badge{flex:0 0 auto;text-align:center;min-width:52px}
-.score-badge b{font-size:1.7rem;font-weight:800;font-variant-numeric:tabular-nums;
-  line-height:1;letter-spacing:0}
-.score-badge b.s-crit{color:var(--crit)}
-.score-badge b.s-warn{color:var(--warn)}
-.score-badge b.s-pass{color:var(--pass)}
-.score-badge small{display:block;font-size:.68rem;color:var(--ink-muted)}
-.state-badge{flex:0 0 auto;font-size:.74rem;font-weight:700;text-align:right;max-width:120px}
-/* A+ thin-evidence qualifier: same line as the score, same dark/bold weight as the
-   score itself — never colour-alone (user ruling 2026-08-08). */
-.score-bound{flex:0 0 auto;display:flex;align-items:baseline;gap:.4rem;flex-wrap:wrap;
-  justify-content:flex-end}
-.score-qual{font-size:.78rem;font-weight:700;color:var(--thin);background:var(--bg);
-  border:1px solid currentColor;border-radius:999px;padding:.1rem .55rem;white-space:nowrap}
-
-/* evidence-density meter — THE signature */
-.evi{margin-top:.1rem}
-.evi-track{height:8px;border-radius:5px;background:var(--surface-2);overflow:hidden;
-  border:1px solid var(--border)}
-.evi-fill{height:100%;background:linear-gradient(90deg,var(--beacon),var(--beacon-line))}
-.evi-label{margin-top:.4rem;font-size:.8rem;color:var(--ink-soft);
-  display:flex;justify-content:space-between;gap:.5rem;flex-wrap:wrap}
-.evi-label .tier{font-weight:700}
-.evi-label .tier.high{color:var(--pass)}
-.evi-label .tier.mod{color:var(--ink)}
-.evi-label .tier.low{color:var(--thin)}
-.evi-label .tier.nmc{color:var(--review)}
-.cat-cause{font-size:.87rem;color:var(--ink-soft);margin:0}
-.cat-cause b{color:var(--ink)}
-.tension{font-size:.83rem;background:var(--crit-bg);border:1px solid var(--crit-line);
-  color:var(--ink);border-radius:8px;padding:.5rem .6rem;margin:0}
-.tension b{color:var(--crit)}
-
-/* =========================== 03 FINDINGS =========================== */
-.filters{display:flex;flex-wrap:wrap;gap:.5rem;margin:0 0 1.5rem}
-.filters .flabel{font-size:.85rem;color:var(--ink-soft);align-self:center;margin-right:.2rem}
-.fbtn{font:inherit;font-size:.83rem;font-weight:600;cursor:pointer;padding:.4rem .75rem;
-  border-radius:999px;border:1px solid var(--border);background:var(--bg);color:var(--ink-soft);
-  min-height:44px}
-.fbtn[aria-pressed="true"]{background:var(--ink);color:var(--bg);border-color:var(--ink)}
-.fbtn:hover{border-color:var(--border-strong)}
-.fgroup{border:1px solid var(--border);border-radius:var(--radius);margin-bottom:1.1rem;
-  background:var(--bg);box-shadow:var(--shadow);overflow:hidden}
-.fgroup.is-hidden{display:none}
-.fg-head{padding:1.05rem 1.15rem;display:flex;flex-wrap:wrap;gap:.6rem 1rem;
-  align-items:baseline;border-bottom:1px solid var(--border)}
-.fg-head .fg-title{font-size:1.08rem;font-weight:700;flex:1 1 260px;line-height:1.3}
-.fg-count{font-variant-numeric:tabular-nums;font-weight:800;font-size:1.05rem}
-.fg-body{padding:1.05rem 1.15rem 1.2rem}
-.who-line{margin:0 0 .85rem;font-size:.93rem;color:var(--ink)}
-.who-line .who-badge{font-weight:700;color:var(--beacon)}
-.meta-row{display:flex;flex-wrap:wrap;gap:.45rem;margin:0 0 .9rem}
-.diff{font-family:var(--mono);font-size:.82rem;line-height:1.55;border-radius:10px;
-  border:1px solid var(--border);overflow:hidden;margin:.2rem 0 1rem}
-/* pre-wrap + a hanging indent so a wrapped line's continuation aligns under
-   the code, not under the +/- tag glyph; overflow-wrap covers unbroken tokens
-   (long URLs/class chains) so nothing forces the box wider than its container. */
-.diff pre{margin:0;padding:.7rem .9rem .7rem 2.3rem;text-indent:-1.4rem;
-  white-space:pre-wrap;overflow-wrap:anywhere;word-break:break-word}
-.diff .before{background:var(--crit-bg);color:var(--ink)}
-.diff .tag{display:inline-block;font-weight:700;margin-right:.5rem;user-select:none;color:var(--crit)}
-.loclist{font-family:var(--mono);font-size:.8rem;color:var(--ink-soft);
-  background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:.55rem .7rem;
-  margin:0 0 .6rem;max-height:8.5rem;overflow-y:auto}
-.loclist span{display:inline-block;margin:.1rem .5rem .1rem 0;overflow-wrap:anywhere}
-.standard-line{font-size:.92rem;margin:.6rem 0 0;color:var(--ink-soft)}
-.standard-line strong{color:var(--beacon)}
-.fix-line{font-size:.92rem;margin:.6rem 0 0}
-.fix-line strong{color:var(--pass)}
-
-/* =========================== 04 CLIENT / EXEC SUMMARY =========================== */
-.exec{border:1px solid var(--border-strong);border-radius:var(--radius);
-  background:var(--bg);box-shadow:var(--shadow)}
-.exec-head{padding:1.1rem 1.3rem;background:var(--surface-2);border-bottom:1px solid var(--border)}
-.exec-head h3{margin:0;font-size:1.35rem;min-width:0}
-.exec-head p{margin:.3rem 0 0;color:var(--ink-soft);font-size:.9rem}
-.exec-body{padding:1.3rem}
-.exec-body h3{font-size:1.02rem;margin:1.3rem 0 .5rem}
-.exec-body h3:first-child{margin-top:0}
-.exec-lead{font-size:1.05rem;line-height:1.6}
-.exec-lead b{color:var(--crit)}
-.prio{counter-reset:p;list-style:none;padding:0;margin:.4rem 0}
-.prio li{position:relative;padding:.55rem 0 .55rem 2.2rem;border-bottom:1px dashed var(--border)}
-.prio li::before{counter-increment:p;content:counter(p);position:absolute;left:0;top:.5rem;
-  width:1.6rem;height:1.6rem;border-radius:50%;background:var(--beacon-soft);color:var(--beacon);
-  font-weight:800;display:flex;align-items:center;justify-content:center;font-size:.85rem}
-.expose{display:flex;flex-wrap:wrap;gap:.4rem;margin:.3rem 0 .2rem}
-.exec-note{margin-top:1.2rem;padding:.85rem 1rem;background:var(--beacon-soft);
-  border-left:4px solid var(--beacon);border-radius:0 10px 10px 0;font-size:.9rem}
-
-/* =========================== FOOTER =========================== */
-footer{border-top:1px solid var(--border);background:var(--surface);margin-top:1rem}
-footer .wrap{padding:1.5rem 20px 2.6rem;font-size:.88rem;color:var(--ink-soft)}
-footer p{margin:.2rem 0}
-footer a{font-weight:600}
-.foot-engine{font-family:var(--mono);font-size:.76rem;color:var(--ink-muted);margin-top:.7rem}
-
-/* =========================== ported from v3.1: methodology / legal / axe / AEO / life-safety / delta =========================== */
-.methodology-panel{font-size:.92rem;line-height:1.7}
-.methodology-panel h3{margin-top:1.8rem;color:var(--accent);border-bottom:1px solid var(--border);padding-bottom:.3rem}
-.methodology-panel .meta-note{color:var(--text-muted);font-size:.85rem;background:var(--surface);padding:.5rem .8rem;border-radius:6px;margin:.5rem 0 1rem}
-.methodology-panel .section-intro{color:var(--text-muted);font-size:.88rem;margin:.3rem 0 .6rem}
-.methodology-panel ul,.methodology-panel ol{margin:.4rem 0 .8rem 1.4rem}
-.methodology-panel li{margin:.35rem 0}
-.capability-list li::marker{color:var(--pass)}
-.limitation-list li::marker{color:var(--warn)}
-.workflow-list li::marker{color:var(--accent);font-weight:700}
-.usage-list li::marker{color:var(--text-muted)}
-.methods-details{background:var(--surface);border-radius:6px;padding:.6rem .9rem;margin:.5rem 0 1rem;border-left:3px solid var(--accent)}
-.methods-details summary{cursor:pointer;color:var(--text-muted);font-size:.9rem}
-.methods-list{margin-top:.5rem;font-size:.85rem;color:var(--text-muted)}
-.live-audit-note{background:var(--warn-bg);border:1px solid var(--warn);border-left:6px solid var(--warn);border-radius:8px;padding:.8rem 1rem;margin:.8rem 0 1rem;color:var(--text)}
-.manual-checks{margin:1.2rem 0}
-.manual-check-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(240px,100%),1fr));gap:.8rem;margin-top:.8rem}
-.manual-check-card{background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:.9rem}
-.manual-check-card h4{margin:.2rem 0 .45rem;font-size:.98rem}
-.manual-check-card p{margin:.35rem 0;font-size:.86rem}
-.manual-check-meta{color:var(--text-soft);font-size:.74rem;text-transform:uppercase;letter-spacing:.04em}
-.reader-task-evidence{margin:1.2rem 0 1.6rem;padding:1rem 1.1rem;background:var(--surface);border:1px solid var(--border);border-left:6px solid var(--accent);border-radius:8px;line-height:1.65}
-.reader-task-evidence h3{margin:.1rem 0 .7rem;color:var(--accent)}
-.reader-task-evidence h4{margin:1rem 0 .45rem;color:var(--text)}
-.reader-status{display:flex;flex-wrap:wrap;gap:.35rem .9rem;align-items:baseline;padding:.7rem .85rem;background:var(--surface-2);border:1px solid var(--border);border-radius:6px}
-.reader-status strong{color:var(--text)}
-.reader-status span{color:var(--text-muted)}
-.reader-status-missing{border-left:4px solid var(--warn)}
-.reader-intent-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(20rem,100%),1fr));gap:.7rem;margin:.9rem 0}
-.reader-intent-grid>div{min-width:0;padding:.65rem .8rem;border:1px solid var(--border);border-radius:6px;background:var(--bg)}
-.reader-label{display:block;color:var(--text-muted);font-size:.78rem;font-weight:700}
-.reader-value{display:block;overflow-wrap:anywhere}
-.reader-task-row{padding:.75rem 0;border-top:1px solid var(--border)}
-.reader-task-row:first-of-type{border-top:0}
-.reader-task-heading{display:flex;flex-wrap:wrap;gap:.4rem .8rem;align-items:baseline}
-.reader-task-heading strong{overflow-wrap:anywhere}
-.reader-outcome,.reader-at-status{display:inline-block;padding:.08rem .45rem;border:1px solid var(--border);border-radius:4px;color:var(--text-muted);font-size:.78rem}
-.reader-task-row p{margin:.35rem 0}
-.reader-task-row ul{margin:.25rem 0 .55rem 1.25rem}
-.reader-surface-summary{margin-top:.7rem;padding-top:.7rem;border-top:1px solid var(--border)}
-.reader-snapshot{margin-top:.7rem}
-.reader-snapshot summary{cursor:pointer;color:var(--accent);font-weight:600}
-.reader-snapshot pre{margin:.6rem 0 0;padding:.8rem;background:var(--bg);border:1px solid var(--border);white-space:pre-wrap;overflow-wrap:anywhere;font-family:var(--mono);font-size:.78rem;line-height:1.5}
-.reader-at{margin-top:.7rem;padding-top:.7rem;border-top:1px solid var(--border)}
-.reader-at ul{list-style:none;margin:.3rem 0 0;padding:0}
-.reader-at li{display:flex;flex-wrap:wrap;gap:.35rem .9rem;align-items:baseline;padding:.45rem 0;border-top:1px solid var(--border-soft)}
-.axe-evidence{margin:1.2rem 0}
-.axe-outcome-list{background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:.65rem .85rem;margin:.6rem 0}
-.axe-outcome-list summary{cursor:pointer;font-weight:700;color:var(--text)}
-.axe-outcome-list ul{margin-top:.6rem}
-.axe-outcome-list li{display:flex;flex-wrap:wrap;gap:.3rem .8rem;align-items:baseline;padding:.45rem 0;border-top:1px solid var(--border-soft)}
-.rule-id,.rule-criteria{color:var(--text-muted);font-size:.78rem;overflow-wrap:anywhere}
-.learn-more a,.axe-outcome-list a{color:var(--accent);text-decoration:underline;text-underline-offset:2px}
-.traps-table,.summary-table{width:100%;border-collapse:collapse;margin:.8rem 0;font-size:.9rem}
-.traps-table th,.summary-table th{text-align:left;padding:.6rem .8rem;background:var(--surface-2);color:var(--accent);font-weight:600;border-bottom:1px solid var(--border)}
-.traps-table td,.summary-table td{padding:.6rem .8rem;border-bottom:1px solid var(--border);vertical-align:top;overflow-wrap:anywhere}
-.traps-table td:first-child{color:var(--text-muted);font-style:italic;width:38%}
-.summary-table .num{text-align:right;font-variant-numeric:tabular-nums}
-.legal-risk-panel{font-size:.92rem}
-.legal-context-note{background:var(--info-bg);border:1px solid var(--info-border);border-left:6px solid var(--info-border);border-radius:8px;padding:.9rem 1rem;margin:.8rem 0 1rem}
-.risk-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(280px,100%),1fr));gap:1rem;margin:1rem 0}
-.risk-card{background:var(--surface);padding:1rem;border-radius:8px;border-left:4px solid var(--accent)}
-.risk-header{display:flex;justify-content:space-between;align-items:center}
-.context-badge{color:var(--accent);background:var(--accent-bg);padding:2px 8px;border-radius:4px;font-size:.75rem;font-weight:700}
-.deadline{color:var(--warn);font-weight:600}
-.criteria-map{color:var(--text-muted);font-size:.86rem}
-.aeo-disclaimer{background:var(--accent-bg);border:1px solid var(--accent);border-left:6px solid var(--accent);border-radius:8px;padding:.9rem 1.1rem;margin:1rem 0 0;font-size:.88rem;line-height:1.65}
-.aeo-disclaimer-title{font-size:.98rem;font-weight:700;color:var(--accent);margin-bottom:.4rem}
-.aeo-disclaimer p{margin-bottom:.45rem}
-.aeo-disclaimer p:last-child{margin-bottom:0}
-.aeo-disclaimer-cta{color:var(--text-muted);font-size:.84rem;border-top:1px dashed var(--border);padding-top:.45rem;margin-top:.45rem}
-.aeo-disclaimer strong{color:var(--text)}
-.life-safety-banner{background:var(--surface-2);border:2px solid var(--fail);border-left:8px solid var(--fail);border-radius:8px;padding:1.1rem 1.3rem;margin:.9rem 0;font-size:.95rem;line-height:1.7}
-.life-safety-banner .banner-title{font-size:1.1rem;font-weight:700;color:var(--fail)}
-.delta{font-size:.75rem;margin-left:4px}
-.delta.positive{color:var(--pass)}
-.delta.negative{color:var(--fail)}
-.delta.neutral{color:var(--text-muted)}
-.empty{color:var(--text-muted);font-style:italic}
-
-/* =========================== MOTION / PRINT =========================== */
-@media (prefers-reduced-motion:reduce){
-  *,*::before,*::after{animation-duration:.01ms!important;transition-duration:.01ms!important;
-    scroll-behavior:auto!important}
-}
-@media print{
-  :root{--bg:#fff!important;--ink:#000!important;--surface:#fff!important;--surface-2:#fff!important}
-  body{font-size:12pt;color:#000}
-  .jump,.masthead .engine-tag,.filters,.beacon-mark,.report-toolbar{display:none!important}
-  .honesty,.fixnext{box-shadow:none}
-  .lang-zh,.lang-en{color:#333}
-  a{color:#000;text-decoration:underline}
-  section{padding:.6rem 0;break-inside:avoid}
-  .exec{break-before:page;border:1px solid #000;box-shadow:none}
-  .fgroup,.catcard,.fixcard{break-inside:avoid;box-shadow:none}
-  .loclist{overflow:visible;max-height:none}
-}
+${REPORT_STYLES}
 </style>
 </head>
 <body>
@@ -3091,19 +2675,23 @@ ${buildJumpNavHTML(!!audit.lighthouse)}
 
 <main id="main-content" tabindex="-1">
 ${buildHeroHTML(audit, previous, allGroups)}
+${buildFindingsSectionHTML(audit, allGroups)}
 
+<details class="supplement"><summary>${bi('分類證據與分數明細', 'Category evidence and score details')}</summary>
 <section class="section-alt" id="layer-evidence" aria-labelledby="h-evidence">
   <div class="wrap">
     <p class="eyebrow"><span class="num">02</span> ${bi('證據層', 'Evidence')}</p>
     <h2 class="layer-h" id="h-evidence">${bi('每個分數旁邊都標出它背後有多少證據', 'Every score shows how much evidence stands behind it')}</h2>
-    <p class="layer-sub">${bi('一個低分從大量檢查算出來，是確鑿的問題；一個低分只從一次檢查算出來，只是證據不足的旗標。密度條讓兩者一眼可辨。', 'A low score from many checks is a proven problem; a low score from one check is a thin-evidence flag, not a verdict. The density meter makes the difference visible at a glance.')}</p>
+    <p class="layer-sub">${bi('檢查數量表示本次證據的規模，不代表判定一定正確。請逐項對照來源與限制。', 'Check counts describe the amount of evidence, not the certainty of a verdict. Review the sources and limitations.')}</p>
     ${buildReaderTaskEvidenceHTML(audit)}
     ${buildCategoryGridHTML(audit.summary.categories, previous?.summary?.categories, groupsByCat, tier2Evidence)}
   </div>
 </section>
 
-${buildFindingsSectionHTML(audit, allGroups)}
+</details>
+<details class="supplement"><summary>${bi('執行摘要', 'Executive summary')}</summary>
 ${buildExecSummaryHTML(audit, allGroups)}
+</details>
 ${buildMethodologySectionHTML(audit)}
 ${buildLegalSectionHTML(audit)}
 ${buildPerformanceSectionHTML(audit)}
@@ -3112,65 +2700,7 @@ ${buildPerformanceSectionHTML(audit)}
 ${buildFooterHTML(audit)}
 
 <script>
-/* Per-category finding filter. Progressive enhancement — without JS every
-   group is visible. Native <button> = keyboard-accessible. */
-(function(){
-  var btns = document.querySelectorAll('.fbtn');
-  var groups = document.querySelectorAll('.fgroup');
-  btns.forEach(function(btn){
-    btn.addEventListener('click', function(){
-      var f = btn.dataset.filter;
-      btns.forEach(function(b){ b.setAttribute('aria-pressed', b === btn ? 'true' : 'false'); });
-      groups.forEach(function(g){
-        g.classList.toggle('is-hidden', f !== 'all' && g.dataset.category !== f);
-      });
-    });
-  });
-})();
-
-/* Language + theme toggles:
-   - default language zh; switch to en, localStorage-persisted
-   - theme default auto (prefers-color-scheme) until a manual light/dark override
-   - native <button> = keyboard-operable, >=44px targets, visible focus (global :focus-visible). */
-(function () {
-  var STORE_LANG = 'beacon-report-lang';
-  var STORE_THEME = 'beacon-report-theme';
-  var root = document.documentElement;
-  var body = document.body;
-
-  function setLang(lang) {
-    body.dataset.activeLang = lang;
-    document.querySelectorAll('[data-lang-btn]').forEach(function (b) {
-      b.setAttribute('aria-pressed', b.dataset.langBtn === lang ? 'true' : 'false');
-    });
-    try { localStorage.setItem(STORE_LANG, lang); } catch (e) {}
-  }
-
-  function setTheme(theme) {
-    if (theme === 'auto') { root.removeAttribute('data-theme'); }
-    else { root.setAttribute('data-theme', theme); }
-    document.querySelectorAll('[data-theme-btn]').forEach(function (b) {
-      b.setAttribute('aria-pressed', b.dataset.themeBtn === theme ? 'true' : 'false');
-    });
-    try { localStorage.setItem(STORE_THEME, theme); } catch (e) {}
-  }
-
-  var savedLang = 'zh';
-  var savedTheme = 'auto';
-  try {
-    savedLang = localStorage.getItem(STORE_LANG) || 'zh';
-    savedTheme = localStorage.getItem(STORE_THEME) || 'auto';
-  } catch (e) {}
-  setLang(savedLang);
-  setTheme(savedTheme);
-
-  document.querySelectorAll('[data-lang-btn]').forEach(function (b) {
-    b.addEventListener('click', function () { setLang(b.dataset.langBtn); });
-  });
-  document.querySelectorAll('[data-theme-btn]').forEach(function (b) {
-    b.addEventListener('click', function () { setTheme(b.dataset.themeBtn); });
-  });
-})();
+${REPORT_INTERACTIONS}
 </script>
 </body>
 </html>`;

@@ -745,8 +745,8 @@
       "en": "Verify computed text and UI contrast with Beacon-native tier2-audit.mjs (default) or axe-core."
     },
     {
-      "zh": "在 200% 縮放下重跑主要流程；320px 回流結果已由本次掃描另行記錄。",
-      "en": "Rerun the primary flow at 200% zoom; the 320px reflow result is recorded separately by this audit."
+      "zh": "在 320px 寬度與實際 200% 瀏覽器縮放下分別重跑主要流程，保留操作結果；靜態掃描本身不能證明回流或縮放已通過。",
+      "en": "Repeat the primary flow at 320px width and, separately, at actual 200% browser zoom. Record both results; a static scan alone does not establish that reflow or zoom passed."
     },
     {
       "zh": "請一位不熟悉產品的使用者完成主要任務，觀察標籤、說明與下一步是否清楚。",
