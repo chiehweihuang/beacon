@@ -5,6 +5,10 @@
 // a calibration harness with a published false-positive rate — that is the gated
 // 3b follow-up and is deliberately NOT done here.
 
+// Linear-time scans with the same matches as the regexes they replace (perf audit
+// 2026-10-04, P5/P8): see attr-scan.mjs.
+import { lazyBlocks, tagMatchAll } from './attr-scan.mjs';
+
 const WCAG_ALT = 'WCAG 2.2: 1.1.1 Non-text Content';
 const WCAG_LINK = 'WCAG 2.2: 2.4.4 Link Purpose (In Context)';
 const WCAG_NAME = 'WCAG 2.2: 4.1.2 Name, Role, Value';
@@ -26,7 +30,7 @@ export function detectQualityFlags(text) {
   const signals = [];
 
   // --- img alt quality (skip alt="" — that is valid decorative markup) ------
-  for (const m of text.matchAll(/<img\b[^>]*\balt\s*=\s*["']([^"']*)["'][^>]*>/gi)) {
+  for (const m of tagMatchAll(text, /<img\b/gi, /<img\b[^>]*\balt\s*=\s*["']([^"']*)["'][^>]*>/iy)) {
     const alt = m[1].trim();
     if (!alt) continue; // decorative
     const index = m.index || 0;
@@ -53,7 +57,9 @@ export function detectQualityFlags(text) {
   }
 
   // --- link purpose: generic link text (only when no accessible-name override) ---
-  for (const m of text.matchAll(/<a\b([^>]*)>([\s\S]*?)<\/a>/gi)) {
+  for (const b of lazyBlocks(text, /<a\b/gi, /<\/a>/gi, { untilGt: true })) { // = matchAll(/<a\b([^>]*)>([\s\S]*?)<\/a>/gi)
+    const m = [text.slice(b.index, b.end), text.slice(b.index + 2, b.bodyStart - 1), text.slice(b.bodyStart, b.bodyEnd)];
+    m.index = b.index;
     const attrs = m[1];
     // accessible-name override — a real attribute only; a `data-` prefix must not count
     // (the `-` before "aria-label" used to satisfy \b and wrongly suppress the check).
