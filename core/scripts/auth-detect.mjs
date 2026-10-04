@@ -16,7 +16,15 @@
 // source location. band: 'FLAG' (hard fail) | 'REVIEW' (risk, verify) | 'INFO'
 // (present but not a 3.3.8 barrier; caller emits nothing).
 
+import { lazyBlocks, replaceBlocks, tagMatchAll } from './attr-scan.mjs';
+
 const WCAG = 'WCAG 2.2: 3.3.8 Accessible Authentication (Minimum)';
+
+// Leftmost match of /<img\b[^>]*captcha[^>]*>/i, or null, without rescanning a long `>`-free
+// run once per `<img` in it (perf audit 2026-10-04, P8; see tagMatchAll).
+function firstImgCaptcha(text) {
+  return tagMatchAll(text, /<img\b/gi, /<img\b[^>]*captcha[^>]*>/iy, 1)[0] || null;
+}
 
 function indexOfMatch(text, re) {
   const m = text.match(re);
@@ -27,7 +35,10 @@ export function detectAuthBarriers(text) {
   // Strip HTML comments first: captcha/widget markup quoted inside a comment
   // (e.g. a migration note `<!-- old <img ...captcha...> -->`) is not a live
   // barrier. Replace with equal-length whitespace so finding offsets stay aligned.
-  text = String(text).replace(/<!--[\s\S]*?-->/g, (m) => ' '.repeat(m.length));
+  // Same blocks as /<!--[\s\S]*?-->/g, but an unclosed `<!--` ends the scan instead of
+  // being retried to EOF from every later `<!--` (P5).
+  text = String(text);
+  text = replaceBlocks(text, lazyBlocks(text, /<!--/g, /-->/g), (m) => ' '.repeat(m.length));
   const signals = [];
   const has = re => re.test(text);
 
@@ -82,14 +93,14 @@ export function detectAuthBarriers(text) {
   // --- Distorted-text / transcription CAPTCHA (no exemption -> hard fail) ---
   // An <img> captcha that is NOT the reCAPTCHA/hCaptcha widget, plus a prompt to
   // transcribe what is shown, is a character-transcription test = a 3.3.8 fail.
-  const imgCaptcha = /<img\b[^>]*captcha[^>]*>/i;   // quoted or unquoted; matches stripWidgets()
+  const imgCaptcha = firstImgCaptcha(text);   // /<img\b[^>]*captcha[^>]*>/i: quoted or unquoted; matches stripWidgets()
   const transcribePhrase = /(?:enter|type|input)\b[^<>]{0,30}\b(?:characters|letters|code|text)\b[^<>]{0,20}\b(?:you see|shown|above|in the image|below)\b|請?輸入(?:圖片中|上方|下列)?(?:的)?驗證碼|看不清楚.{0,6}(?:換一張|刷新)/i;
   const isWidget = /\bg-recaptcha\b|\bh-captcha\b|\bcf-turnstile\b|recaptcha\/api/i;
-  if ((imgCaptcha.test(text) || transcribePhrase.test(text)) && !partOfWidget(text, imgCaptcha, isWidget)) {
-    const strong = imgCaptcha.test(text) && transcribePhrase.test(text);
+  if ((imgCaptcha || transcribePhrase.test(text)) && !partOfWidget(text, imgCaptcha, isWidget)) {
+    const strong = !!imgCaptcha && transcribePhrase.test(text);
     signals.push({
       key: 'auth-text-captcha', band: strong ? 'FLAG' : 'REVIEW', wcag: WCAG, level: 'AA',
-      index: indexOfMatch(text, imgCaptcha.test(text) ? imgCaptcha : transcribePhrase),
+      index: imgCaptcha ? imgCaptcha.index : indexOfMatch(text, transcribePhrase),
       title: 'Text/character CAPTCHA requires a cognitive function test',
       affected_users: 'Users with cognitive disabilities, dyslexia, and low vision',
       description: 'A distorted-text or character-transcription CAPTCHA is a cognitive function test (transcription) with no 3.3.8 exemption. It blocks users who cannot read or transcribe the characters.',
@@ -98,7 +109,7 @@ export function detectAuthBarriers(text) {
   }
 
   // --- Password field that blocks paste / password managers ----------------
-  for (const m of text.matchAll(/<input\b[^>]*>/gi)) {
+  for (const m of text.slice(0, text.lastIndexOf('>') + 1).matchAll(/<input\b[^>]*>/gi)) { // every match ends by the last `>` (P8)
     const tag = m[0];
     // Accept quoted OR unquoted attribute values (both are valid HTML); the
     // lookbehind stops `data-type="password"` / custom-*-type from matching.
@@ -128,10 +139,10 @@ export function detectAuthBarriers(text) {
 // True if the only captcha <img> evidence is inside a known managed widget
 // (so we do not double-flag reCAPTCHA's own iframe/img as a text captcha).
 function partOfWidget(text, imgCaptcha, isWidget) {
-  if (!imgCaptcha.test(text)) return false;       // matched on phrase, not an img -> not a widget artefact
+  if (!imgCaptcha) return false;       // matched on phrase, not an img -> not a widget artefact
   // If a managed widget is present and there is no standalone captcha <img>
   // outside it, treat the img signal as belonging to the widget.
-  return isWidget.test(text) && !/<img\b[^>]*captcha[^>]*>/i.test(stripWidgets(text));
+  return isWidget.test(text) && !firstImgCaptcha(stripWidgets(text));
 }
 function stripWidgets(text) {
   return text
