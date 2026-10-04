@@ -173,8 +173,28 @@ function collect(inputPath, out = []) {
   return out;
 }
 
+// Offsets where each line starts, computed once per text. lineOf and snippetAt run per
+// finding, and re-splitting the whole file each time cost findings x lines (snapshot
+// 102618: 2,845 findings x 63,247 lines took 112 s, near the 120 s audit timeout, 2026-10-04).
+let lineStartsCache = { text: null, starts: null };
+function lineStarts(text) {
+  if (lineStartsCache.text === text) return lineStartsCache.starts;
+  const starts = [0];
+  for (let i = text.indexOf('\n'); i !== -1; i = text.indexOf('\n', i + 1)) starts.push(i + 1);
+  lineStartsCache = { text, starts };
+  return starts;
+}
+
+// 1-based line of `index`: one more than the number of newlines strictly before it.
 function lineOf(text, index) {
-  return text.slice(0, Math.max(index, 0)).split('\n').length;
+  const starts = lineStarts(text);
+  const limit = Math.max(index, 0);
+  let lo = 0, hi = starts.length - 1; // count starts[k] (k >= 1) with starts[k] - 1 < limit
+  while (lo < hi) {
+    const mid = (lo + hi + 1) >> 1;
+    if (starts[mid] - 1 < limit) lo = mid; else hi = mid - 1;
+  }
+  return lo + 1;
 }
 
 // Decodes character references to their real characters instead of blanking them —
@@ -208,9 +228,12 @@ function decodeCommonEntities(s) {
 const SNIPPET_MAX_CHARS = 300;
 
 function snippetAt(text, index, matchLen = 0) {
-  const lines = text.split('\n');
+  // Lines line-1 .. line+1 (1-based), joined as split('\n').slice(...).join('\n') would.
+  const starts = lineStarts(text);
   const line = lineOf(text, index);
-  const raw = lines.slice(Math.max(0, line - 2), Math.min(lines.length, line + 1)).join('\n').trim();
+  const first = Math.max(0, line - 2);
+  const last = Math.min(starts.length, line + 1) - 1;
+  const raw = text.slice(starts[first], last + 1 < starts.length ? starts[last + 1] - 1 : text.length).trim();
   if (raw.length <= SNIPPET_MAX_CHARS) return raw;
   // Oversized (typically one giant minified line): fall back to a character
   // window centered on the matched text itself instead of the whole line.
@@ -423,6 +446,26 @@ function resolveInlineColor(style, prop) {
   return parseStaticColor(matches[matches.length - 1][1]);
 }
 
+// Flat `prelude { body }` rules of a CSS string, in source order: the same pairs as
+// css.matchAll(/([^{}]+)\{([^{}]*)\}/g), in linear time. That regex retried every brace-free
+// run from each offset when the run ended at `}` rather than `{`, which made multi-MB inline
+// stylesheets quadratic (survey snapshot 100348: 130 s, over the 120 s audit timeout, 2026-10-04).
+// Splitting on braces gives the same answer: a rule is a non-empty segment closed by `{`
+// whose following segment is closed by `}`; scanning resumes after that `}`.
+function cssRuleBlocks(css) {
+  const parts = css.split(/([{}])/); // segment, brace, segment, brace, ..., segment
+  const rules = [];
+  for (let i = 0; i + 3 < parts.length; ) {
+    if (parts[i] !== '' && parts[i + 1] === '{' && parts[i + 3] === '}') {
+      rules.push([parts[i], parts[i + 2]]);
+      i += 4;
+    } else {
+      i += 2;
+    }
+  }
+  return rules;
+}
+
 // Same-FILE <style> blocks only (never a linked stylesheet) -> Map<'.class'|'#id', color|null>
 // per logical property ('color' | 'bg'). A selector redeclared anywhere in the file (even with
 // the same value — ponytail: not worth an equality check for this rare case) becomes null.
@@ -442,8 +485,7 @@ function extractSameFileStyleRules(text) {
     // (`^[.#][\w-]+$`); a compound/descendant/element-qualified/pseudo/attribute selector
     // is simply never recorded — the same "unresolved by omission" treatment as an
     // external class, not a special block (nothing false gets INTO the map either way).
-    for (const ruleMatch of css.matchAll(/([^{}]+)\{([^{}]*)\}/g)) {
-      const [, prelude, body] = ruleMatch;
+    for (const [prelude, body] of cssRuleBlocks(css)) {
       const selectors = prelude.split(',').map((s) => s.trim()).filter((s) => /^[.#][\w-]+$/.test(s));
       for (const selector of selectors) {
         // resolveInlineColor already returns null when both `background` and
@@ -540,8 +582,7 @@ function detectMotionEvidence(text) {
 
   // Same-file <style> block rules.
   for (const styleMatch of text.matchAll(/<style\b[^>]*>([\s\S]*?)<\/style>/gi)) {
-    for (const ruleMatch of styleMatch[1].matchAll(/([^{}]+)\{([^{}]*)\}/g)) {
-      const [, prelude, body] = ruleMatch;
+    for (const [prelude, body] of cssRuleBlocks(styleMatch[1])) {
       if (/@keyframes/i.test(prelude)) continue; // handled above
       if (!isMotionBearing(body)) continue;
 
@@ -1132,7 +1173,10 @@ function scanFile(file, root, stats, findings) {
       if (!visible(m.index)) continue; // scripted string or hidden subtree
       if (/\brole\s*=/.test(m[2]) || /\saria-hidden\s*=\s*["']true/i.test(m[2])) continue; // author-controlled ARIA / hidden from a11y tree
       const inner = listInner(m.index + m[0].length);
-      const cm = inner.match(/^\s*(?:<!--[\s\S]*?-->\s*)*<([a-zA-Z][\w-]*)/);
+      // Each comment body stops at its own `-->` (tempered token). A lazy `[\s\S]*?` body
+      // could also merge adjacent comments, so a window of many comments with no element
+      // after them backtracked exponentially (survey page 106063: >300 s, 2026-10-04).
+      const cm = inner.match(/^\s*(?:<!--(?:(?!-->)[\s\S])*-->\s*)*<([a-zA-Z][\w-]*)/);
       if (!cm) continue; // empty, whitespace-only, or comment-only list — no element child to flag
       const lc = cm[1].toLowerCase();
       if (lc === 'li' || lc === 'script' || lc === 'template') continue;
