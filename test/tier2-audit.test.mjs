@@ -8,7 +8,7 @@ import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { resolve, dirname, join } from 'node:path';
 import { fileURLToPath, pathToFileURL } from 'node:url';
-import { existsSync, mkdtempSync, rmSync, writeFileSync } from 'node:fs';
+import { existsSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { execFileSync } from 'node:child_process';
 import {
@@ -241,12 +241,15 @@ test('fixture: touch-targets.html differs by viewport as designed (18x18 shrink 
   try {
     const results = {};
     for (const vp of TIER2_VIEWPORTS) {
-      const page = await browser.newPage({ viewport: { width: vp.width, height: vp.height } });
+      const context = await browser.newContext({ viewport: { width: vp.width, height: vp.height }, ...vp.emulate });
+      const page = await context.newPage();
       await page.goto(url, { waitUntil: 'load' });
       const targets = await captureTouchTargets(page);
       results[vp.label] = analyzeTouchTargets(targets, vp.label).map((f) => `${f.key}:${f.selector}`).sort();
-      await page.close();
+      await context.close();
     }
+    // the feature level: reflow-320, phone, tablet, laptop (plans/2026-10-17-viewport-tiers.md)
+    assert.deepEqual(Object.keys(results), ['320x720', '360x780', '768x1024', '1280x900']);
     const gapBand = [
       'tier2-touch-target-fail:#gap-fail-a',      // 10x10, centers 20px apart (<24) -> circle-vs-circle intersects
       'tier2-touch-target-fail:#gap-fail-b',
@@ -375,13 +378,18 @@ test('runTier2Audit: a per-viewport capture crash (execution context destroyed b
     chromium: {
       async launch() {
         return {
-          async newPage() {
+          async newContext() {
             return {
-              async route() {},
-              async goto() {},
-              async waitForLoadState() {},
-              async waitForTimeout() {},
-              async evaluate() { throw new Error(crashMessage); },
+              async newPage() {
+                return {
+                  async route() {},
+                  async goto() {},
+                  async waitForLoadState() {},
+                  async waitForTimeout() {},
+                  async evaluate() { throw new Error(crashMessage); },
+                  async close() {},
+                };
+              },
               async close() {},
             };
           },
@@ -414,13 +422,18 @@ test('CLI --output to a not-yet-existing nested directory: parent dirs are creat
 export const chromium = {
   async launch() {
     return {
-      async newPage() {
+      async newContext() {
         return {
-          async route() {},
-          async goto() {},
-          async waitForLoadState() {},
-          async waitForTimeout() {},
-          async evaluate() { return []; },
+          async newPage() {
+            return {
+              async route() {},
+              async goto() {},
+              async waitForLoadState() {},
+              async waitForTimeout() {},
+              async evaluate() { return []; },
+              async close() {},
+            };
+          },
           async close() {},
         };
       },
@@ -435,6 +448,33 @@ export const chromium = {
       stdio: ['ignore', 'pipe', 'pipe'],
     });
     assert.ok(existsSync(out), 'tier2-results.json should exist under the freshly created reports/a11y/ dir');
+  } finally {
+    rmSync(dir, { recursive: true, force: true });
+  }
+});
+
+test('CLI --level: default is feature (4 viewports, engine @3); --level quick narrows to 2; bogus level exits non-zero', () => {
+  const dir = mkdtempSync(join(tmpdir(), 'beacon-tier2-level-'));
+  try {
+    const fakePw = join(dir, 'fake-playwright.mjs');
+    writeFileSync(fakePw, `
+export const chromium = { async launch() { return {
+  async newContext() { return {
+    async newPage() { return { async route() {}, async goto() {}, async waitForLoadState() {}, async waitForTimeout() {}, async evaluate() { return []; }, async close() {} }; },
+    async close() {} }; },
+  async close() {} }; } };
+`);
+    const env = { ...process.env, PLAYWRIGHT_MODULE_PATH: fakePw };
+    const run = (extra) => {
+      const out = join(dir, `out-${extra.join('')}.json`);
+      execFileSync('node', [SCRIPT, '--url', 'http://example.test/fake', '--output', out, ...extra], { env, stdio: 'pipe' });
+      return JSON.parse(readFileSync(out, 'utf8')).metadata;
+    };
+    const def = run([]);
+    assert.equal(def.engine_fingerprint, 'beacon-tier2-audit@3');
+    assert.deepEqual(def.viewports, ['320x720', '360x780', '768x1024', '1280x900']);
+    assert.deepEqual(run(['--level', 'quick']).viewports, ['360x780', '1280x900']);
+    assert.throws(() => run(['--level', 'bogus']));
   } finally {
     rmSync(dir, { recursive: true, force: true });
   }

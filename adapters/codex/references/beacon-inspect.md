@@ -68,7 +68,7 @@ node scripts/static-audit.mjs --scope "<scope>" --output audit-results.json <fil
 
 # Beacon-native Tier 2 browser layer — DEFAULT, no Playwright MCP needed.
 # Plain Playwright, axe-free; measures contrast (1.4.3) + touch-target size
-# (2.5.8) at 320px/1280px. Detects a usable Playwright itself (env override,
+# (2.5.8) across the `feature` viewport set (--level). Detects a usable Playwright itself (env override,
 # then the caller's own project, then known global installs) and fails
 # LOUDLY with an actionable error if none resolves — never a silent fallback.
 # Output is a SEPARATE, findings-only artifact (see Tier 2 section below).
@@ -127,7 +127,7 @@ The three WCAG evidence tiers remain unchanged. Reader-oriented task evidence is
 
 **Tier 2 — Beacon-native browser harness (default):**
 
-`scripts/tier2-audit.mjs` is Beacon's own Tier 2 browser layer: plain Playwright, no axe-core, measuring contrast (WCAG 1.4.3) and touch-target size (WCAG 2.5.8) at 320px and 1280px viewports. This is the default way to get real, browser-rendered contrast/touch evidence — no Playwright MCP tools needed.
+`scripts/tier2-audit.mjs` is Beacon's own Tier 2 browser layer: plain Playwright, no axe-core, measuring contrast (WCAG 1.4.3) and touch-target size (WCAG 2.5.8) at the `feature` viewports (320x720, 360x780, 768x1024, 1280x900; phone and tablet under mobile emulation, 320 unemulated because 1.4.10 is a zoom width, not a device). This is the default way to get real, browser-rendered contrast/touch evidence — no Playwright MCP tools needed.
 
 ```bash
 node scripts/tier2-audit.mjs --url <url-or-file> --output tier2-results.json
@@ -135,7 +135,7 @@ node scripts/tier2-audit.mjs --url <url-or-file> --output tier2-results.json
 
 Playwright availability is detected in order: an explicit `PLAYWRIGHT_MODULE_PATH` env override (authoritative — a bad value fails immediately, no silent fallthrough), then `require.resolve('playwright')` from the caller's own project, then known global npm installs. If none resolves, the script fails LOUDLY with an actionable error (`npm i -g playwright` then `npx playwright install chromium`, or set the env var) — it never degrades silently.
 
-`tier2-results.json` is a SEPARATE artifact from `audit-results.json`: findings and evidence only, each finding carrying its own engine provenance (`source: beacon-tier2-audit@2`). Read and summarize it for the human (Step 3). Whether these categories automatically enter `audit-results.json`'s score and coverage is an intentionally undecided product question — this skill does not do that today. If a specific tier-2 finding should count toward the score anyway, feed it through the SAME `--merge-findings` mechanism already used for axe/manual findings (Step 6) — that is the existing, generic, manual mechanism, not new scoring machinery.
+`tier2-results.json` is a SEPARATE artifact from `audit-results.json`: findings and evidence only, each finding carrying its own engine provenance (`source: beacon-tier2-audit@3`). Read and summarize it for the human (Step 3). Whether these categories automatically enter `audit-results.json`'s score and coverage is an intentionally undecided product question — this skill does not do that today. If a specific tier-2 finding should count toward the score anyway, feed it through the SAME `--merge-findings` mechanism already used for axe/manual findings (Step 6) — that is the existing, generic, manual mechanism, not new scoring machinery.
 
 **Reader-oriented task evidence (separate from the score):**
 
@@ -387,10 +387,20 @@ Carry these caveats into the report (the extractor already embeds them):
 Before the category review, run the rendered Design QA gate when a page or local HTML artifact is available:
 
 ```bash
-node scripts/design-qa.mjs --url <url-or-file> --output reports/design-qa/design-qa-round-1.json
+node scripts/design-qa.mjs --level full --url <url-or-file> --output reports/design-qa/design-qa-round-1.json
 ```
 
-The gate captures light/dark screenshots at 320/768/1024/1280/1440/1742/1920 and records document/element horizontal overflow, crushed primary text columns, forbidden MingLiU fallbacks, page errors, and console errors. Exit `2` is blocking evidence; exit `3` means incomplete capture. Exit `0` is only a machine pass. Actual 200% browser zoom, viewport-level dead space, every supported locale/state, and human visual quality remain required manual checks; CSS zoom, DPR, device scale factor, or screenshots alone are not substitutes.
+Check levels (`core/scripts/viewport-tiers.mjs`; both `design-qa.mjs` and `tier2-audit.mjs` take `--level`, and levels nest):
+
+| Level | Runs | Viewports | Schemes |
+|---|---|---|---|
+| `quick` | automatically before an agent reports done (UI gate hook, `scripts/beacon-ui-gate.mjs`) | 360x780, 1280x900 | light |
+| `feature` | automatically before a commit (same hook); tier-2 default | quick + 320x720, 768x1024 | light, dark |
+| `full` | only on explicit `/beacon:inspect`; design-qa default | feature + 390x844, 744x860, 844x390, 1920x1080 | light, dark |
+
+Phone, tablet, and foldable viewports run under Playwright mobile emulation (touch, DPR, device UA); 320x720 and the desktop widths do not. `/beacon:inspect` uses `--level full` for both scripts.
+
+The gate captures light/dark screenshots at the level's viewports and records document/element horizontal overflow, crushed primary text columns, forbidden MingLiU fallbacks, page errors, and console errors. Exit `2` is blocking evidence; exit `3` means incomplete capture. Exit `0` is only a machine pass. Actual 200% browser zoom, viewport-level dead space, every supported locale/state, and human visual quality remain required manual checks; CSS zoom, DPR, device scale factor, or screenshots alone are not substitutes.
 
 Within an authorized implementation task, fix the smallest root cause and rerun, keeping each JSON round. Stop after three correction rounds, or earlier when the same blocker repeats without new evidence. Do not change product intent, user tasks, content, or design direction merely to make the gate pass; surface that choice.
 

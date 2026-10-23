@@ -52,7 +52,7 @@ Updated after each step. This is the live "how far have we got" line.
 - **Evidence states**: scored categories carry a number; unmeasured categories report `not-machine-checkable` or `not-applicable`; 1–2 checks are explicitly marked `thin`
 - **Coverage-derived confidence**: every overall score carries measured-weight coverage; static-only confidence never exceeds medium and insufficient runtime evidence sets `requires_live_audit: true`
 - **Pedagogical demo detection**: deliberately-bad examples in educational pages excluded from scoring
-- **Design QA gate**: `scripts/design-qa.mjs` records light/dark screenshots at 320/768/1024/1280/1440/1742/1920, machine-checks layout blockers, and preserves the remaining manual checks instead of claiming visual approval
+- **Design QA gate**: `scripts/design-qa.mjs` records light/dark screenshots at three check levels (quick 360/1280, feature +320/768, full +390/744/844/1920; phone widths under mobile emulation), machine-checks layout blockers, and preserves the remaining manual checks instead of claiming visual approval
 
 ### Recently shipped (this iteration)
 

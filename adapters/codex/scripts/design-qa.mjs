@@ -4,11 +4,11 @@ import { mkdirSync, writeFileSync } from 'node:fs';
 import { basename, dirname, resolve } from 'node:path';
 import { pathToFileURL } from 'node:url';
 import { loadPlaywright } from './tier2-audit.mjs';
+import { LEVELS, schemesForLevel, viewportsForLevel } from './viewport-tiers.mjs';
 
-export const DESIGN_QA_VIEWPORTS = [320, 768, 1024, 1280, 1440, 1742, 1920]
-  .map(width => ({ width, height: 900, label: `${width}px` }));
+export const DESIGN_QA_VIEWPORTS = viewportsForLevel('full');
 
-const ENGINE = 'beacon-design-qa@1';
+const ENGINE = 'beacon-design-qa@2';
 
 function check(id, status, evidence) {
   return { id, status, evidence };
@@ -94,7 +94,7 @@ async function captureSnapshot(page, pageErrors, consoleErrors) {
   return { ...snapshot, page_errors: pageErrors, console_errors: consoleErrors };
 }
 
-export async function runDesignQa({ url, screenshotDir = 'reports/design-qa/screenshots', date, playwrightModule, viewports = DESIGN_QA_VIEWPORTS, schemes = ['light', 'dark'] } = {}) {
+export async function runDesignQa({ url, screenshotDir = 'reports/design-qa/screenshots', date, playwrightModule, level = 'full', viewports = viewportsForLevel(level), schemes = schemesForLevel(level) } = {}) {
   const pw = playwrightModule || await loadPlaywright();
   const browser = await pw.chromium.launch({ headless: true });
   const target = loadableUrl(url);
@@ -103,14 +103,16 @@ export async function runDesignQa({ url, screenshotDir = 'reports/design-qa/scre
   try {
     for (const scheme of schemes) {
       for (const viewport of viewports) {
-        const page = await browser.newPage({ viewport });
+        const { width, height, emulate } = viewport;
         const pageErrors = [];
         const consoleErrors = [];
-        page.on('pageerror', error => pageErrors.push(String(error.message || error)));
-        page.on('console', message => { if (message.type() === 'error') consoleErrors.push(message.text()); });
         const screenshot = resolve(screenshotDir, `${scheme}-${viewport.width}.png`);
+        let context;
         try {
-          await page.emulateMedia({ colorScheme: scheme });
+          context = await browser.newContext({ viewport: { width, height }, colorScheme: scheme, ...emulate });
+          const page = await context.newPage();
+          page.on('pageerror', error => pageErrors.push(String(error.message || error)));
+          page.on('console', message => { if (message.type() === 'error') consoleErrors.push(message.text()); });
           await page.goto(target, { waitUntil: 'domcontentloaded' });
           await page.waitForLoadState('load', { timeout: 5000 }).catch(() => {});
           await page.waitForTimeout(500);
@@ -121,7 +123,7 @@ export async function runDesignQa({ url, screenshotDir = 'reports/design-qa/scre
         } catch (error) {
           runs.push({ scheme, viewport: viewport.label, screenshot: null, error: String(error.message || error), checks: [] });
         } finally {
-          await page.close();
+          if (context) await context.close();
         }
       }
     }
@@ -133,7 +135,8 @@ export async function runDesignQa({ url, screenshotDir = 'reports/design-qa/scre
       date: date || new Date().toISOString().slice(0, 10),
       url,
       engine_fingerprint: ENGINE,
-      viewports: viewports.map(item => item.width),
+      level,
+      viewports: viewports.map(item => item.label),
       color_schemes: schemes,
     },
     summary: summarizeRuns(runs),
@@ -142,15 +145,16 @@ export async function runDesignQa({ url, screenshotDir = 'reports/design-qa/scre
 }
 
 function usage() {
-  console.error('Usage: node design-qa.mjs --url <url-or-file> [--output design-qa.json] [--screenshots dir] [--date yyyy-mm-dd]');
+  console.error('Usage: node design-qa.mjs --url <url-or-file> [--level quick|feature|full] [--output design-qa.json] [--screenshots dir] [--date yyyy-mm-dd]');
   process.exit(1);
 }
 
 function parseArgs(argv) {
-  const options = { url: null, output: 'reports/design-qa/design-qa.json', screenshotDir: 'reports/design-qa/screenshots', date: null };
+  const options = { url: null, level: 'full', output: 'reports/design-qa/design-qa.json', screenshotDir: 'reports/design-qa/screenshots', date: null };
   for (let index = 0; index < argv.length; index++) {
     const arg = argv[index];
     if (arg === '--url') options.url = argv[++index] || usage();
+    else if (arg === '--level') options.level = LEVELS.includes(argv[index + 1]) ? argv[++index] : usage();
     else if (arg === '--output') options.output = argv[++index] || usage();
     else if (arg === '--screenshots') options.screenshotDir = argv[++index] || usage();
     else if (arg === '--date') options.date = argv[++index] || usage();
