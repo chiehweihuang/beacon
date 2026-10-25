@@ -6,6 +6,10 @@ import { join } from 'node:path';
 import { execFileSync } from 'node:child_process';
 import { loadPlaywright } from '../core/scripts/tier2-audit.mjs';
 
+// Same loud skip as tier2-audit.test.mjs: no Playwright on this machine means skip, not red.
+let pwAvailable = true;
+try { await loadPlaywright(); } catch { pwAvailable = false; }
+
 test('all three generator surfaces preserve audit input and produce identical standalone HTML', () => {
   const dir = mkdtempSync(join(tmpdir(), 'beacon-report-modules-'));
   const input = 'docs/reports/broken-fixture.json';
@@ -31,7 +35,7 @@ test('all three generator surfaces preserve audit input and produce identical st
   } finally { rmSync(dir, { recursive: true, force: true }); }
 });
 
-test('evidence hover, focus, geometry and state labels work in both themes and languages', async () => {
+test('evidence hover, focus, geometry and state labels work in both themes and languages', { skip: !pwAvailable && 'tier2: playwright unavailable on this machine' }, async () => {
   const pw = await loadPlaywright();
   const browser = await pw.chromium.launch({headless:true});
   try {
