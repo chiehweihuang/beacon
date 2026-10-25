@@ -206,7 +206,7 @@ test('--write-ops changes exactly the triage issues file and the improvement sum
   const b2 = new Map(tree(s2.ops));
   const r = validate(s2, ['--write-ops']);
   assert.equal(r.status, 0, r.stderr);
-  const changed = tree(s2.ops).filter(([p, h]) => b2.get(p) !== h).map(([p]) => p.slice(s2.ops.length + 1));
+  const changed = tree(s2.ops).filter(([p, h]) => b2.get(p) !== h).map(([p]) => p.slice(s2.ops.length + 1).replaceAll('\\', '/'));
   assert.deepEqual(changed, [`quality/improvement/${s2.id}.json`, 'quality/issues.json']);
   const issue = JSON.parse(readFileSync(join(s2.ops, 'quality', 'issues.json'))).issues[0];
   assert.equal(issue.status, 'reproduced');
@@ -294,7 +294,7 @@ test('M1: --write-ops on an already validated candidate performs the ops write',
   const r = validate(s, ['--write-ops']);
   assert.equal(r.status, 0, r.stderr);
   assert.equal(r.out.already, true);
-  const changed = tree(s.ops).filter(([p, h]) => before.get(p) !== h).map(([p]) => p.slice(s.ops.length + 1));
+  const changed = tree(s.ops).filter(([p, h]) => before.get(p) !== h).map(([p]) => p.slice(s.ops.length + 1).replaceAll('\\', '/'));
   assert.deepEqual(changed, [`quality/improvement/${s.id}.json`, 'quality/issues.json']);
   const snap = tree(s.ops);
   validate(s, ['--write-ops']);
