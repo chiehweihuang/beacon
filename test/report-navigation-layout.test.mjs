@@ -3,7 +3,11 @@ import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
 import { loadPlaywright } from '../core/scripts/tier2-audit.mjs';
 
-test('report steps align after navigation and languages share header geometry', async () => {
+// Same loud skip as tier2-audit.test.mjs: no Playwright on this machine means skip, not red.
+let pwAvailable = true;
+try { await loadPlaywright(); } catch { pwAvailable = false; }
+
+test('report steps align after navigation and languages share header geometry', { skip: !pwAvailable && 'tier2: playwright unavailable on this machine' }, async () => {
   const pw=await loadPlaywright();
   const browser=await pw.chromium.launch({headless:true});
   try {
