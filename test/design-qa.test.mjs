@@ -4,6 +4,7 @@ import { execFileSync } from 'node:child_process';
 import { existsSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
+import { fileURLToPath } from 'node:url';
 
 import { DESIGN_QA_VIEWPORTS, classifySnapshot, runDesignQa, summarizeRuns } from '../core/scripts/design-qa.mjs';
 import { viewportsForLevel } from '../core/scripts/viewport-tiers.mjs';
@@ -98,7 +99,7 @@ export const chromium = { async launch() { return {
   async close() {} }; } };
 `);
     const out = join(dir, 'o', 'dq.json');
-    const script = new URL('../core/scripts/design-qa.mjs', import.meta.url).pathname;
+    const script = fileURLToPath(new URL('../core/scripts/design-qa.mjs', import.meta.url));
     const env = { ...process.env, PLAYWRIGHT_MODULE_PATH: fakePw };
     execFileSync('node', [script, '--url', 'http://example.test', '--level', 'quick', '--output', out, '--screenshots', join(dir, 's')], { env, stdio: 'pipe' });
     assert.ok(existsSync(out));
