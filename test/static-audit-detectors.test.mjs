@@ -13,14 +13,14 @@ import { execFileSync } from 'node:child_process';
 const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), '..');
 const SCANNER = resolve(ROOT, 'core/scripts/static-audit.mjs');
 
-function runScanner(html) {
+function runScanner(html, { timeout } = {}) {
   const dir = mkdtempSync(join(tmpdir(), 'beacon-detok-'));
   try {
     const fixture = join(dir, 'page.html');
     const out = join(dir, 'audit-results.json');
     writeFileSync(fixture, html);
     execFileSync('node', [SCANNER, '--scope', 'detector-test', '--output', out, fixture], {
-      stdio: ['ignore', 'pipe', 'pipe'], cwd: dir,
+      stdio: ['ignore', 'pipe', 'pipe'], cwd: dir, timeout,
     });
     return JSON.parse(readFileSync(out, 'utf8').replace(/\r\n?/g, '\n'));
   } finally {
@@ -213,6 +213,52 @@ test('list: a real non-li child right after a comment-only sibling list still fl
 <ul class="b"><div>real bad child</div></ul>
 </main></body></html>`);
   assert.equal(findingsMatching(audit, /list/i, /1\.3\.1/).length, 1, 'the second list has a genuine non-li child and must still flag exactly once');
+});
+
+// Regression (2026-10-04, survey snapshot 106063 and three 5 MB pages): a list
+// whose 4000-char window opens with many comments and is cut before any element made the
+// leading-comment skip `(?:<!--[\s\S]*?-->\s*)*` backtrack exponentially, because the lazy
+// body could merge adjacent comments. The scan never finished (>300 s on one page).
+const commentRun = (n) => Array.from({ length: n }, (_, i) => `<!-- <g><path d="M${i},0"/></g> -->\n`).join('');
+test('list: a long run of leading comments cut by the scan window finishes quickly and does not flag', () => {
+  const audit = runScanner(`<!DOCTYPE html><html lang="en"><head><title>t</title>
+<meta name="viewport" content="width=device-width, initial-scale=1"></head><body><main>
+<ul>${commentRun(60)}<!-- ${'x'.repeat(5000)} --><li>a</li></ul>
+</main></body></html>`, { timeout: 10000 });
+  assert.equal(findingsMatching(audit, /list/i, /1\.3\.1/).length, 0, 'no element child inside the window, so nothing to flag');
+});
+// The tempered comment token is deliberate: a stray `-->` after a closed comment is a text
+// node, so the list's first child is text and the list is not flagged. The previous lazy body
+// stretched the comment across the stray `-->` and reported the following <div>.
+test('list: a stray --> after a comment is text, not part of the comment', () => {
+  const audit = runScanner(`<!DOCTYPE html><html lang="en"><head><title>t</title>
+<meta name="viewport" content="width=device-width, initial-scale=1"></head><body><main>
+<ul><!-- a --> stray --> <div>x</div></ul>
+<ul><!-- a --><div>flagged</div></ul>
+</main></body></html>`);
+  assert.equal(findingsMatching(audit, /list/i, /1\.3\.1/).length, 1, 'only the list whose first child is an element flags');
+});
+test('list: a non-li child after a long run of comments still flags', () => {
+  const audit = runScanner(`<!DOCTYPE html><html lang="en"><head><title>t</title>
+<meta name="viewport" content="width=device-width, initial-scale=1"></head><body><main>
+<ul>${commentRun(60)}<div>bad</div></ul>
+<ol>${commentRun(60)}<li>ok</li></ol>
+</main></body></html>`, { timeout: 10000 });
+  assert.equal(findingsMatching(audit, /list/i, /1\.3\.1/).length, 1, 'only the <ul> whose first element child is <div> flags');
+});
+
+// Regression (2026-10-04, survey snapshot 102618: 2,845 findings x 63,247 lines, 112 s):
+// line numbers and evidence snippets re-split the whole file for every finding.
+test('locations: many findings in a many-line file resolve lines without re-splitting per finding', () => {
+  const filler = '<p>x</p>\n'.repeat(60000);
+  const items = Array.from({ length: 2500 }, (_, i) => `<div onclick="go(${i})">item</div>\n`).join('');
+  const audit = runScanner(`<!DOCTYPE html><html lang="en"><head><title>t</title>
+<meta name="viewport" content="width=device-width, initial-scale=1"></head><body><main>
+${filler}${items}</main></body></html>`, { timeout: 8000 });
+  const hits = audit.findings.filter((f) => f.key === 'clickable-non-button');
+  assert.equal(hits.length, 2500);
+  assert.equal(hits[0].location.split(':').pop(), '60003', 'first item sits after 2 header lines + 60,000 filler lines');
+  assert.match(hits[0].code_before, /go\(0\)/);
 });
 
 test('AEO: missing canonical and JSON-LD produce actionable findings', () => {
@@ -1002,6 +1048,20 @@ test('motion: animation shorthand with the name buried mid-token-list ("1s ease-
     .spinner{animation:1s ease-in spin;}</style>
     <main><div class="spinner"></div></main>
   `));
+  assert.equal(motionFindings(audit).length, 1);
+});
+
+// Regression (2026-10-04, survey snapshot 100348 and three 5 MB survey pages, 125-220 s each): the
+// same-file CSS rule scan `([^{}]+)\{([^{}]*)\}` retried a long brace-free run from every
+// offset when it ended at `}` instead of `{`, so large inline stylesheets scanned in
+// quadratic time and blew the 120 s audit timeout.
+test('css rules: a long brace-free run before a stray } scans in linear time and later rules still count', () => {
+  const audit = runScanner(framePage(`
+    <style>${'a'.repeat(300000)}}
+    @keyframes spin{from{transform:translateX(0)}to{transform:translateX(100px)}}
+    .spinner{animation:1s spin;}</style>
+    <main><div class="spinner"></div></main>
+  `), { timeout: 10000 });
   assert.equal(motionFindings(audit).length, 1);
 });
 

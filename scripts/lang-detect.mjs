@@ -13,6 +13,8 @@
 // incompatible with the declared language", not "which family is dominant".
 // Calibrated on a 9-real + 9-synthetic set: 0 hard FP, 0 hard FN.
 
+import { lazyBlocks, replaceBlocks } from './attr-scan.mjs';
+
 const MIN_SAMPLE = 200;   // meaningful chars needed to judge at all
 const LATIN_DOM  = 0.60;  // latin share to call a CJK-declared page latin-dominant
 const KANA_HINT  = 0.02;  // >2% kana among content => Japanese, not Chinese
@@ -56,14 +58,20 @@ function safeFromCodePoint(n) {
 
 // Strip script/style/svg/comments and tags; decode entities; collapse whitespace.
 // Idempotent enough to also accept already-plain text.
+// Each step equals .replace(/<X[\s\S]*?<\/X>/gi, ' ') (comments: /<!--[\s\S]*?-->/g), but an
+// unclosed opener ends that scan instead of being retried to EOF from every later opener;
+// the tag strip runs only up to the last `>`, where every `<[^>]+>` match ends (perf audit
+// 2026-10-04, P5/P8).
+const BLOCK_STRIPS = [
+  [/<script/gi, /<\/script>/gi], [/<style/gi, /<\/style>/gi], [/<noscript/gi, /<\/noscript>/gi],
+  [/<svg/gi, /<\/svg>/gi], [/<!--/g, /-->/g],
+];
 export function extractText(html) {
-  const noBlocks = String(html)
-    .replace(/<script[\s\S]*?<\/script>/gi, ' ')
-    .replace(/<style[\s\S]*?<\/style>/gi, ' ')
-    .replace(/<noscript[\s\S]*?<\/noscript>/gi, ' ')
-    .replace(/<svg[\s\S]*?<\/svg>/gi, ' ')
-    .replace(/<!--[\s\S]*?-->/g, ' ');
-  return decodeEntities(noBlocks.replace(/<[^>]+>/g, ' ')).replace(/\s+/g, ' ').trim();
+  let noBlocks = String(html);
+  for (const [open, close] of BLOCK_STRIPS) noBlocks = replaceBlocks(noBlocks, lazyBlocks(noBlocks, open, close), () => ' ');
+  const lastGt = noBlocks.lastIndexOf('>') + 1;
+  const noTags = noBlocks.slice(0, lastGt).replace(/<[^>]+>/g, ' ') + noBlocks.slice(lastGt);
+  return decodeEntities(noTags).replace(/\s+/g, ' ').trim();
 }
 
 function countScripts(text) {

@@ -13,7 +13,7 @@ import { detectAuthBarriers, detectAuthBarriersInSource } from './auth-detect.mj
 import { assessPdf } from './pdf-detect.mjs';
 import { detectQualityFlags } from './quality-detect.mjs';
 import { parseColor, relLuminance, contrastRatio } from './tier2-audit.mjs';
-import { attrState, parseStartTag } from './attr-scan.mjs';
+import { attrState, parseStartTag, lazyBlocks, replaceBlocks, tagMatchAll } from './attr-scan.mjs';
 import { normalizeReaderEvidence } from './reader-task-audit.mjs';
 import { legalExposureFor } from './jurisdictions.mjs';
 
@@ -173,8 +173,28 @@ function collect(inputPath, out = []) {
   return out;
 }
 
+// Offsets where each line starts, computed once per text. lineOf and snippetAt run per
+// finding, and re-splitting the whole file each time cost findings x lines (snapshot
+// 102618: 2,845 findings x 63,247 lines took 112 s, near the 120 s audit timeout, 2026-10-04).
+let lineStartsCache = { text: null, starts: null };
+function lineStarts(text) {
+  if (lineStartsCache.text === text) return lineStartsCache.starts;
+  const starts = [0];
+  for (let i = text.indexOf('\n'); i !== -1; i = text.indexOf('\n', i + 1)) starts.push(i + 1);
+  lineStartsCache = { text, starts };
+  return starts;
+}
+
+// 1-based line of `index`: one more than the number of newlines strictly before it.
 function lineOf(text, index) {
-  return text.slice(0, Math.max(index, 0)).split('\n').length;
+  const starts = lineStarts(text);
+  const limit = Math.max(index, 0);
+  let lo = 0, hi = starts.length - 1; // count starts[k] (k >= 1) with starts[k] - 1 < limit
+  while (lo < hi) {
+    const mid = (lo + hi + 1) >> 1;
+    if (starts[mid] - 1 < limit) lo = mid; else hi = mid - 1;
+  }
+  return lo + 1;
 }
 
 // Decodes character references to their real characters instead of blanking them —
@@ -208,9 +228,12 @@ function decodeCommonEntities(s) {
 const SNIPPET_MAX_CHARS = 300;
 
 function snippetAt(text, index, matchLen = 0) {
-  const lines = text.split('\n');
+  // Lines line-1 .. line+1 (1-based), joined as split('\n').slice(...).join('\n') would.
+  const starts = lineStarts(text);
   const line = lineOf(text, index);
-  const raw = lines.slice(Math.max(0, line - 2), Math.min(lines.length, line + 1)).join('\n').trim();
+  const first = Math.max(0, line - 2);
+  const last = Math.min(starts.length, line + 1) - 1;
+  const raw = text.slice(starts[first], last + 1 < starts.length ? starts[last + 1] - 1 : text.length).trim();
   if (raw.length <= SNIPPET_MAX_CHARS) return raw;
   // Oversized (typically one giant minified line): fall back to a character
   // window centered on the matched text itself instead of the whole line.
@@ -270,26 +293,72 @@ function isHiddenAttrs(attrs) {
   return /display\s*:\s*none|visibility\s*:\s*hidden/i.test(parsed.get('style') || '');
 }
 
+// `some range in ranges contains i`, the predicate every detector runs once per match. A
+// linear ranges.some(...) cost matches x ranges (snapshot 102618: ~3,700 ranges x 44,432
+// tags, 12.6 s, perf audit 2026-10-04 P1). Binary search over ranges sorted by start, with
+// a running max of ends, answers exactly like .some() even if ranges overlapped.
+function makeRangeTest(ranges) {
+  const sorted = ranges.every((r, k) => k === 0 || ranges[k - 1][0] <= r[0]) ? ranges : [...ranges].sort((a, b) => a[0] - b[0]);
+  const starts = sorted.map(([s]) => s);
+  const maxEnds = [];
+  let maxEnd = -Infinity;
+  for (const [, e] of sorted) maxEnds.push(maxEnd = Math.max(maxEnd, e));
+  return (i) => {
+    let lo = 0, hi = starts.length - 1, k = -1; // k: last range starting at or before i
+    while (lo <= hi) {
+      const mid = (lo + hi) >> 1;
+      if (starts[mid] <= i) { k = mid; lo = mid + 1; } else hi = mid - 1;
+    }
+    return k >= 0 && i < maxEnds[k];
+  };
+}
+
+// Every match of a `…>`-terminated tag regex ends at or before the last `>` in the text, so
+// scanning only up to there gives the same matches (same indices) — while a truncated page
+// with no `>` left no longer makes each `<tag` candidate run its `[^>]*` to EOF (P8).
+// Same matches as text.matchAll(pattern) for a sticky pattern that starts with `<img` and
+// ends with `>`: try each `<img` start in order, resume after a hit, and stop at the last `>`
+// because a later start can never reach a closing `>`.
+function* imgCandidates(text, pattern) {
+  const lastGt = text.lastIndexOf('>'), start = /<img\b/gi;
+  for (let m = start.exec(text); m && m.index < lastGt; m = start.exec(text)) {
+    pattern.lastIndex = m.index;
+    const hit = pattern.exec(text);
+    if (hit) start.lastIndex = hit.index + hit[0].length;
+    if (hit) yield hit;
+  }
+}
+
+function upToLastGt(text) {
+  return text.slice(0, text.lastIndexOf('>') + 1);
+}
+
 // `maskedRanges` (script/style bodies + HTML comments; see scanFile) hides tag tokens
 // that are not real elements — a JS string or a comment containing tag-shaped text must
 // not open/close a range. Defaults to none so other callers/tests are unaffected.
 function computeHiddenRanges(text, maskedRanges = []) {
-  const inMasked = (i) => maskedRanges.some(([s, e]) => i >= s && i < e);
+  const inMasked = makeRangeTest(maskedRanges);
   const ranges = [];
   const stack = []; // open non-void elements: { tag, hidden }
+  const openCount = new Map(); // tag -> how many are on the stack (a stray close skips the search)
   let hiddenDepth = 0;
   let hiddenStart = -1;
-  const re = /<(\/?)([a-zA-Z][\w-]*)((?:"[^"]*"|'[^']*'|[^>"'])*)>/g;
+  // `(?![\w-])` ends the name where the old greedy `[\w-]*` did; without it a long name with
+  // no `>` was retried at every split against the attribute group (P7).
+  const re = /<(\/?)([a-zA-Z][\w-]*)(?![\w-])((?:"[^"]*"|'[^']*'|[^>"'])*)>/g;
+  const scan = upToLastGt(text);
   let m;
-  while ((m = re.exec(text))) {
+  while ((m = re.exec(scan))) {
     if (inMasked(m.index)) continue;
     const [full, close, rawTag, attrs] = m;
     const tag = rawTag.toLowerCase();
     if (tag === 'script' || tag === 'style') continue; // masked separately (inMasked)
     if (close) {
+      if (!openCount.get(tag)) continue; // the search below would find nothing (P6)
       for (let i = stack.length - 1; i >= 0; i--) {
         if (stack[i].tag !== tag) continue;
         for (const popped of stack.splice(i)) {
+          openCount.set(popped.tag, openCount.get(popped.tag) - 1);
           if (!popped.hidden) continue;
           hiddenDepth -= 1;
           if (hiddenDepth === 0) { ranges.push([hiddenStart, m.index + full.length]); hiddenStart = -1; }
@@ -306,6 +375,7 @@ function computeHiddenRanges(text, maskedRanges = []) {
     }
     if (hidden) { hiddenDepth += 1; if (hiddenDepth === 1) hiddenStart = m.index; }
     stack.push({ tag, hidden });
+    openCount.set(tag, (openCount.get(tag) || 0) + 1);
   }
   // KEEP: an unclosed inline-hidden element hides the rest of the document to EOF. This is
   // not a bug — a real unclosed hidden element does swallow subsequent content in browsers
@@ -331,13 +401,14 @@ function computeHiddenRanges(text, maskedRanges = []) {
 // self-closing <label/> wraps nothing, and an unclosed <label> does NOT credit the rest of
 // the page — a maybe-open label must never manufacture a pass or suppress a real fail.
 function computeLabelRanges(text, maskedRanges = []) {
-  const inMasked = (i) => maskedRanges.some(([s, e]) => i >= s && i < e);
+  const inMasked = makeRangeTest(maskedRanges);
   const ranges = [];
   let depth = 0;
   let start = -1;
   const re = /<(\/?)label\b((?:"[^"]*"|'[^']*'|[^>"'])*)>/gi;
+  const scan = upToLastGt(text);
   let m;
-  while ((m = re.exec(text))) {
+  while ((m = re.exec(scan))) {
     if (inMasked(m.index)) continue;
     const [, close, attrs] = m;
     if (close) {
@@ -378,7 +449,7 @@ const STATIC_CONTRAST_MIN = 4.5;
 // WCAG 1.4.11 Non-text Contrast — applies to a PUA-glyph icon node instead of 1.4.3's
 // 4.5:1 (see the PUA-detection branch below).
 const NON_TEXT_CONTRAST_MIN = 3;
-const TAG_ATTRS_RE = /<(\/?)([a-zA-Z][\w-]*)((?:"[^"]*"|'[^']*'|[^>"'])*)>/g;
+const TAG_ATTRS_RE = /<(\/?)([a-zA-Z][\w-]*)(?![\w-])((?:"[^"]*"|'[^']*'|[^>"'])*)>/g; // lookahead: see computeHiddenRanges (P7)
 
 function attrValue(attrs, name) {
   const m = attrs.match(new RegExp(`\\b${name}\\s*=\\s*("([^"]*)"|'([^']*)')`, 'i'));
@@ -423,6 +494,32 @@ function resolveInlineColor(style, prop) {
   return parseStaticColor(matches[matches.length - 1][1]);
 }
 
+// Flat `prelude { body }` rules of a CSS string, in source order: the same pairs as
+// css.matchAll(/([^{}]+)\{([^{}]*)\}/g), in linear time. That regex retried every brace-free
+// run from each offset when the run ended at `}` rather than `{`, which made multi-MB inline
+// stylesheets quadratic (survey snapshot 100348: 130 s, over the 120 s audit timeout, 2026-10-04).
+// Splitting on braces gives the same answer: a rule is a non-empty segment closed by `{`
+// whose following segment is closed by `}`; scanning resumes after that `}`.
+function cssRuleBlocks(css) {
+  const parts = css.split(/([{}])/); // segment, brace, segment, brace, ..., segment
+  const rules = [];
+  for (let i = 0; i + 3 < parts.length; ) {
+    if (parts[i] !== '' && parts[i + 1] === '{' && parts[i + 3] === '}') {
+      rules.push([parts[i], parts[i + 2]]);
+      i += 4;
+    } else {
+      i += 2;
+    }
+  }
+  return rules;
+}
+
+// Bodies of <style> blocks, as text.matchAll(/<style\b[^>]*>([\s\S]*?)<\/style>/gi) gives
+// them, without rescanning to EOF from every unclosed <style> (P5).
+function styleBodies(text) {
+  return lazyBlocks(text, /<style\b/gi, /<\/style>/gi, { untilGt: true }).map((b) => text.slice(b.bodyStart, b.bodyEnd));
+}
+
 // Same-FILE <style> blocks only (never a linked stylesheet) -> Map<'.class'|'#id', color|null>
 // per logical property ('color' | 'bg'). A selector redeclared anywhere in the file (even with
 // the same value — ponytail: not worth an equality check for this rare case) becomes null.
@@ -432,8 +529,8 @@ function extractSameFileStyleRules(text) {
     if (map.has(selector)) map.set(selector, null); // redeclared -> ambiguous
     else map.set(selector, value === undefined ? null : value);
   };
-  for (const styleMatch of text.matchAll(/<style\b[^>]*>([\s\S]*?)<\/style>/gi)) {
-    const css = stripAtMedia(styleMatch[1]);
+  for (const styleBody of styleBodies(text)) {
+    const css = stripAtMedia(styleBody);
     // Capture the FULL prelude before `{` (hakuso HIGH, 2026-07-25): matching only a
     // trailing `[.#][\w-]+` token let `.c2a.c2b`, `.parent .child`, and `div.c4` get
     // mis-recorded under their bare tail token, resolving on ANY element carrying just
@@ -442,8 +539,7 @@ function extractSameFileStyleRules(text) {
     // (`^[.#][\w-]+$`); a compound/descendant/element-qualified/pseudo/attribute selector
     // is simply never recorded — the same "unresolved by omission" treatment as an
     // external class, not a special block (nothing false gets INTO the map either way).
-    for (const ruleMatch of css.matchAll(/([^{}]+)\{([^{}]*)\}/g)) {
-      const [, prelude, body] = ruleMatch;
+    for (const [prelude, body] of cssRuleBlocks(css)) {
       const selectors = prelude.split(',').map((s) => s.trim()).filter((s) => /^[.#][\w-]+$/.test(s));
       for (const selector of selectors) {
         // resolveInlineColor already returns null when both `background` and
@@ -480,16 +576,25 @@ function transitionValueIsMotion(value) {
 // known ceiling — it does not verify the full ancestor chain (`details summary x` only
 // checks `x`, not that a real `<details>` ancestor exists) — upgrade to a real selector
 // engine if that gap starts producing wrong verdicts on real pages.
-function motionSelectorReachable(selector, bodyText) {
+// `memo` (one Map per document) caches each token's answer: thousands of rules repeat the same
+// few tokens, and each test is a whole-document regex scan (snapshot 103898: 4,765 rules,
+// 9.8 s; P2). Kept as a per-token regex on purpose, not an exact class-token set, so that
+// `\bC\b` still matches inside `x-C-y` exactly as before.
+function motionSelectorReachable(selector, bodyText, memo = new Map()) {
+  const occurs = (key, source) => {
+    let hit = memo.get(key);
+    if (hit === undefined) memo.set(key, hit = new RegExp(source, 'i').test(bodyText));
+    return hit;
+  };
   const normalized = String(selector).trim().replace(/\s*[>+~]\s*/g, ' ');
   const rightmost = normalized.split(/\s+/).filter(Boolean).pop() || '';
   const clean = rightmost.replace(/:[\w-]+(?:\([^)]*\))?/g, ''); // strip :hover, :nth-child(), etc.
   const tag = clean.match(/^[a-zA-Z][\w-]*/)?.[0];
   const classes = [...clean.matchAll(/\.([\w-]+)/g)].map((m) => m[1]);
   const attrs = [...clean.matchAll(/\[([\w-]+)/g)].map((m) => m[1]);
-  if (tag && tag !== '*' && !new RegExp(`<${tag}\\b`, 'i').test(bodyText)) return false;
-  for (const c of classes) if (!new RegExp(`\\bclass\\s*=\\s*["'][^"']*\\b${c}\\b`, 'i').test(bodyText)) return false;
-  for (const a of attrs) if (!new RegExp(`[\\s<]${a}\\s*[=\\]]`, 'i').test(bodyText)) return false;
+  if (tag && tag !== '*' && !occurs(`t ${tag}`, `<${tag}\\b`)) return false;
+  for (const c of classes) if (!occurs(`c ${c}`, `\\bclass\\s*=\\s*["'][^"']*\\b${c}\\b`)) return false;
+  for (const a of attrs) if (!occurs(`a ${a}`, `[\\s<]${a}\\s*[=\\]]`)) return false;
   return true;
 }
 
@@ -511,8 +616,9 @@ function detectMotionEvidence(text) {
   // built once, file-wide, so both inline `style=""` animation references and same-file
   // <style> block rules can resolve an `animation: name` against it.
   const motionKeyframes = new Set();
-  for (const styleMatch of text.matchAll(/<style\b[^>]*>([\s\S]*?)<\/style>/gi)) {
-    for (const kf of styleMatch[1].matchAll(/@keyframes\s+([\w-]+)\s*\{((?:[^{}]*\{[^{}]*\})*[^{}]*)\}/gi)) {
+  const styles = styleBodies(text);
+  for (const styleBody of styles) {
+    for (const kf of styleBody.matchAll(/@keyframes\s+([\w-]+)\s*\{((?:[^{}]*\{[^{}]*\})*[^{}]*)\}/gi)) {
       if (MOTION_DECL_RE.test(kf[2])) motionKeyframes.add(kf[1]);
     }
   }
@@ -539,14 +645,14 @@ function detectMotionEvidence(text) {
   }
 
   // Same-file <style> block rules.
-  for (const styleMatch of text.matchAll(/<style\b[^>]*>([\s\S]*?)<\/style>/gi)) {
-    for (const ruleMatch of styleMatch[1].matchAll(/([^{}]+)\{([^{}]*)\}/g)) {
-      const [, prelude, body] = ruleMatch;
+  const reachMemo = new Map();
+  for (const styleBody of styles) {
+    for (const [prelude, body] of cssRuleBlocks(styleBody)) {
       if (/@keyframes/i.test(prelude)) continue; // handled above
       if (!isMotionBearing(body)) continue;
 
       const selectors = prelude.split(',').map((s) => s.trim()).filter(Boolean);
-      if (!selectors.some((s) => motionSelectorReachable(s, text))) continue;
+      if (!selectors.some((s) => motionSelectorReachable(s, text, reachMemo))) continue;
 
       evidence = true;
       if (!/:hover|:active/i.test(prelude)) hoverGatedOnly = false;
@@ -588,19 +694,26 @@ function certainOpaque(v) {
 // root if no bg was ever declared). Findings go through the single addFinding() funnel like
 // every other detector; check:'review' keeps this category out of scoring (P1 comment above).
 function computeStaticContrastFindings(text, rel, hiddenRanges, maskedRanges, styleRules, stats, findings) {
-  const inMasked = (i) => maskedRanges.some(([s, e]) => i >= s && i < e);
-  const inHidden = (i) => hiddenRanges.some(([s, e]) => i >= s && i < e);
+  const inMasked = makeRangeTest(maskedRanges);
+  const inHidden = makeRangeTest(hiddenRanges);
   let resolved = 0, subThreshold = 0;
   const stack = []; // { tag, bg: undefined|null|{r,g,b,a} }
+  const openCount = new Map(); // as in computeHiddenRanges: a stray close skips the search (P6)
+  const scan = upToLastGt(text);
   let m;
   TAG_ATTRS_RE.lastIndex = 0;
-  while ((m = TAG_ATTRS_RE.exec(text))) {
+  while ((m = TAG_ATTRS_RE.exec(scan))) {
     if (inMasked(m.index) || inHidden(m.index)) continue;
     const [full, close, rawTag, attrs] = m;
     const tag = rawTag.toLowerCase();
     if (tag === 'script' || tag === 'style') continue;
     if (close) {
-      for (let i = stack.length - 1; i >= 0; i--) if (stack[i].tag === tag) { stack.splice(i); break; }
+      if (!openCount.get(tag)) continue;
+      for (let i = stack.length - 1; i >= 0; i--) {
+        if (stack[i].tag !== tag) continue;
+        for (const popped of stack.splice(i)) openCount.set(popped.tag, openCount.get(popped.tag) - 1);
+        break;
+      }
       continue;
     }
     const isVoid = VOID_TAGS.has(tag) || attrs.endsWith('/');
@@ -630,7 +743,10 @@ function computeStaticContrastFindings(text, rel, hiddenRanges, maskedRanges, st
     // photo. Same honesty rule as the background-image case: block the climb, don't guess.
     const posAbs = /(?:^|;)\s*position\s*:\s*(absolute|fixed)\b/i.test(style || '');
     const blocksClimb = posAbs && stack.length > 0 && stack[stack.length - 1].sawImgChild === true;
-    if (!isVoid) stack.push({ tag, bg: ownBg, blocksClimb });
+    if (!isVoid) {
+      stack.push({ tag, bg: ownBg, blocksClimb });
+      openCount.set(tag, (openCount.get(tag) || 0) + 1);
+    }
 
     // Direct text immediately following this open tag, up to the next '<'.
     const textStart = m.index + full.length;
@@ -720,7 +836,7 @@ function addCheck(stats, category, status) {
 // Returns the trimmed text content, or '' if no such <title> exists / it has
 // no non-whitespace content (a "hasTitle" caller just checks truthiness).
 function extractDocumentTitle(text) {
-  const noSvg = text.replace(/<svg\b[\s\S]*?<\/svg>/gi, ' ');
+  const noSvg = replaceBlocks(text, lazyBlocks(text, /<svg\b/gi, /<\/svg>/gi), () => ' '); // = .replace(/<svg\b[\s\S]*?<\/svg>/gi, ' ') (P5)
   const m = noSvg.match(/<title\b[^>]*>([\s\S]*?)<\/title>/i);
   return m ? m[1].replace(/<[^>]*>/g, '').trim() : '';
 }
@@ -876,12 +992,14 @@ function scanFile(file, root, stats, findings) {
     // a masked region could open a range that never closes and silently swallows every later
     // finding to EOF.
     const masked = scanMaskedRanges(text);
-    const inMasked = (i) => masked.some(([s, e]) => i >= s && i < e);
+    const inMasked = makeRangeTest(masked);
     // Subtrees hidden from the accessibility tree: no findings, no passes (see
     // computeHiddenRanges).
     const hiddenRanges = computeHiddenRanges(text, masked);
-    const inHidden = (i) => hiddenRanges.some(([s, e]) => i >= s && i < e);
+    const inHidden = makeRangeTest(hiddenRanges);
     const visible = (i) => !inMasked(i) && !inHidden(i);
+    // `>`-terminated tag scans below run over this prefix (same matches; see upToLastGt, P8).
+    const tagText = upToLastGt(text);
 
     // Real `lang` attribute only — NOT `xml:lang=`/`data-lang=`, which end in the
     // same substring but are not a language declaration on <html> (a bare \b
@@ -1012,10 +1130,15 @@ function scanFile(file, root, stats, findings) {
     // Build the AT-facing outline in document order. ARIA headings participate;
     // presentational native headings do not. Hidden/masked headings stay excluded.
     const headings = [];
-    for (const m of text.matchAll(/<([a-z][\w:-]*)\b((?:"[^"]*"|'[^']*'|[^>"'])*)>/gi)) {
+    // The old `<([a-z][\w:-]*)\b(attrs)>` retried every split of a long name with no `>`
+    // (P7). The lookahead takes the whole name run; the old pattern then gave the name back
+    // to its last word character (`\b`), handing a trailing `-`/`:` run to the attributes,
+    // which the two lines after it reproduce exactly.
+    for (const m of tagText.matchAll(/<([a-z][\w:-]*)(?![\w:-])((?:"[^"]*"|'[^']*'|[^>"'])*)>/gi)) {
       if (!visible(m.index || 0)) continue;
-      const tag = m[1].toLowerCase();
-      const attrs = m[2];
+      const name = m[1].replace(/[:-]+$/, '');
+      const tag = name.toLowerCase();
+      const attrs = m[1].slice(name.length) + m[2];
       const roleMatch = attrs.match(/\brole\s*=\s*(?:"([^"]*)"|'([^']*)'|([^\s>]+))/i);
       const roles = (roleMatch?.[1] ?? roleMatch?.[2] ?? roleMatch?.[3] ?? '').toLowerCase().split(/\s+/);
       if (roles.includes('presentation') || roles.includes('none')) continue;
@@ -1059,7 +1182,10 @@ function scanFile(file, root, stats, findings) {
     // Images removed from the accessibility tree need no alt: aria-hidden,
     // role=presentation/none, and inline display:none (tracking pixels, preloads) are
     // exempt — benchmark 2026-07-05 found 20+ false criticals from these classes.
-    for (const m of text.matchAll(/<img\b(?![^>]*\balt=)(?![^>]*aria-hidden=["']true["'])(?![^>]*role=["'](?:presentation|none)["'])(?![^>]*style=["'][^"']*display\s*:\s*none)[^>]*>/gi)) {
+    // Not tagText: the display:none exemption reads `[^"']*`, which can cross a `>` inside a
+    // quoted value, so it needs the full text. imgCandidates skips only <img starts after the
+    // last `>`, which can never close (P8; review 2026-10-05).
+    for (const m of imgCandidates(text, /<img\b(?![^>]*\balt=)(?![^>]*aria-hidden=["']true["'])(?![^>]*role=["'](?:presentation|none)["'])(?![^>]*style=["'][^"']*display\s*:\s*none)[^>]*>/giy)) {
       if (!visible(m.index || 0)) continue;
       addFinding(findings, stats, {
         key: 'image-alt-missing',
@@ -1077,12 +1203,12 @@ function scanFile(file, root, stats, findings) {
     // Images that DO carry alt are verified passes — they give the category its base.
     // Whitespace-anchored so data-alt= is not counted; alt="" stays a pass (correct
     // decorative markup is evidence).
-    for (const m of text.matchAll(/<img\b[^>]*\salt\s*=/gi)) if (visible(m.index || 0)) addCheck(stats, 'screenreader', 'pass');
+    for (const m of tagMatchAll(text, /<img\b/gi, /<img\b[^>]*\salt\s*=/iy)) if (visible(m.index || 0)) addCheck(stats, 'screenreader', 'pass');
 
     // Frames need an accessible name (axe frame-title): statically detectable, and the
     // 2026-07-05 benchmark showed Lighthouse catching real instances Beacon had no rule
     // for. aria-hidden frames are out of the a11y tree and exempt.
-    for (const m of text.matchAll(/<iframe\b(?![^>]*\btitle\s*=)(?![^>]*aria-hidden=["']true["'])[^>]*>/gi)) {
+    for (const m of tagText.matchAll(/<iframe\b(?![^>]*\btitle\s*=)(?![^>]*aria-hidden=["']true["'])[^>]*>/gi)) {
       if (!visible(m.index || 0)) continue;
       addFinding(findings, stats, {
         key: 'frame-title-missing',
@@ -1098,7 +1224,7 @@ function scanFile(file, root, stats, findings) {
         code_before: snippetAt(text, m.index || 0, m[0].length),
       });
     }
-    for (const m of text.matchAll(/<iframe\b[^>]*\btitle\s*=["'][^"']/gi)) if (visible(m.index || 0)) addCheck(stats, 'screenreader', 'pass');
+    for (const m of tagMatchAll(text, /<iframe\b/gi, /<iframe\b[^>]*\btitle\s*=["'][^"']/iy)) if (visible(m.index || 0)) addCheck(stats, 'screenreader', 'pass');
 
     // List structure (axe "list"): a <ul>/<ol> whose first child is not <li>.
     // Conservative Tier-1 heuristic: inspect only the FIRST child after the open
@@ -1128,11 +1254,14 @@ function scanFile(file, root, stats, findings) {
       }
       return window; // no matching close within the window — use what we scanned
     };
-    for (const m of text.matchAll(/<(ul|ol)\b([^>]*)>/gi)) {
+    for (const m of tagText.matchAll(/<(ul|ol)\b([^>]*)>/gi)) {
       if (!visible(m.index)) continue; // scripted string or hidden subtree
       if (/\brole\s*=/.test(m[2]) || /\saria-hidden\s*=\s*["']true/i.test(m[2])) continue; // author-controlled ARIA / hidden from a11y tree
       const inner = listInner(m.index + m[0].length);
-      const cm = inner.match(/^\s*(?:<!--[\s\S]*?-->\s*)*<([a-zA-Z][\w-]*)/);
+      // Each comment body stops at its own `-->` (tempered token). A lazy `[\s\S]*?` body
+      // could also merge adjacent comments, so a window of many comments with no element
+      // after them backtracked exponentially (survey page 106063: >300 s, 2026-10-04).
+      const cm = inner.match(/^\s*(?:<!--(?:(?!-->)[\s\S])*-->\s*)*<([a-zA-Z][\w-]*)/);
       if (!cm) continue; // empty, whitespace-only, or comment-only list — no element child to flag
       const lc = cm[1].toLowerCase();
       if (lc === 'li' || lc === 'script' || lc === 'template') continue;
@@ -1188,7 +1317,7 @@ function scanFile(file, root, stats, findings) {
     // (digi24.ro corpus regression: <button title="">), not a silent drop. Scoped to
     // title="" only — an empty aria-label/aria-labelledby keeps its pre-existing, separately
     // tested suppression (see "pass evidence is positive" in static-audit-scoring.test.mjs).
-    for (const m of text.matchAll(/<button\b[^>]*>/gi)) {
+    for (const m of tagText.matchAll(/<button\b[^>]*>/gi)) {
       if (!visible(m.index || 0)) continue;
       if (attrState(m[0], 'title').state !== 'present-empty') continue;
       if (attrState(m[0], 'aria-label').state === 'present-value') continue;
@@ -1210,7 +1339,7 @@ function scanFile(file, root, stats, findings) {
     // Buttons that DO have a name (text or a NON-EMPTY aria-label/title) are verified
     // keyboard passes. An empty aria-label="" escapes the nameless detector (suppression),
     // but a suppressed fail is not a pass — exclude those from the count.
-    const emptyAriaLabelButtons = [...text.matchAll(/<button\b[^>]*\saria-label(?:ledby)?\s*=\s*(?:""|'')[^>]*>/gi)].filter(m => visible(m.index || 0)).length;
+    const emptyAriaLabelButtons = tagMatchAll(text, /<button\b/gi, /<button\b[^>]*\saria-label(?:ledby)?\s*=\s*(?:""|'')[^>]*>/iy).filter(m => visible(m.index || 0)).length;
     const visibleButtons = [...text.matchAll(/<button\b/gi)].filter(m => visible(m.index || 0)).length;
     const namedButtons = visibleButtons - namelessButtons - emptyAriaLabelButtons;
     for (let i = 0; i < Math.max(0, namedButtons); i++) addCheck(stats, 'keyboard', 'pass');
@@ -1223,9 +1352,11 @@ function scanFile(file, root, stats, findings) {
     // longer false-flagged. Tier-1: not DOM-aware, NOT visibility-aware (hidden
     // nameless links are over-reported vs axe — true of every static check here),
     // and skips matches inside <script>/<style>.
-    for (const m of text.matchAll(/<a\b([^>]*)>([\s\S]*?)<\/a>/gi)) {
-      if (!visible(m.index)) continue;
-      const attrs = m[1], body = m[2];
+    // Same blocks as text.matchAll(/<a\b([^>]*)>([\s\S]*?)<\/a>/gi), without rescanning to
+    // EOF from every unclosed <a> (P5).
+    for (const b of lazyBlocks(text, /<a\b/gi, /<\/a>/gi, { untilGt: true })) {
+      if (!visible(b.index)) continue;
+      const attrs = text.slice(b.index + 2, b.bodyStart - 1), body = text.slice(b.bodyStart, b.bodyEnd);
       if (!/\shref\s*=/.test(attrs)) continue; // anchor without href is not a link
       if (/\saria-hidden\s*=\s*["']true/i.test(attrs)) continue; // removed from the a11y tree
       const svgTitle = body.match(/<title\b[^>]*>([\s\S]*?)<\/title>/i);
@@ -1252,10 +1383,10 @@ function scanFile(file, root, stats, findings) {
         level: 'A',
         title: 'Link may not have an accessible name',
         affected_users: 'Screen-reader, voice-control, and keyboard users',
-        location: `${rel}:${lineOf(text, m.index || 0)}`,
+        location: `${rel}:${lineOf(text, b.index)}`,
         description: 'A link with no visible text, no aria-label/aria-labelledby/title (on it or a descendant), and no image alt or SVG title has no accessible name. Screen readers announce it as a bare "link".',
         fix: 'Add visible link text, an aria-label/aria-labelledby/title, give a wrapped <img> meaningful alt text, or add an <svg><title>.',
-        code_before: snippetAt(text, m.index || 0, m[0].length),
+        code_before: snippetAt(text, b.index, b.end - b.index),
       });
     }
 
@@ -1277,7 +1408,7 @@ function scanFile(file, root, stats, findings) {
     // attr-scan exact-name lookup (not a `\sonclick\s*=` substring test): an attribute
     // name that merely CONTAINS "onclick" (e.g. paginationclickable="true") must not
     // match — same bug class as data-reactid containing id=.
-    for (const m of text.matchAll(/<(div|span)\b[^>]*>/gi)) {
+    for (const m of tagText.matchAll(/<(div|span)\b[^>]*>/gi)) {
       if (!visible(m.index || 0)) continue;
       if (attrState(m[0], 'onclick').state === 'absent') continue;
       const bodyStart = m.index + m[0].length;
@@ -1306,7 +1437,7 @@ function scanFile(file, root, stats, findings) {
     // Only this detector consumes labelRanges — a wrapping <label> is positive evidence
     // solely for the fail-side skip below, not a general-purpose range.
     const labelRanges = computeLabelRanges(text, masked);
-    const inLabel = (i) => labelRanges.some(([s, e]) => i >= s && i < e);
+    const inLabel = makeRangeTest(labelRanges);
     const INPUT_SKIP_TYPES = new Set(['submit', 'hidden', 'button', 'image', 'reset']);
     // HTML-AAM accessible-name fallback chain (2026-08 hunt round 2, ids 100545/103280/
     // 104362, three agents converged): aria-labelledby(resolving) -> aria-label ->
@@ -1319,7 +1450,7 @@ function scanFile(file, root, stats, findings) {
     // input.
     const labelForIds = new Set([...text.matchAll(/<label\b[^>]*\sfor\s*=\s*["']([^"']+)["']/gi)].map((m) => m[1]));
     const elementIds = new Set([...text.matchAll(/\sid\s*=\s*["']([^"']+)["']/gi)].map((m) => m[1]));
-    for (const m of text.matchAll(/<input\b[^>]*>/gi)) {
+    for (const m of tagText.matchAll(/<input\b[^>]*>/gi)) {
       if (!visible(m.index || 0)) continue;
       const attrs = parseStartTag(m[0]);
       const typeValue = attrs.has('type') ? attrs.get('type').toLowerCase() : null;
@@ -1566,11 +1697,28 @@ function scanFile(file, root, stats, findings) {
     // `@media (...) { :focus { outline: none } }` reads its "selector" as
     // `@media (...) { :focus`, which is not a bare shape, so it silently does not fire.
     const UNSCOPED_FOCUS = /^(:focus|\*(:focus)?|[a-z][\w-]*:focus)$/i;
-    for (const m of text.matchAll(/outline\s*:\s*(none|0)\b/gi)) {
-      if (/focus-visible/.test(text)) continue;
-      const openBrace = text.lastIndexOf('{', m.index);
+    // Same answers as before in less than matches x document length (P3): the focus-visible
+    // test that skipped every match is hoisted, each text.lastIndexOf(ch, i) becomes a binary
+    // search over that character's positions, and the "last real tag before the rule" is
+    // looked up in one list of tags instead of rescanning the whole prefix per match.
+    const outlineMatches = /focus-visible/.test(text) ? [] : [...text.matchAll(/outline\s*:\s*(none|0)\b/gi)];
+    const positionsOf = (ch) => { const at = []; for (let i = text.indexOf(ch); i !== -1; i = text.indexOf(ch, i + 1)) at.push(i); return at; };
+    const lastAtOrBefore = (sorted, i) => { // = text.lastIndexOf(ch, i) for i >= -1
+      let lo = 0, hi = sorted.length - 1, found = -1;
+      while (lo <= hi) { const mid = (lo + hi) >> 1; if (sorted[mid] <= i) { found = sorted[mid]; lo = mid + 1; } else hi = mid - 1; }
+      return found;
+    };
+    const opens = outlineMatches.length ? positionsOf('{') : [], closes = outlineMatches.length ? positionsOf('}') : [];
+    let semis = null, htmlTagEnds = null, lastBrace = -1;
+    for (const m of outlineMatches) {
+      const openBrace = lastAtOrBefore(opens, m.index);
       if (openBrace === -1) continue;
-      if (text.lastIndexOf('}', m.index) > openBrace) continue; // not inside an open rule body
+      if (lastAtOrBefore(closes, m.index) > openBrace) continue; // not inside an open rule body
+      // The selector depends only on openBrace, and a selector that matched already ended the
+      // loop, so a later match in the same rule body is a known non-match.
+      if (openBrace === lastBrace) continue;
+      lastBrace = openBrace;
+      semis ||= positionsOf(';');
       // Bounded by the nearest preceding `}` (previous rule) or `;` (a declaration, can't
       // start mid-selector) — NOT `>`, which is also the CSS child combinator (`.a > :focus`
       // read as boundary-then-bare-`:focus` was a false positive on a properly scoped rule).
@@ -1578,15 +1726,17 @@ function scanFile(file, root, stats, findings) {
       // `}`/`;` and the slice runs into the surrounding markup — only THEN, cut through the
       // last real HTML tag's `>` (an actual `<tag...>`, never a bare combinator `>`).
       const selStart = Math.max(
-        text.lastIndexOf('}', openBrace - 1),
-        text.lastIndexOf(';', openBrace - 1),
+        lastAtOrBefore(closes, openBrace - 1),
+        lastAtOrBefore(semis, openBrace - 1),
       ) + 1;
       let selector = text.slice(selStart, openBrace).trim();
       if (selector.includes('<')) {
-        const scope = text.slice(0, openBrace);
-        let lastTag = null, tm;
-        for (const htmlTagRe = /<[a-zA-Z][^<>]*>/g; (tm = htmlTagRe.exec(scope));) lastTag = tm;
-        if (lastTag) selector = scope.slice(lastTag.index + lastTag[0].length, openBrace).trim();
+        // Was: the last /<[a-zA-Z][^<>]*>/g match in text.slice(0, openBrace). Those matches
+        // never overlap and none contains a later `<`, so they are exactly the matches over
+        // the whole text that end at or before openBrace; take the last such one.
+        htmlTagEnds ||= [...text.matchAll(/<[a-zA-Z][^<>]*>/g)].map((tm) => tm.index + tm[0].length);
+        const lastTagEnd = lastAtOrBefore(htmlTagEnds, openBrace);
+        if (lastTagEnd !== -1) selector = text.slice(lastTagEnd, openBrace).trim();
       }
       if (!selector.split(',').some((p) => UNSCOPED_FOCUS.test(p.trim()))) continue;
       addFinding(findings, stats, {
@@ -1614,23 +1764,24 @@ function scanFile(file, root, stats, findings) {
     // an auto-fill case — a narrowed detector would almost never fire while still moving
     // the score. Kept broad, moved to REVIEW instead: still surfaced in the report (a human
     // or the Tier-2 live audit can resolve it), never confirmed as a fail, never scores.
-    for (const m of text.matchAll(/minmax\(\s*\d+px/gi)) {
-      if (!/minmax\(\s*min\(\s*\d+px\s*,\s*100%\s*\)/i.test(text)) {
-        addFinding(findings, stats, {
-          key: 'fixed-minmax-overflow',
-          category: 'responsive',
-          severity: 'tip',
-          check: 'review',
-          wcag: 'WCAG 2.2: 1.4.10 Reflow',
-          title: 'Possible fixed minmax grid overflow',
-          affected_users: 'Low-vision users, mobile users, and zoom users',
-          location: `${rel}:${lineOf(text, m.index || 0)}`,
-          description: 'A minmax(Npx, ...) track has a fixed lower bound, but static CSS analysis cannot confirm it actually overflows at 320px: the track may be auto-fit/auto-fill (adapts column count instead of overflowing), the rule may sit inside an @media block that never applies this narrow, the matched axis may be grid-template-rows rather than columns, or the fixed value may be the max bound rather than the min. Verify with a Tier-2 live audit or a human look.',
-          fix: 'Use minmax(min(Npx, 100%), 1fr), or confirm with a live 320px reflow check.',
-          code_before: snippetAt(text, m.index || 0, m[0].length),
-        });
-        break;
-      }
+    // The min() escape test is loop-invariant and the loop stops at its first finding, so
+    // test it once and take the first match (P4: it re-ran over the whole text per match).
+    const firstMinmax = /minmax\(\s*min\(\s*\d+px\s*,\s*100%\s*\)/i.test(text) ? null : text.match(/minmax\(\s*\d+px/i);
+    if (firstMinmax) {
+      const m = firstMinmax;
+      addFinding(findings, stats, {
+        key: 'fixed-minmax-overflow',
+        category: 'responsive',
+        severity: 'tip',
+        check: 'review',
+        wcag: 'WCAG 2.2: 1.4.10 Reflow',
+        title: 'Possible fixed minmax grid overflow',
+        affected_users: 'Low-vision users, mobile users, and zoom users',
+        location: `${rel}:${lineOf(text, m.index || 0)}`,
+        description: 'A minmax(Npx, ...) track has a fixed lower bound, but static CSS analysis cannot confirm it actually overflows at 320px: the track may be auto-fit/auto-fill (adapts column count instead of overflowing), the rule may sit inside an @media block that never applies this narrow, the matched axis may be grid-template-rows rather than columns, or the fixed value may be the max bound rather than the min. Verify with a Tier-2 live audit or a human look.',
+        fix: 'Use minmax(min(Npx, 100%), 1fr), or confirm with a live 320px reflow check.',
+        code_before: snippetAt(text, m.index || 0, m[0].length),
+      });
     }
 
     // Demoted out of AA scoring/legal mapping entirely (2026-08 hunt round 2, ids
