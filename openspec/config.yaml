@@ -1,0 +1,16 @@
+schema: spec-driven
+
+context: |
+  Beacon is an accessibility and AEO toolkit with guide, advisor and inspect workflows.
+  Reuse the existing Node ESM scripts, tests and build adapters.
+  Existing architecture and roadmap documents are versioned historical sources;
+  reconcile them with source and tests before claiming current behavior.
+  Keep proposed behavior in changes; specs contains only reconciled baseline contracts.
+  Research datasets, captured pages, usage history and private experience stores stay outside this repo.
+rules:
+  specs:
+    - Include observable success and failure scenarios with SHALL or MUST requirements.
+    - Distinguish source inspection, executed tests and unverified runtime behavior.
+  tasks:
+    - Keep task progress here; do not create parallel progress lists.
+    - Separate implementation, validation, publication and deployment.
