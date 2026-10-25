@@ -1,5 +1,5 @@
 {
-  "description": "Beacon proactive triggering — SessionStart injects governance, UserPromptSubmit flags UI prompts, PostToolUse runs the a11y advisor.",
+  "description": "Beacon proactive triggering — SessionStart injects governance, UserPromptSubmit flags UI prompts, PostToolUse runs the a11y advisor, Stop/PreToolUse gate unverified UI changes on a viewport check.",
   "hooks": {
     "SessionStart": [
       {
@@ -29,6 +29,27 @@
           {
             "type": "command",
             "command": "node ${CLAUDE_PLUGIN_ROOT}/scripts/a11y-advisor-hook.mjs"
+          }
+        ]
+      }
+    ],
+    "Stop": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node ${CLAUDE_PLUGIN_ROOT}/scripts/beacon-ui-gate.mjs"
+          }
+        ]
+      }
+    ],
+    "PreToolUse": [
+      {
+        "matcher": "Bash",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node ${CLAUDE_PLUGIN_ROOT}/scripts/beacon-ui-gate.mjs"
           }
         ]
       }

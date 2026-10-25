@@ -6,7 +6,7 @@ import { existsSync, readdirSync } from 'node:fs';
 import { resolve } from 'node:path';
 
 const REFERENCES = ['wcag-quick', 'patterns', 'legal-brief', 'disabilities', 'cases', 'documents', 'auth-detect-fp', 'pdf-detect-fp'];
-const SCRIPTS = ['static-audit', 'generate-report', 'lighthouse-extract', 'lang-detect', 'auth-detect', 'pdf-detect', 'pdf-triage', 'quality-detect', 'focus-flow', 'pattern-runtime', 'tier2-audit', 'reader-task-audit', 'design-qa', 'attr-scan', 'jurisdictions', 'report-components', 'report-styles', 'report-interactions'];
+const SCRIPTS = ['static-audit', 'generate-report', 'lighthouse-extract', 'lang-detect', 'auth-detect', 'pdf-detect', 'pdf-triage', 'quality-detect', 'focus-flow', 'pattern-runtime', 'viewport-tiers', 'tier2-audit', 'reader-task-audit', 'design-qa', 'attr-scan', 'jurisdictions', 'report-components', 'report-styles', 'report-interactions'];
 const PATTERNS = ['web', 'pdf', 'wcag-catalog']; // declarative detector records + wcag catalog; shipped to both surfaces
 export const CONTENT = ['guide', 'inspect', 'advisor'];
 

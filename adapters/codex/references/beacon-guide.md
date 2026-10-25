@@ -496,8 +496,8 @@ These rules are blocking at design time:
    `min-height: 100vh`) on content sections. Section height comes from content;
    viewport-scale empty regions at any width are a failure.
 3. **Full-width sweep, not breakpoints** — before delivery, render and screenshot at
-   320 / 768 / 1024 / 1280 / 1440 / 1920 AND at least one non-breakpoint width
-   (e.g. 1742). Verifying only the widths the CSS was designed around is not
+   the Beacon `full` matrix (320 / 360 / 390 / 744 / 768 / 844 / 1280 / 1920) AND at least one
+   non-breakpoint width (e.g. 1742). Verifying only the widths the CSS was designed around is not
    verification; that is exactly how the incident escaped.
 
 Any width showing horizontal overflow, an under-floor text column, or viewport-scale
@@ -723,7 +723,7 @@ When designing responsive layouts:
 - [ ] Performance budget < 500KB initial load
 - [ ] Text columns keep readable measure at ALL widths 320-1920 (minmax floors; wrap, never squeeze)
 - [ ] No viewport-height content sections; no viewport-scale dead whitespace at wide widths
-- [ ] Swept at 320/768/1024/1280/1440/1920 + one non-breakpoint width — not only designed breakpoints
+- [ ] Swept at 320/360/390/744/768/844/1280/1920 + one non-breakpoint width — not only designed breakpoints
 - [ ] No horizontal scrolling at any width, theme, or language; nav/chips/cards wrap or stack, long strings/code break-wrap, tables reflow — verified with `scrollWidth <= clientWidth`, not by eye
 
 ## Data Boundary

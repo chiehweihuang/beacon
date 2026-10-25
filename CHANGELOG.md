@@ -1,5 +1,25 @@
 # Changelog
 
+## [Unreleased]
+
+### Added
+
+- **Viewport tiers** (`core/scripts/viewport-tiers.mjs`): three nested check levels
+  (`quick`, `feature`, `full`) with more phone widths and fewer laptop/tablet widths.
+  Phone, tablet, and the unfolded Galaxy Z Fold 6 (744x860) run under Playwright mobile
+  emulation; 320x720 stays unemulated (WCAG 1.4.10 is a zoom width, not a device).
+- **UI gate hook** (`scripts/beacon-ui-gate.mjs`, wired in `hooks/hooks.json`): `Stop`
+  blocks once per turn when UI files changed without a covering `quick` design-qa result;
+  `PreToolUse` denies `git commit` without a `feature`-level result.
+
+### Changed
+
+- `design-qa.mjs`: `--level` (default `full`), per-viewport browser contexts with
+  emulation, `metadata.level`, `metadata.viewports` now lists labels; engine
+  `beacon-design-qa@2`.
+- `tier2-audit.mjs`: `--level` (default `feature`: 320x720, 360x780, 768x1024, 1280x900);
+  engine `beacon-tier2-audit@3` because touch-target findings change under emulation.
+
 ## [3.6.0] — 2026-08-29
 
 ### Added

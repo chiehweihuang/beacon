@@ -32,15 +32,12 @@ import { join, resolve, dirname } from 'node:path';
 import { pathToFileURL } from 'node:url';
 import { createRequire } from 'node:module';
 import { legalExposureFor } from './jurisdictions.mjs';
+import { LEVELS, viewportsForLevel } from './viewport-tiers.mjs';
 
-const DETECTOR_VERSION = 'beacon-tier2-audit@2';
+const DETECTOR_VERSION = 'beacon-tier2-audit@3'; // @3: touch-target findings change under mobile emulation
 
-export const TIER2_VIEWPORTS = [
-  { width: 320, height: 720, label: '320x720' },
-  // 1280x900 matches the capture recipe already pinned for the static/benchmark tier
-  // (VALIDATION.md L0) — kept identical so the two tiers stay comparable.
-  { width: 1280, height: 900, label: '1280x900' },
-];
+// 1280x900 matches the capture recipe pinned for the static/benchmark tier (VALIDATION.md L0).
+export const TIER2_VIEWPORTS = viewportsForLevel('feature');
 
 // --- WCAG thresholds (VALIDATION.md L2 calibration decisions, not physical constants) ---
 const CONTRAST_NORMAL_MIN = 4.5;   // WCAG 2.2: 1.4.3 normal text
@@ -561,7 +558,7 @@ function toLoadableUrl(input) {
 // findings, stable from 300ms on. Full trade-off note: plans/2026-07-26-tier2-bugfix-notes.md.
 const SETTLE_QUIET_MS = 500;
 
-export async function runTier2Audit({ url, viewports = TIER2_VIEWPORTS, date, playwrightModule } = {}) {
+export async function runTier2Audit({ url, level = 'feature', viewports = viewportsForLevel(level), date, playwrightModule } = {}) {
   const pw = playwrightModule || await loadPlaywright();
   const loadUrl = toLoadableUrl(url);
   const browser = await pw.chromium.launch({ headless: true });
@@ -569,8 +566,10 @@ export async function runTier2Audit({ url, viewports = TIER2_VIEWPORTS, date, pl
   const byViewport = [];
   try {
     for (const vp of viewports) {
-      const page = await browser.newPage({ viewport: { width: vp.width, height: vp.height } });
+      let context;
       try {
+        context = await browser.newContext({ viewport: { width: vp.width, height: vp.height }, ...vp.emulate });
+        const page = await context.newPage();
         // A saved local snapshot (file://) is analyzed as static markup, not re-fetched live:
         // real wild captures (e.g. the rakuten.co.jp benchmark snapshot) ship blocking
         // <script src="https://..."> tags to hosts that are unreachable offline, which
@@ -622,7 +621,7 @@ export async function runTier2Audit({ url, viewports = TIER2_VIEWPORTS, date, pl
         // record the failure for this viewport and move on to the next one.
         byViewport.push({ viewport: vp.label, error: String((err && err.message) || err) });
       } finally {
-        await page.close();
+        if (context) await context.close();
       }
     }
   } finally {
@@ -672,15 +671,16 @@ function buildArtifact({ url, findings, byViewport, date }) {
 
 // --- CLI -------------------------------------------------------------------------------
 function usage() {
-  console.error('Usage: node tier2-audit.mjs --url <url-or-file-path> [--output tier2-results.json] [--date iso]');
+  console.error('Usage: node tier2-audit.mjs --url <url-or-file-path> [--level quick|feature|full] [--output tier2-results.json] [--date iso]');
   process.exit(1);
 }
 
 function parseArgs(argv) {
-  const opts = { url: null, output: 'tier2-results.json', date: null };
+  const opts = { url: null, level: 'feature', output: 'tier2-results.json', date: null };
   for (let i = 0; i < argv.length; i++) {
     const arg = argv[i];
     if (arg === '--url') opts.url = argv[++i] || usage();
+    else if (arg === '--level') opts.level = LEVELS.includes(argv[i + 1]) ? argv[++i] : usage();
     else if (arg === '--output') opts.output = argv[++i] || usage();
     else if (arg === '--date') opts.date = argv[++i] || usage();
     else usage();

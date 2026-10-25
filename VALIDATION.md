@@ -187,7 +187,17 @@ the measurement is cheap now: the survey tier supplies wild instances for ~36 ke
   each a single uncountered fail) — under `@17` both single-fail categories score instead of
   exiting, so the discontinuity that produced the 40→54 jump no longer exists.
 
-### L2 — Tier-2 (browser-measured) thresholds, engine `beacon-tier2-audit@2`
+### L2 — Tier-2 (browser-measured) thresholds, engine `beacon-tier2-audit@3`
+
+**Calibration note 2026-10-17 (viewport tiers, `plans/2026-10-17-viewport-tiers.md`).**
+Engine bumped @2 -> @3. Default tier-2 matrix is now the `feature` level: 320x720,
+360x780, 768x1024, 1280x900 (was 320x720 + 1280x900). 360x780 and 768x1024 run under
+Playwright mobile emulation (isMobile, hasTouch, DPR, device UA), so touch-target
+findings can differ from @2 on the same page. 320x720 stays UNEMULATED on purpose: WCAG
+1.4.10 means 320 CSS px at 400% zoom, not a device. The 1.4.10 coverage rows stay PARTIAL
+(tier-2 does not measure reflow). `design-qa` moves to `beacon-design-qa@2`: levels
+quick/feature/full, viewport labels in `metadata.viewports`, `metadata.level` added. No
+threshold changed; the new matrix was not re-calibrated against the wild corpus.
 
 Native Playwright measurement (contrast + touch targets), added 2026-07-25 (v3.3
 Workstream A). Findings render as evidence + findings by default because merge is an
